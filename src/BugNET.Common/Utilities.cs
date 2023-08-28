@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -18,7 +19,7 @@ namespace BugNET.Common
             var validator = new IsEMail();
             return validator.IsEmailValid(email);
 
-            //uses regex from the asp.net MVC email address attibute
+            //uses regex from the asp.net MVC email address attribute
             // Regex regex = new Regex(@"^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
             // return regex.Match(email).Length > 0;
@@ -36,21 +37,16 @@ namespace BugNET.Common
             // at this point we have a code so we have to parse it out
             var parts = errorMessage.Split(' ');
 
-            if (parts.Length > 0)
-            {
-                var statusCodeParts = parts[0].Split(':');
+            if (parts.Length <= 0) return DownloadAttachmentStatusCodes.NoAccess.To<int>();
+            var statusCodeParts = parts[0].Split(':');
 
-                if (statusCodeParts.Length.Equals(2))
-                {
-                    var statusCode = statusCodeParts[1];
+            if (!statusCodeParts.Length.Equals(2)) return DownloadAttachmentStatusCodes.NoAccess.To<int>();
+            var statusCode = statusCodeParts[1];
 
-                    // if we cannot convert the code to a proper status code then do the safe thing and not allow access
-                    return statusCode.ToOrDefault(DownloadAttachmentStatusCodes.NoAccess.To<int>());
-                }
-            }
+            // if we cannot convert the code to a proper status code then do the safe thing and not allow access
+            return statusCode.ToOrDefault(DownloadAttachmentStatusCodes.NoAccess.To<int>());
 
             // if we cannot parse the code out then do the safe thing and not allow access
-            return DownloadAttachmentStatusCodes.NoAccess.To<int>();
         }
 
         /// <summary>
@@ -60,7 +56,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static int ParseFullIssueId(string fullId)
         {
-            var lastDashPos = fullId.LastIndexOf("-");
+            var lastDashPos = fullId.LastIndexOf("-", StringComparison.Ordinal);
 
             if (lastDashPos > 0) 
                 fullId = fullId.Substring(lastDashPos+1);
@@ -82,15 +78,15 @@ namespace BugNET.Common
         /// <returns></returns>
         public static bool CheckUploadPath(string sPath)
         {
-            var isPathNorty = false;
-            var tmpPath = sPath; // dont even trim it!
+            var isPathValid = false;
+            var tmpPath = sPath; // don't even trim it!
 
             // BGN-1904
             // Check the length of the upload path
             // 64 characters are allows            
-            if ((tmpPath.Length > Globals.UPLOAD_FOLDER_LIMIT))
+            if ((tmpPath.Length > Globals.UploadFolderLimit))
             {
-                isPathNorty = true;
+                isPathValid = true;
             }
 
             // Now check for funny characters but there is a slight problem.
@@ -103,14 +99,14 @@ namespace BugNET.Common
             // Reject any UNC paths
             if (tmpPath.Contains(@"\\"))
             {
-                isPathNorty = true;
+                isPathValid = true;
             }
 
             // Reject attempts to traverse directories
             if ((tmpPath.Contains(@"\..")) ||
                 (tmpPath.Contains(@"..\")) || (tmpPath.Contains(@"\.\")))
             {
-                isPathNorty = true;
+                isPathValid = true;
             }
 
             // Now that there are just folders left, remove the "\" character
@@ -119,14 +115,14 @@ namespace BugNET.Common
             //check for illegal filename characters
             if (tmpPath.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
             {
-                isPathNorty = true;
+                isPathValid = true;
             }
 
             // Return the opposite of norty
-            return !isPathNorty;
+            return !isPathValid;
         }
 
-        public enum AppSettingKeys
+        public enum ApplicationSettingKeys
         {
                 InstallationDate,
                 NotFoundUrl,
@@ -142,10 +138,8 @@ namespace BugNET.Common
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static string GetAppSetting(AppSettingKeys key, string defaultValue)
-        {
-            return ConfigurationManager.AppSettings.Get(key.ToString(), defaultValue);
-        }
+        public static string GetApplicationSetting(ApplicationSettingKeys key, string defaultValue) =>
+            ConfigurationManager.AppSettings.Get(key.ToString(), defaultValue);
 
         /// <summary>
         /// Gets the boolean as string.
@@ -154,7 +148,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static string GetBooleanAsString(bool value)
         {
-            var boolString = (value) ? Boolean.TrueString : Boolean.FalseString;
+            var boolString = (value) ? bool.TrueString : bool.FalseString;
             return ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, boolString);
         }
 
@@ -165,13 +159,15 @@ namespace BugNET.Common
         /// <returns></returns>
         public static string EstimationToString(decimal estimation)
         {
-            return estimation >= 0 ? estimation.ToString() : ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Empty", "Empty").ToLower();
+            return estimation >= 0
+                ? estimation.ToString(CultureInfo.InvariantCulture)
+                : ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Empty", "Empty").ToLower();
         }
 
         /// <summary>
         /// Strips the HTML. BGN-1732
         /// 
-        /// This should be in a helper classer
+        /// This should be in a helper class
         /// 
         /// From http://www.codeproject.com/Articles/68222/Strip-HTML-Tags-from-Text.aspx
         /// Copyright Raymund Macaalay | 25 Mar 2010
@@ -180,7 +176,7 @@ namespace BugNET.Common
         /// </summary>
         /// <param name="sInputString">The s input string.</param>
         /// <returns></returns>
-        public static string StripHTML(string sInputString)
+        public static string StripHtml(string sInputString)
         {
             try
             {
@@ -190,7 +186,7 @@ namespace BugNET.Common
                 sOutputString = sOutputString.Replace("\r", " ");
                 sOutputString = sOutputString.Replace("\n", " ");
                 // Remove sTabs
-                sOutputString = sOutputString.Replace("\t", String.Empty);
+                sOutputString = sOutputString.Replace("\t", string.Empty);
 
                 //Tag Removal
                 var myDataTable = GetTableDefinition();
@@ -203,7 +199,7 @@ namespace BugNET.Common
                         (sOutputString, sOriginalString, sReplacementString, RegexOptions.IgnoreCase);
                 }
 
-                //Initial replacement target string for linebreaks
+                //Initial replacement target string for line-breaks
                 var sBreaks = "\r\r\r";
 
                 // Initial replacement target string for sTabs
@@ -212,8 +208,8 @@ namespace BugNET.Common
                 {
                     sOutputString = sOutputString.Replace(sBreaks, "\r\r");
                     sOutputString = sOutputString.Replace(sTabs, "\t\t\t\t");
-                    sBreaks = sBreaks + "\r";
-                    sTabs = sTabs + "\t";
+                    sBreaks += "\r";
+                    sTabs += "\t";
                 }
 
                 return sOutputString;
@@ -229,7 +225,7 @@ namespace BugNET.Common
         /// 
         /// Needs System.Data :(
         /// 
-        /// This should be in a helper classer
+        /// This should be in a helper class
         /// 
         /// From http://www.codeproject.com/Articles/68222/Strip-HTML-Tags-from-Text.aspx
         /// Copyright Raymund Macaalay | 25 Mar 2010
@@ -239,76 +235,76 @@ namespace BugNET.Common
         /// <returns></returns>
         private static DataTable GetTableDefinition()
         {
-            var dtCleaningCollection = new DataTable();
-            dtCleaningCollection.Columns.Add("iID", typeof(int));
-            dtCleaningCollection.Columns.Add("sOriginalString", typeof(string));
-            dtCleaningCollection.Columns.Add("sReplacementString", typeof(string));
+            var table = new DataTable();
+            table.Columns.Add("iID", typeof(int));
+            table.Columns.Add("sOriginalString", typeof(string));
+            table.Columns.Add("sReplacementString", typeof(string));
 
             // Replace repeating spaces with single space
-            dtCleaningCollection.Rows.Add(1, @"( )+", " ");
+            table.Rows.Add(1, @"( )+", " ");
 
             // Prepare and clean Header Tag
-            dtCleaningCollection.Rows.Add(2, @"<( )*head([^>])*>", "<head>");
-            dtCleaningCollection.Rows.Add(3, @"(<( )*(/)( )*head( )*>)", "</head>");
-            dtCleaningCollection.Rows.Add(4, "(<head>).*(</head>)", String.Empty);
+            table.Rows.Add(2, @"<( )*head([^>])*>", "<head>");
+            table.Rows.Add(3, @"(<( )*(/)( )*head( )*>)", "</head>");
+            table.Rows.Add(4, "(<head>).*(</head>)", string.Empty);
 
             // Prepare and clean Script Tag
-            dtCleaningCollection.Rows.Add(5, @"<( )*script([^>])*>", "<script>");
-            dtCleaningCollection.Rows.Add(6, @"(<( )*(/)( )*script( )*>)", "</script>");
-            dtCleaningCollection.Rows.Add(7, @"(<script>).*(</script>)", String.Empty);
+            table.Rows.Add(5, @"<( )*script([^>])*>", "<script>");
+            table.Rows.Add(6, @"(<( )*(/)( )*script( )*>)", "</script>");
+            table.Rows.Add(7, @"(<script>).*(</script>)", string.Empty);
 
             // Prepare and clean Style Tag
-            dtCleaningCollection.Rows.Add(8, @"<( )*style([^>])*>", "<style>");
-            dtCleaningCollection.Rows.Add(9, @"(<( )*(/)( )*style( )*>)", "</style>");
-            dtCleaningCollection.Rows.Add(10, "(<style>).*(</style>)", String.Empty);
+            table.Rows.Add(8, @"<( )*style([^>])*>", "<style>");
+            table.Rows.Add(9, @"(<( )*(/)( )*style( )*>)", "</style>");
+            table.Rows.Add(10, "(<style>).*(</style>)", string.Empty);
 
             // Replace <td> with sTabs
-            dtCleaningCollection.Rows.Add(11, @"<( )*td([^>])*>", "\t");
+            table.Rows.Add(11, @"<( )*td([^>])*>", "\t");
 
             // Replace <BR> and <LI> with Line sBreaks
-            dtCleaningCollection.Rows.Add(12, @"<( )*br( )*>", "\r");
-            dtCleaningCollection.Rows.Add(13, @"<( )*li( )*>", "\r");
+            table.Rows.Add(12, @"<( )*br( )*>", "\r");
+            table.Rows.Add(13, @"<( )*li( )*>", "\r");
 
             // Replace <P>, <DIV> and <TR> with Double Line sBreaks
-            dtCleaningCollection.Rows.Add(14, @"<( )*div([^>])*>", "\r\r");
-            dtCleaningCollection.Rows.Add(15, @"<( )*tr([^>])*>", "\r\r");
-            dtCleaningCollection.Rows.Add(16, @"<( )*p([^>])*>", "\r\r");
+            table.Rows.Add(14, @"<( )*div([^>])*>", "\r\r");
+            table.Rows.Add(15, @"<( )*tr([^>])*>", "\r\r");
+            table.Rows.Add(16, @"<( )*p([^>])*>", "\r\r");
 
             // Remove Remaining tags enclosed in < >
-            dtCleaningCollection.Rows.Add(17, @"<[^>]*>", String.Empty);
+            table.Rows.Add(17, @"<[^>]*>", string.Empty);
 
             // Replace special characters:
-            dtCleaningCollection.Rows.Add(18, @" ", " ");
-            dtCleaningCollection.Rows.Add(19, @"&bull;", " * ");
-            dtCleaningCollection.Rows.Add(20, @"&lsaquo;", "<");
-            dtCleaningCollection.Rows.Add(21, @"&rsaquo;", ">");
-            dtCleaningCollection.Rows.Add(22, @"&trade;", "(tm)");
-            dtCleaningCollection.Rows.Add(23, @"&frasl;", "/");
-            dtCleaningCollection.Rows.Add(24, @"&lt;", "<");
-            dtCleaningCollection.Rows.Add(25, @"&gt;", ">");
-            dtCleaningCollection.Rows.Add(26, @"&copy;", "(c)");
-            dtCleaningCollection.Rows.Add(27, @"&reg;", "(r)");
-            dtCleaningCollection.Rows.Add(28, @"&frac14;", "1/4");
-            dtCleaningCollection.Rows.Add(29, @"&frac12;", "1/2");
-            dtCleaningCollection.Rows.Add(30, @"&frac34;", "3/4");
-            dtCleaningCollection.Rows.Add(31, @"&lsquo;", "'");
-            dtCleaningCollection.Rows.Add(32, @"&rsquo;", "'");
-            dtCleaningCollection.Rows.Add(33, @"&ldquo;", "\"");
-            dtCleaningCollection.Rows.Add(34, @"&rdquo;", "\"");
+            table.Rows.Add(18, @" ", " ");
+            table.Rows.Add(19, @"&bull;", " * ");
+            table.Rows.Add(20, @"&lsaquo;", "<");
+            table.Rows.Add(21, @"&rsaquo;", ">");
+            table.Rows.Add(22, @"&trade;", "(tm)");
+            table.Rows.Add(23, @"&frasl;", "/");
+            table.Rows.Add(24, @"&lt;", "<");
+            table.Rows.Add(25, @"&gt;", ">");
+            table.Rows.Add(26, @"&copy;", "(c)");
+            table.Rows.Add(27, @"&reg;", "(r)");
+            table.Rows.Add(28, @"&frac14;", "1/4");
+            table.Rows.Add(29, @"&frac12;", "1/2");
+            table.Rows.Add(30, @"&frac34;", "3/4");
+            table.Rows.Add(31, @"&lsquo;", "'");
+            table.Rows.Add(32, @"&rsquo;", "'");
+            table.Rows.Add(33, @"&ldquo;", "\"");
+            table.Rows.Add(34, @"&rdquo;", "\"");
 
-            // Remove all others remianing special characters
-            // you dont want to replace with another string
-            dtCleaningCollection.Rows.Add(35, @"&(.{2,6});", String.Empty);
+            // Remove all others remaining special characters
+            // you don't want to replace with another string
+            table.Rows.Add(35, @"&(.{2,6});", string.Empty);
 
             // Remove extra line sBreaks and sTabs
-            dtCleaningCollection.Rows.Add(36, "(\r)( )+(\r)", "\r\r");
-            dtCleaningCollection.Rows.Add(37, "(\t)( )+(\t)", "\t\t");
-            dtCleaningCollection.Rows.Add(38, "(\t)( )+(\r)", "\t\r");
-            dtCleaningCollection.Rows.Add(39, "(\r)( )+(\t)", "\r\t");
-            dtCleaningCollection.Rows.Add(40, "(\r)(\t)+(\r)", "\r\r");
-            dtCleaningCollection.Rows.Add(41, "(\r)(\t)+", "\r\t");
+            table.Rows.Add(36, "(\r)( )+(\r)", "\r\r");
+            table.Rows.Add(37, "(\t)( )+(\t)", "\t\t");
+            table.Rows.Add(38, "(\t)( )+(\r)", "\t\r");
+            table.Rows.Add(39, "(\r)( )+(\t)", "\r\t");
+            table.Rows.Add(40, "(\r)(\t)+(\r)", "\r\r");
+            table.Rows.Add(41, "(\r)(\t)+", "\r\t");
 
-            return dtCleaningCollection;
+            return table;
         }
     }
 }

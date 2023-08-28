@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
@@ -24,7 +25,7 @@ namespace BugNET.BLL.Notifications
         /// </summary>
         public string Content { get; set; }
 
-        private string _currentCulture;
+        private string currentCulture;
 
         /// <summary>
         /// Used when the culture content is a xslt template
@@ -59,13 +60,13 @@ namespace BugNET.BLL.Notifications
         private void SetCultureThread()
         {
             // store the current culture
-            _currentCulture = Thread.CurrentThread.CurrentCulture.Name;
+            currentCulture = Thread.CurrentThread.CurrentCulture.Name;
 
             // no culture string use what is configured
             if (string.IsNullOrWhiteSpace(CultureString)) return;
 
             // if the same as current no change needed
-            if (_currentCulture.ToLower() == CultureString.ToLower()) return;
+            if (string.Equals(currentCulture, CultureString, StringComparison.CurrentCultureIgnoreCase)) return;
 
             // set the culture to the string
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(CultureString);
@@ -73,7 +74,7 @@ namespace BugNET.BLL.Notifications
 
         private void ResetCultureThread()
         {
-            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(_currentCulture);
+            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(currentCulture);
         }
     }
 }

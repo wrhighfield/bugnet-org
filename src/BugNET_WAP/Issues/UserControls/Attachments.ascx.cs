@@ -135,7 +135,7 @@ namespace BugNET.Issues.UserControls
 
                     var attachment = new IssueAttachment
                     {
-                        Id = Globals.NEW_ID,
+                        Id = Globals.NewId,
                         Attachment = fileBytes,
                         Description = AttachmentDescription.Text.Trim(),
                         DateCreated = DateTime.Now,
@@ -235,7 +235,7 @@ namespace BugNET.Issues.UserControls
             cmdDelete.Visible = false;
 
             // Check if it is the original user, the project admin or a super user trying to delete the comment.
-            if (currentAttachment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() || UserManager.IsSuperUser() || UserManager.IsInRole(ProjectId, Globals.ProjectAdminRole))
+            if (currentAttachment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() || UserManager.IsSuperUser() || UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole))
             {
                 cmdDelete.Visible = true;
             }

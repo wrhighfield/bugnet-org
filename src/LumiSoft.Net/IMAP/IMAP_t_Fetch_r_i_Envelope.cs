@@ -4,7 +4,6 @@ using System.Text;
 
 using LumiSoft.Net.MIME;
 using LumiSoft.Net.Mail;
-using LumiSoft.Net.IMAP.Client;
 
 namespace LumiSoft.Net.IMAP
 {

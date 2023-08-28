@@ -18,8 +18,8 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(UserCustomFieldSelection entity)
         {
-            if (entity.Id > Globals.NEW_ID)
-                return (DataProviderManager.Provider.UpdateUserCustomFieldSelection(entity));
+            if (entity.Id > Globals.NewId)
+                return DataProviderManager.Provider.UpdateUserCustomFieldSelection(entity);
 
             var tempId = DataProviderManager.Provider.CreateNewUserCustomFieldSelection(entity);
 
@@ -37,9 +37,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int customFieldSelectionId)
         {
-            if (customFieldSelectionId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("customFieldSelectionId"));
+            if (customFieldSelectionId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldSelectionId));
 
-            return (DataProviderManager.Provider.DeleteUserCustomFieldSelection(customFieldSelectionId));
+            return DataProviderManager.Provider.DeleteUserCustomFieldSelection(customFieldSelectionId);
         }
 
 
@@ -50,9 +50,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<UserCustomFieldSelection> GetByCustomFieldId(int customFieldId)
         {
-            if (customFieldId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("customFieldId"));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
 
-            return (DataProviderManager.Provider.GetUserCustomFieldSelectionsByCustomFieldId(customFieldId));
+            return DataProviderManager.Provider.GetUserCustomFieldSelectionsByCustomFieldId(customFieldId);
         }
 
         /// <summary>
@@ -60,9 +60,7 @@ namespace BugNET.BLL
         /// </summary>
         /// <param name="id">The id.</param>
         /// <returns></returns>
-        public static UserCustomFieldSelection GetById(int id)
-        {
-            return (DataProviderManager.Provider.GetUserCustomFieldSelectionById(id));
-        }
+        public static UserCustomFieldSelection GetById(int id) =>
+            DataProviderManager.Provider.GetUserCustomFieldSelectionById(id);
     }
 }

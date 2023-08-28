@@ -18,11 +18,11 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(Priority entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save priority, the project id is invalid"));
-            if (string.IsNullOrEmpty(entity.Name)) throw (new ArgumentException("The priority name cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save priority, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The priority name cannot be empty or null");
 
-            if (entity.Id > Globals.NEW_ID)
+            if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdatePriority(entity);
 
             var tempId = DataProviderManager.Provider.CreateNewPriority(entity);
@@ -39,7 +39,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static Priority GetById(int priorityId)
         {
-            if (priorityId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("priorityId"));
+            if (priorityId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(priorityId));
 
             return DataProviderManager.Provider.GetPriorityById(priorityId);
         }
@@ -52,7 +52,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int id, out string cannotDeleteMessage)
         {
-            if (id <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("id"));
+            if (id <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(id));
 
             var entity = GetById(id);
 
@@ -78,9 +78,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<Priority> GetByProjectId(int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
-            return (DataProviderManager.Provider.GetPrioritiesByProjectId(projectId));
+            return DataProviderManager.Provider.GetPrioritiesByProjectId(projectId);
         }
     }
 }

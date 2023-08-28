@@ -58,7 +58,7 @@ namespace BugNET.Administration.Projects
             if (!UserManager.IsSuperUser())
                 Response.Redirect("~/Errors/AccessDenied.aspx");
 
-            if (Request.Cookies[Globals.SKIP_PROJECT_INTRO] == null)
+            if (Request.Cookies[Globals.SkipProjectIntro] == null)
                 _wizardSteps.Add("UserControls/NewProjectIntro.ascx");
 
             _wizardSteps.Add("UserControls/ProjectDescription.ascx");

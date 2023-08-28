@@ -4,6 +4,7 @@ using System.Web;
 using BugNET.Common;
 using log4net;
 using log4net.Appender;
+using log4net.Repository.Hierarchy;
 
 namespace BugNET.BLL
 {
@@ -32,21 +33,15 @@ namespace BugNET.BLL
         private static void ConfigureAdoNetAppender()
         {
             // Get the Hierarchy object that organizes the loggers
-            log4net.Repository.Hierarchy.Hierarchy hier =
-              log4net.LogManager.GetRepository() as log4net.Repository.Hierarchy.Hierarchy;
 
-            if (hier != null)
-            {
-                //get ADONetAppender
-                log4net.Appender.AdoNetAppender adoAppender =
-                  (log4net.Appender.AdoNetAppender)hier.Root.GetAppender("AdoNetAppender");
+            if (!(LogManager.GetRepository() is Hierarchy hierarchy)) return;
+            //get ADONetAppender
+            var adoAppender =
+                (AdoNetAppender)hierarchy.Root.GetAppender("AdoNetAppender");
 
-                if (adoAppender != null)
-                {
-                    adoAppender.ConnectionString = ConfigurationManager.ConnectionStrings["BugNET"].ConnectionString;
-                    adoAppender.ActivateOptions(); //refresh settings of appender
-                }
-            }
+            if (adoAppender == null) return;
+            adoAppender.ConnectionString = ConfigurationManager.ConnectionStrings["BugNET"].ConnectionString;
+            adoAppender.ActivateOptions(); //refresh settings of appender
         }
 
         /// <summary>
@@ -54,12 +49,12 @@ namespace BugNET.BLL
         /// </summary>
         public static void ConfigureEmailLoggingAppender()
         {
-            var hier =
-            (log4net.Repository.Hierarchy.Hierarchy)LogManager.GetRepository();
+            var hierarchy =
+            (Hierarchy)LogManager.GetRepository();
 
-            if (hier == null) return;
+            if (hierarchy == null) return;
 
-            var appender = (SmtpAppender)hier.Root.GetAppender("SmtpAppender") ?? new SmtpAppender();
+            var appender = (SmtpAppender)hierarchy.Root.GetAppender("SmtpAppender") ?? new SmtpAppender();
 
             appender.Name = "SmtpAppender";
             appender.From = HostSettingManager.Get(HostSettingNames.HostEmailAddress, string.Empty);
@@ -70,12 +65,13 @@ namespace BugNET.BLL
             appender.Authentication = SmtpAppender.SmtpAuthentication.None;
             appender.Username = string.Empty;
             appender.Password = string.Empty;
-            appender.EnableSsl = Boolean.Parse(HostSettingManager.Get(HostSettingNames.SMTPUseSSL));
+            appender.EnableSsl = bool.Parse(HostSettingManager.Get(HostSettingNames.SMTPUseSSL));
 
             if (Convert.ToBoolean(HostSettingManager.Get(HostSettingNames.SMTPAuthentication)))
             {
                 appender.Authentication = SmtpAppender.SmtpAuthentication.Basic;
-                appender.Username = String.Format("{0}\\{1}", HostSettingManager.Get(HostSettingNames.SMTPDomain, string.Empty), HostSettingManager.Get(HostSettingNames.SMTPUsername, string.Empty));
+                appender.Username =
+                    $"{HostSettingManager.Get(HostSettingNames.SMTPDomain, string.Empty)}\\{HostSettingManager.Get(HostSettingNames.SMTPUsername, string.Empty)}";
                 appender.Password = HostSettingManager.Get(HostSettingNames.SMTPPassword, string.Empty);
             }
 
@@ -83,7 +79,7 @@ namespace BugNET.BLL
             appender.Threshold = log4net.Core.Level.Error;
             appender.BufferSize = 0;
 
-            //create patternlayout
+            //create pattern layout
             var patternLayout = new
                 log4net.Layout.PatternLayout("%newline%date [%thread] %-5level %logger [%property{NDC}] - %message%newline%newline%newline");
 
@@ -92,7 +88,7 @@ namespace BugNET.BLL
             appender.ActivateOptions();
 
             //add appender to root logger
-            hier.Root.AddAppender(appender);
+            hierarchy.Root.AddAppender(appender);
         }
 
         /// <summary>
@@ -100,16 +96,13 @@ namespace BugNET.BLL
         /// </summary>
         public static void RemoveEmailLoggingAppender()
         {
-            var hier =
-             LogManager.GetRepository() as log4net.Repository.Hierarchy.Hierarchy;
-
-            if (hier == null) return;
+            if (!(LogManager.GetRepository() is Hierarchy hierarchy)) return;
 
             var appender =
-                (SmtpAppender)hier.Root.GetAppender("SmtpAppender");
+                (SmtpAppender)hierarchy.Root.GetAppender("SmtpAppender");
 
             if (appender != null)
-                hier.Root.RemoveAppender("SmtpAppender");
+                hierarchy.Root.RemoveAppender("SmtpAppender");
         }
 
         /// <summary>
@@ -118,8 +111,6 @@ namespace BugNET.BLL
         /// <param name="key">The key.</param>
         /// <returns></returns>
         public static string GetErrorMessageResource(string key)
-        {
-            return HttpContext.GetGlobalResourceObject("Exceptions", key) as string;
-        }
+            => HttpContext.GetGlobalResourceObject("Exceptions", key) as string;
     }
 }

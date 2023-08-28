@@ -16,9 +16,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public string FormatShortDateAnd24HTime(string value)
         {
-            DateTime dt;
-
-            if (!DateTime.TryParse(value, out dt))
+            if (!DateTime.TryParse(value, out var dt))
                 return "";
 
             return dt.Date.Year > 1968 ? dt.ToString("yyyy-MM-dd HH:mm") : "";
@@ -31,9 +29,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public string FormatShortDateAnd12HTime(string value)
         {
-            DateTime dt;
-
-            if (!DateTime.TryParse(value, out dt))
+            if (!DateTime.TryParse(value, out var dt))
                 return "";
 
             return dt.Date.Year > 1968 ? dt.ToString("yyyy-MM-dd hh:mm tt") : "";
@@ -46,9 +42,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public string FormatShortDate(string value)
         {
-            DateTime dt;
-
-            if (!DateTime.TryParse(value, out dt))
+            if (!DateTime.TryParse(value, out var dt))
                 return "";
 
             return dt.Date.Year > 1968 ? dt.ToShortDateString() : "";
@@ -61,9 +55,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public string FormatShortTime(string value)
         {
-            DateTime dt;
-
-            if (!DateTime.TryParse(value, out dt))
+            if (!DateTime.TryParse(value, out var dt))
                 return "";
 
             return dt.Date.Year > 1968 ? dt.ToShortTimeString() : "";
@@ -77,18 +69,15 @@ namespace BugNET.Common
         /// <returns></returns>
         public string FormatQuantity(string value, string showZeroValue = "true")
         {
-            decimal d;
-            bool show;
+            bool.TryParse(showZeroValue, out var show);
 
-            bool.TryParse(showZeroValue, out show);
-
-            if (!decimal.TryParse(value, out d))
+            if (!decimal.TryParse(value, out var d))
                 return "";
 
             if (show)
                 return d.ToString("###,##0");
 
-            return d.Equals(0.00) ? "" : d.ToString("###,##0");
+            return d.ToString("###,##0");
         }
 
         /// <summary>
@@ -123,7 +112,7 @@ namespace BugNET.Common
             // joshua@joshuaz.com
             // http://www.joshuaz.com
 
-            string result = htmlContent;
+            var result = htmlContent;
 
             // Remove HTML Development formatting
             result = result.Replace("\r", " ");
@@ -166,7 +155,7 @@ namespace BugNET.Common
             result = System.Text.RegularExpressions.Regex.Replace(result, "<( )*tr([^>])*>", "\n\r", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             result = System.Text.RegularExpressions.Regex.Replace(result, "<( )*p([^>])*>", "\n\r", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-            // Remove remaining tags like <a>, links, images, comments etc - anything thats enclosed inside < >
+            // Remove remaining tags like <a>, links, images, comments etc - anything that's enclosed inside < >
             result = System.Text.RegularExpressions.Regex.Replace(result, "<[^>]*>", string.Empty, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
             // replace special characters:
@@ -188,7 +177,7 @@ namespace BugNET.Common
             result = result.Replace("\\n", "\\r");
 
             // Remove extra line breaks and tabs: replace over 2 breaks with 2 and over 4 tabs with 4. 
-            // Prepare first to remove any whitespaces inbetween the escaped characters and remove redundant tabs inbetween linebreaks
+            // Prepare first to remove any whitespaces in-between the escaped characters and remove redundant tabs in-between line-breaks
             result = System.Text.RegularExpressions.Regex.Replace(result, "(\r)( )+(\r)", "\n\r" + "\n\r", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             result = System.Text.RegularExpressions.Regex.Replace(result, "(\t)( )+(\t)", "\t" + "\t", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             result = System.Text.RegularExpressions.Regex.Replace(result, "(\t)( )+(\r)", "\t" + "\n\r", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
@@ -197,7 +186,7 @@ namespace BugNET.Common
             // Remove redundant tabs
             result = System.Text.RegularExpressions.Regex.Replace(result, "(\r)(\t)+(\r)", "\n\r" + "\n\r", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-            // Remove multible tabs followind a linebreak with just one tab
+            // Remove multiple tabs following a line-break with just one tab
             result = System.Text.RegularExpressions.Regex.Replace(result, "(\r)(\t)+", "\n\r" + "\t", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
             return result;
@@ -213,12 +202,11 @@ namespace BugNET.Common
         {
             try
             {
-                string result;
-
-                // Remove HTML Development formatting
-                // Replace line breaks with space
-                // because browsers inserts space
-                result = source.Replace("\r", " ");
+                var result =
+                    // Remove HTML Development formatting
+                    // Replace line breaks with space
+                    // because browsers inserts space
+                    source.Replace("\r", " ");
                 // Replace line breaks with space
                 // because browsers inserts space
                 result = result.Replace("\n", " ");
@@ -359,15 +347,15 @@ namespace BugNET.Common
                          "(\r)(\t)+", "\r\t",
                          System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 // Initial replacement target string for line breaks
-                string breaks = "\r\r\r";
+                var breaks = "\r\r\r";
                 // Initial replacement target string for tabs
-                string tabs = "\t\t\t\t\t";
-                for (int index = 0; index < result.Length; index++)
+                var tabs = "\t\t\t\t\t";
+                for (var index = 0; index < result.Length; index++)
                 {
                     result = result.Replace(breaks, "\r\r");
                     result = result.Replace(tabs, "\t\t\t\t");
-                    breaks = breaks + "\r";
-                    tabs = tabs + "\t";
+                    breaks += "\r";
+                    tabs += "\t";
                 }
 
                 // That's it.

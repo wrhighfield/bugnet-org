@@ -1,4 +1,3 @@
-using System;
 using System.Data;
 using BugNET.Common;
 
@@ -32,7 +31,7 @@ namespace BugNET.Entities
                 if (string.IsNullOrWhiteSpace(FieldName)) return "";
 
                 return CustomFieldQuery ? 
-                    string.Concat(Globals.PROJECT_CUSTOM_FIELDS_PREFIX, FieldName) : 
+                    string.Concat(Globals.ProjectCustomFieldsPrefix, FieldName) : 
                     FieldName;
             }
         }

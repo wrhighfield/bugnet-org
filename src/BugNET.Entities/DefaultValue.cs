@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using System.Web;
-using System.Linq;
-
-namespace BugNET.Entities
+﻿namespace BugNET.Entities
 {
    public class DefaultValue
    {

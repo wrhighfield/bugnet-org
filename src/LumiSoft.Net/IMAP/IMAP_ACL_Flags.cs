@@ -1,5 +1,3 @@
-using System;
-
 namespace LumiSoft.Net.IMAP
 {
 	/// <summary>

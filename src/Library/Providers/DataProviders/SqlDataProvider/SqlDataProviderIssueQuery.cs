@@ -25,7 +25,7 @@ namespace BugNET.Providers.DataProviders
         public override List<Issue> PerformQuery(List<QueryClause> queryClauses, ICollection<KeyValuePair<string, string>> sortFields, int projectId = 0)
         {
             // build the custom field view name
-            var customFieldViewName = string.Format(Globals.PROJECT_CUSTOM_FIELDS_VIEW_NAME, projectId);
+            var customFieldViewName = string.Format(Globals.ProjectCustomFieldsViewName, projectId);
 
             // start out with some default values
             var customFieldsJoin = string.Empty;
@@ -40,8 +40,9 @@ namespace BugNET.Providers.DataProviders
             // if we have a project id then we can take advantage of the custom field view to help with performance
             if (projectId > 0)
             {
-                customFieldsJoin = string.Format("INNER JOIN {0} cf ON cf.IssueId = iv.IssueId AND cf.ProjectId = iv.ProjectId", customFieldViewName);
-                startWhere = string.Format("WHERE iv.[ProjectId] = {0} ", projectId);
+                customFieldsJoin =
+                    $"INNER JOIN {customFieldViewName} cf ON cf.IssueId = iv.IssueId AND cf.ProjectId = iv.ProjectId";
+                startWhere = $"WHERE iv.[ProjectId] = {projectId} ";
             }
             else
             {
@@ -49,7 +50,7 @@ namespace BugNET.Providers.DataProviders
 
                 if (!disabledPresent)
                 {
-                    startWhere = string.Format("WHERE iv.[ProjectDisabled] = {0} ", 0);
+                    startWhere = $"WHERE iv.[ProjectDisabled] = {0} ";
                 }
             }
 
@@ -226,7 +227,7 @@ namespace BugNET.Providers.DataProviders
             int queryClauseCount;
 
             //assign the queryClauses Count to our variable and then check the result.
-            if ((queryClauseCount = queryClauses.Count) == 0) throw (new ArgumentOutOfRangeException("queryClauses"));
+            if ((queryClauseCount = queryClauses.Count) == 0) throw (new ArgumentOutOfRangeException(nameof(queryClauses)));
 
             try
             {
@@ -340,7 +341,7 @@ namespace BugNET.Providers.DataProviders
 
             //assign the queryClauses Count to our variable and then check the result.
             if ((queryClauses.Count) == 0)
-                throw (new ArgumentOutOfRangeException("queryClauses", 0, "queryClauses == 0"));
+                throw (new ArgumentOutOfRangeException(nameof(queryClauses), 0, "queryClauses == 0"));
 
             //BugNet_IssueCommentsView
             const string sql = @"SELECT * FROM BugNet_IssueCommentsView WHERE 1=1 ";

@@ -19,11 +19,11 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(CustomField entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save custom field, the project id is invalid"));
-            if (string.IsNullOrEmpty(entity.Name)) throw (new ArgumentException("The custom field name cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save custom field, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The custom field name cannot be empty or null");
 
-            if (entity.Id > Globals.NEW_ID)
+            if (entity.Id > Globals.NewId)
                 if (DataProviderManager.Provider.UpdateCustomField(entity))
                 {
                     UpdateCustomFieldView(entity.ProjectId);
@@ -47,18 +47,15 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int customFieldId)
         {
-            if (customFieldId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("customFieldId"));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
             var entity = GetById(customFieldId);
 
             if (entity == null) return true;
 
-            if (DataProviderManager.Provider.DeleteCustomField(entity.Id))
-            {
-                UpdateCustomFieldView(entity.ProjectId);
-                return true;
-            }
+            if (!DataProviderManager.Provider.DeleteCustomField(entity.Id)) return false;
+            UpdateCustomFieldView(entity.ProjectId);
+            return true;
 
-            return false;
         }
 
         /// <summary>
@@ -66,15 +63,16 @@ namespace BugNET.BLL
         /// </summary>
         /// <param name="issueId">The issue id.</param>
         /// <param name="fields">The fields.</param>
+        /// <param name="isNewIssue">If the issue is new or not</param>
         /// <returns></returns>
         public static bool SaveCustomFieldValues(int issueId, List<CustomField> fields, bool isNewIssue = false)
         {
-            if (issueId <= Globals.NEW_ID) throw new ArgumentNullException("issueId");
-            if (fields == null) throw (new ArgumentOutOfRangeException("fields"));
+            if (issueId <= Globals.NewId) throw new ArgumentNullException(nameof(issueId));
+            if (fields == null) throw new ArgumentOutOfRangeException(nameof(fields));
 
             try
             {
-                var issueChanges = GetCustomFieldChanges(issueId, CustomFieldManager.GetByIssueId(issueId), fields);
+                var issueChanges = GetCustomFieldChanges(issueId, GetByIssueId(issueId), fields);
                 DataProviderManager.Provider.SaveCustomFieldValues(issueId, fields);
 
                 if(!isNewIssue)
@@ -98,9 +96,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<CustomField> GetByProjectId(int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
-            return (DataProviderManager.Provider.GetCustomFieldsByProjectId(projectId));
+            return DataProviderManager.Provider.GetCustomFieldsByProjectId(projectId);
         }
 
         /// <summary>
@@ -110,7 +108,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static CustomField GetById(int customFieldId)
         {
-            if (customFieldId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("customFieldId"));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
 
             return DataProviderManager.Provider.GetCustomFieldById(customFieldId);
         }
@@ -122,9 +120,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<CustomField> GetByIssueId(int issueId)
         {
-            if (issueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueId"));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
 
-            return (DataProviderManager.Provider.GetCustomFieldsByIssueId(issueId));
+            return DataProviderManager.Provider.GetCustomFieldsByIssueId(issueId);
         }
 
         /// <summary>
@@ -136,7 +134,7 @@ namespace BugNET.BLL
         {
             var customFields = GetByProjectId(projectId);
             var sb = new StringBuilder();
-            var viewName = string.Format(Globals.PROJECT_CUSTOM_FIELDS_VIEW_NAME, projectId);
+            var viewName = string.Format(Globals.ProjectCustomFieldsViewName, projectId);
 
             sb.AppendFormat("SET ANSI_NULLS ON {0}SET XACT_ABORT ON {0}SET QUOTED_IDENTIFIER ON {0}", Environment.NewLine);
             sb.AppendFormat("IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[{0}]') AND OBJECTPROPERTY(id, N'IsView') = 1) {1}", viewName, Environment.NewLine);
@@ -148,7 +146,7 @@ namespace BugNET.BLL
 
             foreach (var customField in customFields)
             {
-                sb.AppendFormat(",ISNULL(p.[{0}], '''') AS [{2}{0}]{1} ", customField.Name.Replace("'", "''"), Environment.NewLine, Globals.PROJECT_CUSTOM_FIELDS_PREFIX);
+                sb.AppendFormat(",ISNULL(p.[{0}], '''') AS [{2}{0}]{1} ", customField.Name.Replace("'", "''"), Environment.NewLine, Globals.ProjectCustomFieldsPrefix);
             }
 
             sb.AppendFormat("FROM{0} ", Environment.NewLine);
@@ -197,10 +195,10 @@ namespace BugNET.BLL
             return false;
         }
 
-        private static List<IssueHistory> GetCustomFieldChanges(int issueId, List<CustomField> originalFields, List<CustomField> newFields)
+        private static IEnumerable<IssueHistory> GetCustomFieldChanges(int issueId, List<CustomField> originalFields, List<CustomField> newFields)
         {
             var fieldChanges = new List<IssueHistory>();
-            foreach(CustomField cf in newFields)
+            foreach(var cf in newFields)
             {
                 var field = originalFields.Find(f => f.Id == cf.Id);
                 if(field != null && field.Value != cf.Value)

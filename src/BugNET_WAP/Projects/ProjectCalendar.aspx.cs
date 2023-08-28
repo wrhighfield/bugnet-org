@@ -100,7 +100,7 @@ namespace BugNET.Projects
                     List<Issue> issues = IssueManager.PerformQuery(queryClauses, ProjectId);
                     foreach (Issue issue in issues)
                     {
-                        if (issue.Visibility == (int)IssueVisibility.Private && issue.AssignedDisplayName != Security.GetUserName() && issue.CreatorDisplayName != Security.GetUserName() && (!UserManager.IsSuperUser() || !UserManager.IsInRole(issue.ProjectId, Globals.ProjectAdminRole)))
+                        if (issue.Visibility == (int)IssueVisibility.Private && issue.AssignedDisplayName != Security.GetUserName() && issue.CreatorDisplayName != Security.GetUserName() && (!UserManager.IsSuperUser() || !UserManager.IsInRole(issue.ProjectId, Globals.ProjectAdministratorRole)))
                             continue;
 
                         string cssClass = string.Empty;

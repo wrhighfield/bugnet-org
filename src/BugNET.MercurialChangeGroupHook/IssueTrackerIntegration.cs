@@ -28,10 +28,10 @@ namespace BugNET.MercurialChangeGroupHook
                 repositoryPath = repositoryPath.Trim();
                 var name = string.Empty;
 
-                var pos = repositoryPath.LastIndexOf(@"\");
+                var pos = repositoryPath.LastIndexOf(@"\", StringComparison.Ordinal);
                 if (pos > -1 && repositoryPath.Length > 1)
                 {
-                    name = repositoryPath.Substring(repositoryPath.LastIndexOf(@"\") + 1).Replace(")", "").Trim();
+                    name = repositoryPath.Substring(repositoryPath.LastIndexOf(@"\", StringComparison.Ordinal) + 1).Replace(")", "").Trim();
                 }
 
                 return name;
@@ -46,14 +46,14 @@ namespace BugNET.MercurialChangeGroupHook
         /// Updates the issue tracker from the change set.
         /// </summary>
         /// <param name="repository"> </param>
-        /// <param name="changeset"> </param>
+        /// <param name="changeSet"> </param>
         /// <param name="service"> </param>
-        public static void UpdateBugNetForChangeset(string repository, Changeset changeset, WebServices.BugNetServices service)
+        public static void UpdateBugNetForChangeSet(string repository, Changeset changeSet, WebServices.BugNetServices service)
         {
             var issuesAffectedList = new List<int>();
             var regEx = new Regex(AppSettings.IssueIdRegEx, RegexOptions.IgnoreCase);
 
-            var commitMessage = changeset.CommitMessage.Trim();
+            var commitMessage = changeSet.CommitMessage.Trim();
             var matchResults = regEx.Match(commitMessage);
 
             if (!matchResults.Success) // none in the commit message
@@ -74,8 +74,7 @@ namespace BugNET.MercurialChangeGroupHook
                 {
                     var idString = issueIdParts[1];
 
-                    int issueId;
-                    if (int.TryParse(idString, out issueId))
+                    if (int.TryParse(idString, out var issueId))
                     {
                         if(service.ValidIssue(issueId)) // check the issue to make sure it exists
                         {
@@ -90,11 +89,11 @@ namespace BugNET.MercurialChangeGroupHook
 
             if (issuesAffectedList.Count <= 0) return;
 
-            var revisionNumber = changeset.RevisionNumber;
-            var revision = changeset.Hash.Trim();
-            var author = changeset.AuthorName.Trim();
-            var dateTime = changeset.Timestamp.ToString();
-            var branch = changeset.Branch.Trim();
+            var revisionNumber = changeSet.RevisionNumber;
+            var revision = changeSet.Hash.Trim();
+            var author = changeSet.AuthorName.Trim();
+            var dateTime = changeSet.Timestamp.ToString("s");
+            var branch = changeSet.Branch.Trim();
 
             foreach (var id in issuesAffectedList)
             {

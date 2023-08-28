@@ -8,7 +8,7 @@ namespace BugNET.Providers.MembershipProviders
     /// </summary>
     public class CustomMembershipUser : MembershipUser
     {
-        private string _displayName;
+        private string displayName;
 
         /// <summary>
         /// Gets or sets the first name.
@@ -28,18 +28,16 @@ namespace BugNET.Providers.MembershipProviders
         /// <value>The display name.</value>
         public string DisplayName
         {
-            get {
-                return string.IsNullOrEmpty(_displayName) ? base.UserName : _displayName;
-            }
-            set { _displayName = value; }
+            get => string.IsNullOrEmpty(displayName) ? base.UserName : displayName;
+            set => displayName = value;
         }
 
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomMembershipUser"/> class.
         /// </summary>
-        /// <param name="providername">The provider name.</param>
-        /// <param name="username">The username.</param>
+        /// <param name="providerName">The provider name.</param>
+        /// <param name="userName">The username.</param>
         /// <param name="providerUserKey">The provider user key.</param>
         /// <param name="email">The email.</param>
         /// <param name="passwordQuestion">The password question.</param>
@@ -54,8 +52,8 @@ namespace BugNET.Providers.MembershipProviders
         /// <param name="displayName">The display name.</param>
         /// <param name="firstName">The first name.</param>
         /// <param name="lastName">The last name.</param>
-        public CustomMembershipUser(string providername,
-                                  string username,
+        public CustomMembershipUser(string providerName,
+                                  string userName,
                                   object providerUserKey,
                                   string email,
                                   string passwordQuestion,
@@ -70,8 +68,8 @@ namespace BugNET.Providers.MembershipProviders
                                   string displayName,
                                   string firstName,
                                   string lastName) :
-                                  base(providername,
-                                       username,
+                                  base(providerName,
+                                       userName,
                                        providerUserKey,
                                        email,
                                        passwordQuestion,

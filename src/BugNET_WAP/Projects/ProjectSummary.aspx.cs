@@ -141,7 +141,7 @@ namespace BugNET.Projects
                             if (data.ImageUrl.Length > 0)
                                 summaryImage.ImageUrl = data.ImageUrl;
 
-                            if (data.Id.ToString().Equals(Globals.NEW_ID.ToString()) || data.Id.ToString().Equals(Globals.EMPTY_GUID))
+                            if (data.Id.ToString().Equals(Globals.NewId.ToString()) || data.Id.ToString().Equals(Globals.EmptyGuid))
                                 summaryImage.Visible = false;
                         }
 

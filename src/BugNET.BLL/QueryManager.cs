@@ -20,11 +20,11 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(string userName, int projectId, Query entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (string.IsNullOrEmpty(entity.Name)) throw (new ArgumentException("The query name cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The query name cannot be empty or null");
             if (entity.Clauses.Count == 0) throw new ArgumentException("The query must have at least one query clause");
 
-            return entity.Id > Globals.NEW_ID ?  
+            return entity.Id > Globals.NewId ?  
                 DataProviderManager.Provider.UpdateQuery(entity.Id, userName, projectId, entity.Name, entity.IsPublic, entity.Clauses) :
             DataProviderManager.Provider.SaveQuery(userName, projectId, entity.Name, entity.IsPublic, entity.Clauses);
         }
@@ -36,7 +36,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int queryId)
         {
-            if (queryId <= Globals.NEW_ID) throw new ArgumentOutOfRangeException("queryId");
+            if (queryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(queryId));
 
             return DataProviderManager.Provider.DeleteQuery(queryId);
         }
@@ -48,7 +48,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static Query GetById(int queryId)
         {
-            if (queryId <= Globals.NEW_ID) throw new ArgumentOutOfRangeException("queryId");
+            if (queryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(queryId));
 
             return DataProviderManager.Provider.GetQueryById(queryId);
         }
@@ -61,7 +61,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<Query> GetByUsername(string username, int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw new ArgumentOutOfRangeException("projectId");
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             return DataProviderManager.Provider.GetQueriesByUserName(username, projectId);
         }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LumiSoft.Net.IMAP.Server
+﻿namespace LumiSoft.Net.IMAP.Server
 {
     /// <summary>
     /// This class holds IMAP server FETCH return data type.

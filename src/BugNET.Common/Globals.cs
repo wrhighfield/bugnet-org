@@ -1,6 +1,3 @@
-using System;
-using System.Xml.Serialization;
-
 namespace BugNET.Common
 {
     public delegate void ActionEventHandler(object sender, ActionEventArgs args);
@@ -14,34 +11,34 @@ namespace BugNET.Common
         #region Public Constants
 
         //Cookie Constants
-        public const string USER_COOKIE = "BugNETUser";
-        public const string ISSUE_COLUMNS = "issuecolumns";
+        public const string UserCookie = "BugNETUser";
+        public const string IssueColumns = "issuecolumns";
 
-        public const string CONFIG_FOLDER = "\\Config\\";
-        public const string UPLOAD_TOKEN = "UploadToken";
-        public const int UPLOAD_FOLDER_LIMIT = 64;
+        public const string ConfigFolder = @"\Config\";
+        public const string UploadToken = "UploadToken";
+        public const int UploadFolderLimit = 64;
 
-        public const string SKIP_PROJECT_INTRO = "skipprojectintro";
-        public const string UNASSIGNED_DISPLAY_TEXT = "none";
+        public const string SkipProjectIntro = "skipprojectintro";
+        public const string UnassignedDisplayText = "none";
 
-        public const int NEW_ID = 0;
-        public const string EMPTY_GUID = "00000000-0000-0000-0000-000000000000";
+        public const int NewId = 0;
+        public const string EmptyGuid = "00000000-0000-0000-0000-000000000000";
 
-        public const string SUPER_USER_ROLE = "Super Users";
+        public const string SuperUserRole = "Super Users";
 
         public static readonly string[] DefaultRoles = { "Project Administrators", "Read Only", "Reporter", "Developer", "Quality Assurance" };
-        public static readonly string ProjectAdminRole = DefaultRoles[0];
+        public static readonly string ProjectAdministratorRole = DefaultRoles[0];
 
-        public const string PROJECT_CUSTOM_FIELDS_VIEW_NAME = "BugNet_P{0}_CFV";
-        public const string PROJECT_CUSTOM_FIELDS_PREFIX = "bgn_cf_";
+        public const string ProjectCustomFieldsViewName = "BugNet_P{0}_CFV";
+        public const string ProjectCustomFieldsPrefix = "bgn_cf_";
 
-        public const string USER_CUSTOM_FIELDS_VIEW_NAME = "BugNet_USER_CFV";
-        public const string USER_CUSTOM_FIELDS_PREFIX = "bgn_ucf_";
+        public const string UserCustomFieldsViewName = "BugNet_USER_CFV";
+        public const string UserCustomFieldsPrefix = "bgn_ucf_";
 
         /// <summary>
         /// The default length of short comments (if not specified).
         /// </summary>
-        public const int DEFAULTSHORT_COMMENT_LENGTH = 100;
+        public const int DefaultShortCommentLength = 100;
 
 
 

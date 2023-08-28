@@ -57,7 +57,7 @@ namespace BugNET.Administration.Projects.UserControls
 			ProjectManager.DataBind();
             ProjectManager.Items.Insert(0, new ListItem(GetLocalResourceObject("SelectUser").ToString(), ""));
 
-			if (ProjectId > Globals.NEW_ID) 
+			if (ProjectId > Globals.NewId) 
 			{
 				var projectToUpdate = BLL.ProjectManager.GetById(ProjectId);
 

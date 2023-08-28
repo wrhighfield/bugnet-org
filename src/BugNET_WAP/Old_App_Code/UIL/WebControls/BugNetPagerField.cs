@@ -1,10 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing.Design;
 using System.Globalization;
 using System.Web;
-using System.Web.Resources;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 

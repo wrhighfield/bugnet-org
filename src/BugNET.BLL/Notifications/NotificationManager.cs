@@ -1,3 +1,5 @@
+// Ignore Spelling: Xslt
+
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +24,7 @@ namespace BugNET.BLL.Notifications
         /// <returns></returns>
         public static string LoadEmailNotificationTemplate(string templateName, EmailFormatType emailFormat)
         {
-            var templateKey = (emailFormat == EmailFormatType.Text) ? "" : "HTML";
+            var templateKey = emailFormat == EmailFormatType.Text ? "" : "HTML";
             var template = LoadNotificationTemplate(string.Concat(templateName, templateKey));
             
             //load template path from host settings

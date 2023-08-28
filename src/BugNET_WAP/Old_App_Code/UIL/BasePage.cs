@@ -1,5 +1,4 @@
 using System;
-using System.Web;
 using BugNET.BLL;
 using BugNET.Common;
 using Microsoft.AspNet.FriendlyUrls;
@@ -40,7 +39,7 @@ namespace BugNET.UserInterfaceLayer
         /// <value>The project id.</value>
         public virtual int ProjectId
         {
-            get { return ViewState.Get("ProjectId", Globals.NEW_ID); }
+            get { return ViewState.Get("ProjectId", Globals.NewId); }
             set { ViewState.Set("ProjectId", value); }
         }
 
@@ -95,10 +94,10 @@ namespace BugNET.UserInterfaceLayer
             }
             catch
             {
-                projectId = Request.QueryString.Get("pid", Globals.NEW_ID);
+                projectId = Request.QueryString.Get("pid", Globals.NewId);
             }
 
-            if (projectId <= Globals.NEW_ID) return;
+            if (projectId <= Globals.NewId) return;
 
             // Security check: Ensure the project exists (ie PID is valid project)
             var myProj = ProjectManager.GetById(projectId);

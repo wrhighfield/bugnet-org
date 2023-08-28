@@ -16,9 +16,7 @@ namespace BugNET.BLL
         /// </summary>
         /// <returns></returns>
         public static List<Permission> GetAll()
-        {
-            return DataProviderManager.Provider.GetAllPermissions();
-        }
+            => DataProviderManager.Provider.GetAllPermissions();
 
         #endregion
     }

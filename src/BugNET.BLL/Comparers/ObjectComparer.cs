@@ -1,21 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
 using System.Collections;
+using System.Collections.Generic;
 
-namespace BugNET.BLL
+namespace BugNET.BLL.Comparers
 {
     /// http://aadreja.wordpress.com/2009/02/09/c-sorting-with-objects-on-multiple-fields/
     /// http://www.codeproject.com/KB/recipes/Sorting_with_Objects.aspx
     /// <summary>
     /// Allows multi column sorting of an object
     /// </summary>
-    /// <typeparam name="ComparableObject">The type of the comparable object.</typeparam>
+    /// <typeparam name="TComparableObject">The type of the comparable object.</typeparam>
     [Serializable]
-    public class ObjectComparer<ComparableObject> : IComparer<ComparableObject>
+    public class ObjectComparer<TComparableObject> : IComparer<TComparableObject>
     {
-        private string _propertyName;
-        private bool _MultiColumn;
+        private string propertyName;
+        private bool multiColumn;
 
         #region Constructor
         /// <summary>
@@ -28,23 +27,23 @@ namespace BugNET.BLL
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectComparer&lt;ComparableObject&gt;"/> class.
         /// </summary>
-        /// <param name="p_propertyName">Name of the p_property.</param>
-        public ObjectComparer(string p_propertyName)
+        /// <param name="pPropertyName">Name of the p_property.</param>
+        public ObjectComparer(string pPropertyName)
         {    
             //We must have a property name for this comparer to work
-            this.PropertyName = p_propertyName;
+            PropertyName = pPropertyName;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectComparer&lt;ComparableObject&gt;"/> class.
         /// </summary>
-        /// <param name="p_propertyName">Name of the p_property.</param>
-        /// <param name="p_MultiColumn">if set to <c>true</c> [p_ multi column].</param>
-        public ObjectComparer(string p_propertyName, bool p_MultiColumn)
+        /// <param name="pPropertyName">Name of the p_property.</param>
+        /// <param name="pMultiColumn">if set to <c>true</c> [p_ multi column].</param>
+        public ObjectComparer(string pPropertyName, bool pMultiColumn)
         {
             //We must have a property name for this comparer to work
-            this.PropertyName = p_propertyName;
-            this.MultiColumn = p_MultiColumn;
+            PropertyName = pPropertyName;
+            MultiColumn = pMultiColumn;
         }
         #endregion
 
@@ -56,8 +55,8 @@ namespace BugNET.BLL
         /// <value><c>true</c> if [multi column]; otherwise, <c>false</c>.</value>
         public bool MultiColumn
         {
-            get { return _MultiColumn; }
-            set { _MultiColumn = value; }
+            get => multiColumn;
+            set => multiColumn = value;
         }
 
      
@@ -67,8 +66,8 @@ namespace BugNET.BLL
         /// <value>The name of the property.</value>
         public string PropertyName
         {
-            get { return _propertyName; }
-            set { _propertyName = value; }
+            get => propertyName;
+            set => propertyName = value;
         }
         #endregion 
 
@@ -82,67 +81,59 @@ namespace BugNET.BLL
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public int Compare(ComparableObject x, ComparableObject y)
+        public int Compare(TComparableObject x, TComparableObject y)
         {
-            Type t = x.GetType();
-            if (_MultiColumn) // Multi Column Sorting
+            var t = x.GetType();
+
+            if (multiColumn) // Multi Column Sorting
             {
-                string[] sortExpressions = _propertyName.Trim().Split(',');
-                for (int i = 0; i < sortExpressions.Length; i++)
+                var sortExpressions = propertyName.Trim().Split(',');
+                foreach (var sortExpression in sortExpressions)
                 {
                     string fieldName, direction = "ASC";
-                    if (sortExpressions[i].Trim().EndsWith(" DESC"))
-                    {fieldName = sortExpressions[i].Replace(" DESC", "").Trim();
-                    direction = "DESC";
-                }
-                else
-                {
-                    fieldName = sortExpressions[i].Replace(" ASC", "").Trim();
-                }
-
-                //Get property by name
-                PropertyInfo val = t.GetProperty(fieldName);
-                if (val != null)
-                {
-                    //Compare values, using IComparable interface of the property's type
-                    int iResult = Comparer.DefaultInvariant.Compare
-				    (val.GetValue(x, null), val.GetValue(y, null));
-                    if (iResult != 0)
-                    {
-                        //Return if not equal
-                        if (direction == "DESC")
-                        {
-                            //Invert order
-                            return -iResult;
-                        }
-                        else
-                        {
-                            return iResult;
-                        }
+                    if (sortExpression.Trim().EndsWith(" DESC"))
+                    {fieldName = sortExpression.Replace(" DESC", "").Trim();
+                        direction = "DESC";
                     }
+                    else
+                    {
+                        fieldName = sortExpression.Replace(" ASC", "").Trim();
+                    }
+
+                    //Get property by name
+                    var propertyInfo = t.GetProperty(fieldName);
+
+                    if (propertyInfo != null)
+                    {
+                        var iResult = Comparer.DefaultInvariant.Compare
+                            (propertyInfo.GetValue(x, null), propertyInfo.GetValue(y, null));
+                        if (iResult == 0) continue;
+                        //Return if not equal
+                        return direction == "DESC"
+                            ?
+                            //Invert order
+                            -iResult
+                            : iResult;
+                    }
+
+                    throw new Exception($"{fieldName} is not a valid property to sort on. It doesn't exist in the Class.");
+
+                    //Compare values, using IComparable interface of the property's type
+
                 }
-                else
-                {
-                    throw new Exception(fieldName + " is not a valid property to sort on. It doesn't exist in the Class.");
-                }
+                //Objects have the same sort order
+                return 0;
             }
-            //Objects have the same sort order
-            return 0;
-        }
-        else
-        {
-            PropertyInfo val = t.GetProperty(this.PropertyName);
+
+            var val = t.GetProperty(PropertyName);
             if (val != null)
             {
                 return Comparer.DefaultInvariant.Compare
-		    (val.GetValue(x, null), val.GetValue(y, null));
+                    (val.GetValue(x, null), val.GetValue(y, null));
             }
-            else
-            {
-                throw new Exception(this.PropertyName + "is not a valid property to sort on. It doesn't exist in the Class.");
-            }
+
+            throw new Exception(PropertyName + "is not a valid property to sort on. It doesn't exist in the Class.");
         }
-    }
     #endregion
 
     }

@@ -1,5 +1,4 @@
 using BugNET.Common;
-using log4net;
 
 namespace BugNET.MailboxReader
 {

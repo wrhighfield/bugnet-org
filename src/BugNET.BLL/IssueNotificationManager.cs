@@ -22,9 +22,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(IssueNotification notification)
         {
-            if (notification == null) throw new ArgumentNullException("notification");
-            if (notification.IssueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("notification", "The issue id for the notification is not valid"));
-            if (string.IsNullOrEmpty(notification.NotificationUsername)) throw (new ArgumentOutOfRangeException("notification", "The user name for the notification cannot be null or empty"));
+            if (notification == null) throw new ArgumentNullException(nameof(notification));
+            if (notification.IssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(notification), "The issue id for the notification is not valid");
+            if (string.IsNullOrEmpty(notification.NotificationUsername)) throw new ArgumentOutOfRangeException(nameof(notification), "The user name for the notification cannot be null or empty");
 
             return DataProviderManager.Provider.CreateNewIssueNotification(notification) > 0;
         }
@@ -36,9 +36,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(IssueNotification notification)
         {
-            if (notification == null) throw new ArgumentNullException("notification");
-            if (notification.IssueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("notification", "The issue id for the notification is not valid"));
-            if (string.IsNullOrEmpty(notification.NotificationUsername)) throw (new ArgumentOutOfRangeException("notification", "The user name for the notification cannot be null or empty"));
+            if (notification == null) throw new ArgumentNullException(nameof(notification));
+            if (notification.IssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(notification), "The issue id for the notification is not valid");
+            if (string.IsNullOrEmpty(notification.NotificationUsername)) throw new ArgumentOutOfRangeException(nameof(notification), "The user name for the notification cannot be null or empty");
 
             return DataProviderManager.Provider.DeleteIssueNotification(notification.IssueId, notification.NotificationUsername);
         }
@@ -50,7 +50,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<IssueNotification> GetByIssueId(int issueId)
         {
-            if (issueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueId"));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             return DataProviderManager.Provider.GetIssueNotificationsByIssueId(issueId);
         }
@@ -61,7 +61,7 @@ namespace BugNET.BLL
         /// <param name="issueId">The issue id.</param>
         public static void SendIssueNotifications(int issueId)
         {
-            if (issueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueId"));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             // TODO - create this via dependency injection at some point.
             IMailDeliveryService mailService = new SmtpMailDeliveryService();
@@ -72,10 +72,10 @@ namespace BugNET.BLL
 
             var data = new Dictionary<string, object> { { "Issue", issue } };
 
-            var displayname = UserManager.GetUserDisplayName(Security.GetUserName());
+            var displayName = UserManager.GetUserDisplayName(Security.GetUserName());
 
             var templateCache = new List<CultureNotificationContent>();
-            var emailFormatKey = (emailFormatType == EmailFormatType.Text) ? "" : "HTML";
+            var emailFormatKey = emailFormatType == EmailFormatType.Text ? "" : "HTML";
             const string subjectKey = "IssueUpdatedSubject";
             var bodyKey = string.Concat("IssueUpdated", emailFormatKey);
 
@@ -108,7 +108,7 @@ namespace BugNET.BLL
 
                     var emailSubject = nc.CultureContents
                         .First(p => p.ContentKey == subjectKey)
-                        .FormatContent(issue.FullId, displayname);
+                        .FormatContent(issue.FullId, displayName);
 
                     var bodyContent = nc.CultureContents
                         .First(p => p.ContentKey == bodyKey)
@@ -137,7 +137,7 @@ namespace BugNET.BLL
         public static void SendIssueAddNotifications(int issueId)
         {
             // validate input
-            if (issueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueId"));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             // TODO - create this via dependency injection at some point.
             IMailDeliveryService mailService = new SmtpMailDeliveryService();
@@ -149,7 +149,7 @@ namespace BugNET.BLL
             var data = new Dictionary<string, object> { { "Issue", issue } };
 
             var templateCache = new List<CultureNotificationContent>();
-            var emailFormatKey = (emailFormatType == EmailFormatType.Text) ? "" : "HTML";
+            var emailFormatKey = emailFormatType == EmailFormatType.Text ? "" : "HTML";
             const string subjectKey = "IssueAddedSubject";
             var bodyKey = string.Concat("IssueAdded", emailFormatKey);
 
@@ -212,9 +212,9 @@ namespace BugNET.BLL
         public static void SendIssueNotifications(int issueId, IEnumerable<IssueHistory> issueChanges)
         {
             // validate input
-            if (issueId <= Globals.NEW_ID)
+            if (issueId <= Globals.NewId)
             {
-                throw (new ArgumentOutOfRangeException("issueId"));
+                throw new ArgumentOutOfRangeException(nameof(issueId));
             }
 
             // TODO - create this via dependency injection at some point.
@@ -243,7 +243,7 @@ namespace BugNET.BLL
             }
 
             var templateCache = new List<CultureNotificationContent>();
-            var emailFormatKey = (emailFormatType == EmailFormatType.Text) ? "" : "HTML";
+            var emailFormatKey = emailFormatType == EmailFormatType.Text ? "" : "HTML";
             const string subjectKey = "IssueUpdatedSubject";
             var bodyKey = string.Concat("IssueUpdatedWithChanges", emailFormatKey);
 
@@ -258,7 +258,7 @@ namespace BugNET.BLL
                 templateCache.Add(new CultureNotificationContent().LoadContent(culture, subjectKey, bodyKey));
             }
 
-            var displayname = UserManager.GetUserDisplayName(Security.GetUserName());
+            var displayName = UserManager.GetUserDisplayName(Security.GetUserName());
 
             foreach (var notification in issNotifications)
             {
@@ -278,7 +278,7 @@ namespace BugNET.BLL
 
                     var emailSubject = nc.CultureContents
                         .First(p => p.ContentKey == subjectKey)
-                        .FormatContent(issue.FullId, displayname);
+                        .FormatContent(issue.FullId, displayName);
 
                     var bodyContent = nc.CultureContents
                         .First(p => p.ContentKey == bodyKey)
@@ -304,10 +304,10 @@ namespace BugNET.BLL
         /// Sends an email to the user that is assigned to the issue
         /// </summary>
         /// <param name="notification"></param>
-        public static void SendNewAssigneeNotification(IssueNotification notification)
+        public static void SendNewAssignmentNotification(IssueNotification notification)
         {
-            if (notification == null) throw (new ArgumentNullException("notification"));
-            if (notification.IssueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("notification", "The issue id is not valid for this notification"));
+            if (notification == null) throw new ArgumentNullException(nameof(notification));
+            if (notification.IssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(notification), "The issue id is not valid for this notification");
 
             // TODO - create this via dependency injection at some point.
             IMailDeliveryService mailService = new SmtpMailDeliveryService();
@@ -317,7 +317,7 @@ namespace BugNET.BLL
 
             // data for template
             var data = new Dictionary<string, object> { { "Issue", issue } };
-            var emailFormatKey = (emailFormatType == EmailFormatType.Text) ? "" : "HTML";
+            var emailFormatKey = emailFormatType == EmailFormatType.Text ? "" : "HTML";
             const string subjectKey = "NewAssigneeSubject";
             var bodyKey = string.Concat("NewAssignee", emailFormatKey);
 
@@ -326,7 +326,7 @@ namespace BugNET.BLL
             try
             {
                 //send notifications to everyone except who changed it.
-                if (notification.NotificationUsername.ToLower() == Security.GetUserName().ToLower()) return;
+                if (string.Equals(notification.NotificationUsername, Security.GetUserName(), StringComparison.CurrentCultureIgnoreCase)) return;
 
                 var user = UserManager.GetUser(notification.NotificationUsername);
 
@@ -366,8 +366,8 @@ namespace BugNET.BLL
         /// <param name="newComment">The new comment.</param>
         public static void SendNewIssueCommentNotification(int issueId, IssueComment newComment)
         {
-            if (issueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueId"));
-            if (newComment == null) throw new ArgumentNullException("newComment");
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
+            if (newComment == null) throw new ArgumentNullException(nameof(newComment));
 
             // TODO - create this via dependency injection at some point.
             IMailDeliveryService mailService = new SmtpMailDeliveryService();
@@ -378,10 +378,10 @@ namespace BugNET.BLL
 
             // data for template
             var data = new Dictionary<string, object> { { "Issue", issue }, { "Comment", newComment } };
-            var displayname = UserManager.GetUserDisplayName(newComment.CreatorUserName);
+            var displayName = UserManager.GetUserDisplayName(newComment.CreatorUserName);
 
             var templateCache = new List<CultureNotificationContent>();
-            var emailFormatKey = (emailFormatType == EmailFormatType.Text) ? "" : "HTML";
+            var emailFormatKey = emailFormatType == EmailFormatType.Text ? "" : "HTML";
             const string subjectKey = "NewIssueCommentSubject";
             var bodyKey = string.Concat("NewIssueComment", emailFormatKey);
 
@@ -402,7 +402,7 @@ namespace BugNET.BLL
 
                 var emailSubject = nc.CultureContents
                     .First(p => p.ContentKey == subjectKey)
-                    .FormatContent(issue.FullId, displayname);
+                    .FormatContent(issue.FullId, displayName);
 
                 var bodyContent = nc.CultureContents
                     .First(p => p.ContentKey == bodyKey)

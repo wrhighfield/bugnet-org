@@ -46,7 +46,7 @@ namespace BugNET.Issues
         {
             var queryClauses = new List<QueryClause>();
 
-            var projects = PresentationUtils.GetSelectedItemsIntegerList(ProjectListBoxFilter, returnAll).Where(project => project > Globals.NEW_ID).ToList();
+            var projects = PresentationUtils.GetSelectedItemsIntegerList(ProjectListBoxFilter, returnAll).Where(project => project > Globals.NewId).ToList();
 
             if (projects.Count > 0)
             {
@@ -231,7 +231,7 @@ namespace BugNET.Issues
 
             if (ViewIssuesDropDownFilter.SelectedValue == "Monitored")
             {
-                var projects = PresentationUtils.GetSelectedItemsIntegerList(ProjectListBoxFilter, false).Where(project => project > Globals.NEW_ID).ToList();
+                var projects = PresentationUtils.GetSelectedItemsIntegerList(ProjectListBoxFilter, false).Where(project => project > Globals.NewId).ToList();
 
                 ctlDisplayIssues.RssUrl = string.Format("~/Feed.aspx?channel=15&ec={0}", ExcludeClosedIssuesFilter.Checked);
                 ctlDisplayIssues.DataSource = IssueManager.GetMonitoredIssuesByUserName(userId, sortColumns, projects, ExcludeClosedIssuesFilter.Checked);

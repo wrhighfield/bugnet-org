@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Web;
 using BugNET.BLL;
 using BugNET.Common;
@@ -54,8 +53,8 @@ namespace BugNET.Queries
         {
             Message1.Visible = false;
 
-            _queryId = Request.Get("id", Globals.NEW_ID);
-            ProjectId = Request.Get("pid", Globals.NEW_ID);
+            _queryId = Request.Get("id", Globals.NewId);
+            ProjectId = Request.Get("pid", Globals.NewId);
 
             // If no project id or query id then redirect away
             if (ProjectId == 0)

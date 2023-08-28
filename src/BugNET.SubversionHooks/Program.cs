@@ -12,7 +12,7 @@ namespace BugNET.SubversionHooks
         {
 
             log4net.Config.XmlConfigurator.Configure();
-            log4net.ILog logger = log4net.LogManager.GetLogger("Main");
+            var logger = log4net.LogManager.GetLogger("Main");
 
             //Console.WriteLine(IssueTrackerIntegration.GetRepositoryName(@"F:\SVN\Repositories\MyRepo"));
             //Console.ReadLine();
@@ -23,11 +23,11 @@ namespace BugNET.SubversionHooks
                 {
                     logger.Info("Starting post-commit...");
 
-                    string repository = args[1];
-                    string revision = args[2];
+                    var repository = args[1];
+                    var revision = args[2];
 
                     logger.InfoFormat("Executing IssueTrackerIntegration.UpdateIssueTrackerFromRevision(\"{0}\", \"{1}\")", repository, revision);
-                    IssueTrackerIntegration integration = new IssueTrackerIntegration();
+                    var integration = new IssueTrackerIntegration();
                     integration.UpdateIssueTrackerFromRevision(repository, revision);
                     logger.Info("Finished IssueTrackerIntegration.UpdateIssueTrackerFromRevision\n");
                 }

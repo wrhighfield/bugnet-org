@@ -9,7 +9,6 @@ using System.Web.Services;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET;
 
 namespace BugNET.Webservices
 {
@@ -101,7 +100,7 @@ namespace BugNET.Webservices
 
             var issueAttachment = new IssueAttachment
             {
-                Id = Globals.NEW_ID,
+                Id = Globals.NewId,
                 Attachment = attachment,
                 Description = description,
                 DateCreated = DateTime.Now,
@@ -137,7 +136,7 @@ namespace BugNET.Webservices
             if (c != null)
             {
                 string UserName = Thread.CurrentPrincipal.Identity.Name;
-                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdminRole) && !UserManager.IsInRole(UserName, 0, Globals.SUPER_USER_ROLE))
+                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) && !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
                     throw new UnauthorizedAccessException(LoggingManager.GetErrorMessageResource("AccessDenied"));
 
                 c.Name = name;
@@ -165,7 +164,7 @@ namespace BugNET.Webservices
             {
                 string UserName = Thread.CurrentPrincipal.Identity.Name;
 
-                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdminRole) && !UserManager.IsInRole(UserName, 0, Globals.SUPER_USER_ROLE))
+                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) && !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
                     throw new UnauthorizedAccessException(LoggingManager.GetErrorMessageResource("AccessDenied"));
 
                 c.ParentCategoryId = Convert.ToInt32(newParentId);
@@ -298,7 +297,7 @@ namespace BugNET.Webservices
 
             var userName = Thread.CurrentPrincipal.Identity.Name;
 
-            if (!UserManager.IsInRole(userName, Convert.ToInt32(projectId), Globals.ProjectAdminRole) && !UserManager.IsInRole(userName, 0, Globals.SUPER_USER_ROLE))
+            if (!UserManager.IsInRole(userName, Convert.ToInt32(projectId), Globals.ProjectAdministratorRole) && !UserManager.IsInRole(userName, 0, Globals.SuperUserRole))
                 throw new UnauthorizedAccessException(LoggingManager.GetErrorMessageResource("AccessDenied"));
 
             var entity = new Category { ProjectId = validParojectId, ParentCategoryId = validParentCategoryId, Name = name, ChildCount = 0 };
@@ -323,7 +322,7 @@ namespace BugNET.Webservices
             {
                 string UserName = Thread.CurrentPrincipal.Identity.Name;
 
-                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdminRole) && !UserManager.IsInRole(UserName, 0, Globals.SUPER_USER_ROLE))
+                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) && !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
                     throw new UnauthorizedAccessException(LoggingManager.GetErrorMessageResource("AccessDenied"));
 
                 if (c.ChildCount > 0)

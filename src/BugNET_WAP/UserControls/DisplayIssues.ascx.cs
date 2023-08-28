@@ -61,7 +61,7 @@ namespace BugNET.UserControls
             }
             else
             {
-                var httpCookie = Request.Cookies[Globals.ISSUE_COLUMNS];
+                var httpCookie = Request.Cookies[Globals.IssueColumns];
 
                 if (httpCookie != null)
                 {
@@ -106,7 +106,7 @@ namespace BugNET.UserControls
         public new void DataBind()
         {
             //Private issue check
-            DataSource = IssueManager.StripPrivateIssuesForRequestor(DataSource, Security.GetUserName()).ToList();
+            DataSource = IssueManager.StripPrivateIssuesForUser(DataSource, Security.GetUserName()).ToList();
 
             if (DataSource.Count > 0)
             {
@@ -118,7 +118,7 @@ namespace BugNET.UserControls
                 var pId = Request.QueryString.Get("pid", -1);
 
                 //get custom fields for project
-                if (pId > Globals.NEW_ID)
+                if (pId > Globals.NewId)
                 {
                     var customFields = CustomFieldManager.GetByProjectId(pId);
 
@@ -405,7 +405,7 @@ namespace BugNET.UserControls
             }
             else
             {
-                var httpCookie = new HttpCookie(Globals.ISSUE_COLUMNS) { Path = "/", Expires = DateTime.MaxValue, Value = strIssueColumns };
+                var httpCookie = new HttpCookie(Globals.IssueColumns) { Path = "/", Expires = DateTime.MaxValue, Value = strIssueColumns };
 
                 Response.Cookies.Add(httpCookie);
             }

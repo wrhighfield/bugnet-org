@@ -28,11 +28,9 @@ namespace BugNET.Common
 
         public static string GetGlobalResource(GlobalResources classKey, string resourceKey, CultureInfo culture, string defaultValue = "")
         {
-            if (HttpContext.Current != null)
-            {
-                var resource = HttpContext.GetGlobalResourceObject(classKey.ToString(), resourceKey, culture);
-                if (resource != null) return resource.ToString();
-            }
+            if (HttpContext.Current == null) return defaultValue;
+            var resource = HttpContext.GetGlobalResourceObject(classKey.ToString(), resourceKey, culture);
+            if (resource != null) return resource.ToString();
 
             return defaultValue;
         }
@@ -46,11 +44,9 @@ namespace BugNET.Common
         /// <returns></returns>
         public static string GetLocalResource(string virtualPath, string resourceKey, string defaultValue = "")
         {
-            if (HttpContext.Current != null)
-            {
-                var resource = HttpContext.GetLocalResourceObject(virtualPath, resourceKey);
-                if (resource != null) return resource.ToString();
-            }
+            if (HttpContext.Current == null) return defaultValue;
+            var resource = HttpContext.GetLocalResourceObject(virtualPath, resourceKey);
+            if (resource != null) return resource.ToString();
 
             return defaultValue;
         }

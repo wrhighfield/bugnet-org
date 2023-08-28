@@ -17,11 +17,11 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(Status entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save status, the project id is invalid"));
-            if (string.IsNullOrEmpty(entity.Name)) throw (new ArgumentException("The status name cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save status, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The status name cannot be empty or null");
 
-            if (entity.Id > Globals.NEW_ID)
+            if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateStatus(entity);
 
             var tempId = DataProviderManager.Provider.CreateNewStatus(entity);
@@ -38,7 +38,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static Status GetById(int statusId)
         {
-            if (statusId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("statusId"));
+            if (statusId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(statusId));
 
             return DataProviderManager.Provider.GetStatusById(statusId);
         }
@@ -52,7 +52,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int id, out string cannotDeleteMessage)
         {
-            if (id <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("id"));
+            if (id <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(id));
 
             var entity = GetById(id);
 
@@ -79,9 +79,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<Status> GetByProjectId(int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
-            return (DataProviderManager.Provider.GetStatusByProjectId(projectId));
+            return DataProviderManager.Provider.GetStatusByProjectId(projectId);
         }
     }
 }

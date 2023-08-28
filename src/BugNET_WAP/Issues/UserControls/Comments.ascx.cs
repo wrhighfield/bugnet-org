@@ -1,18 +1,13 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
 using BugNET.UserInterfaceLayer;
 using System.Web.Security;
-using System.Security.Cryptography;
-using System.Diagnostics;
-using System.Text;
 
 namespace BugNET.Issues.UserControls
 {
@@ -143,7 +138,7 @@ namespace BugNET.Issues.UserControls
                 if (Page.User.Identity.IsAuthenticated && UserManager.HasPermission(ProjectId, Common.Permission.EditComment.ToString()))
                     cmdEditComment.Visible = true;
                     // Check if the project admin or a super user trying to edit the comment.
-                else if ((Page.User.Identity.IsAuthenticated && UserManager.IsSuperUser()) || (Page.User.Identity.IsAuthenticated && UserManager.IsInRole(ProjectId, Globals.ProjectAdminRole)))
+                else if ((Page.User.Identity.IsAuthenticated && UserManager.IsSuperUser()) || (Page.User.Identity.IsAuthenticated && UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)))
                     cmdEditComment.Visible = true;
                     // Check if it is the original user, the project admin or a super user trying to edit the comment.
                 else if (currentComment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() && UserManager.HasPermission(ProjectId, Common.Permission.OwnerEditComment.ToString()))
@@ -161,7 +156,7 @@ namespace BugNET.Issues.UserControls
             cmdDeleteComment.Visible = false;
 
             // Check if it is the original user, the project admin or a super user trying to delete the comment.
-            if (currentComment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() || UserManager.IsSuperUser() || UserManager.IsInRole(ProjectId, Globals.ProjectAdminRole))
+            if (currentComment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() || UserManager.IsSuperUser() || UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole))
             {
                 cmdDeleteComment.Visible = true;
             }

@@ -66,7 +66,7 @@ namespace BugNET.Issues.UserControls
 
             // allow delete if user had the permission, the project admin or a super user trying to delete the comment.
             if (!UserManager.IsInRole(ProjectId, Common.Permission.DeleteSubIssue.ToString()) &&
-                !UserManager.IsSuperUser() && !UserManager.IsInRole(ProjectId, Globals.ProjectAdminRole)) return;
+                !UserManager.IsSuperUser() && !UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)) return;
 
             cmdDelete.Visible = true;
             cmdDelete.OnClientClick = string.Format("return confirm('{0}');", GetLocalResourceObject("RemoveSubIssue"));
@@ -81,7 +81,7 @@ namespace BugNET.Issues.UserControls
         {
             var commandArgument = e.CommandArgument.ToString();
             var commandName = e.CommandName.ToLower().Trim();
-            var currentIssueId = Globals.NEW_ID;
+            var currentIssueId = Globals.NewId;
 
             switch (commandName)
             {
@@ -91,7 +91,7 @@ namespace BugNET.Issues.UserControls
                     break;
             }
 
-            if (currentIssueId > Globals.NEW_ID)
+            if (currentIssueId > Globals.NewId)
             {
                 var history = new IssueHistory
                 {
@@ -129,7 +129,7 @@ namespace BugNET.Issues.UserControls
 
             var issueId = Utilities.ParseFullIssueId(IssueIdTextBox.Text.Trim());
 
-            if (issueId <= Globals.NEW_ID) return;
+            if (issueId <= Globals.NewId) return;
 
             RelatedIssueManager.CreateNewChildIssue(IssueId, issueId);
 

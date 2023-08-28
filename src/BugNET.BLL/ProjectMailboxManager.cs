@@ -20,11 +20,11 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(ProjectMailbox entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save milestone, the project id is invalid"));
-            if (string.IsNullOrEmpty(entity.Mailbox)) throw (new ArgumentException("The mailbox cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save milestone, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Mailbox)) throw new ArgumentException("The mailbox cannot be empty or null");
 
-            if (entity.Id > Globals.NEW_ID)
+            if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateProjectMailbox(entity);
 
             var tempId = DataProviderManager.Provider.CreateProjectMailbox(entity);
@@ -42,7 +42,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static ProjectMailbox GetById(int projectMailboxId)
         {
-            if (projectMailboxId <= 0) throw new ArgumentOutOfRangeException("projectMailboxId");
+            if (projectMailboxId <= 0) throw new ArgumentOutOfRangeException(nameof(projectMailboxId));
 
             return DataProviderManager.Provider.GetProjectMailboxByMailboxId(projectMailboxId);
         }
@@ -54,7 +54,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static ProjectMailbox GetByMailbox(string mailbox)
         {
-            if (string.IsNullOrEmpty(mailbox)) throw (new ArgumentOutOfRangeException("mailbox"));
+            if (string.IsNullOrEmpty(mailbox)) throw new ArgumentOutOfRangeException(nameof(mailbox));
 
             return DataProviderManager.Provider.GetProjectByMailbox(mailbox);
         }
@@ -66,7 +66,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<ProjectMailbox> GetByProjectId(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             return DataProviderManager.Provider.GetMailboxsByProjectId(projectId);
         }
@@ -78,7 +78,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int projectMailboxId)
         {
-            if (projectMailboxId <= 0) throw new ArgumentOutOfRangeException("projectMailboxId");
+            if (projectMailboxId <= 0) throw new ArgumentOutOfRangeException(nameof(projectMailboxId));
 
             return DataProviderManager.Provider.DeleteProjectMailbox(projectMailboxId);
         }

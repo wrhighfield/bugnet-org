@@ -9,16 +9,6 @@ namespace BugNET.Providers.HtmlEditorProviders
     /// </summary>
     public class HtmlEditorManager
     {
-        //Initialization related variables and logic
-
-        /// <summary>
-        /// Initializes the <see cref="HtmlEditorManager"/> class.
-        /// </summary>
-        static HtmlEditorManager()
-        {
-           // Initialize();
-        }
-
         /// <summary>
         /// Initializes this instance.
         /// </summary>
@@ -31,23 +21,22 @@ namespace BugNET.Providers.HtmlEditorProviders
                 throw new ProviderException("You must specify a valid default provider.");
 
             //Instantiate the providers
-            providerCollection = new HtmlEditorProviderCollection();
-            ProvidersHelper.InstantiateProviders(qc.Providers, providerCollection, typeof(HtmlEditorProvider));
-            providerCollection.SetReadOnly();
-            defaultProvider = providerCollection[qc.DefaultProvider];
+            Providers = new HtmlEditorProviderCollection();
+            ProvidersHelper.InstantiateProviders(qc.Providers, Providers, typeof(HtmlEditorProvider));
+            Providers.SetReadOnly();
+            _defaultProvider = Providers[qc.DefaultProvider];
 
-            if (defaultProvider == null)
+            if (_defaultProvider == null)
             {
                 throw new ConfigurationErrorsException(
                     "You must specify a default provider for the feature.",
-                    qc.ElementInformation.Properties["defaultProvider"].Source,
+                    qc.ElementInformation.Properties["defaultProvider"]?.Source,
                     qc.ElementInformation.Properties["defaultProvider"].LineNumber);
             }
         }
 
         //Public feature API
-        private static HtmlEditorProvider defaultProvider;
-        private static HtmlEditorProviderCollection providerCollection;
+        private static HtmlEditorProvider _defaultProvider;
 
         /// <summary>
         /// Gets the provider.
@@ -58,7 +47,7 @@ namespace BugNET.Providers.HtmlEditorProviders
             get
             {
                 Initialize();
-                return defaultProvider;
+                return _defaultProvider;
             }
         }
 
@@ -66,12 +55,6 @@ namespace BugNET.Providers.HtmlEditorProviders
         /// Gets the providers.
         /// </summary>
         /// <value>The providers.</value>
-        public static HtmlEditorProviderCollection Providers
-        {
-            get
-            {
-                return providerCollection;
-            }
-        }
+        public static HtmlEditorProviderCollection Providers { get; private set; }
     }
 }

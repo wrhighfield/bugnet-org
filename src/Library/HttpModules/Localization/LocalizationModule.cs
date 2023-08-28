@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using System.Linq;
 using System.Threading;
 using System.Web;
 using BugNET.BLL;
@@ -17,10 +16,7 @@ namespace BugNET.HttpModules
         /// Gets the name of the module.
         /// </summary>
         /// <value>The name of the module.</value>
-        public string ModuleName
-        {
-            get { return "LocalizationModule"; }
-        }
+        public string ModuleName => "LocalizationModule";
 
         #region IHttpModule Members
 
@@ -37,7 +33,7 @@ namespace BugNET.HttpModules
         /// <param name="context">An <see cref="T:System.Web.HttpApplication"/> that provides access to the methods, properties, and events common to all application objects within an ASP.NET application</param>
         public void Init(HttpApplication context)
         {
-            context.PreRequestHandlerExecute += context_PreRequestHandlerExecute;
+            context.PreRequestHandlerExecute += ContextPreRequestHandlerExecute;
         }
 
         #endregion
@@ -47,7 +43,7 @@ namespace BugNET.HttpModules
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        private void context_PreRequestHandlerExecute(object sender, EventArgs e)
+        private static void ContextPreRequestHandlerExecute(object sender, EventArgs e)
         {        
             if (HttpContext.Current.Request.Url.LocalPath.ToLower().EndsWith("install.aspx"))
                 return;
@@ -62,16 +58,14 @@ namespace BugNET.HttpModules
             }
             else
             {
-                if (HttpContext.Current.Profile["PreferredLocale"] != null &&
-                !string.IsNullOrEmpty(HttpContext.Current.Profile["PreferredLocale"].ToString()))
-                {
-                    //retrieve culture
-                    culture = HttpContext.Current.Profile["PreferredLocale"].ToString();
+                if (HttpContext.Current.Profile["PreferredLocale"] == null ||
+                    string.IsNullOrEmpty(HttpContext.Current.Profile["PreferredLocale"].ToString())) return;
+                //retrieve culture
+                culture = HttpContext.Current.Profile["PreferredLocale"].ToString();
 
-                    //set culture
-                    Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(culture);
-                    Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
-                }
+                //set culture
+                Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture(culture);
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo(culture);
 
             }
         }

@@ -346,7 +346,7 @@ namespace BugNET.Projects
             var issueList = IssueManager.PerformQuery(queryClauses, sortList, ProjectId);
 
             // private issue check
-            issueList = IssueManager.StripPrivateIssuesForRequestor(issueList, Security.GetUserName()).ToList();
+            issueList = IssueManager.StripPrivateIssuesForUser(issueList, Security.GetUserName()).ToList();
 
             if (issueList.Count > 0)
             {

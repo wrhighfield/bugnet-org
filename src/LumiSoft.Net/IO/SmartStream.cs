@@ -1,10 +1,7 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-
-using LumiSoft.Net.Log;
 
 namespace LumiSoft.Net.IO
 {

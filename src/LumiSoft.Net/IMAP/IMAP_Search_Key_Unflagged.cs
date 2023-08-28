@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.Text;
 using LumiSoft.Net.IMAP.Client;
 
 namespace LumiSoft.Net.IMAP

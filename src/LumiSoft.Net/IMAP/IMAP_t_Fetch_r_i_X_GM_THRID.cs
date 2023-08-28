@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LumiSoft.Net.IMAP
+﻿namespace LumiSoft.Net.IMAP
 {
     /// <summary>
     /// This class represents IMAP FETCH response X-GM-THRID data-item. Defined in <see href="http://code.google.com/intl/et/apis/gmail/imap">GMail API</see>.

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Web;
+﻿using System.Web;
 using BugNET.BLL;
 using BugNET.Common;
 
@@ -23,7 +22,7 @@ namespace BugNET.UserInterfaceLayer.WebControls
                 Items.Add(new SuckerMenuItem("~/Issues/MyIssues", Resources.SharedResources.MyIssues, this));
             }
 
-            if (projectId > Globals.NEW_ID)
+            if (projectId > Globals.NewId)
             {
                 var oItemProject = new SuckerMenuItem("#", Resources.SharedResources.Project, this, "dropdown");
 
@@ -54,7 +53,7 @@ namespace BugNET.UserInterfaceLayer.WebControls
 
             var oItemAdmin = new SuckerMenuItem("#", Resources.SharedResources.Admin, this, "navbar-admin");
 
-            if (projectId > Globals.NEW_ID && (UserManager.IsInRole(projectId, Globals.ProjectAdminRole) || UserManager.IsSuperUser()))
+            if (projectId > Globals.NewId && (UserManager.IsInRole(projectId, Globals.ProjectAdministratorRole) || UserManager.IsSuperUser()))
             {            
                 oItemAdmin.Items.Add(new SuckerMenuItem(string.Format("~/Administration/Projects/EditProject/{0}", projectId), Resources.SharedResources.EditProject, this, "admin"));
             }

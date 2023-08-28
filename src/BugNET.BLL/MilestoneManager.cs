@@ -18,11 +18,11 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(Milestone entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save milestone, the project id is invalid"));
-            if (string.IsNullOrEmpty(entity.Name)) throw (new ArgumentException("The milestone name cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save milestone, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The milestone name cannot be empty or null");
 
-            if (entity.Id > Globals.NEW_ID)
+            if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateMilestone(entity);
 
             var tempId = DataProviderManager.Provider.CreateNewMilestone(entity);
@@ -40,7 +40,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int id, out string cannotDeleteMessage)
         {
-            if (id <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("id"));
+            if (id <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(id));
 
             var milestone = GetById(id);
 
@@ -65,11 +65,9 @@ namespace BugNET.BLL
         /// <param name="projectId">The project id.</param>
         /// <param name="milestoneCompleted">if set to <c>true</c> [milestone completed].</param>
         /// <returns></returns>
-        public static List<Milestone> GetByProjectId(int projectId, bool milestoneCompleted = true)
-        {
-            return projectId <= Globals.NEW_ID ? new List<Milestone>() : 
+        public static List<Milestone> GetByProjectId(int projectId, bool milestoneCompleted = true) =>
+            projectId <= Globals.NewId ? new List<Milestone>() : 
                 DataProviderManager.Provider.GetMilestonesByProjectId(projectId, milestoneCompleted);
-        }
 
         /// <summary>
         /// Gets the Milestone by id.
@@ -78,7 +76,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static Milestone GetById(int milestoneId)
         {
-            if (milestoneId < Globals.NEW_ID) throw (new ArgumentOutOfRangeException("milestoneId"));
+            if (milestoneId < Globals.NewId) throw new ArgumentOutOfRangeException(nameof(milestoneId));
 
             return DataProviderManager.Provider.GetMilestoneById(milestoneId);
         }

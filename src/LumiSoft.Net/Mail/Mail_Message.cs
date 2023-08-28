@@ -6,8 +6,6 @@ using System.Text;
 using LumiSoft.Net.IO;
 using LumiSoft.Net.MIME;
 
-using System.Threading;
-
 namespace LumiSoft.Net.Mail
 {
     /// <summary>

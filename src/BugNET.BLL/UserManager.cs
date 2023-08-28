@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Security;
 using BugNET.BLL.Notifications;
@@ -25,10 +23,8 @@ namespace BugNET.BLL
         /// <param name="userName"></param>
         /// <param name="password"></param>
         /// <param name="email"></param>
-        public static void CreateUser(string userName, string password, string email)
-        {
+        public static void CreateUser(string userName, string password, string email) =>
             Membership.CreateUser(userName, password, email);
-        }
 
         /// <summary>
         /// Provides a BugNET way of checking if the user's credentials are
@@ -37,10 +33,8 @@ namespace BugNET.BLL
         /// <param name="userName"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public static bool ValidateUser(string userName, string password)
-        {
-            return Membership.ValidateUser(userName, password);
-        }
+        public static bool ValidateUser(string userName, string password) =>
+            Membership.ValidateUser(userName, password);
 
         /// <summary>
         /// Gets the user.
@@ -49,7 +43,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static MembershipUser GetUser(object userProviderKey)
         {
-            if (userProviderKey == null) throw (new ArgumentOutOfRangeException("userProviderKey"));
+            if (userProviderKey == null) throw new ArgumentOutOfRangeException(nameof(userProviderKey));
             return Membership.GetUser(userProviderKey);
         }
 
@@ -60,7 +54,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static MembershipUser GetUser(string userName)
         {
-            if (String.IsNullOrEmpty(userName)) throw (new ArgumentOutOfRangeException("userName"));
+            if (string.IsNullOrEmpty(userName)) throw new ArgumentOutOfRangeException(nameof(userName));
             return Membership.GetUser(userName);
         }
 
@@ -68,10 +62,8 @@ namespace BugNET.BLL
         /// Gets all users in the application
         /// </summary>
         /// <returns>Collection of membership users</returns>
-        public static List<CustomMembershipUser> GetAllUsers()
-        {
-            return Membership.GetAllUsers().Cast<CustomMembershipUser>().OrderBy(cmu=> cmu.DisplayName).ToList();
-        }
+        public static List<CustomMembershipUser> GetAllUsers() =>
+            Membership.GetAllUsers().Cast<CustomMembershipUser>().OrderBy(cmu=> cmu.DisplayName).ToList();
 
         /// <summary>
         /// Gets all users.
@@ -114,10 +106,8 @@ namespace BugNET.BLL
         /// </summary>
         /// <param name="emailToMatch">The email to match.</param>
         /// <returns></returns>
-        public static List<CustomMembershipUser> FindUsersByEmail(string emailToMatch)
-        {
-            return Membership.FindUsersByEmail(emailToMatch).Cast<CustomMembershipUser>().ToList();
-        }
+        public static List<CustomMembershipUser> FindUsersByEmail(string emailToMatch) =>
+            Membership.FindUsersByEmail(emailToMatch).Cast<CustomMembershipUser>().ToList();
 
         /// <summary>
         /// Updates the user.
@@ -125,8 +115,7 @@ namespace BugNET.BLL
         /// <param name="user">The user.</param>
         public static void UpdateUser(MembershipUser user)
         {
-            if (user == null) throw new ArgumentNullException("user");
-
+            if (user == null) throw new ArgumentNullException(nameof(user));
             Membership.UpdateUser(user);
         }
 
@@ -140,8 +129,8 @@ namespace BugNET.BLL
         /// </returns>
         public static bool IsInRole(int projectId, string roleName)
         {
-            if (projectId <= Globals.NEW_ID) throw new ArgumentOutOfRangeException("projectId");
-            if (String.IsNullOrEmpty(roleName)) throw new ArgumentNullException("roleName");
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
+            if (string.IsNullOrEmpty(roleName)) throw new ArgumentNullException(nameof(roleName));
 
             return IsInRole(HttpContext.Current.User.Identity.Name, projectId, roleName);
         }
@@ -163,15 +152,15 @@ namespace BugNET.BLL
         /// <returns>
         /// <c>true</c> if is in role otherwise, <c>false</c>.
         /// </returns>
-        public static bool IsSuperUser(string username)
+        private static bool IsSuperUser(string userName)
         {
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(userName))
             {
                 return false;
             }
 
-            var roles = RoleManager.GetForUser(username);
-            return roles.Exists(r => r.Name == Globals.SUPER_USER_ROLE);
+            var roles = RoleManager.GetForUser(userName);
+            return roles.Exists(r => r.Name == Globals.SuperUserRole);
         }
 
         /// <summary>
@@ -198,8 +187,8 @@ namespace BugNET.BLL
         /// </returns>
         public static bool IsInRole(string userName, int projectId, string roleName)
         {
-            if (String.IsNullOrEmpty(roleName)) throw new ArgumentNullException("roleName");
-            if (String.IsNullOrEmpty(userName)) return false;
+            if (string.IsNullOrEmpty(roleName)) throw new ArgumentNullException(nameof(roleName));
+            if (string.IsNullOrEmpty(userName)) return false;
 
             var roles = RoleManager.GetForUser(userName, projectId);
 
@@ -217,7 +206,7 @@ namespace BugNET.BLL
         /// </returns>
         public static bool HasPermission(int projectId, string permissionKey)
         {
-            if (string.IsNullOrEmpty(permissionKey)) throw new ArgumentNullException("permissionKey");
+            if (string.IsNullOrEmpty(permissionKey)) throw new ArgumentNullException(nameof(permissionKey));
 
             return HasPermission(Security.GetUserName(), projectId, permissionKey);
         }
@@ -231,10 +220,10 @@ namespace BugNET.BLL
         /// <returns>
         /// 	<c>true</c> if the specified user name has permission; otherwise, <c>false</c>.
         /// </returns>
-        public static bool HasPermission(string userName, int projectId, string permissionKey)
+        private static bool HasPermission(string userName, int projectId, string permissionKey)
         {
             if (string.IsNullOrEmpty(userName)) return false;
-            if (string.IsNullOrEmpty(permissionKey)) throw new ArgumentNullException("permissionKey");
+            if (string.IsNullOrEmpty(permissionKey)) throw new ArgumentNullException(nameof(permissionKey));
             //if (projectId <= Globals.NEW_ID) throw new ArgumentNullException("projectId");
 
             //return true for all permission checks if the user is in the super users role.
@@ -252,7 +241,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static string GetUserDisplayName(string userName)
         {
-            if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException("userName");
+            if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
 
             var displayName = new WebProfile().GetProfile(userName).DisplayName;
             return !string.IsNullOrEmpty(displayName) ? displayName : userName;
@@ -262,22 +251,18 @@ namespace BugNET.BLL
         /// Gets the size of the profile page.
         /// </summary>
         /// <returns></returns>
-        public static int GetProfilePageSize()
-        {
-            return HttpContext.Current.User.Identity.IsAuthenticated ? 
+        public static int GetProfilePageSize() =>
+            HttpContext.Current.User.Identity.IsAuthenticated ? 
                 WebProfile.Current.IssuesPageSize : 
                 10;
-        }
 
         /// <summary>
         /// Gets the users by project id.
         /// </summary>
         /// <param name="projectId">The project id.</param>
         /// <returns></returns>
-        public static List<ITUser> GetUsersByProjectId(int projectId)
-        {
-            return DataProviderManager.Provider.GetUsersByProjectId(projectId, false);
-        }
+        public static List<ITUser> GetUsersByProjectId(int projectId) =>
+            GetUsersByProjectId(projectId, false);
 
         /// <summary>
         /// Gets the users by project id.
@@ -285,10 +270,8 @@ namespace BugNET.BLL
         /// <param name="projectId">The project id.</param>
         /// <param name="excludeReadOnlyUsers">if set to <c>true</c> [exclude read only users].</param>
         /// <returns></returns>
-        public static List<ITUser> GetUsersByProjectId(int projectId, bool excludeReadOnlyUsers = true)
-        {
-            return DataProviderManager.Provider.GetUsersByProjectId(projectId, excludeReadOnlyUsers);
-        }
+        public static List<ITUser> GetUsersByProjectId(int projectId, bool excludeReadOnlyUsers) =>
+            DataProviderManager.Provider.GetUsersByProjectId(projectId, excludeReadOnlyUsers);
 
         /// <summary>
         /// Sends the user verification notification.
@@ -296,14 +279,14 @@ namespace BugNET.BLL
         /// <param name="user">The user.</param>
         public static void SendUserVerificationNotification(MembershipUser user)
         {
-            if (user == null) throw new ArgumentNullException("user");
-            if (user.ProviderUserKey == null) throw new ArgumentNullException("user");
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (user.ProviderUserKey == null) throw new ArgumentNullException(nameof(user));
 
             // TODO - create this via dependency injection at some point.
             IMailDeliveryService mailService = new SmtpMailDeliveryService();
 
             var emailFormatType = HostSettingManager.Get(HostSettingNames.SMTPEMailFormat, EmailFormatType.Text);
-            var emailFormatKey = (emailFormatType == EmailFormatType.Text) ? "" : "HTML";
+            var emailFormatKey = emailFormatType == EmailFormatType.Text ? "" : "HTML";
             const string subjectKey = "UserVerificationSubject";
             var bodyKey = string.Concat("UserVerification", emailFormatKey);
             var profile = new WebProfile().GetProfile(user.UserName);
@@ -348,16 +331,16 @@ namespace BugNET.BLL
         /// <param name="userName">The user.</param>
         public static void SendUserRegisteredNotification(string userName)
         {
-            if (userName == "") throw new ArgumentNullException("userName");
+            if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentNullException(nameof(userName));
 
             var user = GetUser(userName);
-            if (user.ProviderUserKey == null) throw new ArgumentNullException("userName");
+            if (user.ProviderUserKey == null) throw new ArgumentNullException(nameof(userName));
 
             // TODO - create this via dependency injection at some point.
             IMailDeliveryService mailService = new SmtpMailDeliveryService();
 
             var emailFormatType = HostSettingManager.Get(HostSettingNames.SMTPEMailFormat, EmailFormatType.Text);
-            var emailFormatKey = (emailFormatType == EmailFormatType.Text) ? "" : "HTML";
+            var emailFormatKey = emailFormatType == EmailFormatType.Text ? "" : "HTML";
             const string subjectKey = "UserRegisteredSubject";
             var bodyKey = string.Concat("UserRegistered", emailFormatKey);
             var profile = new WebProfile().GetProfile(user.UserName);
@@ -401,37 +384,25 @@ namespace BugNET.BLL
         /// </summary>
         /// <param name="user">The user.</param>
         /// <param name="token">The token.</param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// user
         /// or
         /// user
         /// </exception>
         public static void SendForgotPasswordEmail(MembershipUser user, string token)
         {
-            if (user == null) throw new ArgumentNullException("user");
-            if (user.ProviderUserKey == null) throw new ArgumentNullException("user");
+            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (user.ProviderUserKey == null) throw new ArgumentNullException(nameof(user));
 
             IMailDeliveryService mailService = new SmtpMailDeliveryService();
 
             var emailFormatType = HostSettingManager.Get(HostSettingNames.SMTPEMailFormat, EmailFormatType.Text);
-            var emailFormatKey = (emailFormatType == EmailFormatType.Text) ? "" : "HTML";
+            var emailFormatKey = emailFormatType == EmailFormatType.Text ? "" : "HTML";
             const string subjectKey = "ForgotPasswordSubject";
             var bodyKey = string.Concat("ForgotPassword", emailFormatKey);
             var profile = new WebProfile().GetProfile(user.UserName);
 
             var nc = new CultureNotificationContent().LoadContent(profile.PreferredLocale, subjectKey, bodyKey);
-
-            var notificationUser = new NotificationUser
-            {
-                Id = (Guid)user.ProviderUserKey,
-                CreationDate = user.CreationDate,
-                Email = user.Email,
-                UserName = user.UserName,
-                DisplayName = profile.DisplayName,
-                FirstName = profile.FirstName,
-                LastName = profile.LastName,
-                IsApproved = user.IsApproved
-            };
 
             var data = new Dictionary<string, object>
                 {
@@ -464,8 +435,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static string GetSelectedIssueColumnsByUserName(string userName, int projectId)
         {
-            if (userName == "") throw new ArgumentNullException("userName");
-
+            if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentNullException(nameof(userName));
             return  DataProviderManager.Provider.GetSelectedIssueColumnsByUserName(userName, projectId);
 
         }
@@ -478,8 +448,7 @@ namespace BugNET.BLL
         /// <param name="columns">The columns.</param>
         public static void SetSelectedIssueColumnsByUserName(string userName,int projectId, string columns)
         {
-            if (userName == "") throw new ArgumentNullException("userName");
-
+            if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentNullException(nameof(userName));
             DataProviderManager.Provider.SetSelectedIssueColumnsByUserName(userName, projectId, columns);
         }
 

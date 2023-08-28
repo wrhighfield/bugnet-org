@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
+﻿using System.Configuration;
 
 namespace BugNET.MercurialChangeGroupHook
 {
     internal static class AppSettings
     {
-        public static string BugNetUsername
+        public static string BugNetUserName
         {
             get
             {
@@ -49,10 +45,7 @@ namespace BugNET.MercurialChangeGroupHook
             get
             {
                 var value = ConfigurationManager.AppSettings["BugNetWindowsAuthentication"] ?? "";
-
-                bool boolean;
-
-                return bool.TryParse(value, out boolean) && boolean;
+                return bool.TryParse(value, out var boolean) && boolean;
             }
         }
     }

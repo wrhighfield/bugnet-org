@@ -13,8 +13,6 @@ namespace BugNET.BLL
         /// </summary>
         /// <returns></returns>
         public static IEnumerable<string> GetInstalledLanguageResources()
-        {
-            return DataProviderManager.Provider.GetInstalledLanguageResources();
-        }
+            => DataProviderManager.Provider.GetInstalledLanguageResources();
     }
 }

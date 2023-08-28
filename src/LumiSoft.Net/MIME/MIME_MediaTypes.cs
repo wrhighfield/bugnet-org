@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LumiSoft.Net.MIME
+﻿namespace LumiSoft.Net.MIME
 {
     /// <summary>
     /// This class holds well known Content-Type header field media types. For example: text/plain, application/octet-stream.

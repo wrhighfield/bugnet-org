@@ -305,7 +305,7 @@ namespace BugNET.Issues
 
                     if (Guid.TryParse(AssignedUserId, out userId))
                     {
-                        q = AssignedUserId == Globals.EMPTY_GUID ?
+                        q = AssignedUserId == Globals.EmptyGuid ?
                             new QueryClause("AND", "iv.[IssueAssignedUserId]", "IS", null, SqlDbType.Int) :
                             new QueryClause("AND", "iv.[IssueAssignedUserId]", "=", AssignedUserId, SqlDbType.NVarChar);
                     }

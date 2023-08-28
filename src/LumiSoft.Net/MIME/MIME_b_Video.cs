@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 using LumiSoft.Net.IO;
 
 namespace LumiSoft.Net.MIME

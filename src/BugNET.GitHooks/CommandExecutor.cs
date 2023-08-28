@@ -13,7 +13,6 @@ namespace BugNET.GitHooks
       
         private static readonly Dictionary<int, string> Errors = new Dictionary<int, string>();
 
-
         /// <summary>
         /// Runs the command.
         /// </summary>
@@ -21,10 +20,8 @@ namespace BugNET.GitHooks
         /// <param name="args">The args.</param>
         /// <param name="echoCommand">if set to <c>true</c> [echo command].</param>
         /// <returns></returns>
-        public static string RunCommand(string command, string args, bool echoCommand)
-        {
-            return RunCommand(command, args, 300, echoCommand);
-        }
+        public static string RunCommand(string command, string args, bool echoCommand) =>
+            RunCommand(command, args, 300, echoCommand);
 
 
         /// <summary>
@@ -38,7 +35,7 @@ namespace BugNET.GitHooks
         public static string RunCommand(string command, string args, int killAfterSeconds = 300, bool echoCommand = true)
         {
             Process proc = null;
-            log4net.ILog logger = log4net.LogManager.GetLogger("CommandExecutor");
+            var logger = log4net.LogManager.GetLogger("CommandExecutor");
 
             if (logger.IsDebugEnabled) logger.DebugFormat("Running Commandline: {0} {1}",command,args);
 
@@ -65,8 +62,8 @@ namespace BugNET.GitHooks
                 if (!proc.WaitForExit(killAfterSeconds * 1000))
                     proc.Kill();
 
-                if (Errors.ContainsKey(proc.Id))
-                    retVal += Environment.NewLine + "Error: " + Environment.NewLine + Errors[proc.Id];
+                if (Errors.TryGetValue(proc.Id, out var error))
+                    retVal += Environment.NewLine + "Error: " + Environment.NewLine + error;
 
                 if (echoCommand)
                 {
@@ -107,9 +104,9 @@ namespace BugNET.GitHooks
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        static void CommandProcessErrorDataReceived(object sender, DataReceivedEventArgs e)
+        private static void CommandProcessErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
-            // RC: Sometimes an error occurres in here. I think the process is ending while we are getting the data, but Im not sure.
+            // RC: Sometimes an error occurs in here. I think the process is ending while we are getting the data, but Im not sure.
             // I'm stuffing it for now.
             try
             {
@@ -125,7 +122,9 @@ namespace BugNET.GitHooks
                     Errors.Add(id, e.Data);
             }
             catch (Exception)
-            { }
+            {
+                // ignored
+            }
         }
     }
 }

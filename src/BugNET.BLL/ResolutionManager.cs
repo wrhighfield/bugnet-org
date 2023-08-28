@@ -17,11 +17,11 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(Resolution entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save resolution, the project id is invalid"));
-            if (string.IsNullOrEmpty(entity.Name)) throw (new ArgumentException("The resolution name cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save resolution, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The resolution name cannot be empty or null");
 
-            if (entity.Id > Globals.NEW_ID)
+            if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateResolution(entity);
 
             var tempId = DataProviderManager.Provider.CreateNewResolution(entity);
@@ -37,7 +37,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static Resolution GetById(int resolutionId)
         {
-            if (resolutionId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("resolutionId"));
+            if (resolutionId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(resolutionId));
 
             return DataProviderManager.Provider.GetResolutionById(resolutionId);
         }
@@ -50,7 +50,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int id, out string cannotDeleteMessage)
         {
-            if (id <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("id"));
+            if (id <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(id));
 
             var entity = GetById(id);
 
@@ -76,7 +76,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<Resolution> GetByProjectId(int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             return DataProviderManager.Provider.GetResolutionsByProjectId(projectId);
         }

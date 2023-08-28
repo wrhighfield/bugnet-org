@@ -7,6 +7,7 @@ using BugNET.Entities;
 using BugNET.UserInterfaceLayer;
 using System.Data;
 using System.Linq;
+using BugNET.BLL.Comparers;
 
 namespace BugNET.Issues
 {
@@ -281,7 +282,7 @@ namespace BugNET.Issues
                 issues = IssueManager.PerformQuery(queryClauses, null, p.Id);
 
                 // to the private check on all issues
-                issues = IssueManager.StripPrivateIssuesForRequestor(issues, Security.GetUserName()).ToList();
+                issues = IssueManager.StripPrivateIssuesForUser(issues, Security.GetUserName()).ToList();
 
                 foreach (var iss in issues)
                 {
@@ -330,7 +331,7 @@ namespace BugNET.Issues
             _mainIssues.AddRange(tmpIssues1);
 
             // to the private check on all issues
-            _mainIssues = IssueManager.StripPrivateIssuesForRequestor(_mainIssues, Security.GetUserName()).ToList();
+            _mainIssues = IssueManager.StripPrivateIssuesForUser(_mainIssues, Security.GetUserName()).ToList();
 
             // mainIssues list should be pure now
             var tmpComm = (from comm in _mainComments

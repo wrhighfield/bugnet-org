@@ -8,22 +8,17 @@ namespace BugNET.BLL.Notifications
 {
     public class CultureNotificationContent
     {
-        private string _currentCulture;
+        private string currentCulture;
 
         /// <summary>
         /// The current Culture code for the content being loaded
         /// </summary>
-        public string CultureString { get; internal set; }
+        public string CultureString { get; private set; }
 
         /// <summary>
         /// The loaded contents
         /// </summary>
-        public IList<CultureContent> CultureContents { get; set; }
-
-        public CultureNotificationContent()
-        {
-            CultureContents = new List<CultureContent>();
-        }
+        public IList<CultureContent> CultureContents { get; set; } = new List<CultureContent>();
 
         /// <summary>
         /// Load the notification content based on the culture
@@ -33,8 +28,8 @@ namespace BugNET.BLL.Notifications
         /// <returns></returns>
         public CultureNotificationContent LoadContent(string cultureString, params string[] contentKeys)
         {
-            if (string.IsNullOrWhiteSpace(cultureString)) throw new ArgumentNullException("cultureString");
-            if (contentKeys == null) throw new ArgumentNullException("contentKeys");
+            if (string.IsNullOrWhiteSpace(cultureString)) throw new ArgumentNullException(nameof(cultureString));
+            if (contentKeys == null) throw new ArgumentNullException(nameof(contentKeys));
 
             CultureString = cultureString;
 
@@ -71,13 +66,13 @@ namespace BugNET.BLL.Notifications
         private void SetCultureThread()
         {
             // store the current culture
-            _currentCulture = Thread.CurrentThread.CurrentUICulture.Name;
+            currentCulture = Thread.CurrentThread.CurrentUICulture.Name;
 
             // no culture string use what is configured
             if (string.IsNullOrWhiteSpace(CultureString)) return;
 
             // if the same as current no change needed
-            if (_currentCulture.ToLower() == CultureString.ToLower()) return;
+            if (string.Equals(currentCulture, CultureString, StringComparison.CurrentCultureIgnoreCase)) return;
 
             // set the culture to the string
             Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture(CultureString);
@@ -86,7 +81,7 @@ namespace BugNET.BLL.Notifications
         private void ResetCultureThread()
         {
             // set the culture to the original setting
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture(_currentCulture);
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture(currentCulture);
         }
     }
 }

@@ -14,9 +14,9 @@ namespace BugNET.Providers.DataProviders
         /// <summary>
         /// 
         /// </summary>
-        public const string TOTAL_ROW_COUNT_FIELD_NAME = "TotalRecordCount";
+        public const string TotalRowCountFieldName = "TotalRecordCount";
 
-        public void TGenerateDefaultValueListFromReader<T>(SqlDataReader returnData, ref List<DefaultValue> defaultList)
+        public void GenerateDefaultValueListFromReader<T>(SqlDataReader returnData, ref List<DefaultValue> defaultList)
         {
             while (returnData.Read())
             {
@@ -884,13 +884,13 @@ namespace BugNET.Providers.DataProviders
             for (int i = 0; i < returnData.FieldCount; i++)
             {
                 string field = returnData.GetName(i);
-                if (!field.StartsWith(Globals.PROJECT_CUSTOM_FIELDS_PREFIX)) continue;
+                if (!field.StartsWith(Globals.ProjectCustomFieldsPrefix)) continue;
 
                 entity.IssueCustomFields.Add(
                     new IssueCustomField
                         {
                             DatabaseFieldName = field,
-                            FieldName = field.Replace(Globals.PROJECT_CUSTOM_FIELDS_PREFIX, ""),
+                            FieldName = field.Replace(Globals.ProjectCustomFieldsPrefix, ""),
                             FieldValue = returnData.GetString(i)
                         }
                     );

@@ -9,7 +9,6 @@ using System.Net.Security;
 using LumiSoft.Net.IO;
 using LumiSoft.Net.TCP;
 using LumiSoft.Net.AUTH;
-using LumiSoft.Net.IMAP;
 using LumiSoft.Net.MIME;
 
 namespace LumiSoft.Net.IMAP.Client

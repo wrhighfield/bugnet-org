@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace BugNET.Entities
+﻿namespace BugNET.Entities
 {
     public class IssueCustomField
     {

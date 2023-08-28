@@ -17,8 +17,8 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool UpdateIssueLastUpdated(int issueId, string lastUpdatedUsername)
         {
-            if (issueId <= Globals.NEW_ID) throw (new ArgumentNullException("issueId"));
-            if (string.IsNullOrEmpty(lastUpdatedUsername.Trim())) throw (new ArgumentNullException("lastUpdatedUsername"));
+            if (issueId <= Globals.NewId) throw (new ArgumentNullException(nameof(issueId)));
+            if (string.IsNullOrEmpty(lastUpdatedUsername.Trim())) throw (new ArgumentNullException(nameof(lastUpdatedUsername)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -39,10 +39,10 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override string GetSelectedIssueColumnsByUserName(string userName, int projectId)
         {
-            if (projectId <= Globals.NEW_ID)
-                throw (new ArgumentNullException("projectId"));
+            if (projectId <= Globals.NewId)
+                throw (new ArgumentNullException(nameof(projectId)));
             if (string.IsNullOrEmpty(userName))
-                throw (new ArgumentNullException("userName"));
+                throw (new ArgumentNullException(nameof(userName)));
             try
             {
                 // Execute SQL Command
@@ -72,10 +72,10 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override void SetSelectedIssueColumnsByUserName(string userName, int projectId, string columns)
         {
-            if (projectId <= Globals.NEW_ID)
-                throw (new ArgumentNullException("projectId"));
+            if (projectId <= Globals.NewId)
+                throw (new ArgumentNullException(nameof(projectId)));
             if (string.IsNullOrEmpty(userName))
-                throw (new ArgumentNullException("userName"));
+                throw (new ArgumentNullException(nameof(userName)));
             if (string.IsNullOrEmpty(columns))
                 columns = "";
             try
@@ -103,7 +103,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteIssue(int issueId)
         {
-            if (issueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueId"));
+            if (issueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(issueId)));
 
             try
             {
@@ -131,7 +131,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Issue> GetIssuesByProjectId(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -152,7 +152,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override Issue GetIssueById(int issueId)
         {
-            if (issueId <= 0) throw (new ArgumentOutOfRangeException("issueId"));
+            if (issueId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueId)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -173,7 +173,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool UpdateIssue(Issue issueToUpdate)
         {
-            if (issueToUpdate == null) throw (new ArgumentNullException("issueToUpdate"));
+            if (issueToUpdate == null) throw (new ArgumentNullException(nameof(issueToUpdate)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -213,7 +213,7 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewIssue(Issue newIssue)
         {
             // Validate Parameters
-            if (newIssue == null) throw (new ArgumentNullException("newIssue"));
+            if (newIssue == null) throw (new ArgumentNullException(nameof(newIssue)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -250,8 +250,8 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Issue> GetIssuesByRelevancy(int projectId, string userName)
         {
-            if (userName == null) throw (new ArgumentNullException("userName"));
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (userName == null) throw (new ArgumentNullException(nameof(userName)));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -274,8 +274,8 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Issue> GetIssuesByAssignedUserName(int projectId, string assignedUserName)
         {
-            if (assignedUserName == null) throw (new ArgumentNullException("assignedUserName"));
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (assignedUserName == null) throw (new ArgumentNullException(nameof(assignedUserName)));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -297,7 +297,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Issue> GetOpenIssues(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -319,8 +319,8 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Issue> GetIssuesByCreatorUserName(int projectId, string userName)
         {
-            if (userName == null) throw (new ArgumentNullException("userName"));
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (userName == null) throw (new ArgumentNullException(nameof(userName)));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -343,8 +343,8 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Issue> GetIssuesByOwnerUserName(int projectId, string userName)
         {
-            if (userName == null) throw (new ArgumentNullException("userName"));
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (userName == null) throw (new ArgumentNullException(nameof(userName)));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -362,7 +362,7 @@ namespace BugNET.Providers.DataProviders
         
         public override List<Issue> GetMonitoredIssuesByUserName(object userId, ICollection<KeyValuePair<string, string>> sortFields, List<int> projects, bool excludeClosedStatus)
         {
-            if (userId == null) throw (new ArgumentNullException("userId"));
+            if (userId == null) throw (new ArgumentNullException(nameof(userId)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -448,7 +448,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Issue> GetMonitoredIssuesByUserName(string userName, bool excludeClosedStatus)
         {
-            if (userName == null) throw (new ArgumentNullException("userName"));
+            if (userName == null) throw (new ArgumentNullException(nameof(userName)));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -470,7 +470,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueCount> GetIssueStatusCountByProject(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             try
             {
@@ -498,7 +498,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueCount> GetIssueMilestoneCountByProject(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             try
             {
@@ -526,7 +526,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueCount> GetIssueUserCountByProject(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             try
             {
@@ -554,7 +554,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override int GetIssueUnassignedCountByProject(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             try
             {
@@ -581,7 +581,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override int GetIssueUnscheduledMilestoneCountByProject(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             try
             {
@@ -608,7 +608,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override int GetIssueCountByProjectAndCategory(int projectId, int categoryId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             try
             {
@@ -637,7 +637,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueCount> GetIssueTypeCountByProject(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             try
             {
@@ -665,7 +665,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueCount> GetIssuePriorityCountByProject(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
 
             try
             {

@@ -2,7 +2,6 @@
 using BugNET.Common;
 using BugNET.BLL;
 using BugNET.UserInterfaceLayer;
-using System.Web.UI.WebControls;
 using System.Web.Configuration;
 
 namespace BugNET.Administration.Host.UserControls

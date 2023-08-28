@@ -17,8 +17,8 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(ProjectNotification entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save notification, the project id is invalid"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save notification, the project id is invalid");
 
             var tempId = DataProviderManager.Provider.CreateNewProjectNotification(entity);
 
@@ -35,7 +35,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int projectId, string username)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             return DataProviderManager.Provider.DeleteProjectNotification(projectId, username);
         }
@@ -48,7 +48,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static IEnumerable<ProjectNotification> GetByProjectId(int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             return DataProviderManager.Provider.GetProjectNotificationsByProjectId(projectId);
         }
@@ -60,7 +60,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<ProjectNotification> GetByUsername(string username)
         {
-            if (string.IsNullOrEmpty(username)) throw (new ArgumentOutOfRangeException("username"));
+            if (string.IsNullOrEmpty(username)) throw new ArgumentOutOfRangeException(nameof(username));
 
             return DataProviderManager.Provider.GetProjectNotificationsByUsername(username);
         }

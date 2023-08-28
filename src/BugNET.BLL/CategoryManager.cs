@@ -17,12 +17,12 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(Category entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save category, the project id is invalid"));
-            if (string.IsNullOrEmpty(entity.Name)) throw (new ArgumentException("The category name cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save category, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The category name cannot be empty or null");
 
-            if (entity.Id > Globals.NEW_ID)
-                return (DataProviderManager.Provider.UpdateCategory(entity));
+            if (entity.Id > Globals.NewId)
+                return DataProviderManager.Provider.UpdateCategory(entity);
 
             var tempId = DataProviderManager.Provider.CreateNewCategory(entity);
 
@@ -40,7 +40,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int categoryId)
         {
-            if (categoryId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("categoryId"));
+            if (categoryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(categoryId));
 
             return DataProviderManager.Provider.DeleteCategory(categoryId);
         }
@@ -52,7 +52,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<Category> GetByProjectId(int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             return DataProviderManager.Provider.GetCategoriesByProjectId(projectId);
 
@@ -65,7 +65,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<Category> GetRootCategoriesByProjectId(int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             return DataProviderManager.Provider.GetRootCategoriesByProjectId(projectId);
         }
@@ -77,7 +77,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<Category> GetChildCategoriesByCategoryId(int categoryId)
         {
-            if (categoryId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("categoryId"));
+            if (categoryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(categoryId));
 
             return DataProviderManager.Provider.GetChildCategoriesByCategoryId(categoryId);
         }
@@ -88,7 +88,7 @@ namespace BugNET.BLL
         /// <param name="categoryId">The category id.</param>
         public static void DeleteChildCategoriesByCategoryId(int categoryId)
         {
-            if (categoryId <= Globals.NEW_ID) throw new ArgumentOutOfRangeException("categoryId");
+            if (categoryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(categoryId));
 
             var c = GetById(categoryId);
 
@@ -106,7 +106,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static Category GetById(int categoryId)
         {
-            if (categoryId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("categoryId"));
+            if (categoryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(categoryId));
 
             return DataProviderManager.Provider.GetCategoryById(categoryId);
         }

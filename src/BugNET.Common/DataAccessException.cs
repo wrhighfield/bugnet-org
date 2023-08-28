@@ -18,12 +18,10 @@ namespace BugNET.Common
         /// </summary>
         public int StatusCode
         {
-            get
-            {
-                return Data.Contains("BNStatusCode") ? 
+            get =>
+                Data.Contains("BNStatusCode") ? 
                     int.Parse(Data["BNStatusCode"].ToString()) 
                     : 0;
-            }
             set
             {
                 if(!Data.Contains("BNStatusCode"))

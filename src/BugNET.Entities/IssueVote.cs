@@ -1,7 +1,4 @@
-﻿using System;
-using BugNET.Common;
-
-namespace BugNET.Entities
+﻿namespace BugNET.Entities
 {
     public class IssueVote
     {

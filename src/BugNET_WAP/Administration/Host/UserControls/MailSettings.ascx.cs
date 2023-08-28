@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Net;
 using System.Net.Mail;
 using BugNET.BLL;
-using BugNET.BLL.Notifications;
 using BugNET.Common;
 using BugNET.UserInterfaceLayer;
 using log4net;

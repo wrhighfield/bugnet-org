@@ -2,46 +2,40 @@
 using System.Collections.Generic;
 using BugNET.Entities;
 
-namespace BugNET.BLL
+namespace BugNET.BLL.Comparers
 {
     public class ApplicationLogComparer : IComparer<ApplicationLog>
     {
         /// <summary>
         /// Sorting column
         /// </summary>
-        private string _sortColumn;
+        private readonly string sortColumn;
         /// <summary>
         /// Reverse sorting
         /// </summary>
-        private bool _reverse;
+        private readonly bool reverse;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IssueComparer"/> class.
+        /// Initializes a new instance of the <see cref="ApplicationLogComparer"/> class.
         /// </summary>
         /// <param name="sortEx">The sort ex.</param>
         /// <param name="ascending">The ascending.</param>
-        public ApplicationLogComparer(string sortEx,bool ascending) {
-          if (!String.IsNullOrEmpty(sortEx))
-          {
-              _reverse = ascending;      
-              _sortColumn = sortEx;
-          }
+        public ApplicationLogComparer(string sortEx,bool ascending)
+        {
+            if (string.IsNullOrEmpty(sortEx)) return;
+            reverse = ascending;      
+            sortColumn = sortEx;
         }
 
         /// <summary>
-        /// Equalses the specified x.
+        /// Equalizes the specified x.
         /// </summary>
         /// <param name="x">The x.</param>
         /// <param name="y">The y.</param>
         /// <returns></returns>
         public bool Equals(ApplicationLog x, ApplicationLog y)
         {
-          if (x.Id == y.Id) {
-            return true;
-          }
-          else {
-            return false;
-          }
+            return x.Id == y.Id;
         }
 
         /// <summary>
@@ -54,29 +48,29 @@ namespace BugNET.BLL
         /// </returns>
         public int Compare(ApplicationLog x, ApplicationLog y)
         {
-          int retVal = 0;
-          switch (_sortColumn) 
+          var retVal = 0;
+          switch (sortColumn) 
           {
             case "Id":
-                retVal = (x.Id - y.Id);
+                retVal = x.Id - y.Id;
                 break;
             case "Logger":
-                retVal = String.Compare(x.Logger, y.Logger, StringComparison.InvariantCultureIgnoreCase);
+                retVal = string.Compare(x.Logger, y.Logger, StringComparison.InvariantCultureIgnoreCase);
                 break;
             case "Message":
-              retVal = String.Compare(x.Message, y.Message, StringComparison.InvariantCultureIgnoreCase);
+              retVal = string.Compare(x.Message, y.Message, StringComparison.InvariantCultureIgnoreCase);
               break;
             case "User":
-              retVal = String.Compare(x.User, y.User, StringComparison.InvariantCultureIgnoreCase);
+              retVal = string.Compare(x.User, y.User, StringComparison.InvariantCultureIgnoreCase);
               break;
             case "Level":
-              retVal = String.Compare(x.Level, y.Level , StringComparison.InvariantCultureIgnoreCase);
+              retVal = string.Compare(x.Level, y.Level , StringComparison.InvariantCultureIgnoreCase);
               break;
             case "Date":
               retVal = DateTime.Compare(x.Date, y.Date);
               break;
           }
-          return (retVal * (_reverse ? -1 : 1));
+          return retVal * (reverse ? -1 : 1);
         }
 
         /// <summary>

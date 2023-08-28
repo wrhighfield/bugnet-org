@@ -48,7 +48,7 @@ namespace BugNET.Common
 
     public class IsEMail
     {
-        public List<string> ResultInfo { get; set; }
+        private List<string> ResultInfo { get; set; }
 
         /**
          * Checks that an email address conforms to RFCs 5321, 5322 and others. With
@@ -62,7 +62,7 @@ namespace BugNET.Common
          * @throws DNSLookupException
          *             Is thrown if an internal error in the DNS lookup appeared.
          */
-        public bool IsEmailValid(String email)
+        public bool IsEmailValid(string email)
         {
             ResultInfo = new List<string>();
             if (email == null)
@@ -88,11 +88,11 @@ namespace BugNET.Common
             // characters (including the punctuation and element separators)
             // (http://tools.ietf.org/html/rfc5321#section-4.5.3.1.3)
             // NB There is a mandatory 2-character wrapper round the actual address
-            int emailLength = email.Length;
+            var emailLength = email.Length;
             // revision 1.17: Max length reduced to 254 (see above)
             if (emailLength > 254)
             {
-                this.ResultInfo.Add(@"
+                ResultInfo.Add(@"
 Email is too long.
 
 The maximum total length of a reverse-path or forward-path is 256
@@ -105,33 +105,33 @@ characters (including the punctuation and element separators)
             // Contemporary email addresses consist of a "local part" separated from
             // a "domain part" (a fully-qualified domain name) by an at-sign ("@").
             // (http://tools.ietf.org/html/rfc3696#section-3)
-            int atIndex = email.LastIndexOf('@');
+            var atIndex = email.LastIndexOf('@');
 
-            if (atIndex == -1)
+            switch (atIndex)
             {
-                this.ResultInfo.Add(@"
+                case -1:
+                    ResultInfo.Add(@"
             Email is too long.
 
             Contemporary email addresses consist of a ""local part"" separated from
             a ""domain part"" (a fully-qualified domain name) by an at-sign (""@"").
             (http://tools.ietf.org/html/rfc3696#section-3)
             ");
-                return false;
-            }
-            if (atIndex == 0)
-            {
-                this.ResultInfo.Add(@"
+                    return false;
+                case 0:
+                    ResultInfo.Add(@"
             Email is too long.
 
             Contemporary email addresses consist of a ""local part"" separated from
             a ""domain part"" (a fully-qualified domain name) by an at-sign (""@"").
             (http://tools.ietf.org/html/rfc3696#section-3)
             ");
-                return false;
+                    return false;
             }
+
             if (atIndex == emailLength - 1)
             {
-                this.ResultInfo.Add(@"
+                ResultInfo.Add(@"
             Email is too long.
 
             Contemporary email addresses consist of a ""local part"" separated from
@@ -144,14 +144,14 @@ characters (including the punctuation and element separators)
             // Sanitize comments
             // - remove nested comments, quotes and dots in comments
             // - remove parentheses and dots from quoted strings
-            int braceDepth = 0;
-            bool inQuote = false;
-            bool escapeThisChar = false;
+            var braceDepth = 0;
+            var inQuote = false;
+            var escapeThisChar = false;
 
-            for (int i = 0; i < emailLength; ++i)
+            for (var i = 0; i < emailLength; ++i)
             {
-                char charX = email.ToCharArray()[i];
-                bool replaceChar = false;
+                var charX = email.ToCharArray()[i];
+                var replaceChar = false;
 
                 if (charX == '\\')
                 {
@@ -244,16 +244,16 @@ characters (including the punctuation and element separators)
                         // Replace the offending character with something harmless
                         // revision 1.12: Line above replaced because PHPLint
                         // doesn't like that syntax
-                        email = replaceCharAt(email, i, 'x');
+                        email = ReplaceCharAt(email, i, 'x');
                     }
 
                 }
             }
 
-            String localPart = email.Substring(0, atIndex);
-            String domain = email.Substring(atIndex + 1);
+            var localPart = email.Substring(0, atIndex);
+            var domain = email.Substring(atIndex + 1);
             // Folding white space
-            String FWS = "(?:(?:(?:[ \\t]*(?:\\r\\n))?[ \\t]+)|(?:[ \\t]+(?:(?:\\r\\n)[ \\t]+)*))";
+            var fws = @"(?:(?:(?:[ \t]*(?:\r\n))?[ \t]+)|(?:[ \t]+(?:(?:\r\n)[ \t]+)*))";
 
             // Let's check the local part for RFC compliance...
             //
@@ -264,23 +264,23 @@ characters (including the punctuation and element separators)
             // Problem: need to distinguish between "first.last" and "first"."last"
             // (i.e. one element or two). And I suck at regular expressions.
 
-            Regex regex = new Regex("(?m)\\.(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*(?![^\\\"]*\\\"))");
-            String[] dotArray = regex.Split(localPart);
-            int partLength = 0;
+            var regex = new Regex("(?m)\\.(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*(?![^\\\"]*\\\"))");
+            var dotArray = regex.Split(localPart);
+            var partLength = 0;
 
             #region foreach block
-            foreach (String element in dotArray)
+            foreach (var element in dotArray)
             {
-                string working_element = element; // for use in our for loop, can't work on a foreach target SCO-04152011
+                var workingElement = element; // for use in our for loop, can't work on a foreach target SCO-04152011
 
                 // Remove any leading or trailing FWS
-                Regex repRegex = new Regex("^" + FWS + "|" + FWS + "$");
-                String new_element = repRegex.Replace(working_element, string.Empty);
+                var repRegex = new Regex("^" + fws + "|" + fws + "$");
+                var newElement = repRegex.Replace(workingElement, string.Empty);
 
-                if (!working_element.Equals(new_element))
+                if (!workingElement.Equals(newElement))
                 {
                     // FWS is unlikely in the real world
-                    this.ResultInfo.Add(@"
+                    ResultInfo.Add(@"
                 Folding White Space
 
 		        local-part = dot-atom / quoted-string / obs-local-part
@@ -288,15 +288,15 @@ characters (including the punctuation and element separators)
 (http://tools.ietf.org/html/rfc5322#section-3.4.1)
             ");
                 }
-                working_element = new_element; // version 2.3: Warning condition added
+                workingElement = newElement; // version 2.3: Warning condition added
 
-                int elementLength = new_element.Length;
+                var elementLength = newElement.Length;
 
                 if (elementLength == 0)
                 {
                     // Can't have empty element (consecutive dots or
                     // dots at the start or end)
-                    this.ResultInfo.Add(@"
+                    ResultInfo.Add(@"
 				Can't have empty element (consecutive dots or
 				dots at the start or end)
                 (http://tools.ietf.org/html/rfc5322#section-3.4.1)
@@ -308,75 +308,70 @@ characters (including the punctuation and element separators)
 
                 // We need to remove any valid comments (i.e. those at the start or
                 // end of the element)
-                if (working_element.Substring(0) == "(")
+                if (workingElement.Substring(0) == "(")
                 {
                     // Comments are unlikely in the real world
                     // return_status = IsEMailResult.ISEMAIL_COMMENTS;
 
                     // version 2.0: Warning condition added
-                    int indexBrace = working_element.IndexOf(")");
+                    var indexBrace = workingElement.IndexOf(")", StringComparison.Ordinal);
                     if (indexBrace != -1)
                     {
-                        Regex pregMatch = new Regex("(?<!\\\\)[\\(\\)]");
-                        if (pregMatch.Matches(working_element.Substring(1, indexBrace - 1)).Count > 0)
+                        var match = new Regex(@"(?<!\\)[\(\)]");
+                        if (match.Matches(workingElement.Substring(1, indexBrace - 1)).Count > 0)
                         {
                             // Illegal characters in comment
-                            this.ResultInfo.Add(@"
-				            Illegal characters in comment
-                        ");
+                            ResultInfo.Add(@"Illegal characters in comment");
                             return false;
                         }
-                        working_element = working_element.Substring(indexBrace + 1, elementLength - indexBrace - 1);
-                        elementLength = working_element.Length;
+                        workingElement = workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 1);
+                        elementLength = workingElement.Length;
                     }
                 }
 
-                if (working_element.Substring(elementLength - 1) == ")")
+                if (workingElement.Substring(elementLength - 1) == ")")
                 {
                     // Comments are unlikely in the real world
                     // return_status = IsEMailResult.ISEMAIL_COMMENTS;
 
                     // version 2.0: Warning condition added
-                    int indexBrace = working_element.LastIndexOf("(");
+                    var indexBrace = workingElement.LastIndexOf("(", StringComparison.Ordinal);
                     if (indexBrace != -1)
                     {
-                        Regex pregMatch = new Regex("(?<!\\\\)(?:[\\(\\)])");
-                        if (pregMatch.Matches(working_element.Substring(indexBrace + 1, elementLength - indexBrace - 2)).Count > 0)
+                        var match = new Regex(@"(?<!\\)(?:[\(\)])");
+                        if (match.Matches(workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 2)).Count > 0)
                         {
                             // Illegal characters in comment						
-                            this.ResultInfo.Add(@"
-				            Illegal characters in comment
-                        ");
+                            ResultInfo.Add(@"Illegal characters in comment");
                             return false;
                         }
-                        working_element = working_element.Substring(0, indexBrace);
-                        elementLength = working_element.Length;
+                        workingElement = workingElement.Substring(0, indexBrace);
                     }
                 }
 
                 // Remove any remaining leading or trailing FWS around the element
                 // (having removed any comments)
-                Regex fwsRegex = new Regex("^" + FWS + "|" + FWS + "$");
+                var fwsRegex = new Regex("^" + fws + "|" + fws + "$");
 
-                new_element = fwsRegex.Replace(working_element, string.Empty);
+                newElement = fwsRegex.Replace(workingElement, string.Empty);
 
                 //// FWS is unlikely in the real world
                 //if (!working_element.equals(new_element))
                 //    return_status = IsEMailResult.ISEMAIL_FWS;
 
-                working_element = new_element;
+                workingElement = newElement;
                 // version 2.0: Warning condition added
 
                 // What's left counts towards the maximum length for this part
                 if (partLength > 0)
                     partLength++; // for the dot
-                partLength += working_element.Length;
+                partLength += workingElement.Length;
 
                 // Each dot-delimited component can be an atom or a quoted string
                 // (because of the obs-local-part provision)
 
-                Regex quotRegex = new Regex("(?s)^\"(?:.)*\"$");
-                if (quotRegex.Matches(working_element).Count > 0)
+                var quotRegex = new Regex("(?s)^\"(?:.)*\"$");
+                if (quotRegex.Matches(workingElement).Count > 0)
                 {
                     // Quoted-string tests:
                     // Quoted string is unlikely in the real world
@@ -385,22 +380,22 @@ characters (including the punctuation and element separators)
                     // Remove any FWS
                     // A warning condition, but we've already raised
                     // ISEMAIL_QUOTEDSTRING
-                    Regex newRepRegex = new Regex("(?<!\\\\)" + FWS);
-                    working_element = newRepRegex.Replace(working_element, string.Empty);
+                    var newRepRegex = new Regex(@"(?<!\\)" + fws);
+                    workingElement = newRepRegex.Replace(workingElement, string.Empty);
 
                     // My regular expression skills aren't up to distinguishing
                     // between \" \\" \\\" \\\\" etc.
                     // So remove all \\ from the string first...
-                    Regex slashRegex = new Regex("\\\\\\\\");
-                    working_element = slashRegex.Replace(working_element, string.Empty);
+                    var slashRegex = new Regex(@"\\\\");
+                    workingElement = slashRegex.Replace(workingElement, string.Empty);
 
-                    Regex quot2Regex = new Regex("(?<!\\\\|^)[\"\\r\\n\\x00](?!$)|\\\\\"$|\"\"");
-                    if (quot2Regex.Matches(working_element).Count > 0)
+                    var quot2Regex = new Regex("(?<!\\\\|^)[\"\\r\\n\\x00](?!$)|\\\\\"$|\"\"");
+                    if (quot2Regex.Matches(workingElement).Count > 0)
                     {
                         // ", CR, LF and NUL must be escaped
                         // version 2.0: allow ""@example.com because it's
                         // technically valid					
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
 				            "", CR, LF and NUL must be escaped
                         ");
                         return false;
@@ -419,10 +414,10 @@ characters (including the punctuation and element separators)
                     // end of the
                     // local part, or two periods together. Either way it's not
                     // allowed.
-                    if (string.IsNullOrEmpty(working_element))
+                    if (string.IsNullOrEmpty(workingElement))
                     {
                         // Dots in wrong place
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
 				        A zero-length element implies a period at the beginning or
 				        end of the local part, or two periods together. Either way it's not
 				        allowed.
@@ -440,11 +435,11 @@ characters (including the punctuation and element separators)
                     //
                     // Any excluded characters? i.e. 0x00-0x20, (, ), <, >, [, ], :,
                     // ;, @, \, comma, period, "
-                    Regex quot3Regex = new Regex("[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\.\"]");
-                    if (quot3Regex.Matches(working_element).Count > 0)
+                    var quot3Regex = new Regex("[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\.\"]");
+                    if (quot3Regex.Matches(workingElement).Count > 0)
                     {
                         // These characters must be in a quoted string
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
 				         Any ASCII graphic (printing) character other than the
 				         at-sign (""@""), backslash, double quote, comma, or square
 				         brackets may appear without quoting. If any of that list of excluded
@@ -466,7 +461,7 @@ characters (including the punctuation and element separators)
             if (partLength > 64)
             {
                 // Local part must be 64 characters or less
-                this.ResultInfo.Add(@"
+                ResultInfo.Add(@"
 				Local part must be 64 characters or less
             ");
                 return false;
@@ -494,26 +489,26 @@ characters (including the punctuation and element separators)
                 //return_status = IsEMailResult.ISEMAIL_ADDRESSLITERAL;
 
                 // version 2.0: Warning condition added
-                String addressLiteral = domain.Substring(1, domain.Length - 2);
+                var addressLiteral = domain.Substring(1, domain.Length - 2);
 
-                String IPv6;
-                int groupMax = 8;
+                string pv6;
+                var groupMax = 8;
                 // revision 2.1: new IPv6 testing strategy
 
-                String colon = ":"; // Revision 2.7: Daniel Marschall's new
+                var colon = ":"; // Revision 2.7: Daniel Marschall's new
                 // IPv6 testing strategy
-                String double_colon = "::";
+                var doubleColon = "::";
 
-                String IPv6tag = "IPv6:";
+                var pv6Tag = "IPv6:";
 
                 // Extract IPv4 part from the end of the address-literal (if there
                 // is one)
-                Regex splitRegex = new Regex("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+                var splitRegex = new Regex(@"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
 
-                MatchCollection matchesIP1 = splitRegex.Matches(addressLiteral);
-                if (matchesIP1.Count > 0)
+                var matchesIp1 = splitRegex.Matches(addressLiteral);
+                if (matchesIp1.Count > 0)
                 {
-                    int index = addressLiteral.LastIndexOf(matchesIP1[0].Value);
+                    var index = addressLiteral.LastIndexOf(matchesIp1[0].Value, StringComparison.Ordinal);
 
                     if (index == 0)
                     {
@@ -529,10 +524,10 @@ characters (including the punctuation and element separators)
                         // IsEMailResult.ISEMAIL_IPV4BADPREFIX; // Character
                         // preceding IPv4 address must be ':'
                         // revision 2.1: new IPv6 testing strategy
-                        if (!addressLiteral.Substring(0, 5).Equals(IPv6tag))
+                        if (!addressLiteral.Substring(0, 5).Equals(pv6Tag))
                         {
                             // RFC5321 section 4.1.3		
-                            this.ResultInfo.Add(@"
+                            ResultInfo.Add(@"
                             Character preceding IPv4 address must be ':'
 						    RFC5321 section 4.1.3	
                         ");
@@ -543,39 +538,39 @@ characters (including the punctuation and element separators)
                         // $index - 6);
                         // - $groupMax = 6;
                         // revision 2.1: new IPv6 testing strategy
-                        IPv6 = addressLiteral.Substring(5, index - 5) + "0000:0000"; // Convert IPv4 part to IPv6 format
+                        pv6 = addressLiteral.Substring(5, index - 5) + "0000:0000"; // Convert IPv4 part to IPv6 format
                     }
                 }
                 else
                 {
                     // It must be an attempt at pure IPv6
-                    if (!addressLiteral.Substring(0, 5).Equals(IPv6tag))
+                    if (!addressLiteral.Substring(0, 5).Equals(pv6Tag))
                     {
                         // RFC5321 section 4.1.3
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
                             Invalid IPV6 address
 						    RFC5321 section 4.1.3	
                         ");
                         return false;
                     }
-                    IPv6 = addressLiteral.Substring(5);
+                    pv6 = addressLiteral.Substring(5);
                     // - $groupMax = 8;
                     // revision 2.1: new IPv6 testing strategy
                 }
 
                 // Revision 2.7: Daniel Marschall's new IPv6 testing strategy
-                Regex split2Regex = new Regex(colon);
-                string[] matchesIP = split2Regex.Split(IPv6);
-                int groupCount = matchesIP.Length;
-                int currIndex = IPv6.IndexOf(double_colon);
+                var split2Regex = new Regex(colon);
+                var matchesIp = split2Regex.Split(pv6);
+                var groupCount = matchesIp.Length;
+                var currentIndex = pv6.IndexOf(doubleColon, StringComparison.Ordinal);
 
-                if (currIndex == -1)
+                if (currentIndex == -1)
                 {
                     // We need exactly the right number of groups
                     if (groupCount != groupMax)
                     {
                         // RFC5321 section 4.1.3
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
                             Invalid IPV6 groupcount
 						    RFC5321 section 4.1.3	
                         ");
@@ -584,16 +579,16 @@ characters (including the punctuation and element separators)
                 }
                 else
                 {
-                    if (currIndex != IPv6.LastIndexOf(double_colon))
+                    if (currentIndex != pv6.LastIndexOf(doubleColon, StringComparison.Ordinal))
                     {
                         // More than one '::'
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
                             IPV6 double double colon present
 						    RFC5321 section 4.1.3	
                         ");
                         return false;
                     }
-                    if ((currIndex == 0) || (currIndex == (IPv6.Length - 2)))
+                    if ((currentIndex == 0) || (currentIndex == (pv6.Length - 2)))
                     {
                         groupMax++; // RFC 4291 allows :: at the start or end of an
                     }
@@ -601,7 +596,7 @@ characters (including the punctuation and element separators)
                     if (groupCount > groupMax)
                     {
                         // Too many IPv6 groups in address
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
                             Too many groups in section
 						    RFC5321 section 4.1.3	
                         ");
@@ -611,25 +606,25 @@ characters (including the punctuation and element separators)
                     {
                         // Eliding a single group with :: is deprecated by RFCs 5321 & 5952
                         // & 5952
-                        this.ResultInfo.Add(@"Eliding a single group with :: is deprecated by RFCs 5321 & 5952");
+                        ResultInfo.Add(@"Eliding a single group with :: is deprecated by RFCs 5321 & 5952");
                     }
                 }
 
                 // Check for single : at start and end of address
                 // Revision 2.7: Daniel Marschall's new IPv6 testing strategy
-                if (IPv6.StartsWith(colon) && (!IPv6.StartsWith(double_colon)))
+                if (pv6.StartsWith(colon) && (!pv6.StartsWith(doubleColon)))
                 {
                     // Address starts with a single colon
-                    this.ResultInfo.Add(@"
+                    ResultInfo.Add(@"
                     IPV6 must start with a single colon
 				    RFC5321 section 4.1.3	
                         ");
                     return false;
                 }
-                if (IPv6.EndsWith(colon) && (!IPv6.EndsWith(double_colon)))
+                if (pv6.EndsWith(colon) && (!pv6.EndsWith(doubleColon)))
                 {
                     // Address ends with a single colon
-                    this.ResultInfo.Add(@"
+                    ResultInfo.Add(@"
                     IPV6 must end with a single colon
 				    RFC5321 section 4.1.3	
                         ");
@@ -637,12 +632,12 @@ characters (including the punctuation and element separators)
                 }
 
                 // Check for unmatched characters
-                foreach (String s in matchesIP)
+                foreach (var s in matchesIp)
                 {
-                    Regex goodStuff = new Regex("^[0-9A-Fa-f]{0,4}$");
+                    var goodStuff = new Regex("^[0-9A-Fa-f]{0,4}$");
                     if (goodStuff.Matches(s).Count == 0)
                     {
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
                     IPV6 address contains bad characters
 				    RFC5321 section 4.1.3	
                         ");
@@ -689,36 +684,36 @@ characters (including the punctuation and element separators)
                 // SMTP purposes
                 // (http://tools.ietf.org/html/rfc5321#section-4.1.2)
 
-                Regex split2Regex = new Regex("(?m)\\.(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*(?![^\\\"]*\\\"))");
+                var split2Regex = new Regex("(?m)\\.(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*(?![^\\\"]*\\\"))");
                 dotArray = split2Regex.Split(domain);
                 partLength = 0;
                 // Since we use 'element' after the foreach
                 // loop let's make sure it has a value
-                String lastElement = "";
+                var lastElement = "";
                 // revision 1.13: Line above added because PHPLint now checks for
                 // Definitely Assigned Variables
 
                 if (dotArray.Length == 1)
                 {
-                    this.ResultInfo.Add(@"The mail host probably isn't a TLD");
+                    ResultInfo.Add(@"The mail host probably isn't a TLD");
                 }
                 // version 2.0: downgraded to a warning
 
-                foreach (String element in dotArray)
+                foreach (var element in dotArray)
                 {
-                    string working_element = element;
+                    var workingElement = element;
                     lastElement = element;
                     // Remove any leading or trailing FWS
-                    Regex newReg = new Regex("^" + FWS + "|" + FWS + "$");
-                    String new_element = newReg.Replace(working_element, string.Empty);
+                    var newReg = new Regex("^" + fws + "|" + fws + "$");
+                    var newElement = newReg.Replace(workingElement, string.Empty);
 
-                    if (!element.Equals(new_element))
+                    if (!element.Equals(newElement))
                     {
-                        this.ResultInfo.Add(@"FWS is unlikely in the real world");
+                        ResultInfo.Add(@"FWS is unlikely in the real world");
                     }
-                    working_element = new_element;
+                    workingElement = newElement;
                     // version 2.0: Warning condition added
-                    int elementLength = working_element.Length;
+                    var elementLength = workingElement.Length;
 
                     // Each dot-delimited component must be of type atext
                     // A zero-length element implies a period at the beginning or
@@ -728,8 +723,8 @@ characters (including the punctuation and element separators)
                     if (elementLength == 0)
                     {
                         // Dots in wrong place
-                        this.ResultInfo.Add(@"
-				 Each dot-delimited component must be of type atext
+                        ResultInfo.Add(@"
+				 Each dot-delimited component must be of type a text
 				 A zero-length element implies a period at the beginning or
 				 end of the
 				 local part, or two periods together. Either way it's not
@@ -742,68 +737,68 @@ characters (including the punctuation and element separators)
 
                     // Then we need to remove all valid comments (i.e. those at the
                     // start or end of the element
-                    if (working_element.Substring(0, 1) == "(")
+                    if (workingElement.Substring(0, 1) == "(")
                     {
-                        this.ResultInfo.Add(@"Comments are unlikely in the real world");
+                        ResultInfo.Add(@"Comments are unlikely in the real world");
 
 
                         // version 2.0: Warning condition added
-                        int indexBrace = working_element.IndexOf(")");
+                        var indexBrace = workingElement.IndexOf(")", StringComparison.Ordinal);
 
                         if (indexBrace != -1)
                         {
-                            Regex comments1Regex = new Regex("(?<!\\\\)[\\(\\)]");
-                            if (comments1Regex.Matches(working_element.Substring(1, indexBrace - 1)).Count > 0)
+                            var comments1Regex = new Regex(@"(?<!\\)[\(\)]");
+                            if (comments1Regex.Matches(workingElement.Substring(1, indexBrace - 1)).Count > 0)
                             {
                                 // revision 1.17: Fixed name of constant (also
                                 // spotted by turboflash - thanks!)
                                 // Illegal characters in comment
-                                this.ResultInfo.Add(@"
+                                ResultInfo.Add(@"
                             Illegal characters in comment
                         ");
                                 return false;
                             }
-                            working_element = working_element.Substring(indexBrace + 1, elementLength - indexBrace - 1);
-                            elementLength = working_element.Length;
+                            workingElement = workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 1);
+                            elementLength = workingElement.Length;
                         }
                     }
 
-                    if (working_element.Substring(elementLength - 1, 1) == ")")
+                    if (workingElement.Substring(elementLength - 1, 1) == ")")
                     {
                         // Comments are unlikely in the real world
                         // return_status = IsEMailResult.ISEMAIL_COMMENTS;
 
                         // version 2.0: Warning condition added
-                        int indexBrace = working_element.LastIndexOf("(");
+                        var indexBrace = workingElement.LastIndexOf("(", StringComparison.Ordinal);
                         if (indexBrace != -1)
                         {
-                            Regex commentRegex = new Regex("(?<!\\\\)(?:[\\(\\)])");
-                            if (commentRegex.Matches(working_element.Substring(indexBrace + 1, elementLength - indexBrace - 2)).Count > 0)
+                            var commentRegex = new Regex(@"(?<!\\)(?:[\(\)])");
+                            if (commentRegex.Matches(workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 2)).Count > 0)
                             {
                                 // revision 1.17: Fixed name of constant (also
                                 // spotted by turboflash - thanks!)
                                 // Illegal characters in comment
-                                this.ResultInfo.Add(@"
+                                ResultInfo.Add(@"
                             Illegal characters in comment
                         ");
                                 return false;
                             }
 
-                            working_element = working_element.Substring(0, indexBrace);
-                            elementLength = working_element.Length;
+                            workingElement = workingElement.Substring(0, indexBrace);
+                            elementLength = workingElement.Length;
                         }
                     }
 
                     // Remove any leading or trailing FWS around the element (inside
                     // any comments)
-                    Regex repRegex = new Regex("^" + FWS + "|" + FWS + "$");
-                    new_element = repRegex.Replace(working_element, string.Empty);
+                    var repRegex = new Regex("^" + fws + "|" + fws + "$");
+                    newElement = repRegex.Replace(workingElement, string.Empty);
                     //if (!element.equals(new_element)) 
                     //{
                     //    // FWS is unlikely in the real world
                     //    return_status = IsEMailResult.ISEMAIL_FWS;
                     //}
-                    working_element = new_element;
+                    workingElement = newElement;
                     // version 2.0: Warning condition added
 
                     // What's left counts towards the maximum length for this part
@@ -812,7 +807,7 @@ characters (including the punctuation and element separators)
                         partLength++; // for the dot
                     }
 
-                    partLength += working_element.Length;
+                    partLength += workingElement.Length;
 
                     // The DNS defines domain name syntax very generally -- a
                     // string of labels each containing up to 63 8-bit octets,
@@ -822,7 +817,7 @@ characters (including the punctuation and element separators)
                     if (elementLength > 63)
                     {
                         // Label must be 63 characters or less
-                        this.ResultInfo.Add(@"
+                        ResultInfo.Add(@"
 				 The DNS defines domain name syntax very generally -- a
 				 string of labels each containing up to 63 8-bit octets,
 				 separated by dots, and with a maximum total of 255
@@ -847,32 +842,30 @@ characters (including the punctuation and element separators)
                     // Any excluded characters? i.e. 0x00-0x20, (, ), <, >, [, ], :,
                     // ;, @, \, comma, period, "
 
-                    Regex badChars = new Regex("[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\.\"]|^-|-$");
-                    if (badChars.Matches(working_element).Count > 0)
-                    {
-                        // Illegal character in domain name
-                        this.ResultInfo.Add(@"
+                    var badChars = new Regex("[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\.\"]|^-|-$");
+                    if (badChars.Matches(workingElement).Count <= 0) continue;
+                    // Illegal character in domain name
+                    ResultInfo.Add(@"
                     Illegal character in domain name
                         ");
-                        return false;
-                    }
+                    return false;
                 }
 
                 if (partLength > 255)
                 {
                     // Domain part must be 255 characters or less
                     // (http://tools.ietf.org/html/rfc1123#section-6.1.3.5)
-                    this.ResultInfo.Add(@"
+                    ResultInfo.Add(@"
 				 Domain part must be 255 characters or less
 				 (http://tools.ietf.org/html/rfc1123#section-6.1.3.5)
                         ");
                     return false;
                 }
 
-                Regex foo = new Regex("^[0-9]+$");
+                var foo = new Regex("^[0-9]+$");
                 if (foo.Matches(lastElement).Count > 0)
                 {
-                    this.ResultInfo.Add(@"TLD probably isn't all-numeric
+                    ResultInfo.Add(@"TLD probably isn't all-numeric
                 (http://www.apps.ietf.org/rfc/rfc3696.html#sec-2)
                 ");
                     // version 2.0: Downgraded to a warning
@@ -896,7 +889,7 @@ characters (including the punctuation and element separators)
          * @return The new String
          * @see Source: http://www.rgagnon.com/javadetails/java-0030.html
          */
-        private static String replaceCharAt(String s, int pos, char c)
+        private static string ReplaceCharAt(string s, int pos, char c)
         {
             return s.Substring(0, pos) + c + s.Substring(pos + 1);
         }

@@ -26,8 +26,8 @@ namespace BugNET.Projects
 
             if (!IsPostBack)
             {
-                ProjectId = Request.Get("pid", Globals.NEW_ID);
-                MilestoneId = Request.Get("m", Globals.NEW_ID);
+                ProjectId = Request.Get("pid", Globals.NewId);
+                MilestoneId = Request.Get("m", Globals.NewId);
 
                 // If don't know project or issue then redirect to something missing page
                 if (ProjectId == 0 || MilestoneId == 0)

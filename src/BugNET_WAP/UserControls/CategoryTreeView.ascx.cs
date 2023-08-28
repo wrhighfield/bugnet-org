@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Web.Script.Serialization;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;

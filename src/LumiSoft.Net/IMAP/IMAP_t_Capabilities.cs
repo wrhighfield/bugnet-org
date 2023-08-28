@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LumiSoft.Net.IMAP
+﻿namespace LumiSoft.Net.IMAP
 {
     /// <summary>
     /// This class represent IANA registered IMAP capabilities. Defined in http://www.iana.org/assignments/imap4-capabilities.

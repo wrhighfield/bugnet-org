@@ -25,7 +25,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static string GetDisplayName()
         {
-            return (HttpContext.Current == null) ? 
+            return HttpContext.Current == null ? 
                 "SYSTEM" :
                 UserManager.GetUserDisplayName(HttpContext.Current.User.Identity.Name);
         }

@@ -20,8 +20,8 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(IssueWorkReport entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.IssueId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save issue work report, the issue id is invalid"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.IssueId <= Globals.NewId) throw new ArgumentException("Cannot save issue work report, the issue id is invalid");
 
             if (!string.IsNullOrEmpty(entity.CommentText))
                 entity.CommentId = DataProviderManager.Provider.CreateNewIssueComment(
@@ -35,13 +35,10 @@ namespace BugNET.BLL
 
             var tempId = DataProviderManager.Provider.CreateNewIssueWorkReport(entity);
 
-            if (tempId > Globals.NEW_ID)
-            {
-                entity.Id = tempId;
-                return true;
-            }
+            if (tempId <= Globals.NewId) return false;
+            entity.Id = tempId;
+            return true;
 
-            return false;
         }
 
         /// <summary>
@@ -51,7 +48,7 @@ namespace BugNET.BLL
         /// <returns>List of WorkReport Objects</returns>
         public static List<IssueWorkReport> GetByIssueId(int issueId)
         {
-            if (issueId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueId"));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             return DataProviderManager.Provider.GetIssueWorkReportsByIssueId(issueId);
         }
@@ -63,9 +60,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int issueWorkReportId)
         {
-            if (issueWorkReportId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueWorkReportId"));
+            if (issueWorkReportId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueWorkReportId));
 
-            return (DataProviderManager.Provider.DeleteIssueWorkReport(issueWorkReportId));
+            return DataProviderManager.Provider.DeleteIssueWorkReport(issueWorkReportId);
         }
         #endregion
     }

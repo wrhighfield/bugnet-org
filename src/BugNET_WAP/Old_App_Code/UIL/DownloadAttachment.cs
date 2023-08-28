@@ -16,7 +16,6 @@ using System;
 using System.Web;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.Entities;
 using log4net;
 
 //using BugNET.BusinessLogicLayer;
@@ -49,7 +48,7 @@ namespace BugNET.UserInterfaceLayer
         {
             if (context.Request.QueryString["mode"] == "project")
             {
-                var projectId = context.Request.QueryString.Get("id", Globals.NEW_ID);
+                var projectId = context.Request.QueryString.Get("id", Globals.NewId);
 
                 var projectImage = ProjectManager.GetProjectImageById(projectId);
 
@@ -72,10 +71,10 @@ namespace BugNET.UserInterfaceLayer
             else
             {
                 // Get the attachment
-                var attachmentId = context.Request.Get("id", Globals.NEW_ID);
+                var attachmentId = context.Request.Get("id", Globals.NewId);
 
                 // cannot parse the attachment from the querystring bail without trying
-                if (attachmentId.Equals(Globals.NEW_ID))
+                if (attachmentId.Equals(Globals.NewId))
                 {
                     context.Response.Write("<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
                     context.Response.End();

@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Configuration;
 using System.Web.Security;
 using BugNET.BLL;
 using BugNET.Common;
@@ -345,7 +344,7 @@ namespace BugNET.Install
                     var roles = RoleManager.GetForUser("Admin");
                     if (roles.Count > 0)
                     {
-                        var role = roles.SingleOrDefault(r => r.Name == Globals.SUPER_USER_ROLE);
+                        var role = roles.SingleOrDefault(r => r.Name == Globals.SuperUserRole);
                         if (role != null) found = true;
                     }
 

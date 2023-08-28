@@ -19,10 +19,7 @@ namespace BugNET.Providers.DataProviders
         /// <value>
         /// 	<c>true</c> if [supports project cloning]; otherwise, <c>false</c>.
         /// </value>
-        public override bool SupportsProjectCloning
-        {
-            get { return true; }
-        }
+        public override bool SupportsProjectCloning => true;
 
         /// <summary>
         /// Gets the installed language resources.
@@ -54,20 +51,19 @@ namespace BugNET.Providers.DataProviders
         {
             var context = HttpContext.Current;
 
-            if (_providerPath != string.Empty)
+            if (providerPath != string.Empty)
             {
-                if (_mappedProviderPath == string.Empty)
-                {
-                    _mappedProviderPath = context.Server.MapPath(_providerPath);
-                    if (!Directory.Exists(_mappedProviderPath))
-                        return string.Format("ERROR: providerPath folder {0} specified for SqlDataProvider does not exist on web server", _mappedProviderPath);
-                }
+                if (mappedProviderPath != string.Empty) return mappedProviderPath;
+                mappedProviderPath = context.Server.MapPath(providerPath);
+                if (!Directory.Exists(mappedProviderPath))
+                    return
+                        $"ERROR: providerPath folder {mappedProviderPath} specified for SqlDataProvider does not exist on web server";
             }
             else
             {
                 return "ERROR: providerPath folder value not specified in web.config for SqlDataProvider";
             }
-            return _mappedProviderPath;
+            return mappedProviderPath;
         }
 
         /// <summary>
@@ -92,24 +88,21 @@ namespace BugNET.Providers.DataProviders
                 }
 
                 //check for version 0.8 if 0.7 has not already been found or threw an exception
-                if (currentVersion == string.Empty || currentVersion == "ERROR")
+                if (currentVersion != string.Empty && currentVersion != "ERROR") return currentVersion;
+                try
                 {
-                    try
+                    SetCommandType(sqlCmd, CommandType.Text, "SELECT SettingValue FROM BugNet_HostSettings WHERE SettingName='Version'");
+                    currentVersion = (string)ExecuteScalarCmd(sqlCmd);
+                }
+                catch (SqlException e)
+                {
+                    switch (e.Number)
                     {
-                        SetCommandType(sqlCmd, CommandType.Text, "SELECT SettingValue FROM BugNet_HostSettings WHERE SettingName='Version'");
-                        currentVersion = (string)ExecuteScalarCmd(sqlCmd);
-                    }
-                    catch (SqlException e)
-                    {
-                        switch (e.Number)
-                        {
-                            case 4060:
-                                return "ERROR " + e.Message;
-                        }
-
-                        currentVersion = string.Empty;
+                        case 4060:
+                            return "ERROR " + e.Message;
                     }
 
+                    currentVersion = string.Empty;
                 }
             }
 
@@ -152,8 +145,8 @@ namespace BugNET.Providers.DataProviders
         private static void AddParamToSqlCmd(SqlCommand sqlCmd, string paramId, SqlDbType sqlType, int paramSize, ParameterDirection paramDirection, object paramvalue)
         {
             // Validate Parameter Properties
-            if (sqlCmd == null) throw (new ArgumentNullException("sqlCmd"));
-            if (paramId == string.Empty) throw (new ArgumentOutOfRangeException("paramId"));
+            if (sqlCmd == null) throw (new ArgumentNullException(nameof(sqlCmd)));
+            if (paramId == string.Empty) throw (new ArgumentOutOfRangeException(nameof(paramId)));
 
             // Add Parameter
             var newSqlParam = new SqlParameter { ParameterName = paramId, SqlDbType = sqlType, Direction = paramDirection };
@@ -172,15 +165,15 @@ namespace BugNET.Providers.DataProviders
         /// </summary>
         /// <param name="sqlCmd">The SQL CMD.</param>
         /// <returns></returns>
-        private Object ExecuteScalarCmd(SqlCommand sqlCmd)
+        private object ExecuteScalarCmd(SqlCommand sqlCmd)
         {
             // Validate Command Properties
-            if (string.IsNullOrEmpty(_connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
-            if (sqlCmd == null) throw (new ArgumentNullException("sqlCmd"));
+            if (string.IsNullOrEmpty(connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
+            if (sqlCmd == null) throw (new ArgumentNullException(nameof(sqlCmd)));
 
-            Object result;
+            object result;
 
-            using (var cn = new SqlConnection(_connectionString))
+            using (var cn = new SqlConnection(connectionString))
             {
                 sqlCmd.Connection = cn;
                 cn.Open();
@@ -198,10 +191,10 @@ namespace BugNET.Providers.DataProviders
         private void ExecuteNonQuery(SqlCommand sqlCmd)
         {
             // Validate Command Properties
-            if (string.IsNullOrEmpty(_connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
-            if (sqlCmd == null) throw (new ArgumentNullException("sqlCmd"));
+            if (string.IsNullOrEmpty(connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
+            if (sqlCmd == null) throw (new ArgumentNullException(nameof(sqlCmd)));
 
-            using (var cn = new SqlConnection(_connectionString))
+            using (var cn = new SqlConnection(connectionString))
             {
                 sqlCmd.Connection = cn;
                 cn.Open();
@@ -218,10 +211,10 @@ namespace BugNET.Providers.DataProviders
         /// <param name="list">The list.</param>
         private void ExecuteReaderCmd<T>(SqlCommand sqlCmd, GenerateListFromReader<T> gcfr, ref List<T> list)
         {
-            if (string.IsNullOrEmpty(_connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
-            if (sqlCmd == null) throw (new ArgumentNullException("sqlCmd"));
+            if (string.IsNullOrEmpty(connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
+            if (sqlCmd == null) throw (new ArgumentNullException(nameof(sqlCmd)));
 
-            using (var cn = new SqlConnection(_connectionString))
+            using (var cn = new SqlConnection(connectionString))
             {
                 sqlCmd.Connection = cn;
                 cn.Open();
@@ -248,9 +241,9 @@ namespace BugNET.Providers.DataProviders
         public override void ExecuteScript(IEnumerable<string> sql)
         {
             if (sql == null)
-                throw new ArgumentNullException("sql");
+                throw new ArgumentNullException(nameof(sql));
 
-            using (var conn = new SqlConnection(_connectionString))
+            using (var conn = new SqlConnection(connectionString))
             {
                 conn.Open();
 

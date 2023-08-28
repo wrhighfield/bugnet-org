@@ -20,14 +20,10 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool UpdateHostSetting(HostSettingNames key, string settingValue)
         {
-            if (GetHostSettings().Contains(key.ToString()))
-            {
-                if (DataProviderManager.Provider.UpdateHostSetting(key.ToString(), settingValue))
-                {
-                    HttpContext.Current.Cache.Remove("HostSettings");
-                    GetHostSettings();
-                }
-            }
+            if (!GetHostSettings().Contains(key.ToString())) return false;
+            if (!DataProviderManager.Provider.UpdateHostSetting(key.ToString(), settingValue)) return false;
+            HttpContext.Current.Cache.Remove("HostSettings");
+            GetHostSettings();
             return false;
         }
 
@@ -38,7 +34,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static string Get(HostSettingNames key)
         {
-            return Get(key, String.Empty);
+            return Get(key, string.Empty);
         }
 
         public static T Get<T>(HostSettingNames key, T defaultValue) where T : IConvertible
@@ -50,15 +46,13 @@ namespace BugNET.BLL
         {
             var val = defaultValue;
 
-            if (settingsTable.Contains(key.ToString()))
-            {
-                var setting = Convert.ToString(settingsTable[key.ToString()]);
+            if (!settingsTable.Contains(key.ToString())) return val;
+            var setting = Convert.ToString(settingsTable[key.ToString()]);
 
-                var converter = TypeDescriptor.GetConverter(typeof(T));
+            var converter = TypeDescriptor.GetConverter(typeof(T));
 
-                // this will throw an exception when conversion is not possible
-                val = (T)converter.ConvertFromString(setting);
-            }
+            // this will throw an exception when conversion is not possible
+            val = (T)converter.ConvertFromString(setting);
 
             return val;
         }
@@ -70,22 +64,18 @@ namespace BugNET.BLL
         /// <param name="defaultValue">The default value if the setting is missing or is an invalid type</param>
         /// <returns></returns>
         public static bool Get(HostSettingNames key, bool defaultValue)
-        {
-            return Get(GetHostSettings(), key, defaultValue);
-        }
+            => Get(GetHostSettings(), key, defaultValue);
 
         public static bool Get(Hashtable settingsTable, HostSettingNames key, bool defaultValue)
         {
             var val = defaultValue;
 
-            if (settingsTable.Contains(key.ToString()))
-            {
-                var setting = Convert.ToString(settingsTable[key.ToString()]).ToLower();
-                if (setting.Equals("1")) return true;
+            if (!settingsTable.Contains(key.ToString())) return val;
+            var setting = Convert.ToString(settingsTable[key.ToString()]).ToLower();
+            if (setting.Equals("1")) return true;
 
-                if (bool.TryParse(setting.ToLower(), out val))
-                    return val;
-            }
+            if (bool.TryParse(setting.ToLower(), out val))
+                return val;
 
             return val;
         }
@@ -96,18 +86,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static Hashtable GetHostSettings()
         {
-            if(HttpRuntime.Cache == null)
-            {
-                return LoadHostSettings();
-            }
-
-            var h = HttpRuntime.Cache["HostSettings"] as Hashtable;
-
-            if (h == null)
-            {
-                h = LoadHostSettings();
-                HttpRuntime.Cache.Insert("HostSettings", h);
-            }
+            if (HttpRuntime.Cache["HostSettings"] is Hashtable h) return h;
+            h = LoadHostSettings();
+            HttpRuntime.Cache.Insert("HostSettings", h);
 
             return h;
         }
@@ -140,8 +121,9 @@ namespace BugNET.BLL
             {
                 var val = Get(HostSettingNames.SMTPServer);
 
-                if (String.IsNullOrEmpty(val))
-                    throw (new ApplicationException(string.Format("{0} configuration is missing or not set, check the host settings", HostSettingNames.SMTPServer)));
+                if (string.IsNullOrEmpty(val))
+                    throw new ApplicationException(
+                        $"{HostSettingNames.SMTPServer} configuration is missing or not set, check the host settings");
 
                 return val;
             }
@@ -158,7 +140,8 @@ namespace BugNET.BLL
                 var val = Get(HostSettingNames.SMTPPort, -1);
 
                 if (val.Equals(-1))
-                    throw (new ApplicationException(string.Format("{0} configuration is missing or not set, check the host settings", HostSettingNames.SMTPPort)));
+                    throw new ApplicationException(
+                        $"{HostSettingNames.SMTPPort} configuration is missing or not set, check the host settings");
 
                 return val;
             }
@@ -174,10 +157,11 @@ namespace BugNET.BLL
             {
                 var val = Get(HostSettingNames.HostEmailAddress);
 
-                if (String.IsNullOrEmpty(val))
-                    throw (new ApplicationException(string.Format("{0} configuration is missing or not set, check the host settings", HostSettingNames.HostEmailAddress)));
+                if (string.IsNullOrEmpty(val))
+                    throw new ApplicationException(
+                        $"{HostSettingNames.HostEmailAddress} configuration is missing or not set, check the host settings");
 
-                return (val);
+                return val;
             }
         }
 
@@ -191,10 +175,11 @@ namespace BugNET.BLL
             {
                 var val = Get(HostSettingNames.UserAccountSource);
 
-                if (String.IsNullOrEmpty(val))
-                    throw (new ApplicationException(string.Format("{0} configuration is missing or not set, check the host settings", HostSettingNames.UserAccountSource)));
+                if (string.IsNullOrEmpty(val))
+                    throw new ApplicationException(
+                        $"{HostSettingNames.UserAccountSource} configuration is missing or not set, check the host settings");
 
-                return (val);
+                return val;
             }
         }
 
@@ -202,13 +187,7 @@ namespace BugNET.BLL
         /// Gets the application title.
         /// </summary>
         /// <value>The application title.</value>
-        public static string ApplicationTitle
-        {
-            get
-            {
-                return Get(HostSettingNames.ApplicationTitle, "BugNET Issue Tracker");
-            }
-        }
+        public static string ApplicationTitle => Get(HostSettingNames.ApplicationTitle, "BugNET Issue Tracker");
 
         /// <summary>
         /// Gets the default URL.
@@ -220,10 +199,11 @@ namespace BugNET.BLL
             {
                 var val = Get(HostSettingNames.DefaultUrl);
 
-                if (String.IsNullOrEmpty(val))
-                    throw (new ApplicationException(string.Format("{0} configuration is missing or not set, check the host settings", HostSettingNames.DefaultUrl)));
+                if (string.IsNullOrEmpty(val))
+                    throw new ApplicationException(
+                        $"{HostSettingNames.DefaultUrl} configuration is missing or not set, check the host settings");
 
-                return val.EndsWith("/") ? (val) : (string.Concat(val, "/"));
+                return val.EndsWith("/") ? val : string.Concat(val, "/");
             }
         }
 
@@ -240,12 +220,12 @@ namespace BugNET.BLL
                 val = System.Web.Hosting.HostingEnvironment.MapPath(val);
 
                 if (!System.IO.Directory.Exists(val))
-                    throw new Exception(string.Format("The configured path: [{0}] does not exist, cannot load Xslt template", val));
+                    throw new Exception($"The configured path: [{val}] does not exist, cannot load Xslt template");
 
                 if (!val.EndsWith("\\"))
                     val += "\\";
 
-                return (val);
+                return val;
             }
         }
     }

@@ -45,7 +45,8 @@ namespace BugNET.Common
         /// The string returned includes outer quotes  
         /// Example Output: "Hello \"Rick\"!\r\nRock on" 
         /// </summary> 
-        /// <param name="value"></param> 
+        /// <param name="value"></param>
+        /// <param name="omitQuotes"></param>
         /// <returns></returns> 
         public static string JsEncode(this string value, bool omitQuotes = true)
         {
@@ -183,13 +184,9 @@ namespace BugNET.Common
         /// <returns>The Enum corresponding to the stringExtensions</returns>
         public static T ToEnum<T>(this int value, T defaultValue)
         {
-            int num;
-
-            if (int.TryParse(value.ToString(), out num))
-            {
-                if (Enum.IsDefined(typeof(T), num))
-                    return (T)Enum.ToObject(typeof(T), num);
-            }
+            if (!int.TryParse(value.ToString(), out var num)) return defaultValue;
+            if (Enum.IsDefined(typeof(T), num))
+                return (T)Enum.ToObject(typeof(T), num);
 
             return defaultValue; 
         }
@@ -199,15 +196,15 @@ namespace BugNET.Common
         /// </summary>
         /// <typeparam name="T">The type of the Enum</typeparam>
         /// <param name="value">String value to parse</param>
-        /// <param name="ignorecase">Ignore the case of the string being parsed</param>
+        /// <param name="ignoreCase">Ignore the case of the string being parsed</param>
         /// <param name="defaultValue"> </param>
         /// <returns>The Enum corresponding to the stringExtensions</returns>
-        public static T ToEnum<T>(this string value, bool ignorecase, T defaultValue)
+        public static T ToEnum<T>(this string value, bool ignoreCase, T defaultValue)
         {
-            if (value == null) throw new ArgumentNullException("value");
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             if (Enum.IsDefined(typeof(T), value))
-                return (T)Enum.Parse(typeof(T), value, ignorecase);
+                return (T)Enum.Parse(typeof(T), value, ignoreCase);
 
             return defaultValue;
         }
@@ -223,7 +220,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static T Get<T>(this StateBag viewState, string key, T defaultValue)
         {
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
 
             return Get(viewState[key], defaultValue);
         }
@@ -236,7 +233,7 @@ namespace BugNET.Common
         /// <param name="value">The value to set in the view state for the supplied key</param>
         public static void Set(this StateBag viewState, string key, object value)
         {
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
 
             if (value != null)
                 viewState[key] = value;
@@ -253,15 +250,16 @@ namespace BugNET.Common
             if (string.IsNullOrEmpty(input)) return false;
             var conv = TypeDescriptor.GetConverter(typeof(T));
 
-            if (conv.CanConvertFrom(typeof(string)))
+            if (!conv.CanConvertFrom(typeof(string))) return false;
+            try
             {
-                try
-                {
-                    conv.ConvertFrom(input);
-                    return true;
-                }
-                catch { } //hacky yes but the only way to deal with the type converter not being to convert the type
+                conv.ConvertFrom(input);
+                return true;
             }
+            catch
+            { 
+               // ignored
+            }  // hack yes but the only way to deal with the type converter not being to convert the type
             return false;
         }
 
@@ -275,7 +273,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static IEnumerable<T> Sort<T>(this IEnumerable<T> source, string sortExpression)
         {
-            if (source == null) throw new ArgumentNullException("source");
+            if (source == null) throw new ArgumentNullException(nameof(source));
 
             var sortParts = sortExpression.Split(' ');
             var param = Expression.Parameter(typeof(T), string.Empty);
@@ -285,11 +283,9 @@ namespace BugNET.Common
                 var property = Expression.Property(param, sortParts[0]);
                 var sortLambda = Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), param);
 
-                if (sortParts.Length > 1 && sortParts[1].Equals("desc", StringComparison.OrdinalIgnoreCase))
-                {
-                    return source.AsQueryable().OrderByDescending(sortLambda);
-                }
-                return source.AsQueryable().OrderBy(sortLambda);
+                return sortParts.Length > 1 && sortParts[1].Equals("desc", StringComparison.OrdinalIgnoreCase)
+                    ? source.AsQueryable().OrderByDescending(sortLambda)
+                    : source.AsQueryable().OrderBy(sortLambda);
             }
             catch (ArgumentException)
             {
@@ -306,7 +302,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static T Get<T>(this NameValueCollection collection, string key)
         {
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
 
             return Get<T>(collection[key]);
         }
@@ -321,7 +317,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static T Get<T>(this NameValueCollection collection, string key, T defaultValue)
         {
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
 
             return Get(collection[key], defaultValue);
         }
@@ -335,7 +331,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static T Get<T>(this HttpRequest request, string key)
         {
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
 
             return Get<T>(request[key]);
         }
@@ -350,7 +346,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static T Get<T>(this HttpRequest request, string key, T defaultValue)
         {
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
+            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException(nameof(key));
 
             return Get(request[key], defaultValue);
         }
@@ -359,27 +355,54 @@ namespace BugNET.Common
         {
             var value = defaultValue;
 
-            if (input != null)
+            if (input == null) return value;
+            if (input.ToString().Replace(" ", string.Empty).ToLower() == "true,false")
             {
-                if (input.ToString().Replace(" ", string.Empty).ToLower() == "true,false")
-                {
-                    var inputs = input.ToString().Split(',');
-                    var value0 = Boolean.Parse(inputs[0]);
-                    var value1 = Boolean.Parse(inputs[1]);
+                var inputs = input.ToString().Split(',');
+                var value0 = bool.Parse(inputs[0]);
+                var value1 = bool.Parse(inputs[1]);
 
-                    value = (T)Convert.ChangeType(value0 || value1, typeof(T));
-                }
-                else
+                value = (T)Convert.ChangeType(value0 || value1, typeof(T));
+            }
+            else
+            {
+                if (typeof(T).IsEnum)
                 {
-                    if (typeof(T).IsEnum)
+                    if (int.TryParse(input.ToString(), out _))
+                        value = (T)Convert.ChangeType(input, typeof(int));
+                    else
+                        value = (T)Enum.Parse(typeof(T), input.ToString());
+                }
+                else if (typeof(T) == typeof(bool))
+                {
+                    var v = input.ToString().ToLower();
+
+                    switch (v)
                     {
-                        int v;
-                        if (int.TryParse(input.ToString(), out v))
+                        case "true":
+                        case "1":
+                            value = (T)Convert.ChangeType("true", typeof(bool));
+                            break;
+                        case "false":
+                        case "0":
+                            value = (T)Convert.ChangeType("false", typeof(bool));
+                            break;
+                    }
+                }
+                else if (typeof(T).IsGenericType &&
+                         typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    var nc = new NullableConverter(typeof(T));
+                    var underlyingType = nc.UnderlyingType;
+
+                    if (underlyingType.IsEnum)
+                    {
+                        if (int.TryParse(input.ToString(), out _))
                             value = (T)Convert.ChangeType(input, typeof(int));
                         else
                             value = (T)Enum.Parse(typeof(T), input.ToString());
                     }
-                    else if (typeof(T) == typeof(bool))
+                    else if (underlyingType == typeof(bool))
                     {
                         var v = input.ToString().ToLower();
 
@@ -395,44 +418,13 @@ namespace BugNET.Common
                                 break;
                         }
                     }
-                    else if (typeof(T).IsGenericType &&
-                             typeof(T).GetGenericTypeDefinition() == typeof(Nullable<>))
-                    {
-                        var nc = new NullableConverter(typeof(T));
-                        var underlyingType = nc.UnderlyingType;
-
-                        if (underlyingType.IsEnum)
-                        {
-                            int v;
-                            if (int.TryParse(input.ToString(), out v))
-                                value = (T)Convert.ChangeType(input, typeof(int));
-                            else
-                                value = (T)Enum.Parse(typeof(T), input.ToString());
-                        }
-                        else if (underlyingType == typeof(bool))
-                        {
-                            var v = input.ToString().ToLower();
-
-                            switch (v)
-                            {
-                                case "true":
-                                case "1":
-                                    value = (T)Convert.ChangeType("true", typeof(bool));
-                                    break;
-                                case "false":
-                                case "0":
-                                    value = (T)Convert.ChangeType("false", typeof(bool));
-                                    break;
-                            }
-                        }
-                        else
-                        {
-                            value = (T)Convert.ChangeType(input, underlyingType);
-                        }
-                    }
                     else
-                        value = (T)Convert.ChangeType(input, typeof(T));
+                    {
+                        value = (T)Convert.ChangeType(input, underlyingType);
+                    }
                 }
+                else
+                    value = (T)Convert.ChangeType(input, typeof(T));
             }
             return value;
         }

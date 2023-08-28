@@ -8,17 +8,14 @@ namespace BugNET.Providers.HtmlEditorProviders
     /// </summary>
     public class CkHtmlEditorProvider : HtmlEditorProvider
     {
-        private readonly CKEditor.NET.CKEditorControl _textbox = new CKEditor.NET.CKEditorControl();
-        private string _providerPath = string.Empty;
+        private readonly CKEditor.NET.CKEditorControl textBox = new CKEditor.NET.CKEditorControl();
+        private string providerPath = string.Empty;
 
         /// <summary>
         /// Gets the HTML editor.
         /// </summary>
         /// <value>The HTML editor.</value>
-        public override System.Web.UI.Control HtmlEditor
-        {
-            get { return _textbox; }
-        }
+        public override System.Web.UI.Control HtmlEditor => textBox;
 
         /// <summary>
         /// Gets or sets the width.
@@ -26,8 +23,8 @@ namespace BugNET.Providers.HtmlEditorProviders
         /// <value>The width.</value>
         public override Unit Width
         {
-            get { return _textbox.Width; }
-            set { _textbox.Width = value; }
+            get => textBox.Width;
+            set => textBox.Width = value;
         }
 
         /// <summary>
@@ -36,8 +33,8 @@ namespace BugNET.Providers.HtmlEditorProviders
         /// <value>The height.</value>
         public override Unit Height
         {
-            get { return _textbox.Height; }
-            set { _textbox.Height = value; }
+            get => textBox.Height;
+            set => textBox.Height = value;
         }
 
         /// <summary>
@@ -46,8 +43,8 @@ namespace BugNET.Providers.HtmlEditorProviders
         /// <value>The text.</value>
         public override string Text
         {
-            get { return _textbox.Text; }
-            set { _textbox.Text = value; }
+            get => textBox.Text;
+            set => textBox.Text = value;
         }
 
         /// <summary>
@@ -56,18 +53,15 @@ namespace BugNET.Providers.HtmlEditorProviders
         /// <value>The control id.</value>
         public override string ControlId
         {
-            get { return _textbox.ID; }
-            set { _textbox.ID = value; }
+            get => textBox.ID;
+            set => textBox.ID = value;
         }
 
         /// <summary>
         /// Gets the provider path.
         /// </summary>
         /// <value>The provider path.</value>
-        public override string ProviderPath
-        {
-            get { return _providerPath; }
-        }
+        public override string ProviderPath => providerPath;
 
         /// <summary>
         /// Initializes the provider.
@@ -80,7 +74,7 @@ namespace BugNET.Providers.HtmlEditorProviders
         public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
         {
             if ((config == null) || (config.Count == 0))
-                throw new ArgumentNullException("config", "You must supply a valid configuration dictionary.");
+                throw new ArgumentNullException(nameof(config), "You must supply a valid configuration dictionary.");
 
             if (string.IsNullOrEmpty(config["description"]))
             {
@@ -94,28 +88,28 @@ namespace BugNET.Providers.HtmlEditorProviders
 
             //Perform feature-specific provider initialization here
 
-            _providerPath = "" + config["providerPath"];
-            _providerPath = System.Web.VirtualPathUtility.ToAbsolute(_providerPath.Trim().Replace("\\", "/"));
-            if (!_providerPath.EndsWith("/"))
-                _providerPath += "/";
+            providerPath = "" + config["providerPath"];
+            providerPath = System.Web.VirtualPathUtility.ToAbsolute(providerPath.Trim().Replace("\\", "/"));
+            if (!providerPath.EndsWith("/"))
+                providerPath += "/";
                
             var text = config["Text"];
-            Text = !String.IsNullOrEmpty(text) ? text : "";
+            Text = !string.IsNullOrEmpty(text) ? text : "";
 
             var height = config["Height"];
-            Height = !String.IsNullOrEmpty(height) ? Unit.Parse(height) : Unit.Pixel(300);
+            Height = !string.IsNullOrEmpty(height) ? Unit.Parse(height) : Unit.Pixel(300);
 
             var width = config["Width"];
-            Width = !String.IsNullOrEmpty(width) ? Unit.Parse(width) : Unit.Pixel(500);
+            Width = !string.IsNullOrEmpty(width) ? Unit.Parse(width) : Unit.Pixel(500);
 
             if (config["Toolbar"] != null)
-                _textbox.Toolbar = config["Toolbar"];
+                textBox.Toolbar = config["Toolbar"];
 
             if (config["EditorSkin"] != null)
-                _textbox.Skin = _textbox.Skin + "editor/skins/" + config["EditorSkin"] + "/";
+                textBox.Skin = textBox.Skin + "editor/skins/" + config["EditorSkin"] + "/";
             
-            _textbox.BasePath = _providerPath;
-            _textbox.CssClass = "form-control";
+            textBox.BasePath = providerPath;
+            textBox.CssClass = "form-control";
         }
     }
 }

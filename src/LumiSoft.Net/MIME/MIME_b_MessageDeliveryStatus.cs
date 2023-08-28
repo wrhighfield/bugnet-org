@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text;
 
 using LumiSoft.Net.IO;
-using LumiSoft.Net.Mail;
 
 namespace LumiSoft.Net.MIME
 {

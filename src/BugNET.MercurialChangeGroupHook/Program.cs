@@ -2,10 +2,12 @@
 using System.Linq;
 using Mercurial;
 using log4net;
+using log4net.Appender;
+using log4net.Repository.Hierarchy;
 
 namespace BugNET.MercurialChangeGroupHook
 {
-    class Program
+    public static class Program
     {
         private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -13,7 +15,7 @@ namespace BugNET.MercurialChangeGroupHook
         /// Executed by the external hook
         /// </summary>
         /// <param name="args">command line args (none)</param>
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             // get a reference to the hook calling the program
             var hook = new Mercurial.Hooks.MercurialChangeGroupHook();
@@ -36,12 +38,12 @@ namespace BugNET.MercurialChangeGroupHook
             try
             {
                 // get all the change sets for the revision from the log
-                var changesets =
+                var changeSets =
                     hook.Repository.Log(new LogCommand()
                         .WithRevision(RevSpec.From(hook.FirstRevision)))
                         .ToArray();
 
-                Log.InfoFormat("MercurialChangeGroupHook: Found [{0}] change sets", changesets.Length);
+                Log.InfoFormat("MercurialChangeGroupHook: Found [{0}] change sets", changeSets.Length);
 
                 // wire up the bugnet service 
                 var services = new WebServices.BugNetServices
@@ -58,7 +60,7 @@ namespace BugNET.MercurialChangeGroupHook
                 {
                     Log.Info("MercurialChangeGroupHook: Logging in to BugNET Web Services");
 
-                    var result = services.LogIn(AppSettings.BugNetUsername, AppSettings.BugNetPassword);
+                    var result = services.LogIn(AppSettings.BugNetUserName, AppSettings.BugNetPassword);
                     if (result)
                     {
                         Log.Info("MercurialChangeGroupHook: Login successful");
@@ -74,10 +76,10 @@ namespace BugNET.MercurialChangeGroupHook
                 var repositoryName = IssueTrackerIntegration.GetRepositoryName(hook.Repository.ToString());
 
                 // loop the change sets from the log
-                foreach (var changeset in changesets)
+                foreach (var changeset in changeSets)
                 {
                     Log.InfoFormat("MercurialChangeGroupHook: Processing change set [{0}]", changeset.Hash);
-                    IssueTrackerIntegration.UpdateBugNetForChangeset(repositoryName, changeset, services);
+                    IssueTrackerIntegration.UpdateBugNetForChangeSet(repositoryName, changeset, services);
                 }
 
                 Log.Info("MercurialChangeGroupHook: Processing complete");
@@ -102,14 +104,11 @@ namespace BugNET.MercurialChangeGroupHook
         private static bool ConfigureAdoNetAppender()
         {
             // Get the Hierarchy object that organizes the loggers
-            var hier = LogManager.GetRepository() as log4net.Repository.Hierarchy.Hierarchy;
 
-            if (hier == null) return false;
+            if (!(LogManager.GetRepository() is Hierarchy hierarchy)) return false;
 
             //get ADONetAppender
-            var adoAppender = hier.Root.GetAppender("AdoNetAppender") as log4net.Appender.AdoNetAppender;
-
-            if (adoAppender == null) return false;
+            if (!(hierarchy.Root.GetAppender("AdoNetAppender") is AdoNetAppender adoAppender)) return false;
 
             adoAppender.ActivateOptions(); //refresh settings of appender
             return true;

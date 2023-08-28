@@ -1,6 +1,5 @@
 using System;
-using BugNET.Common;
- 
+
 namespace BugNET.Entities
 {
     /// <summary>

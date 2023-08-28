@@ -13,7 +13,7 @@ namespace BugNET.MailboxReader
             ProcessingMessages = new List<string>();
         }
 
-        public MailboxReaderResult(ResultStatuses status) : base()
+        public MailboxReaderResult(ResultStatuses status)
         {
             Status = status;
         }

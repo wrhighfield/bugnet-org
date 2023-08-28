@@ -476,10 +476,10 @@ namespace BugNET.Issues
             if (User.Identity.IsAuthenticated)
             {
                 //enable editing of description if user has permission or in admin role
-                if ((UserManager.IsInRole(ProjectId, Globals.ProjectAdminRole) || UserManager.HasPermission(ProjectId, Common.Permission.EditIssueDescription.ToString())) && !DescriptionHtmlEditor.Visible)
+                if ((UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole) || UserManager.HasPermission(ProjectId, Common.Permission.EditIssueDescription.ToString())) && !DescriptionHtmlEditor.Visible)
                     EditDescription.Visible = true;
 
-                if ((UserManager.IsInRole(ProjectId, Globals.ProjectAdminRole) || UserManager.HasPermission(ProjectId, Common.Permission.EditIssueTitle.ToString())) && !TitleTextBox.Visible)
+                if ((UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole) || UserManager.HasPermission(ProjectId, Common.Permission.EditIssueTitle.ToString())) && !TitleTextBox.Visible)
                     EditTitle.Visible = true;
 
                 //edit issue permission check

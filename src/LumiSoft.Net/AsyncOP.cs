@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LumiSoft.Net
+﻿namespace LumiSoft.Net
 {
     /// <summary>
     /// This is base class for asynchronous operation.

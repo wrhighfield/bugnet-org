@@ -1,6 +1,7 @@
 using System;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
+using BugNET.BLL.Comparers;
 using BugNET.Common;
 using BugNET.Entities;
 using BugNET.UserInterfaceLayer;

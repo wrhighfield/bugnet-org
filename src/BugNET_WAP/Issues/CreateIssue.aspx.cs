@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using Microsoft.AspNet.FriendlyUrls;
 using BugNET.BLL;
 using BugNET.Common;
@@ -355,7 +353,7 @@ namespace BugNET.Issues
 
                         var issueAttachment = new IssueAttachment
                         {
-                            Id = Globals.NEW_ID,
+                            Id = Globals.NewId,
                             Attachment = fileBytes,
                             Description = AttachmentDescription.Text.Trim(),
                             DateCreated = DateTime.Now,

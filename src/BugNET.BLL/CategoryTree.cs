@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using BugNET.Entities;
 using System.Collections.Generic;
@@ -13,9 +12,9 @@ namespace BugNET.BLL
 	{
         private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-	    private int _compIndent = 1;
-        private List<Category> _unSortedCats;
-		private List<Category> _sortedCats;
+	    private int compIndent = 1;
+        private List<Category> unSortedCats;
+		private List<Category> sortedCats;
 
         /// <summary>
         /// Gets the component tree by project id.
@@ -25,14 +24,14 @@ namespace BugNET.BLL
 		public List<Category> GetCategoryTreeByProjectId(int projectId) 
 		{
   
-            _sortedCats = new List<Category>();
-			_unSortedCats = CategoryManager.GetByProjectId(projectId);
+            sortedCats = new List<Category>();
+			unSortedCats = CategoryManager.GetByProjectId(projectId);
 			foreach(var parentCat in GetTopLevelCategories() ) 
 			{
-				_sortedCats.Add( parentCat );
+				sortedCats.Add( parentCat );
 				BindSubCategories(parentCat.Id);
 			}
-			return _sortedCats;
+			return sortedCats;
 		}
 
 
@@ -40,15 +39,15 @@ namespace BugNET.BLL
         /// Binds the sub categories.
         /// </summary>
         /// <param name="parentId">The parent id.</param>
-		void BindSubCategories(int parentId) 
+        private void BindSubCategories(int parentId) 
 		{
 			foreach(var childCat in GetChildCategories(parentId) )
 			{
 			    var categoryName = string.Concat(DisplayIndent(), childCat.Name);
-                _sortedCats.Add(new Category { Name = categoryName, Id = childCat.Id });
-				_compIndent ++;
+                sortedCats.Add(new Category { Name = categoryName, Id = childCat.Id });
+				compIndent ++;
 				BindSubCategories(childCat.Id);
-				_compIndent --;
+				compIndent --;
 			}
 		}
 
@@ -56,29 +55,22 @@ namespace BugNET.BLL
         /// Gets the top level categories.
         /// </summary>
         /// <returns></returns>
-		IEnumerable<Category> GetTopLevelCategories()
-        {
-            return _unSortedCats.Where(cat => cat.ParentCategoryId == 0).ToList();
-        }
+        private IEnumerable<Category> GetTopLevelCategories()
+            => unSortedCats.Where(cat => cat.ParentCategoryId == 0).ToList();
 
-	    /// <summary>
+        /// <summary>
         /// Gets the child categories.
         /// </summary>
         /// <param name="parentId">The parent id.</param>
         /// <returns></returns>
-        IEnumerable<Category> GetChildCategories(int parentId)
-	    {
-	        return _unSortedCats.Where(cat => cat.ParentCategoryId == parentId).ToList();
-	    }
+        private IEnumerable<Category> GetChildCategories(int parentId)
+            => unSortedCats.Where(cat => cat.ParentCategoryId == parentId).ToList();
 
-	    /// <summary>
+        /// <summary>
         /// Displays the indent.
         /// </summary>
         /// <returns></returns>
-		string DisplayIndent() 
-		{     
-		    return new String('-', _compIndent) + " ";     
-		}
-
-	}
+        private string DisplayIndent()
+            => new string('-', compIndent) + " ";
+    }
 }

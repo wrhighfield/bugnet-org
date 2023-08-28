@@ -17,11 +17,11 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool SaveOrUpdate(IssueType entity)
         {
-            if (entity == null) throw new ArgumentNullException("entity");
-            if (entity.ProjectId <= Globals.NEW_ID) throw (new ArgumentException("Cannot save issue type, the project id is invalid"));
-            if (string.IsNullOrEmpty(entity.Name)) throw (new ArgumentException("The issue type name cannot be empty or null"));
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save issue type, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The issue type name cannot be empty or null");
 
-            if (entity.Id > Globals.NEW_ID)
+            if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateIssueType(entity);
 
             var tempId = DataProviderManager.Provider.CreateNewIssueType(entity);
@@ -41,7 +41,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static IssueType GetById(int issueTypeId)
         {
-            if (issueTypeId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("issueTypeId"));
+            if (issueTypeId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueTypeId));
 
             return DataProviderManager.Provider.GetIssueTypeById(issueTypeId);
         }
@@ -54,7 +54,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int id, out string cannotDeleteMessage)
         {
-            if (id <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("id"));
+            if (id <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(id));
 
             var entity = GetById(id);
 
@@ -80,47 +80,8 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static List<IssueType> GetByProjectId(int projectId)
         {
-            if (projectId <= Globals.NEW_ID) throw (new ArgumentOutOfRangeException("projectId"));
-
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
             return DataProviderManager.Provider.GetIssueTypesByProjectId(projectId);
         }
-
-        ///// <summary>
-        ///// Stewart Moss
-        ///// Apr 14 2010 
-        ///// 
-        ///// Performs a query containing any number of query clauses on a certain projectID
-        ///// </summary>
-        ///// <param name="projectId"></param>
-        ///// <param name="queryClauses"></param>
-        ///// <returns></returns>
-        //public static List<IssueType> PerformQuery(int projectId, List<QueryClause> queryClauses)
-        //{
-        //    if (projectId < 0) throw new ArgumentOutOfRangeException("projectId", "projectI d must be bigger than 0");
-
-        //    queryClauses.Add(new QueryClause("AND", "ProjectID", "=", projectId.ToString(), System.Data.SqlDbType.Int, false));
-
-        //    return PerformQuery(queryClauses);
-        //}
-
-        ///// <summary>
-        ///// Stewart Moss
-        ///// Apr 14 2010 8:30 pm
-        ///// 
-        ///// Performs any query containing any number of query clauses
-        ///// WARNING! Will expose the entire IssueType table, regardless of 
-        ///// project level privledges. (thats why its private for now)
-        ///// </summary>        
-        ///// <param name="queryClauses"></param>
-        ///// <returns></returns>
-        //private static List<IssueType> PerformQuery(List<QueryClause> queryClauses)
-        //{
-        //    if (queryClauses == null) throw new ArgumentNullException("queryClauses");
-
-        //    var lst = new List<IssueType>();
-        //    DataProviderManager.Provider.PerformGenericQuery(ref lst, queryClauses, @"SELECT a.*, b.ProjectName as ProjectName from BugNet_ProjectIssueTypes as a, BugNet_Projects as b  WHERE a.ProjectID=b.ProjectID ", @" ORDER BY a.ProjectID, a.IssueTypeID ASC");
-
-        //    return lst;
-        //}
     }
 }

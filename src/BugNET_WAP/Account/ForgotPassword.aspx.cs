@@ -2,7 +2,6 @@ using System;
 using System.Security.Cryptography;
 using System.Web;
 using System.Web.Security;
-using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using log4net;

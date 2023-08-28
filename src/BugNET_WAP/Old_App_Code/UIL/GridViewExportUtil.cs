@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Web;
 using System.Web.UI;
@@ -6,7 +5,6 @@ using System.Web.UI.WebControls;
 using BugNET.Common;
 using BugNET.UserControls;
 using System.Text.RegularExpressions;
-using System.Collections.Generic;
 using BugNET.BLL;
 
 namespace BugNET.UserInterfaceLayer

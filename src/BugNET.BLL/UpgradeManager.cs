@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
 using System.Web;
-using System.Web.Configuration;
 using System.Collections.Generic;
-using System.Web.Security;
+using System.Linq;
 using BugNET.Common;
 using BugNET.DAL;
 using log4net;
-using System.Xml;
-using System.Globalization;
 
 namespace BugNET.BLL
 {
@@ -29,13 +21,10 @@ namespace BugNET.BLL
             try
             {
                 var projects = DataProviderManager.Provider.GetAllProjects();
-                bool successful = true;
-                foreach (var project in projects)
+                var successful = true;
+                foreach (var _ in projects.Where(project => !CustomFieldManager.UpdateCustomFieldView(project.Id)))
                 {
-                    if(!CustomFieldManager.UpdateCustomFieldView(project.Id))
-                    {
-                        successful = false;
-                    }               
+                    successful = false;
                 }
 
                 return successful;
@@ -62,20 +51,16 @@ namespace BugNET.BLL
         /// Gets the provider path.
         /// </summary>
         /// <returns></returns>
-        public static string GetProviderPath()
-        {
-            return DataProviderManager.Provider.GetProviderPath();
-        }
+        public static string GetProviderPath() =>
+            DataProviderManager.Provider.GetProviderPath();
 
         /// <summary>
         /// Upgrades the database version.
         /// </summary>
         /// <param name="version">The version.</param>
         /// <returns></returns>
-        public static bool UpdateDatabaseVersion(string version)
-        {
-            return HostSettingManager.UpdateHostSetting(HostSettingNames.Version, version);
-        }
+        public static bool UpdateDatabaseVersion(string version) =>
+            HostSettingManager.UpdateHostSetting(HostSettingNames.Version, version);
 
         /// <summary>
         /// Gets the upgrade status.
@@ -85,7 +70,7 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static UpgradeStatus GetUpgradeStatus()
         {
-            string version = DataProviderManager.Provider.GetDatabaseVersion();
+            var version = DataProviderManager.Provider.GetDatabaseVersion();
 
             if (string.IsNullOrEmpty(version))
                 return UpgradeStatus.Install;
@@ -104,29 +89,22 @@ namespace BugNET.BLL
         /// Gets the installed version.
         /// </summary>
         /// <returns></returns>
-        public static string GetInstalledVersion()
-        {
-            return DataProviderManager.Provider.GetDatabaseVersion();
-        }
+        public static string GetInstalledVersion() =>
+            DataProviderManager.Provider.GetDatabaseVersion();
 
         /// <summary>
         /// Gets the BugNET version from the currently running assembly.
         /// </summary>
         /// <returns></returns>
-        public static string GetCurrentVersion()
-        {
-            return String.Format("{0}", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version);
-
-        }
+        public static string GetCurrentVersion() =>
+            $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version}";
 
         /// <summary>
         /// Detect if BugNET has been installed        
         /// </summary>
         /// <returns>True is BugNET is installed</returns>
-        public static bool IsInstalled()
-        {
-            return GetUpgradeStatus() != UpgradeStatus.Install;
-        }
+        public static bool IsInstalled() =>
+            GetUpgradeStatus() != UpgradeStatus.Install;
 
         /// <summary>
         /// Gets the application map path.

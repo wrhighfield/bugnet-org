@@ -1,6 +1,5 @@
 using System;
 using System.Xml.Serialization;
-using BugNET.Common;
 
 namespace BugNET.Entities
 {

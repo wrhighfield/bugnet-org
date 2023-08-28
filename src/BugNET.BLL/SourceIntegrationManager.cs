@@ -5,7 +5,6 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using BugNET.Common;
-using BugNET.Entities;
 using log4net;
 
 namespace BugNET.BLL
@@ -90,11 +89,9 @@ namespace BugNET.BLL
                 if (!repoPath.EndsWith(Path.DirectorySeparatorChar.ToString()))
                     repoPath += Path.DirectorySeparatorChar;
 
-                if (!String.IsNullOrEmpty(HostSettingManager.Get(HostSettingNames.SvnHookPath)))
-                {
-                    using (var sw = File.CreateText(repoPath + "hooks" + Path.DirectorySeparatorChar + "post-commit.bat"))
-                        sw.WriteLine(HostSettingManager.Get(HostSettingNames.SvnHookPath) + @" post-commit %1 %2");
-                }
+                if (string.IsNullOrEmpty(HostSettingManager.Get(HostSettingNames.SvnHookPath))) return sb.ToString();
+                using (var sw = File.CreateText(repoPath + "hooks" + Path.DirectorySeparatorChar + "post-commit.bat"))
+                    sw.WriteLine(HostSettingManager.Get(HostSettingNames.SvnHookPath) + @" post-commit %1 %2");
 
                 return sb.ToString();
 
@@ -124,9 +121,9 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static string CreateTag(int projectId, string tagName, string comment, string userName, string password)
         {
-            Project proj = ProjectManager.GetById(projectId);
+            var proj = ProjectManager.GetById(projectId);
 
-            string repoUrl = proj.SvnRepositoryUrl;
+            var repoUrl = proj.SvnRepositoryUrl;
 
             if (!repoUrl.EndsWith("/"))
                 repoUrl += "/";
@@ -150,7 +147,7 @@ namespace BugNET.BLL
 
         public static bool IsValidSubversionName(string name)
         {
-            return Regex.IsMatch(name, "\\A[\\w-\\.]+\\z");
+            return Regex.IsMatch(name, @"\A[\w-\.]+\z");
         }
 
         /// <summary>
@@ -176,7 +173,7 @@ namespace BugNET.BLL
 
 
         /// <summary>
-        /// Runs a seperate process and returns the standard outout and error text. This is intended for command line apps only.
+        /// Runs a separate process and returns the standard out and error text. This is intended for command line apps only.
         /// </summary>
         /// <param name="command"></param>
         /// <param name="args"></param>
@@ -208,8 +205,8 @@ namespace BugNET.BLL
                 if (!proc.WaitForExit(killAfterSeconds * 1000))
                     proc.Kill();
 
-                if (Errors.ContainsKey(proc.Id))
-                    retVal += Environment.NewLine + "Error: " + Environment.NewLine + Errors[proc.Id];
+                if (Errors.TryGetValue(proc.Id, out var error))
+                    retVal += Environment.NewLine + "Error: " + Environment.NewLine + error;
 
                 // hide password from being displayed
                 var regexObj = new Regex("--password\\s+\\S+\\s", RegexOptions.IgnoreCase);
@@ -237,24 +234,20 @@ namespace BugNET.BLL
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        static void CommandProcessErrorDataReceived(object sender, DataReceivedEventArgs e)
+        private static void CommandProcessErrorDataReceived(object sender, DataReceivedEventArgs e)
         {
-            // RC: Sometimes an error occurres in hear. I think the process is ending while we are getting the data, but Im not sure.
+            // RC: Sometimes an error occurs hear. I think the process is ending while we are getting the data, but Im not sure.
             // I'm stuffing it for now.
             try
             {
-                if (sender != null)
-                {
-                    if (!string.IsNullOrEmpty(e.Data))
-                    {
-                        var id = ((Process)sender).Id;
+                if (sender == null) return;
+                if (string.IsNullOrEmpty(e.Data)) return;
+                var id = ((Process)sender).Id;
 
-                        if (Errors.ContainsKey(id))
-                            Errors[id] += Environment.NewLine + e.Data;
-                        else
-                            Errors.Add(id, e.Data);
-                    }
-                }
+                if (Errors.ContainsKey(id))
+                    Errors[id] += Environment.NewLine + e.Data;
+                else
+                    Errors.Add(id, e.Data);
             }
             catch (Exception ex)
             {

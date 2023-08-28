@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace LumiSoft.Net.IMAP.Client
+﻿namespace LumiSoft.Net.IMAP.Client
 {
     /// <summary>
     /// This class specified IMAP command part type.
