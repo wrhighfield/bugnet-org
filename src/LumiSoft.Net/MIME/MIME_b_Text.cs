@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-
 using LumiSoft.Net.IO;
 
 namespace LumiSoft.Net.MIME
@@ -35,16 +34,16 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>mediaType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected static new MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
             if(defaultContentType == null){
-                throw new ArgumentNullException("defaultContentType");
+                throw new ArgumentNullException(nameof(defaultContentType));
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             MIME_b_Text retVal = null;
@@ -55,7 +54,7 @@ namespace LumiSoft.Net.MIME
                 retVal = new MIME_b_Text(defaultContentType.TypeWithSubtype);
             }
 
-            Net_Utils.StreamCopy(stream,retVal.EncodedStream,32000);
+            NetUtils.StreamCopy(stream,retVal.EncodedStream,32000);
             retVal.SetModified(false);
 
             return retVal;
@@ -78,20 +77,20 @@ namespace LumiSoft.Net.MIME
         public void SetText(string transferEncoding,Encoding charset,string text)
         {
             if(transferEncoding == null){
-                throw new ArgumentNullException("transferEncoding");
+                throw new ArgumentNullException(nameof(transferEncoding));
             }
             if(charset == null){
-                throw new ArgumentNullException("charset");
+                throw new ArgumentNullException(nameof(charset));
             }
             if(text == null){
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
             }
-            if(this.Entity == null){
+            if(Entity == null){
                 throw new InvalidOperationException("Body must be bounded to some entity first.");
             }
 
             SetData(new MemoryStream(charset.GetBytes(text)),transferEncoding);
-            this.Entity.ContentType.Param_Charset = charset.WebName;            
+            Entity.ContentType.Param_Charset = charset.WebName;            
         }
 
         #endregion
@@ -108,22 +107,20 @@ namespace LumiSoft.Net.MIME
         {
             // RFC 2046 4.1.2. The default character set, US-ASCII.
             
-            if(this.Entity.ContentType == null || string.IsNullOrEmpty(this.Entity.ContentType.Param_Charset)){
+            if(Entity.ContentType == null || string.IsNullOrEmpty(Entity.ContentType.Param_Charset)){
                 return Encoding.ASCII;
             }
-            else{
-                // Handle custome/extended charsets, just remove "x-" from start.
-                if(this.Entity.ContentType.Param_Charset.ToLower().StartsWith("x-")){
-                    return Encoding.GetEncoding(this.Entity.ContentType.Param_Charset.Substring(2));
-                }
-                // Cp1252 is not IANA reggistered, some mail clients send it, it equal to windows-1252.
-                else if(string.Equals(this.Entity.ContentType.Param_Charset,"cp1252",StringComparison.InvariantCultureIgnoreCase)){
-                    return Encoding.GetEncoding("windows-1252");
-                }
-                else{
-                    return Encoding.GetEncoding(this.Entity.ContentType.Param_Charset);
-                }
+
+            // Handle custome/extended charsets, just remove "x-" from start.
+            if(Entity.ContentType.Param_Charset.ToLower().StartsWith("x-")){
+                return Encoding.GetEncoding(Entity.ContentType.Param_Charset.Substring(2));
             }
+            // Cp1252 is not IANA reggistered, some mail clients send it, it equal to windows-1252.
+
+            if(string.Equals(Entity.ContentType.Param_Charset,"cp1252",StringComparison.InvariantCultureIgnoreCase)){
+                return Encoding.GetEncoding("windows-1252");
+            }
+            return Encoding.GetEncoding(Entity.ContentType.Param_Charset);
         }
 
         #endregion
@@ -136,10 +133,7 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         /// <exception cref="ArgumentException">Is raised when not supported content-type charset or not supported content-transfer-encoding value.</exception>
         /// <exception cref="NotSupportedException">Is raised when body contains not supported Content-Transfer-Encoding.</exception>
-        public string Text
-        {
-            get{ return GetCharset().GetString(this.Data); }
-        }
+        public string Text => GetCharset().GetString(Data);
 
         #endregion
     }

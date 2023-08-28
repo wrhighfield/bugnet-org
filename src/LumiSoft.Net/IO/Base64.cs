@@ -10,7 +10,7 @@ namespace LumiSoft.Net.IO
     {
         #region BASE64_ENCODE_TABLE
 
-        private readonly static byte[] BASE64_ENCODE_TABLE = new byte[]{
+        private static readonly byte[] BASE64_ENCODE_TABLE = new byte[]{
 		    (byte)'A',(byte)'B',(byte)'C',(byte)'D',(byte)'E',(byte)'F',(byte)'G',(byte)'H',(byte)'I',(byte)'J',
             (byte)'K',(byte)'L',(byte)'M',(byte)'N',(byte)'O',(byte)'P',(byte)'Q',(byte)'R',(byte)'S',(byte)'T',
             (byte)'U',(byte)'V',(byte)'W',(byte)'X',(byte)'Y',(byte)'Z',(byte)'a',(byte)'b',(byte)'c',(byte)'d',
@@ -24,7 +24,7 @@ namespace LumiSoft.Net.IO
 
         #region BASE64_DECODE_TABLE
 
-        private readonly static short[] BASE64_DECODE_TABLE = new short[]{
+        private static readonly short[] BASE64_DECODE_TABLE = new short[]{
             -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,  // 0 -    9
 		    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,  //10 -   19
 		    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,  //20 -   29
@@ -80,14 +80,14 @@ namespace LumiSoft.Net.IO
         public byte[] Decode(string value,bool ignoreNonBase64Chars)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
-            byte[] encBuffer = Encoding.ASCII.GetBytes(value);
-            byte[] buffer    = new byte[encBuffer.Length];
+            var encBuffer = Encoding.ASCII.GetBytes(value);
+            var buffer    = new byte[encBuffer.Length];
 
-            int decodedCount = Decode(encBuffer,0,encBuffer.Length,buffer,0,ignoreNonBase64Chars);
-            byte[] retVal = new byte[decodedCount];
+            var decodedCount = Decode(encBuffer,0,encBuffer.Length,buffer,0,ignoreNonBase64Chars);
+            var retVal = new byte[decodedCount];
             Array.Copy(buffer,retVal,decodedCount);
 
             return retVal;
@@ -106,13 +106,13 @@ namespace LumiSoft.Net.IO
         public byte[] Decode(byte[] data,int offset,int count,bool ignoreNonBase64Chars)
         {
             if(data == null){
-                throw new ArgumentNullException("data");
+                throw new ArgumentNullException(nameof(data));
             }
 
-            byte[] buffer = new byte[data.Length];
+            var buffer = new byte[data.Length];
 
-            int decodedCount = Decode(data,offset,count,buffer,0,ignoreNonBase64Chars);
-            byte[] retVal = new byte[decodedCount];
+            var decodedCount = Decode(data,offset,count,buffer,0,ignoreNonBase64Chars);
+            var retVal = new byte[decodedCount];
             Array.Copy(buffer,retVal,decodedCount);
 
             return retVal;
@@ -134,22 +134,22 @@ namespace LumiSoft.Net.IO
         public int Decode(byte[] encBuffer,int encOffset,int encCount,byte[] buffer,int offset,bool ignoreNonBase64Chars)
         {
             if(encBuffer == null){
-                throw new ArgumentNullException("encBuffer");
+                throw new ArgumentNullException(nameof(encBuffer));
             }           
             if(encOffset < 0){
-                throw new ArgumentOutOfRangeException("encOffset","Argument 'encOffset' value must be >= 0.");
+                throw new ArgumentOutOfRangeException(nameof(encOffset),"Argument 'encOffset' value must be >= 0.");
             }
             if(encCount < 0){
-                throw new ArgumentOutOfRangeException("encCount","Argument 'encCount' value must be >= 0.");
+                throw new ArgumentOutOfRangeException(nameof(encCount),"Argument 'encCount' value must be >= 0.");
             }
             if(encOffset + encCount > encBuffer.Length){
-                throw new ArgumentOutOfRangeException("encCount","Argument 'count' is bigger than than argument 'encBuffer'.");
+                throw new ArgumentOutOfRangeException(nameof(encCount),"Argument 'count' is bigger than than argument 'encBuffer'.");
             }
             if(buffer == null){
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if(offset < 0 || offset >= buffer.Length){
-                throw new ArgumentOutOfRangeException("offset");
+                throw new ArgumentOutOfRangeException(nameof(offset));
             }
 
             /* RFC 4648.
@@ -183,24 +183,24 @@ namespace LumiSoft.Net.IO
 					// |    8-bit         |    8-bit        |    8-bit         |
 			*/
 
-            int    decodeOffset  = encOffset;
-            int    decodedOffset = 0;
-            byte[] base64Block   = new byte[4];
+            var    decodeOffset  = encOffset;
+            var    decodedOffset = 0;
+            var base64Block   = new byte[4];
 
             // Decode while we have data.
-            while((decodeOffset - encOffset) < encCount){
+            while(decodeOffset - encOffset < encCount){
                 // Read 4-byte base64 block.
-                int offsetInBlock = 0;
+                var offsetInBlock = 0;
                 while(offsetInBlock < 4){
                     // Check that we won't exceed buffer data.
-                    if((decodeOffset - encOffset) >= encCount){
+                    if(decodeOffset - encOffset >= encCount)
+                    {
                         if(offsetInBlock == 0){
                             break;
                         }
                         // Incomplete 4-byte base64 data block.
-                        else{
-                            throw new FormatException("Invalid incomplete base64 4-char block");
-                        }
+
+                        throw new FormatException("Invalid incomplete base64 4-char block");
                     }
 
                     // Read byte.
@@ -223,7 +223,8 @@ namespace LumiSoft.Net.IO
                         break;
                     }
                     // Non-base64 char.
-                    else if(b > 127 || BASE64_DECODE_TABLE[b] == -1){
+
+                    if(b > 127 || BASE64_DECODE_TABLE[b] == -1){
                         if(!ignoreNonBase64Chars){
                             throw new FormatException("Invalid base64 char '" + b + "'.");
                         }

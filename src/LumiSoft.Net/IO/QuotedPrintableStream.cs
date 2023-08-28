@@ -8,13 +8,13 @@ namespace LumiSoft.Net.IO
     /// </summary>
     public class QuotedPrintableStream : Stream
     {
-        private SmartStream m_pStream        = null;
+        private SmartStream m_pStream;
         private FileAccess  m_AccessMode     = FileAccess.ReadWrite;
-        private byte[]      m_pDecodedBuffer = null;
-        private int         m_DecodedOffset  = 0;
-        private int         m_DecodedCount   = 0;
-        private byte[]      m_pEncodedBuffer = null;
-        private int         m_EncodedCount   = 0;
+        private byte[]      m_pDecodedBuffer;
+        private int         m_DecodedOffset;
+        private int         m_DecodedCount;
+        private byte[]      m_pEncodedBuffer;
+        private int         m_EncodedCount;
 
         /// <summary>
         /// Default constructor.
@@ -24,11 +24,7 @@ namespace LumiSoft.Net.IO
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
         public QuotedPrintableStream(SmartStream stream,FileAccess access)
         {
-            if(stream == null){
-                throw new ArgumentNullException("stream");
-            }
-
-            m_pStream    = stream;
+            m_pStream    = stream ?? throw new ArgumentNullException(nameof(stream));
             m_AccessMode = access;
 
             m_pDecodedBuffer = new byte[32000];
@@ -99,7 +95,7 @@ namespace LumiSoft.Net.IO
         public override int Read(byte[] buffer,int offset,int count)
         {
             if(buffer == null){
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if(offset < 0 || offset > buffer.Length){
                 throw new ArgumentException("Invalid argument 'offset' value.");
@@ -116,60 +112,59 @@ namespace LumiSoft.Net.IO
                 if(m_DecodedOffset >= m_DecodedCount){
                     m_DecodedOffset = 0;
                     m_DecodedCount  = 0;
-                    SmartStream.ReadLineAsyncOP readLineOP = new SmartStream.ReadLineAsyncOP(new byte[32000],SizeExceededAction.ThrowException);
+                    var readLineOP = new SmartStream.ReadLineAsyncOP(new byte[32000],SizeExceededAction.ThrowException);
                     m_pStream.ReadLine(readLineOP,false);
                     // IO error reading line.
                     if(readLineOP.Error != null){
                         throw readLineOP.Error;
                     }
                     // We reached end of stream.
-                    else if(readLineOP.BytesInBuffer == 0){
+
+                    if(readLineOP.BytesInBuffer == 0){
                         return 0;
                     }
                     // Decode quoted-printable line.
-                    else{
-                        // Process bytes.
-                        bool softLineBreak = false;
-                        int lineLength     = readLineOP.LineBytesInBuffer;
-                        for(int i=0;i<readLineOP.LineBytesInBuffer;i++){
-                            byte b = readLineOP.Buffer[i];
-                            // We have soft line-break.
-                            if(b == '=' && i == (lineLength - 1)){
-                                softLineBreak = true;
-                            }
-                            // We should have =XX hex-byte.
-                            else if(b == '='){
-                                byte b1 = readLineOP.Buffer[++i];
-                                byte b2 = readLineOP.Buffer[++i];
+                    // Process bytes.
+                    var softLineBreak = false;
+                    var lineLength     = readLineOP.LineBytesInBuffer;
+                    for(var i=0;i<readLineOP.LineBytesInBuffer;i++){
+                        var b = readLineOP.Buffer[i];
+                        // We have soft line-break.
+                        if(b == '=' && i == lineLength - 1){
+                            softLineBreak = true;
+                        }
+                        // We should have =XX hex-byte.
+                        else if(b == '='){
+                            var b1 = readLineOP.Buffer[++i];
+                            var b2 = readLineOP.Buffer[++i];
                         
-                                byte b3 = 0;
-                                if(byte.TryParse(new string(new char[]{(char)b1,(char)b2}),System.Globalization.NumberStyles.HexNumber,null,out b3)){
-                                    m_pDecodedBuffer[m_DecodedCount++] = b3;
-                                }
-                                // Not hex number, leave it as it is.
-                                else{
-                                    m_pDecodedBuffer[m_DecodedCount++] = (byte)'=';
-                                    m_pDecodedBuffer[m_DecodedCount++] = b1;
-                                    m_pDecodedBuffer[m_DecodedCount++] = b2;
-                                }
+                            byte b3 = 0;
+                            if(byte.TryParse(new string(new[]{(char)b1,(char)b2}),System.Globalization.NumberStyles.HexNumber,null,out b3)){
+                                m_pDecodedBuffer[m_DecodedCount++] = b3;
                             }
-                            // Normal char.
+                            // Not hex number, leave it as it is.
                             else{
-                                m_pDecodedBuffer[m_DecodedCount++] = b;
+                                m_pDecodedBuffer[m_DecodedCount++] = (byte)'=';
+                                m_pDecodedBuffer[m_DecodedCount++] = b1;
+                                m_pDecodedBuffer[m_DecodedCount++] = b2;
                             }
                         }
-
-                        // Add hard line break only if there was one in original data.
-                        if(readLineOP.LineBytesInBuffer != readLineOP.BytesInBuffer && !softLineBreak){
-                            m_pDecodedBuffer[m_DecodedCount++] = (byte)'\r';
-                            m_pDecodedBuffer[m_DecodedCount++] = (byte)'\n';
+                        // Normal char.
+                        else{
+                            m_pDecodedBuffer[m_DecodedCount++] = b;
                         }
+                    }
+
+                    // Add hard line break only if there was one in original data.
+                    if(readLineOP.LineBytesInBuffer != readLineOP.BytesInBuffer && !softLineBreak){
+                        m_pDecodedBuffer[m_DecodedCount++] = (byte)'\r';
+                        m_pDecodedBuffer[m_DecodedCount++] = (byte)'\n';
                     }
                 }
 
                 // We have some decoded data, return it.
                 if(m_DecodedOffset < m_DecodedCount){
-                    int countToCopy = Math.Min(count,m_DecodedCount - m_DecodedOffset);
+                    var countToCopy = Math.Min(count,m_DecodedCount - m_DecodedOffset);
                     Array.Copy(m_pDecodedBuffer,m_DecodedOffset,buffer,offset,countToCopy);
                     m_DecodedOffset += countToCopy;
 
@@ -194,7 +189,7 @@ namespace LumiSoft.Net.IO
         public override void Write(byte[] buffer,int offset,int count)
         {
             if(buffer == null){
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             if(offset < 0 || offset > buffer.Length){
                 throw new ArgumentException("Invalid argument 'offset' value.");
@@ -207,8 +202,8 @@ namespace LumiSoft.Net.IO
             }
 
             // Process bytes.
-            for(int i=0;i<count;i++){
-                byte b = buffer[offset + i];
+            for(var i=0;i<count;i++){
+                var b = buffer[offset + i];
 
                 // We don't need to encode byte.
                 if((b >= 33 && b <= 60) || (b >= 62 && b <= 126)){
@@ -253,40 +248,26 @@ namespace LumiSoft.Net.IO
         /// Gets a value indicating whether the current stream supports reading.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
-        public override bool CanRead
-        { 
-            get{ return (m_AccessMode & FileAccess.Read) != 0; } 
-        }
+        public override bool CanRead => (m_AccessMode & FileAccess.Read) != 0;
 
         /// <summary>
         /// Gets a value indicating whether the current stream supports seeking.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
-        public override bool CanSeek
-        { 
-            get{ return false; } 
-        }
+        public override bool CanSeek => false;
 
         /// <summary>
         /// Gets a value indicating whether the current stream supports writing.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
-        public override bool CanWrite
-        { 
-            get{ return (m_AccessMode & FileAccess.Write) != 0; } 
-        }
+        public override bool CanWrite => (m_AccessMode & FileAccess.Write) != 0;
 
         /// <summary>
         /// Gets the length in bytes of the stream.  This method is not supported and always throws a NotSupportedException.
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         /// <exception cref="NotSupportedException">Is raised when this property is accessed.</exception>
-        public override long Length
-        { 
-            get{
-                throw new NotSupportedException();
-            } 
-        }
+        public override long Length => throw new NotSupportedException();
 
         /// <summary>
         /// Gets or sets the position within the current stream. This method is not supported and always throws a NotSupportedException.
@@ -295,13 +276,9 @@ namespace LumiSoft.Net.IO
         /// <exception cref="NotSupportedException">Is raised when this property is accessed.</exception>
         public override long Position
         { 
-            get{
-                throw new NotSupportedException();
-            } 
+            get => throw new NotSupportedException();
 
-            set{
-                throw new NotSupportedException();
-            }
+            set => throw new NotSupportedException();
         }
 
         #endregion

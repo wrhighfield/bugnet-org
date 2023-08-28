@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-
 using LumiSoft.Net.IO;
 using LumiSoft.Net.Mail;
 
@@ -12,7 +11,7 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_b_MessageRfc822 : MIME_b
     {
-        private Mail_Message m_pMessage = null;
+        private Mail_Message m_pMessage;
 
         /// <summary>
         /// Default constructor.
@@ -34,19 +33,19 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected static new MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
             if(defaultContentType == null){
-                throw new ArgumentNullException("defaultContentType");
+                throw new ArgumentNullException(nameof(defaultContentType));
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
-            MIME_b_MessageRfc822 retVal = new MIME_b_MessageRfc822();
+            var retVal = new MIME_b_MessageRfc822();
             retVal.m_pMessage = Mail_Message.ParseFromStream(stream);
 
             return retVal;
@@ -66,10 +65,10 @@ namespace LumiSoft.Net.MIME
         /// <param name="headerReencode">If true always specified encoding is used for header. If false and header field value not modified, 
         /// original encoding is kept.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
-        internal protected override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
+        protected internal override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
         {
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             m_pMessage.ToStream(stream,headerWordEncoder,headerParmetersCharset,headerReencode);
@@ -83,11 +82,8 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets if body has modified.
         /// </summary>
-        public override bool IsModified
-        {
-            get{ return m_pMessage.IsModified; }
-        }
-    
+        public override bool IsModified => m_pMessage.IsModified;
+
         /// <summary>
         /// Gets embbed mail message.
         /// </summary>
@@ -95,19 +91,19 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="InvalidOperationException">Is raised when this method is accessed and this body is not bounded to any entity.</exception>
         public Mail_Message Message
         {
-            get{ return m_pMessage; }
+            get => m_pMessage;
 
             set{
                 if(value == null){
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
-                if(this.Entity == null){
+                if(Entity == null){
                     throw new InvalidOperationException("Body must be bounded to some entity first.");
                 }
 
                 // Owner entity has no content-type or has different content-type, just add/overwrite it.
-                if(this.Entity.ContentType == null || !string.Equals(this.Entity.ContentType.TypeWithSubtype,this.MediaType,StringComparison.InvariantCultureIgnoreCase)){
-                    this.Entity.ContentType = new MIME_h_ContentType(this.MediaType);
+                if(Entity.ContentType == null || !string.Equals(Entity.ContentType.TypeWithSubtype,MediaType,StringComparison.InvariantCultureIgnoreCase)){
+                    Entity.ContentType = new MIME_h_ContentType(MediaType);
                 }
 
                 m_pMessage = value;

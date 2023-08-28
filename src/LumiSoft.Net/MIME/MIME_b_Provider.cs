@@ -9,7 +9,7 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_b_Provider
     {
-        private Dictionary<string,Type> m_pBodyTypes = null;
+        private Dictionary<string,Type> m_pBodyTypes;
 
         /// <summary>
         /// Default constructor.
@@ -46,16 +46,16 @@ namespace LumiSoft.Net.MIME
         public MIME_b Parse(MIME_Entity owner,SmartStream stream,MIME_h_ContentType defaultContentType)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
             if(defaultContentType == null){
-                throw new ArgumentNullException("defaultContentType");
+                throw new ArgumentNullException(nameof(defaultContentType));
             }
 
-            string mediaType = defaultContentType.TypeWithSubtype;
+            var mediaType = defaultContentType.TypeWithSubtype;
             try{
                 if(owner.ContentType != null){
                     mediaType = owner.ContentType.TypeWithSubtype;
@@ -76,7 +76,7 @@ namespace LumiSoft.Net.MIME
             else{
                 // Registered list of mediaTypes are available: http://www.iana.org/assignments/media-types/.
 
-                string mediaRootType = mediaType.Split('/')[0].ToLowerInvariant();
+                var mediaRootType = mediaType.Split('/')[0].ToLowerInvariant();
                 if(mediaRootType == "application"){
                     bodyType = typeof(MIME_b_Application);
                 }

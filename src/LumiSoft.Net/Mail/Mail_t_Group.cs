@@ -10,8 +10,8 @@ namespace LumiSoft.Net.Mail
     /// </summary>
     public class Mail_t_Group : Mail_t_Address
     {
-        private string               m_DisplayName = null;
-        private List<Mail_t_Mailbox> m_pList       = null;
+        private string               m_DisplayName;
+        private List<Mail_t_Mailbox> m_pList;
 
         /// <summary>
         /// Default constructor.
@@ -43,7 +43,7 @@ namespace LumiSoft.Net.Mail
         /// <returns>Returns address as string value.</returns>
         public override string ToString(MIME_Encoding_EncodedWord wordEncoder)
         {
-            StringBuilder retVal = new StringBuilder();
+            var retVal = new StringBuilder();
             if(string.IsNullOrEmpty(m_DisplayName)){
                 retVal.Append(":");
             }
@@ -52,12 +52,12 @@ namespace LumiSoft.Net.Mail
                     retVal.Append(wordEncoder.Encode(m_DisplayName) + ":");
                 }
                 else{
-                    retVal.Append(TextUtils.QuoteString(m_DisplayName) + ":");
+                    retVal.Append(TextUtilities.QuoteString(m_DisplayName) + ":");
                 }
             }
-            for(int i=0;i<m_pList.Count;i++){
+            for(var i=0;i<m_pList.Count;i++){
                 retVal.Append(m_pList[i].ToString(wordEncoder));
-                if(i < (m_pList.Count - 1)){
+                if(i < m_pList.Count - 1){
                     retVal.Append(",");
                 }
             }
@@ -76,18 +76,15 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public string DisplayName
         {
-            get{ return m_DisplayName; }
+            get => m_DisplayName;
 
-            set{ m_DisplayName = value; }
+            set => m_DisplayName = value;
         }
 
         /// <summary>
         /// Gets groiup address members collection.
         /// </summary>
-        public List<Mail_t_Mailbox> Members
-        {
-            get{ return m_pList; }
-        }
+        public List<Mail_t_Mailbox> Members => m_pList;
 
         #endregion
     }

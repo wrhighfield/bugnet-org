@@ -33,16 +33,16 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>mediaType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected static new MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
             if(defaultContentType == null){
-                throw new ArgumentNullException("defaultContentType");
+                throw new ArgumentNullException(nameof(defaultContentType));
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             MIME_b_Video retVal = null;
@@ -53,7 +53,7 @@ namespace LumiSoft.Net.MIME
                 retVal = new MIME_b_Video(defaultContentType.TypeWithSubtype);
             }
 
-            Net_Utils.StreamCopy(stream,retVal.EncodedStream,32000);
+            NetUtils.StreamCopy(stream,retVal.EncodedStream,32000);
 
             return retVal;
         }

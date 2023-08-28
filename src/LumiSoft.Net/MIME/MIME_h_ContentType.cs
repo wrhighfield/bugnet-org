@@ -52,11 +52,11 @@ namespace LumiSoft.Net.MIME
     /// </remarks>
     public class MIME_h_ContentType : MIME_h
     {
-        private bool                       m_IsModified  = false;
-        private string                     m_ParseValue  = null;
+        private bool                       m_IsModified;
+        private string                     m_ParseValue;
         private string                     m_Type        = "";
         private string                     m_SubType     = "";
-        private MIME_h_ParameterCollection m_pParameters = null;
+        private MIME_h_ParameterCollection m_pParameters;
 
         /// <summary>
         /// Default constructor.
@@ -69,7 +69,7 @@ namespace LumiSoft.Net.MIME
                 throw new ArgumentNullException(mediaType);
             }
 
-            string[] type_subtype = mediaType.Split(new char[]{'/',},2);
+            var type_subtype = mediaType.Split(new[]{'/',},2);
             if(type_subtype.Length == 2){
                 if(type_subtype[0] == "" || !MIME_Reader.IsToken(type_subtype[0])){
                     throw new ArgumentException("Invalid argument 'mediaType' value '" + mediaType + "', value must be token.");
@@ -110,21 +110,21 @@ namespace LumiSoft.Net.MIME
         public static MIME_h_ContentType Parse(string value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             // We should not have encoded words here, but some email clients do this, so encoded them if any.
-            string valueDecoded = MIME_Encoding_EncodedWord.DecodeS(value);
+            var valueDecoded = MIME_Encoding_EncodedWord.DecodeS(value);
 
-            MIME_h_ContentType retVal = new MIME_h_ContentType();
+            var retVal = new MIME_h_ContentType();
             
-            string[] name_value = valueDecoded.Split(new char[]{':'},2);
+            var name_value = valueDecoded.Split(new[]{':'},2);
             if(name_value.Length != 2){
                 throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
             }
             
-            MIME_Reader r = new MIME_Reader(name_value[1]);
-            string type = r.Token();
+            var r = new MIME_Reader(name_value[1]);
+            var type = r.Token();
             if(type == null){
                 throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
             }
@@ -134,7 +134,7 @@ namespace LumiSoft.Net.MIME
                 throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
             }
 
-            string subtype = r.Token();
+            var subtype = r.Token();
             if(subtype == null){
                 throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
             }
@@ -164,17 +164,16 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns header field as string.</returns>
         public override string ToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset,bool reEncode)
         {
-            if(!reEncode && !this.IsModified){
+            if(!reEncode && !IsModified){
                 return m_ParseValue;
             }
-            else{
-                StringBuilder retVal = new StringBuilder();
-                retVal.Append("Content-Type: " + m_Type + "/" + m_SubType);
-                retVal.Append(m_pParameters.ToString(parmetersCharset));
-                retVal.Append("\r\n");
 
-                return retVal.ToString();
-            }
+            var retVal = new StringBuilder();
+            retVal.Append("Content-Type: " + m_Type + "/" + m_SubType);
+            retVal.Append(m_pParameters.ToString(parmetersCharset));
+            retVal.Append("\r\n");
+
+            return retVal.ToString();
         }
 
         #endregion
@@ -187,70 +186,49 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         /// <remarks>All new added header fields has <b>IsModified = true</b>.</remarks>
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
-        public override bool IsModified
-        {
-            get{ return m_IsModified || m_pParameters.IsModified; }
-        }
+        public override bool IsModified => m_IsModified || m_pParameters.IsModified;
 
         /// <summary>
         /// Returns always "Content-Type".
         /// </summary>
-        public override string Name
-        {
-            get { return "Content-Type"; }
-        }
+        public override string Name => "Content-Type";
 
         /// <summary>
         /// Gets media type. For example: application,image,text, ... .
         /// </summary>
         /// <remarks>The official list of reggistered types are http://www.iana.org/assignments/media-types .</remarks>
-        public string Type
-        {
-            get{ return m_Type; }
-        }
+        public string Type => m_Type;
 
         /// <summary>
         /// Gets media sub-type. For example for text/plain, sub-type is 'plain'.
         /// </summary>
         /// <remarks>The official list of reggistered types are http://www.iana.org/assignments/media-types .</remarks>
-        public string SubType
-        {
-            get{ return m_SubType; }
-        }
+        public string SubType => m_SubType;
 
         /// <summary>
         /// Gets media type with subtype as Type/SubType. Well known value are in <see cref="MIME_MediaTypes">MIME_MediaTypes</see>. For example: text/plain.
         /// </summary>
         [Obsolete("Mispelled 'TypeWithSubype', use TypeWithSubtype instead !")]
-        public string TypeWithSubype
-        {
-            get{ return m_Type + "/" + m_SubType; }
-        }
+        public string TypeWithSubype => m_Type + "/" + m_SubType;
 
         /// <summary>
         /// Gets media type with subtype as Type/SubType. Well known value are in <see cref="MIME_MediaTypes">MIME_MediaTypes</see>. For example: text/plain.
         /// </summary>
-        public string TypeWithSubtype
-        {
-            get{ return m_Type + "/" + m_SubType; }
-        }
+        public string TypeWithSubtype => m_Type + "/" + m_SubType;
 
         /// <summary>
         /// Gets Content-Type parameters collection.
         /// </summary>
-        public MIME_h_ParameterCollection Parameters
-        {
-            get{ return m_pParameters; }
-        }
+        public MIME_h_ParameterCollection Parameters => m_pParameters;
 
         /// <summary>
         /// Gets or sets Content-Type <b>name</b> parameter value. Value null means not specified.
         /// </summary>
         public string Param_Name
         {
-            get{ return m_pParameters["name"]; }
+            get => m_pParameters["name"];
 
-            set{ m_pParameters["name"] = value; }
+            set => m_pParameters["name"] = value;
         }
         
         /// <summary>
@@ -258,9 +236,9 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public string Param_Charset
         {
-            get{ return m_pParameters["charset"]; }
+            get => m_pParameters["charset"];
 
-            set{ m_pParameters["charset"] = value; }
+            set => m_pParameters["charset"] = value;
         }
 
         /// <summary>
@@ -268,9 +246,9 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public string Param_Boundary
         {
-            get{ return m_pParameters["boundary"]; }
+            get => m_pParameters["boundary"];
 
-            set{ m_pParameters["boundary"] = value; }
+            set => m_pParameters["boundary"] = value;
         }
 
         #endregion

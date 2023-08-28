@@ -16,9 +16,9 @@ namespace LumiSoft.Net.Mail
     /// </example>
     public class Mail_h_Mailbox : MIME_h
     {
-        private string         m_ParseValue = null;
-        private string         m_Name       = null;
-        private Mail_t_Mailbox m_pAddress   = null;
+        private string         m_ParseValue;
+        private string         m_Name;
+        private Mail_t_Mailbox m_pAddress;
 
         /// <summary>
         /// Default constructor.
@@ -30,13 +30,13 @@ namespace LumiSoft.Net.Mail
         public Mail_h_Mailbox(string fieldName,Mail_t_Mailbox mailbox)
         {
             if(fieldName == null){
-                throw new ArgumentNullException("fieldName");
+                throw new ArgumentNullException(nameof(fieldName));
             }
             if(fieldName == string.Empty){
                 throw new ArgumentException("Argument 'fieldName' value must be specified.");
             }
             if(mailbox == null){
-                throw new ArgumentNullException("mailbox");
+                throw new ArgumentNullException(nameof(mailbox));
             }
 
             m_Name     = fieldName;
@@ -56,31 +56,32 @@ namespace LumiSoft.Net.Mail
         public static Mail_h_Mailbox Parse(string value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
-            string[] name_value = value.Split(new char[]{':'},2);
+            var name_value = value.Split(new[]{':'},2);
             if(name_value.Length != 2){
                 throw new ParseException("Invalid header field value '" + value + "'.");
             }
 
-            MIME_Reader r = new MIME_Reader(name_value[1].Trim());
+            var r = new MIME_Reader(name_value[1].Trim());
 
-            string word = r.QuotedReadToDelimiter(new char[]{',','<',':'});
+            var word = r.QuotedReadToDelimiter(new[]{',','<',':'});
             // Invalid value.
             if(word == null){
                 throw new ParseException("Invalid header field value '" + value + "'.");
             }
             // name-addr
-            else if(r.Peek(true) == '<'){
-                Mail_h_Mailbox h = new Mail_h_Mailbox(name_value[0],new Mail_t_Mailbox(word != null ? MIME_Encoding_EncodedWord.DecodeS(TextUtils.UnQuoteString(word)) : null,r.ReadParenthesized()));
+
+            if(r.Peek(true) == '<'){
+                var h = new Mail_h_Mailbox(name_value[0],new Mail_t_Mailbox(word != null ? MIME_Encoding_EncodedWord.DecodeS(TextUtilities.UnQuoteString(word)) : null,r.ReadParenthesized()));
                 h.m_ParseValue = value;
 
                 return h;
             }
             // addr-spec
             else{
-                Mail_h_Mailbox h = new Mail_h_Mailbox(name_value[0],new Mail_t_Mailbox(null,word));
+                var h = new Mail_h_Mailbox(name_value[0],new Mail_t_Mailbox(null,word));
                 h.m_ParseValue = value;
 
                 return h;
@@ -104,9 +105,8 @@ namespace LumiSoft.Net.Mail
             if(!reEncode && m_ParseValue != null){
                 return m_ParseValue;
             }
-            else{
-                return m_Name + ": " + m_pAddress.ToString(wordEncoder) + "\r\n";
-            }
+
+            return m_Name + ": " + m_pAddress.ToString(wordEncoder) + "\r\n";
         }
 
         #endregion
@@ -119,26 +119,17 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         /// <remarks>All new added header fields has <b>IsModified = true</b>.</remarks>
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
-        public override bool IsModified
-        {
-            get{ return false; }
-        }
+        public override bool IsModified => false;
 
         /// <summary>
         /// Gets header field name. For example "Sender".
         /// </summary>
-        public override string Name
-        {
-            get{ return m_Name; }
-        }
+        public override string Name => m_Name;
 
         /// <summary>
         /// Gets mailbox address.
         /// </summary>
-        public Mail_t_Mailbox Address
-        {
-            get{ return m_pAddress; }
-        }
+        public Mail_t_Mailbox Address => m_pAddress;
 
         #endregion
     }

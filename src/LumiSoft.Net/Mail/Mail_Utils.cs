@@ -21,7 +21,7 @@ namespace LumiSoft.Net.Mail
         internal static string SMTP_Mailbox(MIME_Reader reader)
         {
             if(reader == null){
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             // TODO:
@@ -32,7 +32,7 @@ namespace LumiSoft.Net.Mail
                 Dot-string     = Atom *("."  Atom)
             */
 
-            StringBuilder retVal = new StringBuilder();
+            var retVal = new StringBuilder();
             if(reader.Peek(true) == '\"'){
                 retVal.Append("\"" + reader.QuotedString() + "\"");
             }
@@ -43,14 +43,13 @@ namespace LumiSoft.Net.Mail
             if(reader.Peek(true) != '@'){
                 return null;
             }
-            else{
-                // Eat "@".
-                reader.Char(true);
 
-                retVal.Append('@');
-                retVal.Append(reader.DotAtom());
-            }
-                        
+            // Eat "@".
+            reader.Char(true);
+
+            retVal.Append('@');
+            retVal.Append(reader.DotAtom());
+
             return retVal.ToString();
         }
 

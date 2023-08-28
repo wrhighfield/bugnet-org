@@ -71,7 +71,7 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns header field value as string.</returns>
         public string ValueToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset)
         {
-            return ToString(wordEncoder,parmetersCharset).Split(new char[]{':'},2)[1].TrimStart();
+            return ToString(wordEncoder,parmetersCharset).Split(new[]{':'},2)[1].TrimStart();
         }
 
         #endregion

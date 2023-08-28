@@ -11,7 +11,7 @@ namespace LumiSoft.Net.MIME
     public class MIME_Encoding_EncodedWord
     {
         private MIME_EncodedWordEncoding m_Encoding;
-        private Encoding                 m_pCharset = null;
+        private Encoding                 m_pCharset;
         private bool                     m_Split    = true;
 
         //private static readonly Regex encodedword_regex = new Regex(@"=\?(((?<charset>.*?)\*.*?)|(?<charset>.*?))\?(?<encoding>[qQbB])\?(?<value>.*?)\?=(?<whitespaces>\s*)",RegexOptions.IgnoreCase);
@@ -26,7 +26,7 @@ namespace LumiSoft.Net.MIME
         public MIME_Encoding_EncodedWord(MIME_EncodedWordEncoding encoding,Encoding charset)
         {
             if(charset == null){
-                throw new ArgumentNullException("charset");
+                throw new ArgumentNullException(nameof(charset));
             }
 
             m_Encoding = encoding;
@@ -42,13 +42,12 @@ namespace LumiSoft.Net.MIME
         /// <param name="text">Text to encode.</param>
         /// <returns>Returns encoded text.</returns>
         public string Encode(string text)
-        {            
+        {
             if(MustEncode(text)){
                 return EncodeS(m_Encoding,m_pCharset,m_Split,text);
             }
-            else{
-                return text;
-            }
+
+            return text;
         }
 
         #endregion
@@ -64,7 +63,7 @@ namespace LumiSoft.Net.MIME
         public string Decode(string text)
         {
             if(text == null){
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
             }
 
             return DecodeS(text);
@@ -84,12 +83,12 @@ namespace LumiSoft.Net.MIME
         public static bool MustEncode(string text)
         {
             if(text == null){
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
             }
 
             // Encoding is needed only for non-ASCII chars.
 
-            foreach(char c in text){
+            foreach(var c in text){
                 if(c > 127){
                     return true;
                 }
@@ -114,10 +113,10 @@ namespace LumiSoft.Net.MIME
         public static string EncodeS(MIME_EncodedWordEncoding encoding,Encoding charset,bool split,string text)
         {
             if(charset == null){
-                throw new ArgumentNullException("charset");
+                throw new ArgumentNullException(nameof(charset));
             }
             if(text == null){
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
             }
 
             /* RFC 2047 2.
@@ -134,12 +133,12 @@ namespace LumiSoft.Net.MIME
             */
 
             if(MustEncode(text)){
-                List<string> parts = new List<string>();
+                var parts = new List<string>();
                 if(split){
-                    int index = 0;
+                    var index = 0;
                     // We just split text to 30 char words, then if some chars encoded, we don't exceed 75 chars lenght limit.
                     while(index < text.Length){
-                        int countReaded = Math.Min(30,text.Length - index);
+                        var countReaded = Math.Min(30,text.Length - index);
                         parts.Add(text.Substring(index,countReaded));                        
                         index += countReaded;                        
                     }
@@ -148,10 +147,10 @@ namespace LumiSoft.Net.MIME
                     parts.Add(text);
                 }
 
-                StringBuilder retVal = new StringBuilder();
-                for(int i=0;i<parts.Count;i++){
-                    string part = parts[i];
-                    byte[] data = charset.GetBytes(part);
+                var retVal = new StringBuilder();
+                for(var i=0;i<parts.Count;i++){
+                    var part = parts[i];
+                    var data = charset.GetBytes(part);
 
                     #region B encode
 
@@ -165,8 +164,8 @@ namespace LumiSoft.Net.MIME
 
                     else{
                         retVal.Append("=?" + charset.WebName + "?Q?");
-                        int stored = 0;
-                        foreach(byte b in data){
+                        var stored = 0;
+                        foreach(var b in data){
                             string val = null;
                             // We need to encode byte. Defined in RFC 2047 4.2.
                             if(b > 127 || b == '=' || b == '?' || b == '_' || b == ' '){
@@ -184,16 +183,15 @@ namespace LumiSoft.Net.MIME
 
                     #endregion
 
-                    if(i < (parts.Count - 1)){
+                    if(i < parts.Count - 1){
                         retVal.Append("\r\n ");
                     }
                 }
 
                 return retVal.ToString();
             }
-            else{
-                return text;
-            }
+
+            return text;
         }
 
         #endregion
@@ -210,7 +208,7 @@ namespace LumiSoft.Net.MIME
         public static string DecodeS(string word)
         {
             if(word == null){
-                throw new ArgumentNullException("word");
+                throw new ArgumentNullException(nameof(word));
             }
 
             return DecodeTextS(word);
@@ -249,26 +247,26 @@ namespace LumiSoft.Net.MIME
                     encoded-word := "=?" charset ["*" language] "?" encoded-text "?="
             */
 
-            string retVal = text;
+            var retVal = text;
 
             retVal = encodedword_regex.Replace(retVal,delegate(Match m){
                 // We have encoded word, try to decode it.
                 // Also if we have continuing encoded word, we need to skip all whitespaces between words.
              
-                string encodedWord = m.Value;
+                var encodedWord = m.Value;
                 try{
                     if(string.Equals(m.Groups["encoding"].Value,"Q",StringComparison.InvariantCultureIgnoreCase)){
                         encodedWord =  MIME_Utils.QDecode(Encoding.GetEncoding(m.Groups["charset"].Value),m.Groups["value"].Value);
                     }
                     else if(string.Equals(m.Groups["encoding"].Value,"B",StringComparison.InvariantCultureIgnoreCase)){
-                        encodedWord = Encoding.GetEncoding(m.Groups["charset"].Value).GetString(Net_Utils.FromBase64(Encoding.Default.GetBytes(m.Groups["value"].Value)));
+                        encodedWord = Encoding.GetEncoding(m.Groups["charset"].Value).GetString(NetUtils.FromBase64(Encoding.Default.GetBytes(m.Groups["value"].Value)));
                     }
                     // Failed to parse encoded-word, leave it as is. RFC 2047 6.3.
                     // else{
 
                     // No continuing encoded-word, append whitespaces to retval.
-                    Match mNext = encodedword_regex.Match(retVal,m.Index + m.Length);
-                    if(!(mNext.Success && mNext.Index == (m.Index + m.Length))){
+                    var mNext = encodedword_regex.Match(retVal,m.Index + m.Length);
+                    if(!(mNext.Success && mNext.Index == m.Index + m.Length)){
                         encodedWord += m.Groups["whitespaces"].Value;
                     }
                     // We have continuing encoded-word, so skip all whitespaces.
@@ -295,9 +293,9 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public bool Split
         {
-            get{ return m_Split; }
+            get => m_Split;
 
-            set{ m_Split = value; }
+            set => m_Split = value;
         }
 
         #endregion

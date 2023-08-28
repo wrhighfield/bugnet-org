@@ -18,8 +18,8 @@ namespace LumiSoft.Net.Mail
     /// </example>
     public class Mail_t_MailboxList : IEnumerable
     {
-        private bool                 m_IsModified = false;
-        private List<Mail_t_Mailbox> m_pList      = null;
+        private bool                 m_IsModified;
+        private List<Mail_t_Mailbox> m_pList;
 
         /// <summary>
         /// Default constructor.
@@ -42,20 +42,21 @@ namespace LumiSoft.Net.Mail
         public static Mail_t_MailboxList Parse(string value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
-            MIME_Reader        r      = new MIME_Reader(value);
-            Mail_t_MailboxList retVal = new Mail_t_MailboxList();
+            var        r      = new MIME_Reader(value);
+            var retVal = new Mail_t_MailboxList();
             while(true){
-                string word = r.QuotedReadToDelimiter(new char[]{',','<'});
+                var word = r.QuotedReadToDelimiter(new[]{',','<'});
                 // We processed all data.
                 if(string.IsNullOrEmpty(word) && r.Available == 0){
                     break;
                 }
                 // name-addr
-                else if(r.Peek(true) == '<'){
-                    retVal.Add(new Mail_t_Mailbox(word != null ? MIME_Encoding_EncodedWord.DecodeS(TextUtils.UnQuoteString(word.Trim())) : null,r.ReadParenthesized()));                    
+
+                if(r.Peek(true) == '<'){
+                    retVal.Add(new Mail_t_Mailbox(word != null ? MIME_Encoding_EncodedWord.DecodeS(TextUtilities.UnQuoteString(word.Trim())) : null,r.ReadParenthesized()));                    
                 }
                 // addr-spec
                 else{
@@ -86,10 +87,10 @@ namespace LumiSoft.Net.Mail
         public void Insert(int index,Mail_t_Mailbox value)
         {
             if(index < 0 || index > m_pList.Count){
-                throw new ArgumentOutOfRangeException("index");
+                throw new ArgumentOutOfRangeException(nameof(index));
             }
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             m_pList.Insert(index,value);
@@ -108,7 +109,7 @@ namespace LumiSoft.Net.Mail
         public void Add(Mail_t_Mailbox value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             m_pList.Add(value);
@@ -127,7 +128,7 @@ namespace LumiSoft.Net.Mail
         public void Remove(Mail_t_Mailbox value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             m_pList.Remove(value);
@@ -178,9 +179,9 @@ namespace LumiSoft.Net.Mail
         /// <returns>Returns address-list as string.</returns>
         public override string ToString()
         {
-            StringBuilder retVal = new StringBuilder();
-            for(int i=0;i<m_pList.Count;i++){
-                if(i == (m_pList.Count - 1)){
+            var retVal = new StringBuilder();
+            for(var i=0;i<m_pList.Count;i++){
+                if(i == m_pList.Count - 1){
                     retVal.Append(m_pList[i].ToString());
                 }
                 else{
@@ -225,18 +226,12 @@ namespace LumiSoft.Net.Mail
         /// <summary>
         /// Gets if list has modified since it was loaded.
         /// </summary>
-        public bool IsModified
-        {            
-            get{ return m_IsModified; }
-        }
+        public bool IsModified => m_IsModified;
 
         /// <summary>
         /// Gets number of items in the collection.
         /// </summary>
-        public int Count
-        {
-            get{ return m_pList.Count; }
-        }
+        public int Count => m_pList.Count;
 
         /// <summary>
         /// Gets the element at the specified index.
@@ -248,7 +243,7 @@ namespace LumiSoft.Net.Mail
         {
             get{ 
                 if(index < 0 || index >= m_pList.Count){
-                    throw new ArgumentOutOfRangeException("index");
+                    throw new ArgumentOutOfRangeException(nameof(index));
                 }
 
                 return m_pList[index]; 

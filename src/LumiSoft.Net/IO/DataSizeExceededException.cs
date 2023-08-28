@@ -10,7 +10,7 @@ namespace LumiSoft.Net.IO
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public DataSizeExceededException() : base()
+        public DataSizeExceededException()
         {
         }
     }

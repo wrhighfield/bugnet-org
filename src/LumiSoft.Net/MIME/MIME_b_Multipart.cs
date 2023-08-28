@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-
 using LumiSoft.Net.IO;
 
 namespace LumiSoft.Net.MIME
@@ -59,8 +58,8 @@ namespace LumiSoft.Net.MIME
             /// </summary>
             private class _DataLine
             {
-                private byte[] m_pLineBuffer   = null;
-                private int    m_BytesInBuffer = 0;
+                private byte[] m_pLineBuffer;
+                private int    m_BytesInBuffer;
 
                 /// <summary>
                 /// Default constructor.
@@ -96,18 +95,12 @@ namespace LumiSoft.Net.MIME
                 /// <summary>
                 /// Gets line data buffer.
                 /// </summary>
-                public byte[] LineBuffer
-                {
-                    get{ return m_pLineBuffer; }
-                }
+                public byte[] LineBuffer => m_pLineBuffer;
 
                 /// <summary>
                 /// Gets number of bytes used in <b>LineBuffer</b>.
                 /// </summary>
-                public int BytesInBuffer
-                {
-                    get{ return m_BytesInBuffer; }
-                }
+                public int BytesInBuffer => m_BytesInBuffer;
 
                 #endregion
             }
@@ -115,12 +108,12 @@ namespace LumiSoft.Net.MIME
             #endregion
 
             private State                       m_State         = State.SeekFirst;
-            private SmartStream                 m_pStream       = null;
+            private SmartStream                 m_pStream;
             private string                      m_Boundary      = "";
-            private _DataLine                   m_pPreviousLine = null;
-            private SmartStream.ReadLineAsyncOP m_pReadLineOP   = null;
-            private StringBuilder               m_pTextPreamble = null;
-            private StringBuilder               m_pTextEpilogue = null;
+            private _DataLine                   m_pPreviousLine;
+            private SmartStream.ReadLineAsyncOP m_pReadLineOP;
+            private StringBuilder               m_pTextPreamble;
+            private StringBuilder               m_pTextEpilogue;
 
             /// <summary>
             /// Default constructor.
@@ -131,10 +124,10 @@ namespace LumiSoft.Net.MIME
             public _MultipartReader(SmartStream stream,string boundary)
             {
                 if(stream == null){
-                    throw new ArgumentNullException("stream");
+                    throw new ArgumentNullException(nameof(stream));
                 }
                 if(boundary == null){
-                    throw new ArgumentNullException("boundary");
+                    throw new ArgumentNullException(nameof(boundary));
                 }
 
                 m_pStream  = stream;
@@ -163,10 +156,11 @@ namespace LumiSoft.Net.MIME
                 if(m_State == State.InBoundary){
                     throw new InvalidOperationException("You must read all boundary data, before calling this method.");
                 }
-                else if(m_State == State.Done){
+
+                if(m_State == State.Done){
                     return false;
                 }
-                else if(m_State == State.SeekFirst){
+                if(m_State == State.SeekFirst){
                     m_pPreviousLine = null;
 
                     while(true){
@@ -175,68 +169,67 @@ namespace LumiSoft.Net.MIME
                             throw m_pReadLineOP.Error;
                         }
                         // We reached end of stream. Bad boundary: boundary end tag missing.
-                        else if(m_pReadLineOP.BytesInBuffer == 0){
+
+                        if(m_pReadLineOP.BytesInBuffer == 0){
                             m_State = State.Done;
 
                             return false;
                         }
-                        else{
-                            // Check if we have boundary start/end.
-                            if(m_pReadLineOP.Buffer[0] == '-'){
-                                string boundary = m_pReadLineOP.LineUtf8;
-                                // We have readed all MIME entity body parts.
-                                if("--" + m_Boundary + "--" == boundary){
-                                    m_State = State.Done;
+                        // Check if we have boundary start/end.
+                        if(m_pReadLineOP.Buffer[0] == '-'){
+                            var boundary = m_pReadLineOP.LineUtf8;
+                            // We have readed all MIME entity body parts.
+                            if("--" + m_Boundary + "--" == boundary){
+                                m_State = State.Done;
 
-                                    // Last CRLF is no part of preamble, but is part of boundary-tag.
-                                    if(m_pTextPreamble.Length >= 2){
-                                        m_pTextPreamble.Remove(m_pTextPreamble.Length - 2,2);
-                                    }
-
-                                    // Read "epilogoue",if has any.
-                                    while(true){
-                                        m_pStream.ReadLine(m_pReadLineOP,false);
-
-                                        if(m_pReadLineOP.Error != null){
-                                            throw m_pReadLineOP.Error;
-                                        }
-                                        // We reached end of stream. Epilogue reading completed.
-                                        else if(m_pReadLineOP.BytesInBuffer == 0){
-                                            break;
-                                        }
-                                        else{
-                                            m_pTextEpilogue.Append(m_pReadLineOP.LineUtf8 + "\r\n");
-                                        }
-                                    }
-
-                                    return false;
+                                // Last CRLF is no part of preamble, but is part of boundary-tag.
+                                if(m_pTextPreamble.Length >= 2){
+                                    m_pTextPreamble.Remove(m_pTextPreamble.Length - 2,2);
                                 }
-                                // We have next boundary.
-                                else if("--" + m_Boundary == boundary){
-                                    m_State = State.InBoundary;
 
-                                    // Last CRLF is no part of preamble, but is part of boundary-tag.
-                                    if(m_pTextPreamble.Length >= 2){
-                                        m_pTextPreamble.Remove(m_pTextPreamble.Length - 2,2);
+                                // Read "epilogoue",if has any.
+                                while(true){
+                                    m_pStream.ReadLine(m_pReadLineOP,false);
+
+                                    if(m_pReadLineOP.Error != null){
+                                        throw m_pReadLineOP.Error;
                                     }
+                                    // We reached end of stream. Epilogue reading completed.
 
-                                    return true;
+                                    if(m_pReadLineOP.BytesInBuffer == 0){
+                                        break;
+                                    }
+                                    m_pTextEpilogue.Append(m_pReadLineOP.LineUtf8 + "\r\n");
                                 }
-                                // Not boundary or not boundary we want.
-                                //else{
+
+                                return false;
                             }
+                            // We have next boundary.
 
-                            m_pTextPreamble.Append(m_pReadLineOP.LineUtf8 + "\r\n");                           
-                        }                        
+                            if("--" + m_Boundary == boundary){
+                                m_State = State.InBoundary;
+
+                                // Last CRLF is no part of preamble, but is part of boundary-tag.
+                                if(m_pTextPreamble.Length >= 2){
+                                    m_pTextPreamble.Remove(m_pTextPreamble.Length - 2,2);
+                                }
+
+                                return true;
+                            }
+                            // Not boundary or not boundary we want.
+                            //else{
+                        }
+
+                        m_pTextPreamble.Append(m_pReadLineOP.LineUtf8 + "\r\n");
                     }                   
                 }
-                else if(m_State == State.ReadNext){
+                if(m_State == State.ReadNext){
                     m_pPreviousLine = null;
                     m_State = State.InBoundary;
 
                     return true;
                 }
-           
+
                 return false;
             }
 
@@ -297,7 +290,7 @@ namespace LumiSoft.Net.MIME
             public override int Read(byte[] buffer,int offset,int count)
             {
                 if(buffer == null){
-                    throw new ArgumentNullException("buffer");
+                    throw new ArgumentNullException(nameof(buffer));
                 }
                 if(m_State == State.SeekFirst){
                     throw new InvalidOperationException("Read method is not valid in '" + m_State + "' state.");
@@ -323,13 +316,14 @@ namespace LumiSoft.Net.MIME
                         throw m_pReadLineOP.Error;
                     }
                     // We reached end of stream. Bad boundary: boundary end tag missing.
-                    else if(m_pReadLineOP.BytesInBuffer == 0){
+
+                    if(m_pReadLineOP.BytesInBuffer == 0){
                         m_State = State.Done;
 
                         return 0;
                     }
                     // We have readed all MIME entity body parts.(boundary end tag reached)
-                    else if(m_pReadLineOP.Buffer[0] == '-' && string.Equals("--" + m_Boundary + "--",m_pReadLineOP.LineUtf8)){
+                    if(m_pReadLineOP.Buffer[0] == '-' && string.Equals("--" + m_Boundary + "--",m_pReadLineOP.LineUtf8)){
                         m_State = State.Done;
 
                         // Read "epilogoue",if has any.
@@ -340,26 +334,23 @@ namespace LumiSoft.Net.MIME
                                 throw m_pReadLineOP.Error;
                             }
                             // We reached end of stream. Epilogue reading completed.
-                            else if(m_pReadLineOP.BytesInBuffer == 0){
+
+                            if(m_pReadLineOP.BytesInBuffer == 0){
                                 break;
                             }
-                            else{
-                                m_pTextEpilogue.Append(m_pReadLineOP.LineUtf8 + "\r\n");
-                            }
+                            m_pTextEpilogue.Append(m_pReadLineOP.LineUtf8 + "\r\n");
                         }
 
                         return 0;
                     }
                     // We have readed all active boundary data, next boundary start tag.
-                    else if(m_pReadLineOP.Buffer[0] == '-' && string.Equals("--" + m_Boundary,m_pReadLineOP.LineUtf8)){
+                    if(m_pReadLineOP.Buffer[0] == '-' && string.Equals("--" + m_Boundary,m_pReadLineOP.LineUtf8)){
                         m_State = State.ReadNext;
 
                         return 0;
                     }
                     // Store first read-ahed line.
-                    else{
-                        m_pPreviousLine.AssignFrom(m_pReadLineOP);
-                    }
+                    m_pPreviousLine.AssignFrom(m_pReadLineOP);
                 }
 
                 m_pStream.ReadLine(m_pReadLineOP,false);
@@ -367,7 +358,8 @@ namespace LumiSoft.Net.MIME
                     throw m_pReadLineOP.Error;
                 }
                 // We reached end of stream. Bad boundary: boundary end tag missing.
-                else if(m_pReadLineOP.BytesInBuffer == 0){
+
+                if(m_pReadLineOP.BytesInBuffer == 0){
                     m_State = State.Done;
 
                     if(count < m_pPreviousLine.BytesInBuffer){
@@ -380,7 +372,7 @@ namespace LumiSoft.Net.MIME
                     return m_pPreviousLine.BytesInBuffer;
                 }
                 // We have readed all MIME entity body parts.(boundary end tag reached)
-                else if(m_pReadLineOP.Buffer[0] == '-' && string.Equals("--" + m_Boundary + "--",m_pReadLineOP.LineUtf8)){
+                if(m_pReadLineOP.Buffer[0] == '-' && string.Equals("--" + m_Boundary + "--",m_pReadLineOP.LineUtf8)){
                     m_State = State.Done;
 
                     // Read "epilogoue",if has any.
@@ -391,12 +383,11 @@ namespace LumiSoft.Net.MIME
                             throw m_pReadLineOP.Error;
                         }
                         // We reached end of stream. Epilogue reading completed.
-                        else if(m_pReadLineOP.BytesInBuffer == 0){
+
+                        if(m_pReadLineOP.BytesInBuffer == 0){
                             break;
                         }
-                        else{
-                            m_pTextEpilogue.Append(m_pReadLineOP.LineUtf8 + "\r\n");
-                        }
+                        m_pTextEpilogue.Append(m_pReadLineOP.LineUtf8 + "\r\n");
                     }
                                         
                     if(count < m_pPreviousLine.BytesInBuffer){
@@ -408,12 +399,11 @@ namespace LumiSoft.Net.MIME
 
                         return m_pPreviousLine.BytesInBuffer - 2;
                     }
-                    else{
-                        return 0;
-                    }
+
+                    return 0;
                 }
                 // We have readed all active boundary data, next boundary start tag.
-                else if(m_pReadLineOP.Buffer[0] == '-' && string.Equals("--" + m_Boundary,m_pReadLineOP.LineUtf8)){
+                if(m_pReadLineOP.Buffer[0] == '-' && string.Equals("--" + m_Boundary,m_pReadLineOP.LineUtf8)){
                     m_State = State.ReadNext;
 
                     // Return previous line data - CRLF, because CRLF if part of boundary tag.
@@ -425,26 +415,23 @@ namespace LumiSoft.Net.MIME
 
                         return m_pPreviousLine.BytesInBuffer - 2;
                     }
-                    else{
-                        return 0;
-                    }
+
+                    return 0;
                 }
                 // We have boundary data-line.
-                else{
-                    // Here we actually process previous line and store current.
+                // Here we actually process previous line and store current.
 
-                    if(count < m_pPreviousLine.BytesInBuffer){
-                        throw new ArgumentException("Argument 'buffer' is to small. This should never happen.");
-                    }                    
-                    Array.Copy(m_pPreviousLine.LineBuffer,0,buffer,offset,m_pPreviousLine.BytesInBuffer);
+                if(count < m_pPreviousLine.BytesInBuffer){
+                    throw new ArgumentException("Argument 'buffer' is to small. This should never happen.");
+                }                    
+                Array.Copy(m_pPreviousLine.LineBuffer,0,buffer,offset,m_pPreviousLine.BytesInBuffer);
 
-                    int countCopied = m_pPreviousLine.BytesInBuffer;
+                var countCopied = m_pPreviousLine.BytesInBuffer;
 
-                    // Store current line as previous.
-                    m_pPreviousLine.AssignFrom(m_pReadLineOP);
+                // Store current line as previous.
+                m_pPreviousLine.AssignFrom(m_pReadLineOP);
                                         
-                    return countCopied;
-                }
+                return countCopied;
             }
 
             #endregion
@@ -471,43 +458,23 @@ namespace LumiSoft.Net.MIME
             /// <summary>
             /// Gets a value indicating whether the current stream supports reading.
             /// </summary>
-            public override bool CanRead
-            { 
-                get{
-                    return true;
-                } 
-            }
+            public override bool CanRead => true;
 
             /// <summary>
             /// Gets a value indicating whether the current stream supports seeking.
             /// </summary>
-            public override bool CanSeek
-            { 
-                get{
-                    return false;
-                } 
-            }
+            public override bool CanSeek => false;
 
             /// <summary>
             /// Gets a value indicating whether the current stream supports writing.
             /// </summary>
-            public override bool CanWrite
-            { 
-                get{
-                    return false;
-                } 
-            }
+            public override bool CanWrite => false;
 
             /// <summary>
             /// Gets the length in bytes of the stream.  This method is not supported and always throws a NotSupportedException.
             /// </summary>
             /// <exception cref="NotSupportedException">Is raised when this property is accessed.</exception>
-            public override long Length
-            { 
-                get{
-                    throw new NotSupportedException();
-                } 
-            }
+            public override long Length => throw new NotSupportedException();
 
             /// <summary>
             /// Gets or sets the position within the current stream. This method is not supported and always throws a NotSupportedException.
@@ -515,48 +482,35 @@ namespace LumiSoft.Net.MIME
             /// <exception cref="NotSupportedException">Is raised when this property is accessed.</exception>
             public override long Position
             { 
-                get{
-                    throw new NotSupportedException();
-                } 
+                get => throw new NotSupportedException();
 
-                set{
-                    throw new NotSupportedException();
-                }
+                set => throw new NotSupportedException();
             }
                         
             /// <summary>
             /// Gets "preamble" text. Defined in RFC 2046 5.1.1.
             /// </summary>
             /// <remarks>Preamble text is text between MIME entiy headers and first boundary.</remarks>
-            public string TextPreamble
-            {
-                get{ return m_pTextPreamble.ToString(); }
-            }
+            public string TextPreamble => m_pTextPreamble.ToString();
 
             /// <summary>
             /// Gets "epilogue" text. Defined in RFC 2046 5.1.1.
             /// </summary>
             /// <remarks>Epilogue text is text after last boundary end.</remarks>
-            public string TextEpilogue
-            {
-                get{ return m_pTextEpilogue.ToString(); }
-            }
+            public string TextEpilogue => m_pTextEpilogue.ToString();
 
             /// <summary>
             /// Gets reader state.
             /// </summary>
-            internal State ReaderState
-            {
-                get{ return m_State; }
-            }
+            internal State ReaderState => m_State;
 
             #endregion
         }
 
         #endregion
 
-        private MIME_h_ContentType    m_pContentType = null;
-        private MIME_EntityCollection m_pBodyParts   = null;
+        private MIME_h_ContentType    m_pContentType;
+        private MIME_EntityCollection m_pBodyParts;
         private string                m_TextPreamble = "";
         private string                m_TextEpilogue = "";
         
@@ -569,7 +523,7 @@ namespace LumiSoft.Net.MIME
         public MIME_b_Multipart(MIME_h_ContentType contentType) : base(contentType)
         {
             if(contentType == null){
-                throw new ArgumentNullException("contentType");
+                throw new ArgumentNullException(nameof(contentType));
             }
             if(string.IsNullOrEmpty(contentType.Param_Boundary)){
                 throw new ArgumentException("Argument 'contentType' doesn't contain required boundary parameter.");
@@ -592,22 +546,22 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected static new MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
             if(defaultContentType == null){
-                throw new ArgumentNullException("defaultContentType");
+                throw new ArgumentNullException(nameof(defaultContentType));
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
             if(owner.ContentType == null || owner.ContentType.Param_Boundary == null){
                 throw new ParseException("Multipart entity has not required 'boundary' paramter.");
             }
             
-            MIME_b_Multipart retVal = new MIME_b_Multipart(owner.ContentType);
+            var retVal = new MIME_b_Multipart(owner.ContentType);
             ParseInternal(owner,owner.ContentType.TypeWithSubtype,stream,retVal);
 
             return retVal;
@@ -629,24 +583,24 @@ namespace LumiSoft.Net.MIME
         protected static void ParseInternal(MIME_Entity owner,string mediaType,SmartStream stream,MIME_b_Multipart body)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
             if(mediaType == null){
-                throw new ArgumentNullException("mediaType");
+                throw new ArgumentNullException(nameof(mediaType));
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
             if(owner.ContentType == null || owner.ContentType.Param_Boundary == null){
                 throw new ParseException("Multipart entity has not required 'boundary' parameter.");
             }
             if(body == null){
-                throw new ArgumentNullException("body");
+                throw new ArgumentNullException(nameof(body));
             }
 
-            _MultipartReader multipartReader = new _MultipartReader(stream,owner.ContentType.Param_Boundary);       
+            var multipartReader = new _MultipartReader(stream,owner.ContentType.Param_Boundary);       
             while(multipartReader.Next()){
-                MIME_Entity entity = new MIME_Entity();
+                var entity = new MIME_Entity();
                 entity.Parse(new SmartStream(multipartReader,false),Encoding.UTF8,body.DefaultBodyPartContentType);
                 body.m_pBodyParts.Add(entity);
                 entity.SetParent(owner);
@@ -673,8 +627,8 @@ namespace LumiSoft.Net.MIME
             base.SetParent(entity,setContentType);
 
             // Owner entity has no content-type or has different content-type, just add/overwrite it.
-            if(setContentType && (this.Entity.ContentType == null || !string.Equals(this.Entity.ContentType.TypeWithSubtype,this.MediaType,StringComparison.InvariantCultureIgnoreCase))){
-                this.Entity.ContentType = m_pContentType;
+            if(setContentType && (Entity.ContentType == null || !string.Equals(Entity.ContentType.TypeWithSubtype,MediaType,StringComparison.InvariantCultureIgnoreCase))){
+                Entity.ContentType = m_pContentType;
             }
         }
 
@@ -691,10 +645,10 @@ namespace LumiSoft.Net.MIME
         /// <param name="headerReencode">If true always specified encoding is used for header. If false and header field value not modified, 
         /// original encoding is kept.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
-        internal protected override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
+        protected internal override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
         {
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             /* RFC 2046 5.1.1.
@@ -705,28 +659,28 @@ namespace LumiSoft.Net.MIME
 
             // Set "preamble" text if any.
             if(!string.IsNullOrEmpty(m_TextPreamble)){
-                byte[] preableBytes = Encoding.UTF8.GetBytes(m_TextPreamble);
+                var preableBytes = Encoding.UTF8.GetBytes(m_TextPreamble);
                 stream.Write(preableBytes,0,preableBytes.Length);
             }
 
-            for(int i=0;i<m_pBodyParts.Count;i++){
-                MIME_Entity bodyPart = m_pBodyParts[i];
+            for(var i=0;i<m_pBodyParts.Count;i++){
+                var bodyPart = m_pBodyParts[i];
                 // Start new body part.
-                byte[] bStart = Encoding.UTF8.GetBytes("\r\n--" + this.Entity.ContentType.Param_Boundary + "\r\n");
+                var bStart = Encoding.UTF8.GetBytes("\r\n--" + Entity.ContentType.Param_Boundary + "\r\n");
                 stream.Write(bStart,0,bStart.Length);
                 
                 bodyPart.ToStream(stream,headerWordEncoder,headerParmetersCharset,headerReencode);
 
                 // Last body part, close boundary.
-                if(i == (m_pBodyParts.Count - 1)){
-                    byte[] bEnd = Encoding.UTF8.GetBytes("\r\n--" + this.Entity.ContentType.Param_Boundary + "--\r\n");
+                if(i == m_pBodyParts.Count - 1){
+                    var bEnd = Encoding.UTF8.GetBytes("\r\n--" + Entity.ContentType.Param_Boundary + "--\r\n");
                     stream.Write(bEnd,0,bEnd.Length);
                 }
             }
 
             // Set "epilogoue" text if any.
             if(!string.IsNullOrEmpty(m_TextEpilogue)){
-                byte[] epilogoueBytes = Encoding.UTF8.GetBytes(m_TextEpilogue);
+                var epilogoueBytes = Encoding.UTF8.GetBytes(m_TextEpilogue);
                 stream.Write(epilogoueBytes,0,epilogoueBytes.Length);
             }
         }
@@ -739,11 +693,8 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets if body has modified.
         /// </summary>
-        public override bool IsModified
-        {
-            get{ return m_pBodyParts.IsModified; }
-        }
-   
+        public override bool IsModified => m_pBodyParts.IsModified;
+
         /// <summary>
         /// Gets default body part Content-Type. For more info see RFC 2046 5.1.
         /// </summary>
@@ -755,7 +706,7 @@ namespace LumiSoft.Net.MIME
             */
 
             get{ 
-                MIME_h_ContentType retVal = new MIME_h_ContentType("text/plain");
+                var retVal = new MIME_h_ContentType("text/plain");
                 retVal.Param_Charset = "US-ASCII";
 
                 return retVal; 
@@ -766,10 +717,7 @@ namespace LumiSoft.Net.MIME
         /// Gets multipart body body-parts collection.
         /// </summary>
         /// <remarks>Multipart entity child entities are called "body parts" in RFC 2045.</remarks>
-        public MIME_EntityCollection BodyParts
-        {
-            get{ return m_pBodyParts; }
-        }
+        public MIME_EntityCollection BodyParts => m_pBodyParts;
 
         /// <summary>
         /// Gets or sets "preamble" text. Defined in RFC 2046 5.1.1.
@@ -777,9 +725,9 @@ namespace LumiSoft.Net.MIME
         /// <remarks>Preamble text is text between MIME entiy headers and first boundary.</remarks>
         public string TextPreamble
         {
-            get{ return m_TextPreamble; }
+            get => m_TextPreamble;
 
-            set{ m_TextPreamble = value; }
+            set => m_TextPreamble = value;
         }
 
         /// <summary>
@@ -788,9 +736,9 @@ namespace LumiSoft.Net.MIME
         /// <remarks>Epilogue text is text after last boundary end.</remarks>
         public string TextEpilogue
         {
-            get{ return m_TextEpilogue; }
+            get => m_TextEpilogue;
 
-            set{ m_TextEpilogue = value; }
+            set => m_TextEpilogue = value;
         }
 
         #endregion

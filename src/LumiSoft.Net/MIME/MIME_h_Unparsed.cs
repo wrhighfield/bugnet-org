@@ -8,10 +8,10 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_h_Unparsed : MIME_h
     {
-        private string    m_ParseValue = null;
-        private string    m_Name       = null;
-        private string    m_Value      = null;
-        private Exception m_pException = null;
+        private string    m_ParseValue;
+        private string    m_Name;
+        private string    m_Value;
+        private Exception m_pException;
 
         /// <summary>
         /// Default constructor.
@@ -23,10 +23,10 @@ namespace LumiSoft.Net.MIME
         internal MIME_h_Unparsed(string value,Exception exception)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
             
-            string[] name_value = value.Split(new char[]{':'},2);
+            var name_value = value.Split(new[]{':'},2);
             if(name_value.Length != 2){
                 throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
             }
@@ -78,34 +78,22 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         /// <remarks>All new added header fields has <b>IsModified = true</b>.</remarks>
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
-        public override bool IsModified
-        {
-            get{ return false; }
-        }
+        public override bool IsModified => false;
 
         /// <summary>
         /// Gets header field name.
         /// </summary>
-        public override string Name
-        {
-            get { return m_Name; }
-        }
+        public override string Name => m_Name;
 
         /// <summary>
         /// Gets header field value.
         /// </summary>
-        public string Value
-        {
-            get{ return m_Value; }
-        }
+        public string Value => m_Value;
 
         /// <summary>
         /// Gets error happened during parse.
         /// </summary>
-        public Exception Exception
-        {
-            get{ return m_pException; }
-        }
+        public Exception Exception => m_pException;
 
         #endregion
     }

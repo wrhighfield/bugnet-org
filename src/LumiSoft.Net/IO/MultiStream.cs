@@ -10,8 +10,8 @@ namespace LumiSoft.Net.IO
     /// </summary>
     public class MultiStream : Stream
     {
-        private bool          m_IsDisposed = false;
-        private Queue<Stream> m_pStreams   = null;        
+        private bool          m_IsDisposed;
+        private Queue<Stream> m_pStreams;        
 
         /// <summary>
         /// Default constructor.
@@ -52,10 +52,10 @@ namespace LumiSoft.Net.IO
         public void AppendStream(Stream stream)
         {
             if(m_IsDisposed){
-                throw new ObjectDisposedException(this.GetType().Name);
+                throw new ObjectDisposedException(GetType().Name);
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             m_pStreams.Enqueue(stream);
@@ -135,23 +135,23 @@ namespace LumiSoft.Net.IO
                 throw new ObjectDisposedException("SmartStream");
             }
 
-            while(true){
+            while(true)
+            {
                 // We have readed all streams data, no data left.
                 if(m_pStreams.Count == 0){
                     return 0;
                 }
-                else{
-                    int readedCount = m_pStreams.Peek().Read(buffer,offset,count);
-                    // We have readed all current stream data.
-                    if(readedCount == 0){
-                        // Move to next stream .
-                        m_pStreams.Dequeue();
 
-                        // Next while loop will process "read".
-                    }
-                    else{
-                        return readedCount;
-                    }
+                var readedCount = m_pStreams.Peek().Read(buffer,offset,count);
+                // We have readed all current stream data.
+                if(readedCount == 0){
+                    // Move to next stream .
+                    m_pStreams.Dequeue();
+
+                    // Next while loop will process "read".
+                }
+                else{
+                    return readedCount;
                 }
             }
         }
@@ -241,7 +241,7 @@ namespace LumiSoft.Net.IO
                 }
 
                 long length = 0;
-                foreach(Stream stream in m_pStreams.ToArray()){
+                foreach(var stream in m_pStreams.ToArray()){
                     length += stream.Length;
                 }
 

@@ -6,18 +6,18 @@ namespace LumiSoft.Net
     /// <summary>
     /// Represents a collection that can be accessed either with the key or with the index. 
     /// </summary>
-    public class KeyValueCollection<K,V> : IEnumerable
+    public class KeyValueCollection<TKeyK,TValue> : IEnumerable
     {
-        private Dictionary<K,V> m_pDictionary = null;
-        private List<V>         m_pList       = null;
+        private readonly Dictionary<TKeyK,TValue> mPDictionary;
+        private readonly List<TValue>         mPList;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         public KeyValueCollection()
         {
-            m_pDictionary = new Dictionary<K,V>();
-            m_pList = new List<V>();
+            mPDictionary = new Dictionary<TKeyK,TValue>();
+            mPList = new List<TValue>();
         }
 
 
@@ -28,10 +28,10 @@ namespace LumiSoft.Net
         /// </summary>
         /// <param name="key">Key.</param>
         /// <param name="value">Value.</param>
-        public void Add(K key,V value)
+        public void Add(TKeyK key,TValue value)
         {
-            m_pDictionary.Add(key,value);
-            m_pList.Add(value);
+            mPDictionary.Add(key,value);
+            mPList.Add(value);
         }
 
         #endregion
@@ -43,18 +43,14 @@ namespace LumiSoft.Net
         /// </summary>
         /// <param name="key">Key.</param>
         /// <returns>Returns if key found and removed, otherwise false.</returns>
-        public bool Remove(K key)
+        public bool Remove(TKeyK key)
         {
-            V value = default(V);
-            if(m_pDictionary.TryGetValue(key,out value)){
-                m_pDictionary.Remove(key);
-                m_pList.Remove(value);
+            if (!mPDictionary.TryGetValue(key, out var value)) return false;
+            mPDictionary.Remove(key);
+            mPList.Remove(value);
 
-                return true;
-            }
-            else{
-                return false;
-            }
+            return true;
+
         }
 
         #endregion
@@ -66,8 +62,8 @@ namespace LumiSoft.Net
         /// </summary>
         public void Clear()
         {
-            m_pDictionary.Clear();
-            m_pList.Clear();
+            mPDictionary.Clear();
+            mPList.Clear();
         }
 
         #endregion
@@ -79,9 +75,9 @@ namespace LumiSoft.Net
         /// </summary>
         /// <param name="key">Key.</param>
         /// <returns>Returns true if the collection contains specified key.</returns>
-        public bool ContainsKey(K key)
+        public bool ContainsKey(TKeyK key)
         {
-            return m_pDictionary.ContainsKey(key);
+            return mPDictionary.ContainsKey(key);
         }
 
         #endregion
@@ -94,9 +90,9 @@ namespace LumiSoft.Net
         /// <param name="key">Key.</param>
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found.</param>
         /// <returns>Returns true if the collection contains specified key and value stored to <b>value</b> argument.</returns>
-        public bool TryGetValue(K key,out V value)
+        public bool TryGetValue(TKeyK key,out TValue value)
         {
-            return m_pDictionary.TryGetValue(key,out value);
+            return mPDictionary.TryGetValue(key,out value);
         }
 
         #endregion
@@ -109,17 +105,15 @@ namespace LumiSoft.Net
         /// <param name="index">Zero based item index.</param>
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found.</param>
         /// <returns>Returns true if the collection contains specified key and value stored to <b>value</b> argument.</returns>
-        public bool TryGetValueAt(int index,out V value)
+        public bool TryGetValueAt(int index,out TValue value)
         {
-            value = default(V);
+            value = default(TValue);
 
-            if(m_pList.Count > 0 && index >= 0 && index < m_pList.Count){
-                value = m_pList[index];
+            if (mPList.Count <= 0 || index < 0 || index >= mPList.Count) return false;
+            value = mPList[index];
 
-                return true;
-            }
+            return true;
 
-            return false;
         }
 
         #endregion
@@ -130,15 +124,14 @@ namespace LumiSoft.Net
         /// Copies all elements to new array, all elements will be in order they added. This method is thread-safe.
         /// </summary>
         /// <returns>Returns elements in a new array.</returns>
-        public V[] ToArray()
+        public TValue[] ToArray()
         {
-            lock(m_pList){
-                return m_pList.ToArray();
+            lock(mPList){
+                return mPList.ToArray();
             }
         }
 
         #endregion
-
 
         #region interface IEnumerator
 
@@ -148,7 +141,7 @@ namespace LumiSoft.Net
 		/// <returns>Returns IEnumerator interface.</returns>
 		public IEnumerator GetEnumerator()
 		{
-			return m_pList.GetEnumerator();
+			return mPList.GetEnumerator();
 		}
 
 		#endregion
@@ -158,21 +151,15 @@ namespace LumiSoft.Net
         /// <summary>
         /// Gets number of items int he collection.
         /// </summary>
-        public int Count
-        {
-            get{ return m_pList.Count; }
-        }
+        public int Count => mPList.Count;
 
         /// <summary>
         /// Gets item with the specified key.
         /// </summary>
         /// <param name="key">Key.</param>
         /// <returns>Returns item with the specified key. If the specified key is not found, a get operation throws a KeyNotFoundException.</returns>
-        public V this[K key]
-        {
-            get{ return m_pDictionary[key]; }
-        }
-   
+        public TValue this[TKeyK key] => mPDictionary[key];
+
         #endregion
 
     }

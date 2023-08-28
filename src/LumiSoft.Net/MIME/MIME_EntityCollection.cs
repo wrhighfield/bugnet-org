@@ -9,8 +9,8 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_EntityCollection : IEnumerable
     {
-        private bool              m_IsModified  = false;
-        private List<MIME_Entity> m_pCollection = null;
+        private bool              m_IsModified;
+        private List<MIME_Entity> m_pCollection;
 
         /// <summary>
         /// Default constructor.
@@ -31,7 +31,7 @@ namespace LumiSoft.Net.MIME
         public void Add(MIME_Entity entity)
         {
             if(entity == null){
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
             }
 
             m_pCollection.Add(entity);
@@ -52,7 +52,7 @@ namespace LumiSoft.Net.MIME
         public void Insert(int index,MIME_Entity entity)
         {
             if(entity == null){
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
             }
 
             m_pCollection.Insert(index,entity);
@@ -115,7 +115,7 @@ namespace LumiSoft.Net.MIME
         public bool Contains(MIME_Entity entity)
         {
             if(entity == null){
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
             }
 
             return m_pCollection.Contains(entity);
@@ -163,7 +163,7 @@ namespace LumiSoft.Net.MIME
                     return true;
                 }
 
-                foreach(MIME_Entity entity in m_pCollection){
+                foreach(var entity in m_pCollection){
                     if(entity.IsModified){
                         return true;
                     }
@@ -176,20 +176,14 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets number of items in the collection.
         /// </summary>
-        public int Count
-        {
-            get{ return m_pCollection.Count; }
-        }
+        public int Count => m_pCollection.Count;
 
         /// <summary>
         /// Gets MIME entity at the specified index.
         /// </summary>
         /// <param name="index">MIME entity zero-based index.</param>
         /// <returns>Returns MIME entity.</returns>
-        public MIME_Entity this[int index]
-        {
-            get{ return m_pCollection[index]; }
-        }
+        public MIME_Entity this[int index] => m_pCollection[index];
 
         #endregion
 

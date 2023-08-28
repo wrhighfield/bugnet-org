@@ -7,7 +7,7 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_h_Parameter
     {
-        private bool   m_IsModified = false;
+        private bool   m_IsModified;
         private string m_Name       = "";
         private string m_Value      = "";
 
@@ -19,7 +19,7 @@ namespace LumiSoft.Net.MIME
         public MIME_h_Parameter(string name,string value)
         {
             if(name == null){
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             m_Name  = name;
@@ -34,25 +34,19 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         /// <remarks>All new added header fields parameters has <b>IsModified = true</b>.</remarks>
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
-        public bool IsModified
-        {
-            get{ return m_IsModified; }
-        }
+        public bool IsModified => m_IsModified;
 
         /// <summary>
         /// Gets parameter name.
         /// </summary>
-        public string Name
-        {
-            get{ return m_Name; }
-        }
+        public string Name => m_Name;
 
         /// <summary>
         /// Gets or sets parameter value. Value null means not specified.
         /// </summary>
         public string Value
         {
-            get{ return m_Value; }
+            get => m_Value;
 
             set{ 
                 m_Value      = value;

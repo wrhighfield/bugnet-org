@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-
 using LumiSoft.Net.IO;
 
 namespace LumiSoft.Net.MIME
@@ -11,8 +10,8 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public abstract class MIME_b
     {
-        private MIME_Entity        m_pEntity      = null;
-        private MIME_h_ContentType m_pContentType = null;
+        private MIME_Entity        m_pEntity;
+        private MIME_h_ContentType m_pContentType;
 
         /// <summary>
         /// Default constructor.
@@ -23,7 +22,7 @@ namespace LumiSoft.Net.MIME
         public MIME_b(MIME_h_ContentType contentType)
         {
             if(contentType == null){
-                throw new ArgumentNullException("contentType");
+                throw new ArgumentNullException(nameof(contentType));
             }
 
             m_pContentType = contentType;
@@ -44,13 +43,13 @@ namespace LumiSoft.Net.MIME
         protected static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
             if(defaultContentType == null){
-                throw new ArgumentNullException("defaultContentType");
+                throw new ArgumentNullException(nameof(defaultContentType));
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             throw new NotImplementedException("Body provider class does not implement required Parse method.");
@@ -71,7 +70,7 @@ namespace LumiSoft.Net.MIME
             m_pEntity = entity;
 
             // Owner entity has no content-type or has different content-type, just add/overwrite it.
-            if(setContentType &&(entity.ContentType == null || !string.Equals(entity.ContentType.TypeWithSubtype,this.MediaType,StringComparison.InvariantCultureIgnoreCase))){
+            if(setContentType &&(entity.ContentType == null || !string.Equals(entity.ContentType.TypeWithSubtype,MediaType,StringComparison.InvariantCultureIgnoreCase))){
                 entity.ContentType = m_pContentType;
             }
         }
@@ -89,7 +88,7 @@ namespace LumiSoft.Net.MIME
         /// <param name="headerReencode">If true always specified encoding is used for header. If false and header field value not modified, 
         /// original encoding is kept.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
-        internal protected abstract void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode);
+        protected internal abstract void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode);
 
         #endregion
 
@@ -107,18 +106,12 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets body owner entity. Returns null if body not bounded to any entity yet.
         /// </summary>
-        public MIME_Entity Entity
-        {
-            get{ return m_pEntity; }
-        }
+        public MIME_Entity Entity => m_pEntity;
 
         /// <summary>
         /// Gets body media type. For example: 'text/plain'.
         /// </summary>
-        public string MediaType
-        {
-            get{ return m_pContentType.TypeWithSubtype; }
-        }
+        public string MediaType => m_pContentType.TypeWithSubtype;
 
         #endregion
     }

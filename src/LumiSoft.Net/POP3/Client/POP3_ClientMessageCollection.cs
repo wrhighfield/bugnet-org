@@ -9,9 +9,9 @@ namespace LumiSoft.Net.POP3.Client
     /// </summary>
     public class POP3_ClientMessageCollection : IEnumerable,IDisposable
     {
-        private POP3_Client              m_pPop3Client = null;
-        private List<POP3_ClientMessage> m_pMessages   = null;
-        private bool                     m_IsDisposed  = false;
+        private POP3_Client              m_pPop3Client;
+        private List<POP3_ClientMessage> m_pMessages;
+        private bool                     m_IsDisposed;
 
         /// <summary>
         /// Default constructor.
@@ -37,7 +37,7 @@ namespace LumiSoft.Net.POP3.Client
             m_IsDisposed = true;
 
             // Release messages.
-            foreach(POP3_ClientMessage message in m_pMessages){
+            foreach(var message in m_pMessages){
                 message.Dispose();
             }
             m_pMessages = null;
@@ -70,7 +70,7 @@ namespace LumiSoft.Net.POP3.Client
 		public IEnumerator GetEnumerator()
 		{
             if(m_IsDisposed){
-                throw new ObjectDisposedException(this.GetType().Name);
+                throw new ObjectDisposedException(GetType().Name);
             }
 
 			return m_pMessages.GetEnumerator();
@@ -88,11 +88,11 @@ namespace LumiSoft.Net.POP3.Client
         {
             get{
                 if(m_IsDisposed){
-                    throw new ObjectDisposedException(this.GetType().Name);
+                    throw new ObjectDisposedException(GetType().Name);
                 }
 
                 long size = 0;
-                foreach(POP3_ClientMessage message in m_pMessages){
+                foreach(var message in m_pMessages){
                     size += message.Size;
                 }
 
@@ -108,7 +108,7 @@ namespace LumiSoft.Net.POP3.Client
         {
             get{ 
                 if(m_IsDisposed){
-                    throw new ObjectDisposedException(this.GetType().Name);
+                    throw new ObjectDisposedException(GetType().Name);
                 }
 
                 return m_pMessages.Count; 
@@ -125,7 +125,7 @@ namespace LumiSoft.Net.POP3.Client
         {
             get{
                 if(m_IsDisposed){
-                    throw new ObjectDisposedException(this.GetType().Name);
+                    throw new ObjectDisposedException(GetType().Name);
                 }
                 if(index < 0 || index > m_pMessages.Count){
                     throw new ArgumentOutOfRangeException();
@@ -146,13 +146,13 @@ namespace LumiSoft.Net.POP3.Client
         {
             get{
                 if(m_IsDisposed){
-                    throw new ObjectDisposedException(this.GetType().Name);
+                    throw new ObjectDisposedException(GetType().Name);
                 }
                 if(!m_pPop3Client.IsUidlSupported){
                     throw new NotSupportedException();
                 }
 
-                foreach(POP3_ClientMessage message in m_pMessages){
+                foreach(var message in m_pMessages){
                     if(message.UID == uid){
                         return message;
                     }

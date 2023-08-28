@@ -3,25 +3,21 @@
     /// <summary>
     /// This is base class for asynchronous operation.
     /// </summary>
-    public abstract class AsyncOP
+    public abstract class AsyncOp
     {
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public AsyncOP()
+        protected AsyncOp()
         {
         }
-
 
         #region Properties implementation
 
         /// <summary>
         /// Gets if this object is disposed.
         /// </summary>
-        public abstract bool IsDisposed
-        {
-            get;
-        }
+        public virtual bool IsDisposed { get; }
 
         /// <summary>
         /// Gets if asynchronous operation has completed.

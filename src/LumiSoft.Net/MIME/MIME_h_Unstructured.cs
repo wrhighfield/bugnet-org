@@ -8,7 +8,7 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_h_Unstructured : MIME_h
     {
-        private string m_ParseValue = null;
+        private string m_ParseValue;
         private string m_Name       = "";
         private string m_Value      = "";
 
@@ -21,13 +21,13 @@ namespace LumiSoft.Net.MIME
         public MIME_h_Unstructured(string name,string value)
         {
             if(name == null){
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
             if(name == string.Empty){
-                throw new ArgumentException("Argument 'name' value must be specified.","name");
+                throw new ArgumentException("Argument 'name' value must be specified.",nameof(name));
             }
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             m_Name  = name;
@@ -54,12 +54,12 @@ namespace LumiSoft.Net.MIME
         public static MIME_h_Unstructured Parse(string value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
-            MIME_h_Unstructured retVal = new MIME_h_Unstructured();
+            var retVal = new MIME_h_Unstructured();
 
-            string[] name_value = value.Split(new char[]{':'},2);
+            var name_value = value.Split(new[]{':'},2);
             if(name_value[0].Trim() == string.Empty){
                 throw new ParseException("Invalid header field '" + value + "' syntax.");
             }
@@ -90,14 +90,12 @@ namespace LumiSoft.Net.MIME
             if(!reEncode && m_ParseValue != null){
                 return m_ParseValue;
             }
-            else{
-                if(wordEncoder != null){
-                    return m_Name + ": " + wordEncoder.Encode(m_Value) + "\r\n";
-                }
-                else{
-                    return m_Name + ": " + m_Value + "\r\n";
-                }
+
+            if(wordEncoder != null){
+                return m_Name + ": " + wordEncoder.Encode(m_Value) + "\r\n";
             }
+
+            return m_Name + ": " + m_Value + "\r\n";
         }
 
         #endregion
@@ -110,18 +108,12 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         /// <remarks>All new added header fields has <b>IsModified = true</b>.</remarks>
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
-        public override bool IsModified
-        {            
-            get{ return m_ParseValue == null; }
-        }
+        public override bool IsModified => m_ParseValue == null;
 
         /// <summary>
         /// Gets header field name.
         /// </summary>
-        public override string Name
-        {
-            get { return m_Name; }
-        }
+        public override string Name => m_Name;
 
         /// <summary>
         /// Gets or sets header field value.
@@ -129,11 +121,11 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when when null reference is passed.</exception>
         public string Value
         {
-            get{ return m_Value; }
+            get => m_Value;
 
             set{
                 if(value == null){
-                    throw new ArgumentNullException("value");
+                    throw new ArgumentNullException(nameof(value));
                 }
 
                 m_Value = value;

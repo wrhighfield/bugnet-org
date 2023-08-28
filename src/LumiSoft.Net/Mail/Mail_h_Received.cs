@@ -52,16 +52,16 @@ namespace LumiSoft.Net.Mail
     /// </remarks>
     public class Mail_h_Received : MIME_h
     {
-        private bool           m_IsModified    = false;
-        private string         m_ParseValue    = null;
+        private bool           m_IsModified;
+        private string         m_ParseValue;
         private string         m_From          = "";
-        private Mail_t_TcpInfo m_pFrom_TcpInfo = null;
+        private Mail_t_TcpInfo m_pFrom_TcpInfo;
         private string         m_By            = "";
-        private Mail_t_TcpInfo m_pBy_TcpInfo   = null;
-        private string         m_Via           = null;
-        private string         m_With          = null;
-        private string         m_ID            = null;
-        private string         m_For           = null;
+        private Mail_t_TcpInfo m_pBy_TcpInfo;
+        private string         m_Via;
+        private string         m_With;
+        private string         m_ID;
+        private string         m_For;
         private DateTime       m_Time;
 
         /// <summary>
@@ -75,16 +75,16 @@ namespace LumiSoft.Net.Mail
         public Mail_h_Received(string from,string by,DateTime time)
         {
             if(from == null){
-                throw new ArgumentNullException("from");
+                throw new ArgumentNullException(nameof(from));
             }
             if(from == string.Empty){
-                throw new ArgumentException("Argument 'from' value must be specified.","from");
+                throw new ArgumentException("Argument 'from' value must be specified.",nameof(from));
             }
             if(by == null){
-                throw new ArgumentNullException("by");
+                throw new ArgumentNullException(nameof(by));
             }
             if(by == string.Empty){
-                throw new ArgumentException("Argument 'by' value must be specified.","by");
+                throw new ArgumentException("Argument 'by' value must be specified.",nameof(by));
             }
 
             m_From = from;
@@ -105,26 +105,27 @@ namespace LumiSoft.Net.Mail
         public static Mail_h_Received Parse(string value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
-            string[] name_value = value.Split(new char[]{':'},2);
+            var name_value = value.Split(new[]{':'},2);
             if(name_value.Length != 2){
                 throw new ParseException("Invalid header field value '" + value + "'.");
             }
 
-            Mail_h_Received retVal = new Mail_h_Received("a","b",DateTime.MinValue);
+            var retVal = new Mail_h_Received("a","b",DateTime.MinValue);
 
-            MIME_Reader r = new MIME_Reader(name_value[1]);
+            var r = new MIME_Reader(name_value[1]);
 
             while(true){
-                string word = r.Word();
+                var word = r.Word();
                 // We processed all data.
                 if(word == null && r.Available == 0){
                     break;
                 }
                 // We have comment, just eat it.
-                else if(r.StartsWith("(")){
+
+                if(r.StartsWith("(")){
                     r.ReadParenthesized();
                 }
                 // We have date-time or unknown-data.
@@ -133,7 +134,7 @@ namespace LumiSoft.Net.Mail
                     r.Char(false);
 
                     try{
-                        retVal.m_Time = MIME_Utils.ParseRfc2822DateTime(r.QuotedReadToDelimiter(new char[]{';'}));
+                        retVal.m_Time = MIME_Utils.ParseRfc2822DateTime(r.QuotedReadToDelimiter(new[]{';'}));
                     }
                     catch{
                         // We hane some unknown data, skip it.
@@ -153,14 +154,14 @@ namespace LumiSoft.Net.Mail
 
                         r.ToFirstChar();
                         if(r.StartsWith("(")){
-                            string[] parts = r.ReadParenthesized().Split(' ');
+                            var parts = r.ReadParenthesized().Split(' ');
                             if(parts.Length == 1){
-                                if(Net_Utils.IsIPAddress(parts[0])){
+                                if(NetUtils.IsIpAddress(parts[0])){
                                     retVal.m_pFrom_TcpInfo = new Mail_t_TcpInfo(IPAddress.Parse(parts[0]),null);
                                 }
                             }
                             else if(parts.Length == 2){
-                                if(Net_Utils.IsIPAddress(parts[1])){
+                                if(NetUtils.IsIpAddress(parts[1])){
                                     retVal.m_pFrom_TcpInfo = new Mail_t_TcpInfo(IPAddress.Parse(parts[1]),parts[0]);
                                 }
                             }
@@ -171,14 +172,14 @@ namespace LumiSoft.Net.Mail
 
                         r.ToFirstChar();
                         if(r.StartsWith("(")){
-                            string[] parts = r.ReadParenthesized().Split(' ');
+                            var parts = r.ReadParenthesized().Split(' ');
                             if(parts.Length == 1){
-                                if(Net_Utils.IsIPAddress(parts[0])){
+                                if(NetUtils.IsIpAddress(parts[0])){
                                     retVal.m_pBy_TcpInfo = new Mail_t_TcpInfo(IPAddress.Parse(parts[0]),null);
                                 }
                             }
                             else if(parts.Length == 2){
-                                if(Net_Utils.IsIPAddress(parts[1])){
+                                if(NetUtils.IsIpAddress(parts[1])){
                                     retVal.m_pBy_TcpInfo = new Mail_t_TcpInfo(IPAddress.Parse(parts[1]),parts[0]);
                                 }
                             }
@@ -208,7 +209,7 @@ namespace LumiSoft.Net.Mail
                             retVal.m_For = r.ReadParenthesized();
                         }
                         else{
-                            string mailbox = Mail_Utils.SMTP_Mailbox(r);
+                            var mailbox = Mail_Utils.SMTP_Mailbox(r);
                             if(mailbox == null){
                                 throw new ParseException("Invalid Received: For parameter value '" + r.ToEnd() + "'.");
                             }
@@ -217,7 +218,7 @@ namespace LumiSoft.Net.Mail
                     }
                     // Unknown, just eat value.
                     else{
-                         r.Word();
+                        r.Word();
                     }
                 }
             }
@@ -241,8 +242,8 @@ namespace LumiSoft.Net.Mail
         /// <returns>Returns header field as string.</returns>
         public override string ToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset,bool reEncode)
         {
-            if(reEncode || this.IsModified){
-                StringBuilder retVal = new StringBuilder();
+            if(reEncode || IsModified){
+                var retVal = new StringBuilder();
 
                 retVal.Append("Received: ");
                 retVal.Append("from " + m_From);
@@ -295,10 +296,9 @@ namespace LumiSoft.Net.Mail
 
                 return retVal.ToString();
             }
-            else{
-                return m_ParseValue;
-            }
-            
+
+            return m_ParseValue;
+
         }
 
         #endregion
@@ -311,18 +311,12 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         /// <remarks>All new added header fields has <b>IsModified = true</b>.</remarks>
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
-        public override bool IsModified
-        {
-            get{ return m_IsModified; }
-        }
+        public override bool IsModified => m_IsModified;
 
         /// <summary>
         /// Returns always "Received".
         /// </summary>
-        public override string Name
-        {
-            get { return "Received"; }
-        }
+        public override string Name => "Received";
 
         /// <summary>
         /// Gets or sets host from where message was received.
@@ -332,7 +326,7 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ArgumentException">Is raised when invalid value passed.</exception>
         public string From
         {
-            get{ return m_From; }
+            get => m_From;
 
             set{
                 if(value == null){
@@ -355,7 +349,7 @@ namespace LumiSoft.Net.Mail
         /// </remarks>
         public Mail_t_TcpInfo From_TcpInfo
         {
-            get{ return m_pFrom_TcpInfo; }
+            get => m_pFrom_TcpInfo;
 
             set{ 
                 m_pFrom_TcpInfo = value; 
@@ -370,7 +364,7 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ArgumentException">Is raised when invalid value passed.</exception>
         public string By
         {
-            get{ return m_By; }
+            get => m_By;
 
             set{
                 if(value == null){
@@ -391,7 +385,7 @@ namespace LumiSoft.Net.Mail
         /// <remarks>RFC defines it, but i don't see any point about that value.</remarks>
         public Mail_t_TcpInfo By_TcpInfo
         {
-            get{ return m_pBy_TcpInfo; }
+            get => m_pBy_TcpInfo;
 
             set{ 
                 m_pBy_TcpInfo = value;
@@ -404,7 +398,7 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public string Via
         {
-            get{ return m_Via; }
+            get => m_Via;
 
             set{ 
                 m_Via = value;
@@ -417,7 +411,7 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public string With
         {
-            get{ return m_With; }
+            get => m_With;
 
             set{ 
                 m_With = value; 
@@ -430,7 +424,7 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public string ID
         {
-            get{ return m_ID; }
+            get => m_ID;
 
             set{ 
                 m_ID = value; 
@@ -443,7 +437,7 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public string For
         {
-            get{ return m_For; }
+            get => m_For;
 
             set{ 
                 m_For = value; 
@@ -456,7 +450,7 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public DateTime Time
         {
-            get{ return m_Time; }
+            get => m_Time;
 
             set{ 
                 m_Time = value;                 

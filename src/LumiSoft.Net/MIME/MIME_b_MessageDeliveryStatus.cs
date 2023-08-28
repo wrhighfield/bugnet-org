@@ -2,7 +2,6 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
-
 using LumiSoft.Net.IO;
 
 namespace LumiSoft.Net.MIME
@@ -37,8 +36,8 @@ namespace LumiSoft.Net.MIME
     /// </remarks>
     public class MIME_b_MessageDeliveryStatus : MIME_b
     {
-        private MIME_h_Collection       m_pMessageFields   = null;
-        private List<MIME_h_Collection> m_pRecipientBlocks = null;
+        private MIME_h_Collection       m_pMessageFields;
+        private List<MIME_h_Collection> m_pRecipientBlocks;
         
         /// <summary>
         /// Default constructor.
@@ -61,33 +60,33 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected static new MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
             if(defaultContentType == null){
-                throw new ArgumentNullException("defaultContentType");
+                throw new ArgumentNullException(nameof(defaultContentType));
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             // We need to buffer all body data, otherwise we don't know if we have readed all data 
             // from stream.
-            MemoryStream msBuffer = new MemoryStream();
-            Net_Utils.StreamCopy(stream,msBuffer,32000);
+            var msBuffer = new MemoryStream();
+            NetUtils.StreamCopy(stream,msBuffer,32000);
             msBuffer.Position = 0;
 
-            SmartStream parseStream = new SmartStream(msBuffer,true);
+            var parseStream = new SmartStream(msBuffer,true);
 
-            MIME_b_MessageDeliveryStatus retVal = new MIME_b_MessageDeliveryStatus();
+            var retVal = new MIME_b_MessageDeliveryStatus();
             //Pare per-message fields.
             retVal.m_pMessageFields.Parse(parseStream);
 
             // Parse per-recipient fields.
             while(parseStream.Position - parseStream.BytesInReadBuffer < parseStream.Length){
-                MIME_h_Collection recipientFields = new MIME_h_Collection(new MIME_h_Provider());
+                var recipientFields = new MIME_h_Collection(new MIME_h_Provider());
                 recipientFields.Parse(parseStream);
                 retVal.m_pRecipientBlocks.Add(recipientFields);                
             }                     
@@ -109,17 +108,17 @@ namespace LumiSoft.Net.MIME
         /// <param name="headerReencode">If true always specified encoding is used for header. If false and header field value not modified, 
         /// original encoding is kept.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
-        internal protected override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
+        protected internal override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
         {
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
             
             m_pMessageFields.ToStream(stream,headerWordEncoder,headerParmetersCharset,headerReencode);
-            stream.Write(new byte[]{(byte)'\r',(byte)'\n'},0,2);
-            foreach(MIME_h_Collection recipientBlock in m_pRecipientBlocks){
+            stream.Write(new[]{(byte)'\r',(byte)'\n'},0,2);
+            foreach(var recipientBlock in m_pRecipientBlocks){
                 recipientBlock.ToStream(stream,headerWordEncoder,headerParmetersCharset,headerReencode);
-                stream.Write(new byte[]{(byte)'\r',(byte)'\n'},0,2);
+                stream.Write(new[]{(byte)'\r',(byte)'\n'},0,2);
             }
         }
 
@@ -137,7 +136,7 @@ namespace LumiSoft.Net.MIME
                 if(m_pMessageFields.IsModified){
                     return true;
                 }
-                foreach(MIME_h_Collection recipientBlock in m_pRecipientBlocks){
+                foreach(var recipientBlock in m_pRecipientBlocks){
                     if(recipientBlock.IsModified){
                         return true;
                     }
@@ -151,19 +150,13 @@ namespace LumiSoft.Net.MIME
         /// Gets per-message fields collection.
         /// </summary>
         /// <exception cref="InvalidOperationException">Is raised when this method is accessed and this body is not bounded to any entity.</exception>
-        public MIME_h_Collection MessageFields
-        {
-            get{ return m_pMessageFields; }
-        }
-        
+        public MIME_h_Collection MessageFields => m_pMessageFields;
+
         /// <summary>
         /// Gets reciepent report blocks collection.
         /// </summary>
         /// <remarks>Each block contains per-recipient-fields.</remarks>
-        public List<MIME_h_Collection> RecipientBlocks
-        {
-            get{ return m_pRecipientBlocks; }
-        }
+        public List<MIME_h_Collection> RecipientBlocks => m_pRecipientBlocks;
 
         #endregion
     }

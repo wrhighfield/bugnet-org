@@ -12,13 +12,13 @@ namespace LumiSoft.Net.Log
         private LogEntryType    m_Type          = LogEntryType.Text;
         private string          m_ID            = "";
         private DateTime        m_Time;
-        private GenericIdentity m_pUserIdentity = null;
-        private long            m_Size          = 0;
+        private GenericIdentity m_pUserIdentity;
+        private long            m_Size;
         private string          m_Text          = "";
-        private Exception       m_pException    = null;
-        private IPEndPoint      m_pLocalEP      = null;
-        private IPEndPoint      m_pRemoteEP     = null;
-        private byte[]          m_pData         = null;
+        private Exception       m_pException;
+        private IPEndPoint      m_pLocalEP;
+        private IPEndPoint      m_pRemoteEP;
+        private byte[]          m_pData;
 
         /// <summary>
         /// Default constructor.
@@ -93,82 +93,52 @@ namespace LumiSoft.Net.Log
         /// <summary>
         /// Gets log entry type.
         /// </summary>
-        public LogEntryType EntryType
-        {
-            get{ return m_Type; }
-        }
+        public LogEntryType EntryType => m_Type;
 
         /// <summary>
         /// Gets log entry ID.
         /// </summary>
-        public string ID
-        {
-            get{ return m_ID; }
-        }
+        public string ID => m_ID;
 
         /// <summary>
         /// Gets time when log entry was created.
         /// </summary>
-        public DateTime Time
-        {
-            get{ return m_Time; }
-        }
+        public DateTime Time => m_Time;
 
         /// <summary>
         /// Gets log entry related user identity.
         /// </summary>
-        public GenericIdentity UserIdentity
-        {
-            get{ return m_pUserIdentity; }
-        }
+        public GenericIdentity UserIdentity => m_pUserIdentity;
 
         /// <summary>
         /// Gets how much data was readed or written, depends on <b>LogEntryType</b>.
         /// </summary>
-        public long Size
-        {
-            get{ return m_Size; }
-        }
+        public long Size => m_Size;
 
         /// <summary>
         /// Gets describing text.
         /// </summary>
-        public string Text
-        {
-            get{ return m_Text; }
-        }
+        public string Text => m_Text;
 
         /// <summary>
         /// Gets exception happened. This property is available only if LogEntryType.Exception.
         /// </summary>
-        public Exception Exception
-        {
-            get{ return m_pException; }
-        }
+        public Exception Exception => m_pException;
 
         /// <summary>
         /// Gets local IP end point. Value null means no local end point.
         /// </summary>
-        public IPEndPoint LocalEndPoint
-        {
-            get{ return m_pLocalEP; }
-        }
+        public IPEndPoint LocalEndPoint => m_pLocalEP;
 
         /// <summary>
         /// Gets remote IP end point. Value null means no remote end point.
         /// </summary>
-        public IPEndPoint RemoteEndPoint
-        {
-            get{ return m_pRemoteEP; }
-        }
+        public IPEndPoint RemoteEndPoint => m_pRemoteEP;
 
         /// <summary>
         /// Gest log data. Value null means no log data.
         /// </summary>
-        public byte[] Data
-        {
-            get{ return m_pData; }
-        }
+        public byte[] Data => m_pData;
 
         #endregion
 

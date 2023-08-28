@@ -40,20 +40,17 @@ namespace LumiSoft.Net {
 			HashSizeValue = 128; 
 		}
 
-		public static new _MD4 Create () 
+		public new static _MD4 Create () 
 		{
 			// for this to work we must register ourself with CryptoConfig
 			return Create ("MD4");
 		}
 
-		public static new _MD4 Create (string hashName) 
+        private new static _MD4 Create (string hashName) 
 		{
-			object o = CryptoConfig.CreateFromName (hashName);
-			// in case machine.config isn't configured to use any MD4 implementation
-			if (o == null) {
-				o = new MD4Managed ();
-			}
-			return (_MD4) o;
+            // in case machine.config isn't configured to use any MD4 implementation
+            var o = CryptoConfig.CreateFromName (hashName) ?? new MD4Managed ();
+            return (_MD4) o;
 		}
 	}
 
@@ -64,10 +61,10 @@ namespace LumiSoft.Net {
 
 	internal class MD4Managed : _MD4 {
 
-		private uint[] state;
-		private byte[] buffer;
-		private uint[] count;
-		private uint[] x;
+		private readonly uint[] state;
+		private readonly byte[] buffer;
+		private readonly uint[] count;
+		private readonly uint[] x;
 
 		private const int S11 = 3;
 		private const int S12 = 7;
@@ -82,7 +79,7 @@ namespace LumiSoft.Net {
 		private const int S33 = 11;
 		private const int S34 = 15;
 
-		private byte[] digest;
+		private readonly byte[] digest;
 
 		//--- constructor -----------------------------------------------------------
                 
@@ -115,15 +112,15 @@ namespace LumiSoft.Net {
 		protected override void HashCore (byte[] array, int ibStart, int cbSize)
 		{
 			/* Compute number of bytes mod 64 */
-			int index = (int) ((count [0] >> 3) & 0x3F);
+			var index = (int) ((count [0] >> 3) & 0x3F);
 			/* Update number of bits */
 			count [0] += (uint) (cbSize << 3);
-			if (count [0] < (cbSize << 3))
+			if (count [0] < cbSize << 3)
 				count [1]++;
 			count [1] += (uint) (cbSize >> 29);
 
-			int partLen = 64 - index;
-			int i = 0;
+			var partLen = 64 - index;
+			var i = 0;
 			/* Transform as many times as possible. */
 			if (cbSize >= partLen) {
 				//MD4_memcpy((POINTER)&context->buffer[index], (POINTER)input, partLen);
@@ -140,18 +137,18 @@ namespace LumiSoft.Net {
 
 			/* Buffer remaining input */
 			//MD4_memcpy ((POINTER)&context->buffer[index], (POINTER)&input[i], inputLen-i);
-			Buffer.BlockCopy (array, ibStart + i, buffer, index, (cbSize-i));
+			Buffer.BlockCopy (array, ibStart + i, buffer, index, cbSize-i);
 		}
 
 		protected override byte[] HashFinal ()
 		{
 			/* Save number of bits */
-			byte[] bits = new byte [8];
+			var bits = new byte [8];
 			Encode (bits, count);
 
 			/* Pad out to 56 mod 64. */
-			uint index = ((count [0] >> 3) & 0x3f);
-			int padLen = (int) ((index < 56) ? (56 - index) : (120 - index));
+			var index = (count [0] >> 3) & 0x3f;
+			var padLen = (int) (index < 56 ? 56 - index : 120 - index);
 			HashCore (Padding (padLen), 0, padLen);
 
 			/* Append length (before padding) */
@@ -171,7 +168,7 @@ namespace LumiSoft.Net {
 		private byte[] Padding (int nLength) 
 		{
 			if (nLength > 0) {
-				byte[] padding = new byte [nLength];
+				var padding = new byte [nLength];
 				padding [0] = 0x80;
 				return padding;
 			}
@@ -181,23 +178,23 @@ namespace LumiSoft.Net {
 		/* F, G and H are basic MD4 functions. */
 		private uint F (uint x, uint y, uint z) 
 		{
-			return (uint) (((x) & (y)) | ((~x) & (z)));
+			return (uint) ((x & y) | (~x & z));
 		}
 
 		private uint G (uint x, uint y, uint z) 
 		{
-			return (uint) (((x) & (y)) | ((x) & (z)) | ((y) & (z)));
+			return (uint) ((x & y) | (x & z) | (y & z));
 		}
 
 		private uint H (uint x, uint y, uint z) 
 		{
-			return (uint) ((x) ^ (y) ^ (z));
+			return (uint) (x ^ y ^ z);
 		}
 
 		/* ROTATE_LEFT rotates x left n bits. */
 		private uint ROL (uint x, byte n) 
 		{
-			return (uint) (((x) << (n)) | ((x) >> (32-(n))));
+			return (uint) ((x << n) | (x >> (32-n)));
 		}
 
 		/* FF, GG and HH are transformations for rounds 1, 2 and 3 */
@@ -223,7 +220,7 @@ namespace LumiSoft.Net {
 		private void Encode (byte[] output, uint[] input)
 		{
 			for (int i = 0, j = 0; j < output.Length; i++, j += 4) {
-				output [j]   = (byte)(input [i]);
+				output [j]   = (byte)input [i];
 				output [j+1] = (byte)(input [i] >> 8);
 				output [j+2] = (byte)(input [i] >> 16);
 				output [j+3] = (byte)(input [i] >> 24);
@@ -233,16 +230,16 @@ namespace LumiSoft.Net {
 		private void Decode (uint[] output, byte[] input, int index) 
 		{
 			for (int i = 0, j = index; i < output.Length; i++, j += 4) {
-				output [i] = (uint) ((input [j]) | (input [j+1] << 8) | (input [j+2] << 16) | (input [j+3] << 24));
+				output [i] = (uint) (input [j] | (input [j+1] << 8) | (input [j+2] << 16) | (input [j+3] << 24));
 			}
 		}
 
 		private void MD4Transform (uint[] state, byte[] block, int index)
 		{
-			uint a = state [0];
-			uint b = state [1];
-			uint c = state [2];
-			uint d = state [3];
+			var a = state [0];
+			var b = state [1];
+			var c = state [2];
+			var d = state [3];
 
 			Decode (x, block, index);
 

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
-
 using LumiSoft.Net.IO;
 
 namespace LumiSoft.Net.MIME
@@ -34,13 +33,13 @@ namespace LumiSoft.Net.MIME
         public static MIME_Message ParseFromFile(string file)
         {
             if(file == null){
-                throw new ArgumentNullException("file");
+                throw new ArgumentNullException(nameof(file));
             }
             if(file == ""){
                 throw new ArgumentException("Argument 'file' value must be specified.");
             }
 
-            using(FileStream fs = File.OpenRead(file)){
+            using(var fs = File.OpenRead(file)){
                 return ParseFromStream(fs,Encoding.UTF8);
             }
         }
@@ -56,16 +55,16 @@ namespace LumiSoft.Net.MIME
         public static MIME_Message ParseFromFile(string file,Encoding headerEncoding)
         {
             if(file == null){
-                throw new ArgumentNullException("file");
+                throw new ArgumentNullException(nameof(file));
             }
             if(file == ""){
                 throw new ArgumentException("Argument 'file' value must be specified.");
             }
             if(headerEncoding == null){
-                throw new ArgumentNullException("headerEncoding");
+                throw new ArgumentNullException(nameof(headerEncoding));
             }
 
-            using(FileStream fs = File.OpenRead(file)){
+            using(var fs = File.OpenRead(file)){
                 return ParseFromStream(fs,headerEncoding);
             }
         }
@@ -83,7 +82,7 @@ namespace LumiSoft.Net.MIME
         public static MIME_Message ParseFromStream(Stream stream)
         {
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             return ParseFromStream(stream,Encoding.UTF8);
@@ -99,13 +98,13 @@ namespace LumiSoft.Net.MIME
         public static MIME_Message ParseFromStream(Stream stream,Encoding headerEncoding)
         {
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
             if(headerEncoding == null){
-                throw new ArgumentNullException("headerEncoding");
+                throw new ArgumentNullException(nameof(headerEncoding));
             }
 
-            MIME_Message retVal = new MIME_Message();
+            var retVal = new MIME_Message();
             retVal.Parse(new SmartStream(stream,false),headerEncoding,new MIME_h_ContentType("text/plain"));
 
             return retVal;
@@ -124,17 +123,17 @@ namespace LumiSoft.Net.MIME
         public static MIME_Entity CreateAttachment(string file)
         {
             if(file == null){
-                throw new ArgumentNullException("file");
+                throw new ArgumentNullException(nameof(file));
             }
 
-            MIME_Entity retVal = new MIME_Entity();
-            MIME_b_Application body = new MIME_b_Application(MIME_MediaTypes.Application.octet_stream);
+            var retVal = new MIME_Entity();
+            var body = new MIME_b_Application(MIME_MediaTypes.Application.octet_stream);
             retVal.Body = body;
             body.SetDataFromFile(file,MIME_TransferEncodings.Base64);
             retVal.ContentType.Param_Name = Path.GetFileName(file);
 
-            FileInfo fileInfo = new FileInfo(file);
-            MIME_h_ContentDisposition disposition = new MIME_h_ContentDisposition(MIME_DispositionTypes.Attachment);
+            var fileInfo = new FileInfo(file);
+            var disposition = new MIME_h_ContentDisposition(MIME_DispositionTypes.Attachment);
             disposition.Param_FileName         = Path.GetFileName(file);
             disposition.Param_Size             = fileInfo.Length;
             disposition.Param_CreationDate     = fileInfo.CreationTime;
@@ -155,21 +154,21 @@ namespace LumiSoft.Net.MIME
         public static MIME_Entity CreateAttachment(Stream stream,string fileName)
         {
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
             if(fileName == null){
-                throw new ArgumentNullException("fileName");
+                throw new ArgumentNullException(nameof(fileName));
             }
 
-            long fileSize = stream.CanSeek ? (stream.Length - stream.Position) : -1;
+            var fileSize = stream.CanSeek ? stream.Length - stream.Position : -1;
 
-            MIME_Entity retVal = new MIME_Entity();
-            MIME_b_Application body = new MIME_b_Application(MIME_MediaTypes.Application.octet_stream);
+            var retVal = new MIME_Entity();
+            var body = new MIME_b_Application(MIME_MediaTypes.Application.octet_stream);
             retVal.Body = body;
             body.SetData(stream,MIME_TransferEncodings.Base64);
             retVal.ContentType.Param_Name = Path.GetFileName(fileName);
 
-            MIME_h_ContentDisposition disposition = new MIME_h_ContentDisposition(MIME_DispositionTypes.Attachment);
+            var disposition = new MIME_h_ContentDisposition(MIME_DispositionTypes.Attachment);
             disposition.Param_FileName         = Path.GetFileName(fileName);
             disposition.Param_Size             = fileSize;
             //disposition.Param_CreationDate     = fileInfo.CreationTime;
@@ -194,28 +193,28 @@ namespace LumiSoft.Net.MIME
         public MIME_Entity[] GetAllEntities(bool includeEmbbedMessage)
         {
             if(m_IsDisposed){
-                throw new ObjectDisposedException(this.GetType().Name);
+                throw new ObjectDisposedException(GetType().Name);
             }
 
-            List<MIME_Entity>  retVal       = new List<MIME_Entity>();
-            List<MIME_Entity> entitiesQueue = new List<MIME_Entity>();
+            var  retVal       = new List<MIME_Entity>();
+            var entitiesQueue = new List<MIME_Entity>();
             entitiesQueue.Add(this);
             
             while(entitiesQueue.Count > 0){
-                MIME_Entity currentEntity = entitiesQueue[0];
+                var currentEntity = entitiesQueue[0];
                 entitiesQueue.RemoveAt(0);
         
                 retVal.Add(currentEntity);
 
                 // Current entity is multipart entity, add it's body-parts for processing.
-                if(this.Body != null && currentEntity.Body.GetType().IsSubclassOf(typeof(MIME_b_Multipart))){
-                    MIME_EntityCollection bodyParts = ((MIME_b_Multipart)currentEntity.Body).BodyParts;
-                    for(int i=0;i<bodyParts.Count;i++){
+                if(Body != null && currentEntity.Body.GetType().IsSubclassOf(typeof(MIME_b_Multipart))){
+                    var bodyParts = ((MIME_b_Multipart)currentEntity.Body).BodyParts;
+                    for(var i=0;i<bodyParts.Count;i++){
                         entitiesQueue.Insert(i,bodyParts[i]);
                     }
                 }
                 // Add embedded message for processing (embedded message entities will be included).
-                else if(includeEmbbedMessage && this.Body != null && currentEntity.Body is MIME_b_MessageRfc822){
+                else if(includeEmbbedMessage && Body != null && currentEntity.Body is MIME_b_MessageRfc822){
                     entitiesQueue.Add(((MIME_b_MessageRfc822)currentEntity.Body).Message);
                 }
             }
@@ -238,16 +237,16 @@ namespace LumiSoft.Net.MIME
         public MIME_Entity GetEntityByCID(string cid)
         {
             if(m_IsDisposed){
-                    throw new ObjectDisposedException(this.GetType().Name);
+                    throw new ObjectDisposedException(GetType().Name);
                 }
             if(cid == null){
-                throw new ArgumentNullException("cid");
+                throw new ArgumentNullException(nameof(cid));
             }
             if(cid == ""){
-                throw new ArgumentException("Argument 'cid' value must be specified.","cid");
+                throw new ArgumentException("Argument 'cid' value must be specified.",nameof(cid));
             }
 
-            foreach(MIME_Entity entity in this.AllEntities){
+            foreach(var entity in AllEntities){
                 if(entity.ContentID == cid){
                     return entity;
                 }
@@ -274,28 +273,28 @@ namespace LumiSoft.Net.MIME
         {
             get{
                 if(m_IsDisposed){
-                    throw new ObjectDisposedException(this.GetType().Name);
+                    throw new ObjectDisposedException(GetType().Name);
                 }
 
-                List<MIME_Entity> retVal        = new List<MIME_Entity>();
-                List<MIME_Entity> entitiesQueue = new List<MIME_Entity>();
+                var retVal        = new List<MIME_Entity>();
+                var entitiesQueue = new List<MIME_Entity>();
                 entitiesQueue.Add(this);
             
                 while(entitiesQueue.Count > 0){
-                    MIME_Entity currentEntity = entitiesQueue[0];
+                    var currentEntity = entitiesQueue[0];
                     entitiesQueue.RemoveAt(0);
         
                     retVal.Add(currentEntity);
 
                     // Current entity is multipart entity, add it's body-parts for processing.
-                    if(this.Body != null && currentEntity.Body.GetType().IsSubclassOf(typeof(MIME_b_Multipart))){
-                        MIME_EntityCollection bodyParts = ((MIME_b_Multipart)currentEntity.Body).BodyParts;
-                        for(int i=0;i<bodyParts.Count;i++){
+                    if(Body != null && currentEntity.Body.GetType().IsSubclassOf(typeof(MIME_b_Multipart))){
+                        var bodyParts = ((MIME_b_Multipart)currentEntity.Body).BodyParts;
+                        for(var i=0;i<bodyParts.Count;i++){
                             entitiesQueue.Insert(i,bodyParts[i]);
                         }
                     }
                     // Add embbed message for processing (Embbed message entities will be included).
-                    else if(this.Body != null && currentEntity.Body is MIME_b_MessageRfc822){
+                    else if(Body != null && currentEntity.Body is MIME_b_MessageRfc822){
                         entitiesQueue.Add(((MIME_b_MessageRfc822)currentEntity.Body).Message);
                     }
                 }

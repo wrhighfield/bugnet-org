@@ -8,8 +8,8 @@ namespace LumiSoft.Net.IO
     /// </summary>
     public class MemoryStreamEx : Stream
     {
-        private bool   m_IsDisposed = false;
-        private Stream m_pStream    = null;
+        private bool   m_IsDisposed;
+        private Stream m_pStream;
         private int    m_MaxMemSize = 32000;
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace LumiSoft.Net.IO
                 throw new ObjectDisposedException("SmartStream");
             }
             if(buffer == null){
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
             
             return m_pStream.Read(buffer,offset,count);
@@ -153,15 +153,15 @@ namespace LumiSoft.Net.IO
                 throw new ObjectDisposedException("SmartStream");
             }
             if(buffer == null){
-                throw new ArgumentNullException("buffer");
+                throw new ArgumentNullException(nameof(buffer));
             }
 
             // We need switch to temporary file.
-            if(m_pStream is MemoryStream && (m_pStream.Position + count) > m_MaxMemSize){
-                FileStream fs = new FileStream(Path.GetTempPath() + "ls-" + Guid.NewGuid().ToString().Replace("-","") + ".tmp",FileMode.Create,FileAccess.ReadWrite,FileShare.Read,32000,FileOptions.DeleteOnClose);
+            if(m_pStream is MemoryStream && m_pStream.Position + count > m_MaxMemSize){
+                var fs = new FileStream(Path.GetTempPath() + "ls-" + Guid.NewGuid().ToString().Replace("-","") + ".tmp",FileMode.Create,FileAccess.ReadWrite,FileShare.Read,32000,FileOptions.DeleteOnClose);
 
                 m_pStream.Position = 0;
-                Net_Utils.StreamCopy(m_pStream,fs,8000);
+                NetUtils.StreamCopy(m_pStream,fs,8000);
                 m_pStream.Close();
                 m_pStream = fs;
             }
@@ -253,7 +253,7 @@ namespace LumiSoft.Net.IO
                 if(m_IsDisposed){
                     throw new ObjectDisposedException("SmartStream");
                 }
-                if(value < 0 || value > this.Length){
+                if(value < 0 || value > Length){
                     throw new ArgumentException("Property 'Position' value must be >= 0 and <= this.Length.");
                 }
 

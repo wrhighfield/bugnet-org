@@ -5,12 +5,12 @@ namespace LumiSoft.Net
     /// <summary>
     /// Represents asynchronous operation.
     /// </summary>
-    public interface IAsyncOP
+    public interface IAsyncOp
     {
         /// <summary>
         /// Gets asynchronous operation state.
         /// </summary>
-        AsyncOP_State State
+        AsyncOpState State
         {
             get;
         }

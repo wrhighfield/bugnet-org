@@ -17,9 +17,9 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public class _ParameterBuilder
         {
-            private string                 m_Name      = null;
-            private SortedList<int,string> m_pParts    = null;
-            private Encoding               m_pEncoding = null;
+            private string                 m_Name;
+            private SortedList<int,string> m_pParts;
+            private Encoding               m_pEncoding;
 
             /// <summary>
             /// Default constructor.
@@ -29,7 +29,7 @@ namespace LumiSoft.Net.MIME
             public _ParameterBuilder(string name)
             {
                 if(name == null){
-                    throw new ArgumentNullException("name");
+                    throw new ArgumentNullException(nameof(name));
                 }
 
                 m_Name = name;
@@ -51,7 +51,7 @@ namespace LumiSoft.Net.MIME
                 // We should have charset and language information available.
                 if(encoded && index == 0){
                     // Syntax: <charset>'<language>'<value>
-                    string[] charset_language_value = value.Split('\'');
+                    var charset_language_value = value.Split('\'');
                     m_pEncoding = Encoding.GetEncoding(charset_language_value[0]);
                     value = charset_language_value[2];
                 }
@@ -71,17 +71,16 @@ namespace LumiSoft.Net.MIME
             public MIME_h_Parameter GetParamter()
             {
                 // Concate parts values and decode value. (SortedList takes care for sorting part indexes)
-                StringBuilder value = new StringBuilder();
-                foreach(KeyValuePair<int,string> v in m_pParts){
+                var value = new StringBuilder();
+                foreach(var v in m_pParts){
                     value.Append(v.Value);
                 }
 
                 if(m_pEncoding != null){
                     return new MIME_h_Parameter(m_Name,DecodeExtOctet(value.ToString(),m_pEncoding));
                 }
-                else{
-                    return new MIME_h_Parameter(m_Name,value.ToString());
-                }
+
+                return new MIME_h_Parameter(m_Name,value.ToString());
             }
 
             #endregion
@@ -92,19 +91,16 @@ namespace LumiSoft.Net.MIME
             /// <summary>
             /// Gets parameter name.
             /// </summary>
-            public string Name
-            {
-                get{ return m_Name ; }
-            }
+            public string Name => m_Name;
 
             #endregion
         }
 
         #endregion
 
-        private bool                                m_IsModified  = false;
-        private MIME_h                              m_pOwner      = null;
-        private Dictionary<string,MIME_h_Parameter> m_pParameters = null;
+        private bool                                m_IsModified;
+        private MIME_h                              m_pOwner;
+        private Dictionary<string,MIME_h_Parameter> m_pParameters;
 
         /// <summary>
         /// Default constructor.
@@ -114,7 +110,7 @@ namespace LumiSoft.Net.MIME
         public MIME_h_ParameterCollection(MIME_h owner)
         {
             if(owner == null){
-                throw new ArgumentNullException("owner");
+                throw new ArgumentNullException(nameof(owner));
             }
 
             m_pOwner = owner;
@@ -133,7 +129,7 @@ namespace LumiSoft.Net.MIME
         public void Remove(string name)
         {
             if(name == null){
-                throw new ArgumentNullException("name");
+                throw new ArgumentNullException(nameof(name));
             }
 
             if(m_pParameters.Remove(name)){
@@ -164,7 +160,7 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns header fields parameters array.</returns>
         public MIME_h_Parameter[] ToArray()
         {
-            MIME_h_Parameter[] retVal = new MIME_h_Parameter[m_pParameters.Count];
+            var retVal = new MIME_h_Parameter[m_pParameters.Count];
             m_pParameters.Values.CopyTo(retVal,0);
 
             return retVal;
@@ -201,26 +197,26 @@ namespace LumiSoft.Net.MIME
                 charset = Encoding.Default;
             }
 
-            StringBuilder retVal = new StringBuilder();
-            foreach(MIME_h_Parameter parameter in this.ToArray()){
+            var retVal = new StringBuilder();
+            foreach(var parameter in ToArray()){
                 if(string.IsNullOrEmpty(parameter.Value)){
                     retVal.Append(";\r\n\t" + parameter.Name);
                 }
                 // We don't need to encode or split value.
-                else if((charset == null || Net_Utils.IsAscii(parameter.Value)) && parameter.Value.Length < 76){
-                    retVal.Append(";\r\n\t" + parameter.Name + "=" + TextUtils.QuoteString(parameter.Value));
+                else if((charset == null || NetUtils.IsAscii(parameter.Value)) && parameter.Value.Length < 76){
+                    retVal.Append(";\r\n\t" + parameter.Name + "=" + TextUtilities.QuoteString(parameter.Value));
                 }
                 // We need to encode/split value.
                 else{
-                    byte[] byteValue = charset.GetBytes(parameter.Value);
+                    var byteValue = charset.GetBytes(parameter.Value);
 
-                    List<string> values = new List<string>();            
+                    var values = new List<string>();            
                     // Do encoding/splitting.
-                    int    offset    = 0;
-                    char[] valueBuff = new char[50];
-                    foreach(byte b in byteValue){                                        
+                    var    offset    = 0;
+                    var valueBuff = new char[50];
+                    foreach(var b in byteValue){                                        
                         // We need split value as RFC 2231 says.
-                        if(offset >= (50 - 3)){
+                        if(offset >= 50 - 3){
                             values.Add(new string(valueBuff,0,offset));
                             offset = 0;
                         }
@@ -241,7 +237,7 @@ namespace LumiSoft.Net.MIME
                         values.Add(new string(valueBuff,0,offset));
                     }
 
-                    for(int i=0;i<values.Count;i++){
+                    for(var i=0;i<values.Count;i++){
                         // Only fist value entry has charset and language info.
                         if(charset != null && i == 0){
                             retVal.Append(";\r\n\t" + parameter.Name + "*" + i.ToString() + "*=" + charset.WebName + "''" + values[i]);
@@ -268,7 +264,7 @@ namespace LumiSoft.Net.MIME
         public void Parse(string value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             Parse(new MIME_Reader(value));
@@ -282,7 +278,7 @@ namespace LumiSoft.Net.MIME
         public void Parse(MIME_Reader reader)
         {
             if(reader == null){
-                throw new ArgumentNullException("reader");
+                throw new ArgumentNullException(nameof(reader));
             }
 
             /* RFC 2231.
@@ -320,27 +316,27 @@ namespace LumiSoft.Net.MIME
                     MUST be present even when the fields are left blank.
             */
 
-            KeyValueCollection<string,_ParameterBuilder> parameters = new KeyValueCollection<string,_ParameterBuilder>();
+            var parameters = new KeyValueCollection<string,_ParameterBuilder>();
 
             // Parse all parameter parts.
-            string[] parameterParts = TextUtils.SplitQuotedString(reader.ToEnd(),';');
-            foreach(string part in parameterParts){
+            var parameterParts = TextUtilities.SplitQuotedString(reader.ToEnd(),';');
+            foreach(var part in parameterParts){
                 if(string.IsNullOrEmpty(part)){
                     continue;
                 }
 
-                string[] name_value = part.Trim().Split(new char[]{'='},2);
-                string   paramName  = name_value[0].Trim();
+                var name_value = part.Trim().Split(new[]{'='},2);
+                var   paramName  = name_value[0].Trim();
                 string   paramValue = null;
                 if(name_value.Length == 2){
-                    paramValue = TextUtils.UnQuoteString(name_value[1].Trim());
+                    paramValue = TextUtilities.UnQuoteString(name_value[1].Trim());
                 }
                 // Valueless parameter.
                 //else{
                                 
-                string[] nameParts = paramName.Split('*');
-                int      index     = 0;
-                bool     encoded   = nameParts.Length == 3;
+                var nameParts = paramName.Split('*');
+                var      index     = 0;
+                var     encoded   = nameParts.Length == 3;
                 // Get multi value parameter index.
                 if(nameParts.Length >= 2){
                     try{
@@ -387,15 +383,15 @@ namespace LumiSoft.Net.MIME
         private static string DecodeExtOctet(string text,Encoding charset)
         {
             if(text == null){
-                throw new ArgumentNullException("text");
+                throw new ArgumentNullException(nameof(text));
             }
             if(charset == null){
-                throw new ArgumentNullException("charset");
+                throw new ArgumentNullException(nameof(charset));
             }
 
-            int    offset        = 0;
-            byte[] decodedBuffer = new byte[text.Length];            
-            for(int i=0;i<text.Length;i++){
+            var    offset        = 0;
+            var decodedBuffer = new byte[text.Length];            
+            for(var i=0;i<text.Length;i++){
                 if(text[i] == '%'){
                     decodedBuffer[offset++] = byte.Parse(text[i + 1].ToString() + text[i + 2].ToString(),System.Globalization.NumberStyles.HexNumber);
                     i += 2;
@@ -433,37 +429,31 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
         public bool IsModified
         {
-            get{
+            get
+            {
                 if(m_IsModified){
                     return true;
                 }
-                else{
-                    foreach(MIME_h_Parameter parameter in this.ToArray()){
-                        if(parameter.IsModified){
-                            return true;
-                        }
-                    }
 
-                    return false;
+                foreach(var parameter in ToArray()){
+                    if(parameter.IsModified){
+                        return true;
+                    }
                 }
+
+                return false;
             }
         }
 
         /// <summary>
         /// Gets owner MIME header field.
         /// </summary>
-        public MIME_h Owner
-        {
-            get{ return m_pOwner; }
-        }
+        public MIME_h Owner => m_pOwner;
 
         /// <summary>
         /// Gets number of items in the collection.
         /// </summary>
-        public int Count
-        {
-            get{ return m_pParameters.Count; }
-        }
+        public int Count => m_pParameters.Count;
 
         /// <summary>
         /// Gets or sets specified header field parameter value. Value null means not specified.
@@ -475,21 +465,20 @@ namespace LumiSoft.Net.MIME
         {
             get{
                 if(name == null){
-                    throw new ArgumentNullException("name");
+                    throw new ArgumentNullException(nameof(name));
                 }
 
                 MIME_h_Parameter retVal = null;
                 if(m_pParameters.TryGetValue(name,out retVal)){
                     return retVal.Value;
                 }
-                else{
-                    return null;
-                }
+
+                return null;
             }
 
             set{
                 if(name == null){
-                    throw new ArgumentNullException("name");
+                    throw new ArgumentNullException(nameof(name));
                 }
 
                 MIME_h_Parameter retVal = null;

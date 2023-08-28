@@ -1,0 +1,28 @@
+﻿namespace LumiSoft.Net
+{
+    /// <summary>
+    /// Specifies asynchronous operation state.
+    /// </summary>
+    public enum AsyncOpState
+    {
+        /// <summary>
+        /// Operation waits for start.
+        /// </summary>
+        WaitingForStart,
+
+        /// <summary>
+        /// Operation processing is in progress.
+        /// </summary>
+        Active,
+
+        /// <summary>
+        /// Operations is completed.
+        /// </summary>
+        Completed,
+
+        /// <summary>
+        /// Operation is disposed.
+        /// </summary>
+        Disposed,
+    }
+}

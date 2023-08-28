@@ -8,8 +8,8 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_h_Provider
     {
-        private Type                    m_pDefaultHeaderField = null;
-        private Dictionary<string,Type> m_pHeadrFields        = null;
+        private Type                    m_pDefaultHeaderField;
+        private Dictionary<string,Type> m_pHeadrFields;
 
         /// <summary>
         /// Default constructor.
@@ -36,7 +36,7 @@ namespace LumiSoft.Net.MIME
         public MIME_h Parse(string field)
         {
             if(field == null){
-                throw new ArgumentNullException("field");
+                throw new ArgumentNullException(nameof(field));
             }
 
             // <CRLF> is misssing from end, add it.
@@ -45,23 +45,22 @@ namespace LumiSoft.Net.MIME
             }
 
             MIME_h   headerField = null;
-            string[] name_value  = field.Split(new char[]{':'},2);
-            string   name        = name_value[0].Trim();
+            var name_value  = field.Split(new[]{':'},2);
+            var   name        = name_value[0].Trim();
             if(name == string.Empty){
                 throw new ParseException("Invalid header field value '" + field + "'.");
             }
-            else{
-                try{
-                    if(m_pHeadrFields.ContainsKey(name)){ 
-                        headerField = (MIME_h)m_pHeadrFields[name].GetMethod("Parse").Invoke(null,new object[]{field});
-                    }
-                    else{
-                        headerField = (MIME_h)m_pDefaultHeaderField.GetMethod("Parse").Invoke(null,new object[]{field});
-                    }
+
+            try{
+                if(m_pHeadrFields.ContainsKey(name)){ 
+                    headerField = (MIME_h)m_pHeadrFields[name].GetMethod("Parse").Invoke(null,new object[]{field});
                 }
-                catch(Exception x){
-                    headerField = new MIME_h_Unparsed(field,x.InnerException);
+                else{
+                    headerField = (MIME_h)m_pDefaultHeaderField.GetMethod("Parse").Invoke(null,new object[]{field});
                 }
+            }
+            catch(Exception x){
+                headerField = new MIME_h_Unparsed(field,x.InnerException);
             }
 
             return headerField;
@@ -80,7 +79,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentException">Is raised when invalid value is passed.</exception>
         public Type DefaultHeaderField
         {
-            get{ return m_pDefaultHeaderField; }
+            get => m_pDefaultHeaderField;
 
             set{
                 if(value == null){
@@ -97,10 +96,7 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets header fields parsers collection.
         /// </summary>
-        public Dictionary<string,Type> HeaderFields
-        {
-            get{ return m_pHeadrFields; }
-        }
+        public Dictionary<string,Type> HeaderFields => m_pHeadrFields;
 
         #endregion
     }

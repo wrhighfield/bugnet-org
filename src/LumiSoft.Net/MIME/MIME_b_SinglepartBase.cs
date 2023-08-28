@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-
 using LumiSoft.Net.IO;
 
 namespace LumiSoft.Net.MIME
@@ -11,8 +10,8 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public abstract class MIME_b_SinglepartBase : MIME_b
     {
-        private bool   m_IsModified         = false;
-        private Stream m_pEncodedDataStream = null;
+        private bool   m_IsModified;
+        private Stream m_pEncodedDataStream;
                 
         /// <summary>
         /// Default constructor.
@@ -22,7 +21,7 @@ namespace LumiSoft.Net.MIME
         public MIME_b_SinglepartBase(MIME_h_ContentType contentType) : base(contentType)
         {
             if(contentType == null){
-                throw new ArgumentNullException("contentType");
+                throw new ArgumentNullException(nameof(contentType));
             }
 
             m_pEncodedDataStream = new MemoryStreamEx(32000);
@@ -51,8 +50,8 @@ namespace LumiSoft.Net.MIME
             base.SetParent(entity,setContentType);
 
             // Owner entity has no content-type or has different content-type, just add/overwrite it.
-            if(setContentType && (this.Entity.ContentType == null || !string.Equals(this.Entity.ContentType.TypeWithSubtype,this.MediaType,StringComparison.InvariantCultureIgnoreCase))){
-                this.Entity.ContentType = new MIME_h_ContentType(MediaType);
+            if(setContentType && (Entity.ContentType == null || !string.Equals(Entity.ContentType.TypeWithSubtype,MediaType,StringComparison.InvariantCultureIgnoreCase))){
+                Entity.ContentType = new MIME_h_ContentType(MediaType);
             }
         }
 
@@ -69,13 +68,13 @@ namespace LumiSoft.Net.MIME
         /// <param name="headerReencode">If true always specified encoding is used for header. If false and header field value not modified, 
         /// original encoding is kept.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
-        internal protected override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
+        protected internal override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
         {
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
-            Net_Utils.StreamCopy(GetEncodedDataStream(),stream,32000);
+            NetUtils.StreamCopy(GetEncodedDataStream(),stream,32000);
         }
 
         #endregion
@@ -103,7 +102,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="InvalidOperationException">Is raised when this method is accessed and this body is not bounded to any entity.</exception>
         public Stream GetEncodedDataStream()
         {
-            if(this.Entity == null){
+            if(Entity == null){
                 throw new InvalidOperationException("Body must be bounded to some entity first.");
             }
 
@@ -127,26 +126,26 @@ namespace LumiSoft.Net.MIME
         public void SetEncodedData(string contentTransferEncoding,Stream stream)
         {
             if(contentTransferEncoding == null){
-                throw new ArgumentNullException("contentTransferEncoding");
+                throw new ArgumentNullException(nameof(contentTransferEncoding));
             }
             if(contentTransferEncoding == string.Empty){
                 throw new ArgumentException("Argument 'contentTransferEncoding' value must be specified.");
             }
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
-            if(this.Entity == null){
+            if(Entity == null){
                 throw new InvalidOperationException("Body must be bounded to some entity first.");
             }
 
             // Owner entity has no content-type or has different content-type, just add/overwrite it.
-            if(this.Entity.ContentType == null || !string.Equals(this.Entity.ContentType.TypeWithSubtype,this.MediaType,StringComparison.InvariantCultureIgnoreCase)){
-                this.Entity.ContentType = new MIME_h_ContentType(this.MediaType);
+            if(Entity.ContentType == null || !string.Equals(Entity.ContentType.TypeWithSubtype,MediaType,StringComparison.InvariantCultureIgnoreCase)){
+                Entity.ContentType = new MIME_h_ContentType(MediaType);
             }
-            this.Entity.ContentTransferEncoding = contentTransferEncoding;
+            Entity.ContentTransferEncoding = contentTransferEncoding;
 
             m_pEncodedDataStream.SetLength(0);
-            Net_Utils.StreamCopy(stream,m_pEncodedDataStream,32000);
+            NetUtils.StreamCopy(stream,m_pEncodedDataStream,32000);
        
             m_IsModified = true;
         }
@@ -164,7 +163,7 @@ namespace LumiSoft.Net.MIME
         /// <remarks>The returned stream should be closed/disposed as soon as it's not needed any more.</remarks>
         public Stream GetDataStream()
         {             
-            if(this.Entity == null){
+            if(Entity == null){
                 throw new InvalidOperationException("Body must be bounded to some entity first.");
             }
 
@@ -172,30 +171,29 @@ namespace LumiSoft.Net.MIME
                 This is the default value -- that is, "Content-Transfer-Encoding: 7BIT" is assumed if the
                 Content-Transfer-Encoding header field is not present.
             */
-            string transferEncoding = MIME_TransferEncodings.SevenBit;
-            if(this.Entity.ContentTransferEncoding != null){
-                transferEncoding = this.Entity.ContentTransferEncoding.ToLowerInvariant();
+            var transferEncoding = MIME_TransferEncodings.SevenBit;
+            if(Entity.ContentTransferEncoding != null){
+                transferEncoding = Entity.ContentTransferEncoding.ToLowerInvariant();
             }
 
             m_pEncodedDataStream.Position = 0;            
             if(transferEncoding == MIME_TransferEncodings.QuotedPrintable){                
                 return new QuotedPrintableStream(new SmartStream(m_pEncodedDataStream,false),FileAccess.Read);
             }
-            else if(transferEncoding == MIME_TransferEncodings.Base64){
+
+            if(transferEncoding == MIME_TransferEncodings.Base64){
                 return new Base64Stream(m_pEncodedDataStream,false,true,FileAccess.Read);
-            }            
-            else if(transferEncoding == MIME_TransferEncodings.Binary){
+            }
+            if(transferEncoding == MIME_TransferEncodings.Binary){
                 return new ReadWriteControlledStream(m_pEncodedDataStream,FileAccess.Read);
             }
-            else if(transferEncoding == MIME_TransferEncodings.EightBit){
+            if(transferEncoding == MIME_TransferEncodings.EightBit){
                 return new ReadWriteControlledStream(m_pEncodedDataStream,FileAccess.Read);
             }
-            else if(transferEncoding == MIME_TransferEncodings.SevenBit){
+            if(transferEncoding == MIME_TransferEncodings.SevenBit){
                 return new ReadWriteControlledStream(m_pEncodedDataStream,FileAccess.Read);
             }
-            else{
-                throw new NotSupportedException("Not supported Content-Transfer-Encoding '" + this.Entity.ContentTransferEncoding + "'.");
-            }
+            throw new NotSupportedException("Not supported Content-Transfer-Encoding '" + Entity.ContentTransferEncoding + "'.");
         }
 
         #endregion
@@ -212,25 +210,25 @@ namespace LumiSoft.Net.MIME
         public void SetData(Stream stream,string transferEncoding)
         {            
             if(stream == null){
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
             if(transferEncoding == null){
-                throw new ArgumentNullException("transferEncoding");
+                throw new ArgumentNullException(nameof(transferEncoding));
             }
 
             if(string.Equals(transferEncoding,MIME_TransferEncodings.QuotedPrintable,StringComparison.InvariantCultureIgnoreCase)){
-                using(MemoryStreamEx fs = new MemoryStreamEx(32000)){
-                    QuotedPrintableStream encoder = new QuotedPrintableStream(new SmartStream(fs,false),FileAccess.ReadWrite);
-                    Net_Utils.StreamCopy(stream,encoder,32000);
+                using(var fs = new MemoryStreamEx(32000)){
+                    var encoder = new QuotedPrintableStream(new SmartStream(fs,false),FileAccess.ReadWrite);
+                    NetUtils.StreamCopy(stream,encoder,32000);
                     encoder.Flush();
                     fs.Position = 0;
                     SetEncodedData(transferEncoding,fs);
                 }
             }
             else if(string.Equals(transferEncoding,MIME_TransferEncodings.Base64,StringComparison.InvariantCultureIgnoreCase)){
-                using(MemoryStreamEx fs = new MemoryStreamEx(32000)){
-                    Base64Stream encoder = new Base64Stream(fs,false,true,FileAccess.ReadWrite);                                     
-                    Net_Utils.StreamCopy(stream,encoder,32000);
+                using(var fs = new MemoryStreamEx(32000)){
+                    var encoder = new Base64Stream(fs,false,true,FileAccess.ReadWrite);                                     
+                    NetUtils.StreamCopy(stream,encoder,32000);
                     encoder.Finish();
                     fs.Position = 0;
                     SetEncodedData(transferEncoding,fs);
@@ -264,10 +262,10 @@ namespace LumiSoft.Net.MIME
         public void SetDataFromFile(string file,string transferEncoding)
         {
             if(file == null){
-                throw new ArgumentNullException("file");
+                throw new ArgumentNullException(nameof(file));
             }
             
-            using(FileStream fs = File.OpenRead(file)){
+            using(var fs = File.OpenRead(file)){
                 SetData(fs,transferEncoding);
             }            
         }
@@ -280,18 +278,12 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets if body has modified.
         /// </summary>
-        public override bool IsModified
-        {
-            get{ return m_IsModified; }
-        }
-                
+        public override bool IsModified => m_IsModified;
+
         /// <summary>
         /// Gets encoded body data size in bytes.
         /// </summary>
-        public int EncodedDataSize
-        {
-            get{ return (int)m_pEncodedDataStream.Length; }
-        }
+        public int EncodedDataSize => (int)m_pEncodedDataStream.Length;
 
         /// <summary>
         /// Gets body encoded data. 
@@ -301,8 +293,8 @@ namespace LumiSoft.Net.MIME
         public byte[] EncodedData
         {
             get{ 
-                MemoryStream ms = new MemoryStream();
-                Net_Utils.StreamCopy(this.GetEncodedDataStream(),ms,32000);
+                var ms = new MemoryStream();
+                NetUtils.StreamCopy(GetEncodedDataStream(),ms,32000);
 
                 return ms.ToArray();
             }
@@ -317,8 +309,8 @@ namespace LumiSoft.Net.MIME
         public byte[] Data
         {
             get{
-                MemoryStream ms = new MemoryStream();
-                Net_Utils.StreamCopy(this.GetDataStream(),ms,32000);
+                var ms = new MemoryStream();
+                NetUtils.StreamCopy(GetDataStream(),ms,32000);
 
                 return ms.ToArray(); 
             }
@@ -328,10 +320,7 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets encoded data stream.
         /// </summary>
-        protected Stream EncodedStream
-        {
-            get{ return m_pEncodedDataStream; }
-        }
+        protected Stream EncodedStream => m_pEncodedDataStream;
 
         #endregion
     }

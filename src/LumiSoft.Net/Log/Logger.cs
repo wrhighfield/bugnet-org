@@ -178,7 +178,7 @@ namespace LumiSoft.Net.Log
         /// <summary>
         /// Is raised when new log entry is available.
         /// </summary>
-        public event EventHandler<WriteLogEventArgs> WriteLog = null;
+        public event EventHandler<WriteLogEventArgs> WriteLog;
 
         #region method OnWriteLog
 
@@ -188,8 +188,8 @@ namespace LumiSoft.Net.Log
         /// <param name="entry">Log entry.</param>
         private void OnWriteLog(LogEntry entry)
         {
-            if(this.WriteLog != null){
-                this.WriteLog(this,new WriteLogEventArgs(entry));
+            if(WriteLog != null){
+                WriteLog(this,new WriteLogEventArgs(entry));
             }
         }
 

@@ -19,7 +19,7 @@ namespace LumiSoft.Net.Mail
     public class Mail_h_ReturnPath : MIME_h
     {
         private bool   m_IsModified = false;
-        private string m_Address    = null;
+        private string m_Address;
 
         /// <summary>
         /// Default constructor.
@@ -43,17 +43,17 @@ namespace LumiSoft.Net.Mail
         public static Mail_h_ReturnPath Parse(string value)
         {
             if(value == null){
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
-            string[] name_value = value.Split(new char[]{':'},2);
+            var name_value = value.Split(new[]{':'},2);
             if(name_value.Length != 2){
                 throw new ParseException("Invalid header field value '" + value + "'.");
             }
 
-            Mail_h_ReturnPath retVal = new Mail_h_ReturnPath(null);
+            var retVal = new Mail_h_ReturnPath(null);
 
-            MIME_Reader r = new MIME_Reader(name_value[1].Trim());
+            var r = new MIME_Reader(name_value[1].Trim());
             r.ToFirstChar();
             // Return-Path missing <>, some server won't be honor RFC.
             if(!r.StartsWith("<")){
@@ -83,9 +83,8 @@ namespace LumiSoft.Net.Mail
             if(string.IsNullOrEmpty(m_Address)){
                 return "Return-Path: <>\r\n";
             }
-            else{
-                return "Return-Path: <" + m_Address + ">\r\n";
-            }
+
+            return "Return-Path: <" + m_Address + ">\r\n";
         }
 
         #endregion
@@ -98,26 +97,17 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         /// <remarks>All new added header fields has <b>IsModified = true</b>.</remarks>
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
-        public override bool IsModified
-        {
-            get{ return m_IsModified; }
-        }
+        public override bool IsModified => m_IsModified;
 
         /// <summary>
         /// Gets header field name. For example "Sender".
         /// </summary>
-        public override string Name
-        {
-            get{ return "Return-Path"; }
-        }
+        public override string Name => "Return-Path";
 
         /// <summary>
         /// Gets mailbox address. Value null means null-path.
         /// </summary>
-        public string Address
-        {
-            get{ return m_Address; }
-        }
+        public string Address => m_Address;
 
         #endregion
     }

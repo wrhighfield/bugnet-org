@@ -50,26 +50,17 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         /// <remarks>All new added header fields has <b>IsModified = true</b>.</remarks>
         /// <exception cref="ObjectDisposedException">Is riased when this class is disposed and this property is accessed.</exception>
-        public override bool IsModified
-        {
-            get{ return true; } //m_pAddresses.IsModified; }
-        }
+        public override bool IsModified => true; //m_pAddresses.IsModified; }
 
         /// <summary>
         /// Gets header field name. For example "Sender".
         /// </summary>
-        public override string Name
-        {
-            get{ return "Disposition-Notification-Options"; }
-        }
+        public override string Name => "Disposition-Notification-Options";
 
         /// <summary>
         /// Gets or sets mailbox address.
         /// </summary>
-        public string Address
-        {
-            get{ return "TODO:"; }
-        }
+        public string Address => "TODO:";
 
         #endregion
     }
