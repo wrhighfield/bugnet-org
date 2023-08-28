@@ -1,9 +1,10 @@
 using System;
 using System.Web;
+using BugNET.UI;
 
 namespace BugNET.Errors
 {
-    public partial class Error : System.Web.UI.Page
+    public partial class Error : BugNetBasePage
     {
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -12,7 +13,7 @@ namespace BugNET.Errors
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-            Label2.Text = string.Format(GetLocalResourceObject("Message1").ToString(), Page.ResolveUrl("~/Default.aspx"));
+            Label2.Text = string.Format(GetLocalString("Message1"), Page.ResolveUrl("~/Default.aspx"));
         }
 
         /// <summary>
@@ -22,15 +23,15 @@ namespace BugNET.Errors
         protected override void OnError(EventArgs e)
         {
             //// At this point we have information about the error
-            HttpContext ctx = HttpContext.Current;
+            var ctx = HttpContext.Current;
 
-            Exception exception = ctx.Server.GetLastError();
+            var exception = ctx.Server.GetLastError();
 
-            string errorInfo =
-               "<br>Offending URL: " + ctx.Request.Url.ToString() +
-               "<br>Source: " + exception.Source +
-               "<br>Message: " + exception.Message; // +
-               //"<br>Stack trace: " + exception.StackTrace;
+            var errorInfo =
+                "<br>Offending URL: " + ctx.Request.Url +
+                "<br>Source: " + exception.Source +
+                "<br>Message: " + exception.Message; // +
+            //"<br>Stack trace: " + exception.StackTrace;
 
             ctx.Response.Write(errorInfo);
 

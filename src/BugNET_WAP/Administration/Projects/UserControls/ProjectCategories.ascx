@@ -1,10 +1,10 @@
 ﻿<%@ Control Language="c#" Inherits="BugNET.Administration.Projects.UserControls.ProjectCategories" CodeBehind="ProjectCategories.ascx.cs"
-    AutoEventWireup="True" %>
+AutoEventWireup="True" %>
 <%@ Register TagPrefix="it" TagName="PickCategory" Src="~/UserControls/PickCategory.ascx" %>
 <asp:ScriptManagerProxy ID="ScriptManagerProxy1" runat="server">
     <Scripts>
-        <asp:ScriptReference Path="~/Scripts/jquery.jstree.js" />
-        <asp:ScriptReference Path="~/Scripts/jquery.cookie.js" />
+        <asp:ScriptReference Path="~/Scripts/jquery.jstree.js"/>
+        <asp:ScriptReference Path="~/Scripts/jquery.cookie.js"/>
     </Scripts>
 </asp:ScriptManagerProxy>
 
@@ -12,7 +12,7 @@
     
     $(document).ready(function(){
         
-        var projectId = { 'projectId': '<%=ProjectId%>' };
+        var projectId = { 'projectId': '<%= ProjectId %>' };
         var jsTree = $("#divJsTree");
         
         if(jsTree) {
@@ -68,7 +68,7 @@
                             else
                             {
                                 node.obj.remove();
-                                BootstrapDialog.alert('<asp:Literal runat="server" Text="<%$ Resources:DuplicateCategoryMessage%>" />');
+                                BootstrapDialog.alert('<asp:Literal runat="server" Text="<%$ Resources:DuplicateCategoryMessage%>"/>');
                             }
                         }, OnError);   
                     }
@@ -88,7 +88,7 @@
                             "data": JSON.stringify(projectId),
                             "contentType": "application/json; charset=utf-8",
                             "dataType": "json",
-                            "url": '<%=ResolveUrl("~/WebServices/BugNetServices.asmx/GetCategories")%>',
+                            "url": '<%= ResolveUrl("~/WebServices/BugNetServices.asmx/GetCategories") %>',
                         "success": function (retval) {
                             if (retval.hasOwnProperty('d')) {
                                 return (eval(retval.d));
@@ -112,7 +112,7 @@
                 var node = $("#divJsTree").jstree('get_selected');
                 if(node.find("> ul > li").length > 0)
                 {
-                    return BootstrapDialog.danger('<asp:Literal runat="server" Text="<%$ Resources:DeleteCategoriesMessage%>" />');
+                    return BootstrapDialog.danger('<asp:Literal runat="server" Text="<%$ Resources:DeleteCategoriesMessage%>"/>');
                 }
 
                 $('#deleteCategoryModal').modal().show();
@@ -136,7 +136,7 @@
         {
             if(tree) {
                 var selectedNode = tree.getSelectionModel().getSelectedNode();       
-                document.getElementById('<%=HiddenField1.ClientID %>').value = selectedNode.id;            
+                document.getElementById('<%= HiddenField1.ClientID %>').value = selectedNode.id;            
             }
         } catch(e) { } 
 
@@ -146,29 +146,32 @@
 
 <div>
     <asp:ValidationSummary ID="ValidationSummary1" runat="server" DisplayMode="BulletList" HeaderText="<%$ Resources:SharedResources, ValidationSummaryHeaderText %>"
-        CssClass="validationSummary" />
+                           CssClass="validationSummary"/>
     <h2>
-        <asp:Literal ID="CategoriesTitle" runat="Server" meta:resourcekey="CategoriesTitle" /></h2>
-    <br />
+        <asp:Literal ID="CategoriesTitle" runat="Server" meta:resourcekey="CategoriesTitle"/>
+    </h2>
+    <br/>
     <asp:CustomValidator Display="dynamic" meta:resourcekey="CategoryValidator" runat="server" OnServerValidate="CategoryValidation_Validate"
-        ID="ComponentValidation" />
+                         ID="ComponentValidation"/>
     <p>
-        <asp:Label ID="DescriptionLabel" runat="server" meta:resourcekey="DescriptionLabel" />
+        <asp:Label ID="DescriptionLabel" runat="server" meta:resourcekey="DescriptionLabel"/>
     </p>
-    <bn:Message ID="Message1" runat="server" />
-    <br />
-    <img id="imgAddCategory" data-selector="AddCategory" alt="Add Category" src="~/images/plugin_add.gif" class="icon cursor-hand" runat="server" />
+    <bn:Message ID="Message1" runat="server"/>
+    <br/>
+    <img id="imgAddCategory" data-selector="AddCategory" alt="Add Category" src="~/images/plugin_add.gif" class="icon cursor-hand" runat="server"/>
     <a href="#" id="linkAddCategory" data-selector="AddCategory">
-        <asp:Literal ID="Literal2" runat="Server" meta:resourcekey="AddCategory" /></a>
-    <img id="imgDeleteCategory" data-selector="DeleteCategory" alt="Delete Category" src="~/images/plugin_delete.gif" class="icon cursor-hand" runat="server" />
+        <asp:Literal ID="Literal2" runat="Server" meta:resourcekey="AddCategory"/>
+    </a>
+    <img id="imgDeleteCategory" data-selector="DeleteCategory" alt="Delete Category" src="~/images/plugin_delete.gif" class="icon cursor-hand" runat="server"/>
     <a href="#" id="linkDeleteCategory" data-selector="DeleteCategory">
-        <asp:Literal ID="Literal1" runat="Server" meta:resourcekey="DeleteCategory" /></a>
-    <br />
-    <br />
+        <asp:Literal ID="Literal1" runat="Server" meta:resourcekey="DeleteCategory"/>
+    </a>
+    <br/>
+    <br/>
     <div id="divJsTree">
     </div>
-    <asp:HiddenField ID="HiddenField1" ClientIDMode="Static" runat="server" />
-    <asp:LinkButton ID="lbDeleteCategory" runat="server" Text="nil" Style="display: none" />
+    <asp:HiddenField ID="HiddenField1" ClientIDMode="Static" runat="server"/>
+    <asp:LinkButton ID="lbDeleteCategory" runat="server" Text="nil" Style="display: none"/>
 </div>
 <!-- Modal -->
 <div class="modal fade" id="deleteCategoryModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -177,23 +180,25 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="myModalLabel">
-                    <asp:Literal runat="server" meta:resourcekey="DeleteCategory" /></h4>
+                    <asp:Literal runat="server" meta:resourcekey="DeleteCategory"/>
+                </h4>
             </div>
             <div class="modal-body">
                 <p>
-                    <asp:Literal ID="SelectOption" runat="Server" meta:resourcekey="SelectOption" /></p>
+                    <asp:Literal ID="SelectOption" runat="Server" meta:resourcekey="SelectOption"/>
+                </p>
                 <div class="form-horizontal">
                     <div class="radio">
-                        <asp:RadioButton ID="RadioButton1" GroupName="DeleteCategory" CssClass="radio" runat="server" Checked="true" Height="30px" Text="&nbsp;&nbsp;Delete this category and all assigned issues." meta:resourcekey="DeleteCategoryRadioButton" />
+                        <asp:RadioButton ID="RadioButton1" GroupName="DeleteCategory" CssClass="radio" runat="server" Checked="true" Height="30px" Text="&nbsp;&nbsp;Delete this category and all assigned issues." meta:resourcekey="DeleteCategoryRadioButton"/>
                     </div>
                     <div class="radio">
-                        <asp:RadioButton ID="RadioButton2" GroupName="DeleteCategory" CssClass="radio" runat="server" Height="30px" Text="&nbsp;&nbsp;Assign all issues to an existing category." meta:resourcekey="DeleteCategoryRadioButton1" />
+                        <asp:RadioButton ID="RadioButton2" GroupName="DeleteCategory" CssClass="radio" runat="server" Height="30px" Text="&nbsp;&nbsp;Assign all issues to an existing category." meta:resourcekey="DeleteCategoryRadioButton1"/>
                         <div style="margin-left:25px;">
-                            <it:PickCategory ID="DropCategory" DisplayDefault="true" Required="false" runat="Server" />
+                            <it:PickCategory ID="DropCategory" DisplayDefault="true" Required="false" runat="Server"/>
                         </div>
                     </div>
                     <div class="radio">
-                        <asp:RadioButton ID="RadioButton3" GroupName="DeleteCategory" CssClass="radio" runat="server" Height="30px" Text="&nbsp;&nbsp;Assign all issues to a new category." meta:resourcekey="DeleteCategoryRadioButton2" />
+                        <asp:RadioButton ID="RadioButton3" GroupName="DeleteCategory" CssClass="radio" runat="server" Height="30px" Text="&nbsp;&nbsp;Assign all issues to a new category." meta:resourcekey="DeleteCategoryRadioButton2"/>
                         <div style="margin-left:25px;">
                             <asp:TextBox ID="NewCategoryTextBox" CssClass="form-control" runat="server" placeholder="Enter a new category"></asp:TextBox>
                         </div>
@@ -201,8 +206,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <asp:Button ID="CancelButton" runat="server" Text="Cancel" CssClass="btn btn-default" data-dismiss="modal" meta:resourcekey="CancelButton" />
-                <asp:Button ID="OkButton" runat="server" OnClick="OkButton_Click" OnClientClick="onOk();" CssClass="btn btn-primary" Text="Save changes" meta:resourcekey="OkButton" />
+                <asp:Button ID="CancelButton" runat="server" Text="Cancel" CssClass="btn btn-default" data-dismiss="modal" meta:resourcekey="CancelButton"/>
+                <asp:Button ID="OkButton" runat="server" OnClick="OkButton_Click" OnClientClick="onOk();" CssClass="btn btn-primary" Text="Save changes" meta:resourcekey="OkButton"/>
             </div>
         </div>
         <!-- /.modal-content -->

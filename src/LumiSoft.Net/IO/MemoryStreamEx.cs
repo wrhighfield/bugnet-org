@@ -8,9 +8,9 @@ namespace LumiSoft.Net.IO
     /// </summary>
     public class MemoryStreamEx : Stream
     {
-        private bool   m_IsDisposed;
+        private bool m_IsDisposed;
         private Stream m_pStream;
-        private int    m_MaxMemSize = 32000;
+        private int m_MaxMemSize = 32000;
 
         /// <summary>
         /// Default constructor.
@@ -38,14 +38,10 @@ namespace LumiSoft.Net.IO
         /// </summary>
         public new void Dispose()
         {
-            if(m_IsDisposed){
-                return;
-            }
+            if (m_IsDisposed) return;
 
             m_IsDisposed = true;
-            if(m_pStream != null){
-                m_pStream.Close();
-            }
+            if (m_pStream != null) m_pStream.Close();
             m_pStream = null;
 
             base.Dispose();
@@ -62,9 +58,7 @@ namespace LumiSoft.Net.IO
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this method is accessed.</exception>
         public override void Flush()
         {
-            if(m_IsDisposed){
-                throw new ObjectDisposedException("SmartStream");
-            }
+            if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
 
             m_pStream.Flush();
         }
@@ -80,13 +74,11 @@ namespace LumiSoft.Net.IO
         /// <param name="origin">A value of type SeekOrigin indicating the reference point used to obtain the new position.</param>
         /// <returns>The new position within the current stream.</returns>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this method is accessed.</exception>
-        public override long Seek(long offset,SeekOrigin origin)
+        public override long Seek(long offset, SeekOrigin origin)
         {
-            if(m_IsDisposed){
-                throw new ObjectDisposedException("SmartStream");
-            }
+            if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
 
-            return m_pStream.Seek(offset,origin);
+            return m_pStream.Seek(offset, origin);
         }
 
         #endregion
@@ -101,9 +93,7 @@ namespace LumiSoft.Net.IO
         /// <exception cref="NotSupportedException">Is raised when this method is accessed.</exception>
         public override void SetLength(long value)
         {
-            if(m_IsDisposed){
-                throw new ObjectDisposedException("SmartStream");
-            }
+            if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
 
             m_pStream.SetLength(value);
         }
@@ -121,16 +111,12 @@ namespace LumiSoft.Net.IO
         /// <returns>The total number of bytes read into the buffer. This can be less than the number of bytes requested if that many bytes are not currently available, or zero (0) if the end of the stream has been reached.</returns>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this method is accessed.</exception>
         /// <exception cref="ArgumentNullException">Is raised when <b>buffer</b> is null reference.</exception>
-        public override int Read(byte[] buffer,int offset,int count)
+        public override int Read(byte[] buffer, int offset, int count)
         {
-            if(m_IsDisposed){
-                throw new ObjectDisposedException("SmartStream");
-            }
-            if(buffer == null){
-                throw new ArgumentNullException(nameof(buffer));
-            }
-            
-            return m_pStream.Read(buffer,offset,count);
+            if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
+
+            return m_pStream.Read(buffer, offset, count);
         }
 
         #endregion
@@ -147,26 +133,25 @@ namespace LumiSoft.Net.IO
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this method is accessed.</exception>
         /// <exception cref="NotSupportedException">Is raised when this method is accessed.</exception>
         /// <exception cref="ArgumentNullException">Is raised when <b>buffer</b> is null reference.</exception>
-        public override void Write(byte[] buffer,int offset,int count)
+        public override void Write(byte[] buffer, int offset, int count)
         {
-            if(m_IsDisposed){
-                throw new ObjectDisposedException("SmartStream");
-            }
-            if(buffer == null){
-                throw new ArgumentNullException(nameof(buffer));
-            }
+            if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
 
             // We need switch to temporary file.
-            if(m_pStream is MemoryStream && m_pStream.Position + count > m_MaxMemSize){
-                var fs = new FileStream(Path.GetTempPath() + "ls-" + Guid.NewGuid().ToString().Replace("-","") + ".tmp",FileMode.Create,FileAccess.ReadWrite,FileShare.Read,32000,FileOptions.DeleteOnClose);
+            if (m_pStream is MemoryStream && m_pStream.Position + count > m_MaxMemSize)
+            {
+                var fs = new FileStream(
+                    Path.GetTempPath() + "ls-" + Guid.NewGuid().ToString().Replace("-", "") + ".tmp", FileMode.Create,
+                    FileAccess.ReadWrite, FileShare.Read, 32000, FileOptions.DeleteOnClose);
 
                 m_pStream.Position = 0;
-                NetUtils.StreamCopy(m_pStream,fs,8000);
+                NetUtils.StreamCopy(m_pStream, fs, 8000);
                 m_pStream.Close();
                 m_pStream = fs;
             }
- 
-            m_pStream.Write(buffer,offset,count);
+
+            m_pStream.Write(buffer, offset, count);
         }
 
         #endregion
@@ -179,14 +164,13 @@ namespace LumiSoft.Net.IO
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public override bool CanRead
-        { 
-            get{
-                if(m_IsDisposed){
-                    throw new ObjectDisposedException("SmartStream");
-                }
+        {
+            get
+            {
+                if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
 
                 return true;
-            } 
+            }
         }
 
         /// <summary>
@@ -194,14 +178,13 @@ namespace LumiSoft.Net.IO
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public override bool CanSeek
-        { 
-            get{
-                if(m_IsDisposed){
-                    throw new ObjectDisposedException("SmartStream");
-                }
+        {
+            get
+            {
+                if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
 
                 return true;
-            } 
+            }
         }
 
         /// <summary>
@@ -209,14 +192,13 @@ namespace LumiSoft.Net.IO
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public override bool CanWrite
-        { 
-            get{
-                if(m_IsDisposed){
-                    throw new ObjectDisposedException("SmartStream");
-                }
+        {
+            get
+            {
+                if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
 
                 return true;
-            } 
+            }
         }
 
         /// <summary>
@@ -225,14 +207,13 @@ namespace LumiSoft.Net.IO
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         /// <exception cref="Seek">Is raised when this property is accessed.</exception>
         public override long Length
-        { 
-            get{
-                if(m_IsDisposed){
-                    throw new ObjectDisposedException("SmartStream");
-                }
+        {
+            get
+            {
+                if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
 
                 return m_pStream.Length;
-            } 
+            }
         }
 
         /// <summary>
@@ -240,22 +221,19 @@ namespace LumiSoft.Net.IO
         /// </summary>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public override long Position
-        { 
-            get{
-                if(m_IsDisposed){
-                    throw new ObjectDisposedException("SmartStream");
-                }
+        {
+            get
+            {
+                if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
 
                 return m_pStream.Position;
-            } 
+            }
 
-            set{
-                if(m_IsDisposed){
-                    throw new ObjectDisposedException("SmartStream");
-                }
-                if(value < 0 || value > Length){
+            set
+            {
+                if (m_IsDisposed) throw new ObjectDisposedException("SmartStream");
+                if (value < 0 || value > Length)
                     throw new ArgumentException("Property 'Position' value must be >= 0 and <= this.Length.");
-                }
 
                 m_pStream.Position = value;
             }

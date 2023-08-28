@@ -2,7 +2,7 @@
 using LumiSoft.Net.MIME;
 
 namespace LumiSoft.Net.Mail
-{    
+{
     /// <summary>
     /// This class represents "mailbox" address. Defined in RFC 5322 3.4.
     /// </summary>
@@ -26,14 +26,12 @@ namespace LumiSoft.Net.Mail
         /// <param name="displayName">Display name. Value null means not specified.</param>
         /// <param name="address">Email address.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>address</b> is null reference.</exception>
-        public Mail_t_Mailbox(string displayName,string address)
+        public Mail_t_Mailbox(string displayName, string address)
         {
-            if(address == null){
-                throw new ArgumentNullException(nameof(address));
-            }
+            if (address == null) throw new ArgumentNullException(nameof(address));
 
             m_DisplayName = displayName;
-            m_Address     = address;
+            m_Address = address;
         }
 
         #region static method Parse
@@ -47,25 +45,25 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when <b>value</b> is not valid <b>mailbox</b> value.</exception>
         public static Mail_t_Mailbox Parse(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            var        r      = new MIME_Reader(value);
+            var r = new MIME_Reader(value);
             var retVal = new Mail_t_MailboxList();
-            while(true){
-                var word = r.QuotedReadToDelimiter(new[]{',','<'});
+            while (true)
+            {
+                var word = r.QuotedReadToDelimiter(new[] {',', '<'});
                 // We processed all data.
-                if(string.IsNullOrEmpty(word) && r.Available == 0){
+                if (string.IsNullOrEmpty(word) && r.Available == 0)
                     throw new ParseException("Not valid 'mailbox' value '" + value + "'.");
-                }
                 // name-addr
 
-                if(r.Peek(true) == '<'){
-                    return new Mail_t_Mailbox(word != null ? MIME_Encoding_EncodedWord.DecodeS(TextUtilities.UnQuoteString(word.Trim())) : null,r.ReadParenthesized());
-                }
+                if (r.Peek(true) == '<')
+                    return new Mail_t_Mailbox(
+                        word != null
+                            ? MIME_Encoding_EncodedWord.DecodeS(TextUtilities.UnQuoteString(word.Trim()))
+                            : null, r.ReadParenthesized());
                 // addr-spec
-                return new Mail_t_Mailbox(null,word);
+                return new Mail_t_Mailbox(null, word);
             }
 
             throw new ParseException("Not valid 'mailbox' value '" + value + "'.");
@@ -92,13 +90,10 @@ namespace LumiSoft.Net.Mail
         /// <returns>Returns address as string value.</returns>
         public override string ToString(MIME_Encoding_EncodedWord wordEncoder)
         {
-            if(string.IsNullOrEmpty(m_DisplayName)){
-                return m_Address;
-            }
+            if (string.IsNullOrEmpty(m_DisplayName)) return m_Address;
 
-            if(wordEncoder != null && MIME_Encoding_EncodedWord.MustEncode(m_DisplayName)){
+            if (wordEncoder != null && MIME_Encoding_EncodedWord.MustEncode(m_DisplayName))
                 return wordEncoder.Encode(m_DisplayName) + " " + "<" + m_Address + ">";
-            }
 
             return TextUtilities.QuoteString(m_DisplayName) + " " + "<" + m_Address + ">";
         }
@@ -123,10 +118,11 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public string LocalPart
         {
-            get{ 
+            get
+            {
                 var localpart_domain = m_Address.Split('@');
 
-                return localpart_domain[0]; 
+                return localpart_domain[0];
             }
         }
 
@@ -135,12 +131,11 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public string Domain
         {
-            get{ 
+            get
+            {
                 var localpart_domain = m_Address.Split('@');
 
-                if(localpart_domain.Length == 2){
-                    return localpart_domain[1]; 
-                }
+                if (localpart_domain.Length == 2) return localpart_domain[1];
 
                 return "";
             }

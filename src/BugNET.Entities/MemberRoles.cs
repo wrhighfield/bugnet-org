@@ -15,7 +15,7 @@ namespace BugNET.Entities
         public MemberRoles(string member, string role)
         {
             Username = member;
-            _roles = new ArrayList { role };
+            _roles = new ArrayList {role};
             _roles.TrimToSize();
         }
 
@@ -25,10 +25,7 @@ namespace BugNET.Entities
         /// <param name="role">The role.</param>
         public void AddRole(string role)
         {
-            if (!_roles.Contains(role))
-            {
-                _roles.Add(role);
-            }
+            if (!_roles.Contains(role)) _roles.Add(role);
         }
 
         /// <summary>
@@ -57,7 +54,7 @@ namespace BugNET.Entities
         {
             get
             {
-                var tmpstr = _roles.Cast<string>().Aggregate("", (current, rs) => current + (rs + ", "));
+                var tmpstr = _roles.Cast<string>().Aggregate("", (current, rs) => current + rs + ", ");
                 return tmpstr.Remove(tmpstr.Length - 2, 2);
             }
         }
@@ -66,9 +63,6 @@ namespace BugNET.Entities
         /// Gets the roles.
         /// </summary>
         /// <value>The roles.</value>
-        public IList Roles
-        {
-            get { return _roles; }
-        }
+        public IList Roles => _roles;
     }
 }

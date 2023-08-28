@@ -19,7 +19,8 @@
         /// <param name="imageFileName">Name of the image file.</param>
         /// <param name="imageFileLength">Length of the image file.</param>
         /// <param name="imageContentType">Type of the image content.</param>
-        public ProjectImage(int projectId, byte[] imageContent, string imageFileName, long imageFileLength, string imageContentType)
+        public ProjectImage(int projectId, byte[] imageContent, string imageFileName, long imageFileLength,
+            string imageContentType)
         {
             ProjectId = projectId;
             ImageContent = imageContent;

@@ -36,15 +36,15 @@ namespace LumiSoft.Net.MIME
     /// </remarks>
     public class MIME_b_MessageDeliveryStatus : MIME_b
     {
-        private MIME_h_Collection       m_pMessageFields;
+        private MIME_h_Collection m_pMessageFields;
         private List<MIME_h_Collection> m_pRecipientBlocks;
-        
+
         /// <summary>
         /// Default constructor.
         /// </summary>
         public MIME_b_MessageDeliveryStatus() : base(new MIME_h_ContentType("message/delivery-status"))
         {
-            m_pMessageFields   = new MIME_h_Collection(new MIME_h_Provider());
+            m_pMessageFields = new MIME_h_Collection(new MIME_h_Provider());
             m_pRecipientBlocks = new List<MIME_h_Collection>();
         }
 
@@ -60,36 +60,31 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner, MIME_h_ContentType defaultContentType, SmartStream stream)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
-            if(defaultContentType == null){
-                throw new ArgumentNullException(nameof(defaultContentType));
-            }
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (defaultContentType == null) throw new ArgumentNullException(nameof(defaultContentType));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             // We need to buffer all body data, otherwise we don't know if we have readed all data 
             // from stream.
             var msBuffer = new MemoryStream();
-            NetUtils.StreamCopy(stream,msBuffer,32000);
+            NetUtils.StreamCopy(stream, msBuffer, 32000);
             msBuffer.Position = 0;
 
-            var parseStream = new SmartStream(msBuffer,true);
+            var parseStream = new SmartStream(msBuffer, true);
 
             var retVal = new MIME_b_MessageDeliveryStatus();
             //Pare per-message fields.
             retVal.m_pMessageFields.Parse(parseStream);
 
             // Parse per-recipient fields.
-            while(parseStream.Position - parseStream.BytesInReadBuffer < parseStream.Length){
+            while (parseStream.Position - parseStream.BytesInReadBuffer < parseStream.Length)
+            {
                 var recipientFields = new MIME_h_Collection(new MIME_h_Provider());
                 recipientFields.Parse(parseStream);
-                retVal.m_pRecipientBlocks.Add(recipientFields);                
-            }                     
+                retVal.m_pRecipientBlocks.Add(recipientFields);
+            }
 
             return retVal;
         }
@@ -108,17 +103,17 @@ namespace LumiSoft.Net.MIME
         /// <param name="headerReencode">If true always specified encoding is used for header. If false and header field value not modified, 
         /// original encoding is kept.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
-        protected internal override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
+        protected internal override void ToStream(Stream stream, MIME_Encoding_EncodedWord headerWordEncoder,
+            Encoding headerParmetersCharset, bool headerReencode)
         {
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
-            
-            m_pMessageFields.ToStream(stream,headerWordEncoder,headerParmetersCharset,headerReencode);
-            stream.Write(new[]{(byte)'\r',(byte)'\n'},0,2);
-            foreach(var recipientBlock in m_pRecipientBlocks){
-                recipientBlock.ToStream(stream,headerWordEncoder,headerParmetersCharset,headerReencode);
-                stream.Write(new[]{(byte)'\r',(byte)'\n'},0,2);
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+
+            m_pMessageFields.ToStream(stream, headerWordEncoder, headerParmetersCharset, headerReencode);
+            stream.Write(new[] {(byte) '\r', (byte) '\n'}, 0, 2);
+            foreach (var recipientBlock in m_pRecipientBlocks)
+            {
+                recipientBlock.ToStream(stream, headerWordEncoder, headerParmetersCharset, headerReencode);
+                stream.Write(new[] {(byte) '\r', (byte) '\n'}, 0, 2);
             }
         }
 
@@ -132,17 +127,14 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public override bool IsModified
         {
-            get{ 
-                if(m_pMessageFields.IsModified){
-                    return true;
-                }
-                foreach(var recipientBlock in m_pRecipientBlocks){
-                    if(recipientBlock.IsModified){
+            get
+            {
+                if (m_pMessageFields.IsModified) return true;
+                foreach (var recipientBlock in m_pRecipientBlocks)
+                    if (recipientBlock.IsModified)
                         return true;
-                    }
-                }
 
-                return false; 
+                return false;
             }
         }
 

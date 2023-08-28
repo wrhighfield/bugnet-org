@@ -57,8 +57,8 @@ namespace BugNET.Entities
         /// <value>The display name.</value>
         public string DisplayName
         {
-            get { return (_displayName == string.Empty) ? UserName : _displayName; }
-            set { _displayName = value; }
+            get => _displayName == string.Empty ? UserName : _displayName;
+            set => _displayName = value;
         }
 
 
@@ -67,7 +67,9 @@ namespace BugNET.Entities
         /// <summary>
         /// Initializes a new instance of the <see cref="ITUser"/> class.
         /// </summary>
-        public ITUser() { }
+        public ITUser()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ITUser"/> class.
@@ -80,7 +82,8 @@ namespace BugNET.Entities
         /// <param name="creationDate"></param>
         /// <param name="lastLoginDate"></param>
         /// <param name="isApproved"></param>
-        public ITUser(Guid userId, string userName, string firstName, string lastName, string displayName, DateTime creationDate, DateTime lastLoginDate, bool isApproved)
+        public ITUser(Guid userId, string userName, string firstName, string lastName, string displayName,
+            DateTime creationDate, DateTime lastLoginDate, bool isApproved)
         {
             Id = userId;
             UserName = userName;
@@ -99,8 +102,10 @@ namespace BugNET.Entities
         /// <param name="userName">Name of the user.</param>
         /// <param name="displayName">The display name.</param>
         public ITUser(Guid userId, string userName, string displayName)
-            : this(userId, userName, string.Empty, string.Empty, displayName, DateTime.MinValue, DateTime.MinValue, true)
-        { }
+            : this(userId, userName, string.Empty, string.Empty, displayName, DateTime.MinValue, DateTime.MinValue,
+                true)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ITUser"/> class.
@@ -110,10 +115,12 @@ namespace BugNET.Entities
         /// <param name="displayName">The display name.</param>
         /// <param name="email">The email of the user.</param>
         public ITUser(Guid userId, string userName, string displayName, string email)
-            : this(userId, userName, string.Empty, string.Empty, displayName, DateTime.MinValue, DateTime.MinValue, true)
+            : this(userId, userName, string.Empty, string.Empty, displayName, DateTime.MinValue, DateTime.MinValue,
+                true)
         {
             Email = email;
         }
+
         #endregion
     }
 }

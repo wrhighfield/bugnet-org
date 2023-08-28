@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class CategoryManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -18,8 +19,10 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(Category entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save category, the project id is invalid");
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The category name cannot be empty or null");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save category, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The category name cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateCategory(entity);
@@ -55,7 +58,6 @@ namespace BugNET.BLL
             if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             return DataProviderManager.Provider.GetCategoriesByProjectId(projectId);
-
         }
 
         /// <summary>
@@ -97,8 +99,8 @@ namespace BugNET.BLL
 
             if (c.ChildCount > 0)
                 DeleteChildCategoriesByCategoryId(c.Id);
-
         }
+
         /// <summary>
         /// Gets the Category by id.
         /// </summary>
@@ -110,6 +112,5 @@ namespace BugNET.BLL
 
             return DataProviderManager.Provider.GetCategoryById(categoryId);
         }
-
     }
 }

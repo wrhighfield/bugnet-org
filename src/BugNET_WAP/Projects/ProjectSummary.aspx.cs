@@ -4,32 +4,31 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
+using BugNET.UI;
 using BugNET.UserControls;
-using BugNET.UserInterfaceLayer;
 using Microsoft.AspNet.FriendlyUrls;
-using System.Collections.Generic;
 
 namespace BugNET.Projects
 {
-	/// <summary>
-	/// Summary description for BrowseProject.
-	/// </summary>
-	public partial class ProjectSummary : BasePage
-	{
-	    /// <summary>
+    /// <summary>
+    /// Summary description for BrowseProject.
+    /// </summary>
+    public partial class ProjectSummary : BugNetBasePage
+    {
+        /// <summary>
         /// Handles the Load event of the Page control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-		protected void Page_Load(object sender, EventArgs e)
-		{
-			// Put user code to initialize the page here
-	        if (Page.IsPostBack) return;
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // Put user code to initialize the page here
+            if (Page.IsPostBack) return;
 
             try
             {
-                IList<string> segments = Request.GetFriendlyUrlSegments();
-                ProjectId = Int32.Parse(segments[0]);
+                var segments = Request.GetFriendlyUrlSegments();
+                ProjectId = int.Parse(segments[0]);
             }
             catch
             {
@@ -39,11 +38,11 @@ namespace BugNET.Projects
             // BGN-1379
             if (ProjectId.Equals(0))
                 ErrorRedirector.TransferToNotFoundPage(Page);
- 
-	        BindProjectSummary();
+
+            BindProjectSummary();
 
             // SiteMap.SiteMapResolve += ExpandPaths;
-		}
+        }
 
         protected void Page_Unload(object sender, EventArgs e)
         {
@@ -51,32 +50,29 @@ namespace BugNET.Projects
             // SiteMap.SiteMapResolve -= ExpandPaths;
         }
 
-        private SiteMapNode ExpandPaths(Object sender, SiteMapResolveEventArgs e)
+        private SiteMapNode ExpandPaths(object sender, SiteMapResolveEventArgs e)
         {
             if (SiteMap.CurrentNode == null) return null;
 
             var currentNode = SiteMap.CurrentNode.Clone(true);
             var tempNode = currentNode;
 
-            if ((null != (tempNode = tempNode.ParentNode)))
-            {
-                tempNode.Url = string.Format("~/Issues/IssueList.aspx?pid={0}", ProjectId);
-            }
+            if (null != (tempNode = tempNode.ParentNode)) tempNode.Url = $"~/Issues/IssueList.aspx?pid={ProjectId}";
 
             return currentNode;
         }
 
-	    /// <summary>
+        /// <summary>
         /// Binds the project summary.
         /// </summary>
-        void BindProjectSummary()
+        private void BindProjectSummary()
         {
-            lnkRSSIssuesByCategory.NavigateUrl = string.Format("~/Feed.aspx?pid={0}&channel=2",ProjectId);
-            lnkRSSIssuesByAssignee.NavigateUrl = string.Format("~/Feed.aspx?pid={0}&channel=6",ProjectId);
-            lnkRSSIssuesByStatus.NavigateUrl = string.Format("~/Feed.aspx?pid={0}&channel=3",ProjectId);
-            lnkRSSIssuesByMilestone.NavigateUrl = string.Format("~/Feed.aspx?pid={0}&channel=1",ProjectId);
-            lnkRSSIssuesByPriority.NavigateUrl = string.Format("~/Feed.aspx?pid={0}&channel=4",ProjectId);
-            lnkRSSIssuesByType.NavigateUrl = string.Format("~/Feed.aspx?pid={0}&channel=5",ProjectId);
+            lnkRSSIssuesByCategory.NavigateUrl = $"~/Feed.aspx?pid={ProjectId}&channel=2";
+            lnkRSSIssuesByAssignee.NavigateUrl = $"~/Feed.aspx?pid={ProjectId}&channel=6";
+            lnkRSSIssuesByStatus.NavigateUrl = $"~/Feed.aspx?pid={ProjectId}&channel=3";
+            lnkRSSIssuesByMilestone.NavigateUrl = $"~/Feed.aspx?pid={ProjectId}&channel=1";
+            lnkRSSIssuesByPriority.NavigateUrl = $"~/Feed.aspx?pid={ProjectId}&channel=4";
+            lnkRSSIssuesByType.NavigateUrl = $"~/Feed.aspx?pid={ProjectId}&channel=5";
 
             //Milestone
             var lsVersion = IssueManager.GetMilestoneCountByProjectId(ProjectId);
@@ -106,66 +102,57 @@ namespace BugNET.Projects
             rptIssueStatus.DataBind();
             rptPriorityOpenIssues.DataBind();
             rptAssigneeOpenIssues.DataBind();
-           
+
             rptTypeOpenIssues.DataBind();
 
             var p = ProjectManager.GetById(ProjectId);
             litProject.Text = p.Name;
             litProjectCode.Text = p.Code;
-
         }
 
-		/// <summary>
-		/// Binds the data for the versions repeater
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
+        /// <summary>
+        /// Binds the data for the versions repeater
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         protected void SummaryItemDataBound(object sender, RepeaterItemEventArgs e)
-		{
-		    switch (e.Item.ItemType)
-		    {
-		        case ListItemType.AlternatingItem:
-		        case ListItemType.Item:
-		            {
-		                var data = e.Item.DataItem as IssueCount;
+        {
+            switch (e.Item.ItemType)
+            {
+                case ListItemType.AlternatingItem:
+                case ListItemType.Item:
+                {
+                    if (!(e.Item.DataItem is IssueCount data)) return;
 
-                        if (data == null) return;
+                    var summaryLink = e.Item.FindControl("summaryLink") as HyperLink;
+                    var summaryCount = e.Item.FindControl("summaryCount") as Label;
+                    var summaryPercent = e.Item.FindControl("summaryPercent") as Label;
 
-                        var summaryImage = e.Item.FindControl("summaryImage") as TextImage;
-                        var summaryLink = e.Item.FindControl("summaryLink") as HyperLink;
-                        var summaryCount = e.Item.FindControl("summaryCount") as Label;
-                        var summaryPercent = e.Item.FindControl("summaryPercent") as Label;
+                    if (e.Item.FindControl("summaryImage") is TextImage summaryImage)
+                    {
+                        if (data.ImageUrl.Length > 0)
+                            summaryImage.ImageUrl = data.ImageUrl;
 
-                        if (summaryImage != null)
-                        {
-                            if (data.ImageUrl.Length > 0)
-                                summaryImage.ImageUrl = data.ImageUrl;
+                        if (data.Id.ToString().Equals(Globals.NewId.ToString()) ||
+                            data.Id.ToString().Equals(Globals.EmptyGuid))
+                            summaryImage.Visible = false;
+                    }
 
-                            if (data.Id.ToString().Equals(Globals.NewId.ToString()) || data.Id.ToString().Equals(Globals.EmptyGuid))
-                                summaryImage.Visible = false;
-                        }
+                    if (summaryLink != null)
+                    {
+                        summaryLink.Text = data.Name.Trim();
 
-                        if (summaryLink != null)
-                        {
-                            summaryLink.Text = data.Name.Trim();
+                        // if the item is unassigned then apply the item name from the resource file
+                        if (data.Id.Equals(0) || data.Id.Equals(Guid.Empty))
+                            summaryLink.Text = GetGlobalString("SharedResources", "Unassigned");
+                    }
 
-                            // if the item is unassigned then apply the item name from the resource file
-                            if (data.Id.Equals(0) || data.Id.Equals(Guid.Empty))
-                                summaryLink.Text = GetGlobalResourceObject("SharedResources", "Unassigned").ToString();
-                        }
+                    if (summaryCount != null) summaryCount.Text = data.Count.ToString();
 
-                        if (summaryCount != null)
-                        {
-                            summaryCount.Text = data.Count.ToString();
-                        }
-
-                        if (summaryPercent != null)
-                        {
-                            summaryPercent.Text = String.Format("({0}%)", data.Percentage);
-                        }
-		            }
-		            break;
-		    }
-		}
-	}
+                    if (summaryPercent != null) summaryPercent.Text = $@"({data.Percentage}%)";
+                }
+                    break;
+            }
+        }
+    }
 }

@@ -13,7 +13,8 @@ namespace BugNET.Entities
         /// <param name="roleName"></param>
         /// <param name="permissionName"></param>
         /// <param name="permissionKey"></param>
-        public RolePermission(int permissionId, int projectId, string roleName, string permissionName, string permissionKey)
+        public RolePermission(int permissionId, int projectId, string roleName, string permissionName,
+            string permissionKey)
         {
             PermissionId = permissionId;
             PermissionName = permissionName;
@@ -55,6 +56,5 @@ namespace BugNET.Entities
         public string PermissionKey { get; private set; }
 
         #endregion
-
     }
 }

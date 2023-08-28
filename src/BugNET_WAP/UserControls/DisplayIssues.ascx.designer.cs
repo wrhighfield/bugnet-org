@@ -361,7 +361,7 @@ namespace BugNET.UserControls {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::BugNET.UserInterfaceLayer.WebControls.GridView gvIssues;
+        protected global::BugNET.UI.WebControls.GridView gvIssues;
         
         /// <summary>
         /// pager control.

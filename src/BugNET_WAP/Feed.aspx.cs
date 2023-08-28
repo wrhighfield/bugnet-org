@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.ServiceModel.Syndication;
-using System.Web.UI;
 using System.Xml;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
 using System.Web;
+using BugNET.UI;
 
 namespace BugNET
 {
     /// <summary>
     /// Generates Syndication Feeds for BugNET
     /// </summary>
-    public partial class Feed : Page
+    public partial class Feed : BugNetBasePage
     {
         private const int maxItemsInFeed = 10;
         private int _projectId;
@@ -37,32 +37,24 @@ namespace BugNET
             if (Request.QueryString["channel"] != null)
                 channelId = Convert.ToInt32(Request.Params["channel"]);
 
-            if (!User.Identity.IsAuthenticated && _projectId == 0)
-            {
-                throw new HttpException(403, "Access Denied");
-
-            }
+            if (!User.Identity.IsAuthenticated && _projectId == 0) throw new HttpException(403, "Access Denied");
 
             if (_projectId != 0)
             {
                 //Security Checks
                 if (!User.Identity.IsAuthenticated &&
                     ProjectManager.GetById(_projectId).AccessType == ProjectAccessType.Private)
-                {
                     throw new HttpException(403, "Access Denied");
-                }
 
                 if (User.Identity.IsAuthenticated &&
                     ProjectManager.GetById(_projectId).AccessType == ProjectAccessType.Private &&
                     !ProjectManager.IsUserProjectMember(User.Identity.Name, _projectId))
-                {
                     throw new HttpException(403, "Access Denied");
-                }
             }
 
 
             // Determine whether we're outputting an Atom or RSS feed
-            var outputRss = (Request.QueryString["Type"] == "RSS");
+            var outputRss = Request.QueryString["Type"] == "RSS";
             var outputAtom = !outputRss;
 
             // Output the appropriate ContentType
@@ -115,17 +107,15 @@ namespace BugNET
                 case 13:
                     QueryFeed(ref myFeed);
                     break;
-                case 14: 
-                    OpenIssueFeed(ref myFeed); 
+                case 14:
+                    OpenIssueFeed(ref myFeed);
                     break;
-                case 15: 
-                    MonitoredFeed(ref myFeed); 
+                case 15:
+                    MonitoredFeed(ref myFeed);
                     break;
                 case 16:
                     ClosedFeed(ref myFeed);
                     break;
-              
-         
             }
 
             // Return the feed's XML content as the response
@@ -160,20 +150,20 @@ namespace BugNET
         {
             var feedItems = new List<SyndicationItem>();
 
-            foreach (Issue issue in issueList.Take(maxItemsInFeed))
+            foreach (var issue in issueList.Take(maxItemsInFeed))
             {
                 // Atom items MUST have an author, so if there are no authors for this content item then go to next item in loop
                 //if (outputAtom && t.TitleAuthors.Count == 0)
                 //    continue;    
                 var item = new SyndicationItem
                 {
-                    Title = SyndicationContent.CreatePlaintextContent(string.Format("{0} - {1}", issue.FullId, issue.Title))
+                    Title = SyndicationContent.CreatePlaintextContent($"{issue.FullId} - {issue.Title}")
                 };
 
                 item.Links.Add(
                     SyndicationLink.CreateAlternateLink(
                         new Uri(
-                            GetFullyQualifiedUrl(string.Format("~/Issues/IssueDetail.aspx?id={0}", issue.Id)))));
+                            GetFullyQualifiedUrl($"~/Issues/IssueDetail.aspx?id={issue.Id}"))));
                 item.Summary = SyndicationContent.CreatePlaintextContent(issue.Description);
                 item.Categories.Add(new SyndicationCategory(issue.CategoryName));
                 item.PublishDate = issue.DateCreated;
@@ -268,7 +258,8 @@ namespace BugNET
         /// </summary>
         /// <param name="issueCountList">The issue count list.</param>
         /// <returns></returns>
-        private IEnumerable<SyndicationItem> CreateSyndicationItemsFromIssueCountList(IEnumerable<IssueCount> issueCountList, string key)
+        private IEnumerable<SyndicationItem> CreateSyndicationItemsFromIssueCountList(
+            IEnumerable<IssueCount> issueCountList, string key)
         {
             var feedItems = new List<SyndicationItem>();
 
@@ -282,11 +273,10 @@ namespace BugNET
                 item.Links.Add(
                     SyndicationLink.CreateAlternateLink(
                         new Uri(
-                            GetFullyQualifiedUrl(string.Format("~/Issues/IssueList.aspx?pid={0}&{1}={2}", _projectId, key,
-                                                               issueCount.Id)))));
+                            GetFullyQualifiedUrl($"~/Issues/IssueList.aspx?pid={_projectId}&{key}={issueCount.Id}"))));
                 item.Summary =
                     SyndicationContent.CreatePlaintextContent(
-                        string.Format(GetLocalResourceObject("OpenIssues").ToString(), issueCount.Count));
+                        string.Format(GetLocalString("OpenIssues"), issueCount.Count));
 
                 item.PublishDate = DateTime.Now;
                 // Add the item to the feed
@@ -320,10 +310,10 @@ namespace BugNET
             var p = ProjectManager.GetById(_projectId);
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByMilestoneTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByMilestoneTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByMilestoneDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByMilestoneDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -333,15 +323,15 @@ namespace BugNET
         /// <param name="feed">The feed.</param>
         private void AllIssuesFeed(ref SyndicationFeed feed)
         {
-            IEnumerable<SyndicationItem> feedItems = CreateSyndicationItemsFromIssueList(IssueManager.GetByProjectId(_projectId));
-            Project p = ProjectManager.GetById(_projectId);
+            var feedItems = CreateSyndicationItemsFromIssueList(IssueManager.GetByProjectId(_projectId));
+            var p = ProjectManager.GetById(_projectId);
 
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("AllIssuesTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("AllIssuesTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("AllIssuesDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("AllIssuesDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -352,12 +342,12 @@ namespace BugNET
         private void CategoryFeed(ref SyndicationFeed feed)
         {
             var objComps = new CategoryTree();
-            List<Category> al = objComps.GetCategoryTreeByProjectId(_projectId);
+            var al = objComps.GetCategoryTreeByProjectId(_projectId);
 
             var feedItems = new List<SyndicationItem>();
-            Project p = ProjectManager.GetById(_projectId);
+            var p = ProjectManager.GetById(_projectId);
 
-            foreach (Category c in al)
+            foreach (var c in al)
             {
                 var item = new SyndicationItem();
 
@@ -365,21 +355,22 @@ namespace BugNET
                 item.Links.Add(
                     SyndicationLink.CreateAlternateLink(
                         new Uri(
-                            GetFullyQualifiedUrl(string.Format("~/Issues/IssueList.aspx?pid={0}&c={1}", _projectId,
-                                                               c.Id)))));
+                            GetFullyQualifiedUrl($"~/Issues/IssueList.aspx?pid={_projectId}&c={c.Id}"))));
                 item.Summary =
                     SyndicationContent.CreatePlaintextContent(
-                        string.Format(GetLocalResourceObject("OpenIssues").ToString(), IssueManager.GetCountByProjectAndCategoryId(_projectId, c.Id)));
+                        string.Format(GetLocalString("OpenIssues"),
+                            IssueManager.GetCountByProjectAndCategoryId(_projectId, c.Id)));
                 item.PublishDate = DateTime.Now;
                 // Add the item to the feed
                 feedItems.Add(item);
             }
+
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByCategoryTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByCategoryTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByCategoryDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByCategoryDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -394,10 +385,10 @@ namespace BugNET
             var feedItems = CreateSyndicationItemsFromIssueCountList(al, "s");
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByStatusTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByStatusTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByStatusDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByStatusDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -413,10 +404,10 @@ namespace BugNET
             var feedItems = CreateSyndicationItemsFromIssueCountList(al, "p");
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByPriorityTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByPriorityTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByPriorityDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByPriorityDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -432,10 +423,10 @@ namespace BugNET
             var feedItems = CreateSyndicationItemsFromIssueCountList(al, "t");
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByIssueTypeTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByIssueTypeTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("IssuesByIssueTypeDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("IssuesByIssueTypeDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -450,11 +441,11 @@ namespace BugNET
             var feedItems = CreateSyndicationItemsFromIssueList(issues);
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("AssignedIssuesTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("AssignedIssuesTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("AssignedIssuesDescription").ToString(),
-                                  Security.GetDisplayName()));
+                    string.Format(GetLocalString("AssignedIssuesDescription"),
+                        Security.GetDisplayName()));
             feed.Items = feedItems;
         }
 
@@ -470,13 +461,13 @@ namespace BugNET
             var p = ProjectManager.GetById(_projectId);
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("FilteredIssuesTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("FilteredIssuesTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("FilteredIssuesDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("FilteredIssuesDescription"), p.Name));
             feed.Items = feedItems;
-            
         }
+
         /// <summary>
         /// Filtereds the issues feed.
         /// </summary>
@@ -493,58 +484,55 @@ namespace BugNET
 
             if (!string.IsNullOrEmpty(IssueCategoryId))
             {
-                q = IssueCategoryId == "0" ?
-                    new QueryClause("AND", "iv.[IssueCategoryId]", "IS", null, SqlDbType.Int) :
-                    new QueryClause("AND", "iv.[IssueCategoryId]", "=", IssueCategoryId, SqlDbType.Int);
+                q = IssueCategoryId == "0"
+                    ? new QueryClause("AND", "iv.[IssueCategoryId]", "IS", null, SqlDbType.Int)
+                    : new QueryClause("AND", "iv.[IssueCategoryId]", "=", IssueCategoryId, SqlDbType.Int);
 
                 queryClauses.Add(q);
             }
 
             if (!string.IsNullOrEmpty(IssueTypeId))
             {
-                q = IssueTypeId == "0" ?
-                    new QueryClause("AND", "iv.[IssueTypeId]", "IS", null, SqlDbType.Int) :
-                    new QueryClause("AND", "iv.[IssueTypeId]", "=", IssueTypeId, SqlDbType.Int);
+                q = IssueTypeId == "0"
+                    ? new QueryClause("AND", "iv.[IssueTypeId]", "IS", null, SqlDbType.Int)
+                    : new QueryClause("AND", "iv.[IssueTypeId]", "=", IssueTypeId, SqlDbType.Int);
 
                 queryClauses.Add(q);
             }
 
             if (!string.IsNullOrEmpty(IssuePriorityId))
             {
-                q = IssuePriorityId == "0" ?
-                    new QueryClause("AND", "iv.[IssuePriorityId]", "IS", null, SqlDbType.Int) :
-                    new QueryClause("AND", "iv.[IssuePriorityId]", "=", IssuePriorityId, SqlDbType.Int);
+                q = IssuePriorityId == "0"
+                    ? new QueryClause("AND", "iv.[IssuePriorityId]", "IS", null, SqlDbType.Int)
+                    : new QueryClause("AND", "iv.[IssuePriorityId]", "=", IssuePriorityId, SqlDbType.Int);
 
                 queryClauses.Add(q);
             }
 
             if (!string.IsNullOrEmpty(IssueMilestoneId))
             {
-                q = IssueMilestoneId == "0" ?
-                    new QueryClause("AND", "iv.[IssueMilestoneId]", "IS", null, SqlDbType.Int) :
-                    new QueryClause("AND", "iv.[IssueMilestoneId]", "=", IssueMilestoneId, SqlDbType.Int);
+                q = IssueMilestoneId == "0"
+                    ? new QueryClause("AND", "iv.[IssueMilestoneId]", "IS", null, SqlDbType.Int)
+                    : new QueryClause("AND", "iv.[IssueMilestoneId]", "=", IssueMilestoneId, SqlDbType.Int);
 
                 queryClauses.Add(q);
             }
 
             if (!string.IsNullOrEmpty(IssueResolutionId))
             {
-                q = IssueResolutionId == "0" ?
-                    new QueryClause("AND", "iv.[IssueResolutionId]", "IS", null, SqlDbType.Int) :
-                    new QueryClause("AND", "iv.[IssueResolutionId]", "=", IssueResolutionId, SqlDbType.Int);
+                q = IssueResolutionId == "0"
+                    ? new QueryClause("AND", "iv.[IssueResolutionId]", "IS", null, SqlDbType.Int)
+                    : new QueryClause("AND", "iv.[IssueResolutionId]", "=", IssueResolutionId, SqlDbType.Int);
 
                 queryClauses.Add(q);
             }
 
             if (!string.IsNullOrEmpty(AssignedUserName))
-            {
-                queryClauses.Add(new QueryClause("AND", "iv.[AssignedUserName]", "=", AssignedUserName, SqlDbType.NVarChar));
-            }
+                queryClauses.Add(new QueryClause("AND", "iv.[AssignedUserName]", "=", AssignedUserName,
+                    SqlDbType.NVarChar));
 
             if (!string.IsNullOrEmpty(OwnerUserName))
-            {
                 queryClauses.Add(new QueryClause("AND", "iv.[OwnerUserName]", "=", OwnerUserName, SqlDbType.NVarChar));
-            }
 
             if (!string.IsNullOrEmpty(IssueStatusId))
             {
@@ -552,9 +540,9 @@ namespace BugNET
                 {
                     isStatus = true;
 
-                    q = IssueStatusId == "0" ?
-                        new QueryClause("AND", "iv.[IssueStatusId]", "IS", null, SqlDbType.Int) :
-                        new QueryClause("AND", "iv.[IssueStatusId]", "=", IssueStatusId, SqlDbType.Int);
+                    q = IssueStatusId == "0"
+                        ? new QueryClause("AND", "iv.[IssueStatusId]", "IS", null, SqlDbType.Int)
+                        : new QueryClause("AND", "iv.[IssueStatusId]", "=", IssueStatusId, SqlDbType.Int);
 
                     queryClauses.Add(q);
                 }
@@ -567,9 +555,7 @@ namespace BugNET
 
             // exclude all closed status's
             if (!isStatus || ExcludeClosedIssues)
-            {
                 queryClauses.Add(new QueryClause("AND", "iv.[IsClosed]", "=", "0", SqlDbType.Int));
-            }
 
             var issueList = IssueManager.PerformQuery(queryClauses, null, _projectId);
 
@@ -588,10 +574,10 @@ namespace BugNET
 
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("FilteredIssuesTitle").ToString(), title));
+                    string.Format(GetLocalString("FilteredIssuesTitle"), title));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("FilteredIssuesDescription").ToString(), title));
+                    string.Format(GetLocalString("FilteredIssuesDescription"), title));
             feed.Items = feedItems;
         }
 
@@ -607,10 +593,10 @@ namespace BugNET
 
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("RelevantIssuesTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("RelevantIssuesTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("RelevantIssuesDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("RelevantIssuesDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -626,16 +612,16 @@ namespace BugNET
 
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("OwnedIssuesTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("OwnedIssuesTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("OwnedIssuesDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("OwnedIssuesDescription"), p.Name));
             feed.Items = feedItems;
         }
 
         private void MonitoredFeed(ref SyndicationFeed feed)
         {
-            bool excludeClosedIssues = false;
+            var excludeClosedIssues = false;
             //get feed id
             if (Request.QueryString["ec"] != null)
                 excludeClosedIssues = Convert.ToBoolean(Request.Params["ec"]);
@@ -646,10 +632,10 @@ namespace BugNET
 
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("MonitoredIssuesTitle").ToString(), profile.DisplayName));
+                    string.Format(GetLocalString("MonitoredIssuesTitle"), profile.DisplayName));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("MonitoredIssuesDescription").ToString(), profile.DisplayName));
+                    string.Format(GetLocalString("MonitoredIssuesDescription"), profile.DisplayName));
             feed.Items = feedItems;
         }
 
@@ -665,10 +651,10 @@ namespace BugNET
 
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("SavedQueryTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("SavedQueryTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("SavedQueryDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("SavedQueryDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -684,10 +670,10 @@ namespace BugNET
 
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("CreatedIssuesTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("CreatedIssuesTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("CreatedIssuesDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("CreatedIssuesDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -703,10 +689,10 @@ namespace BugNET
 
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("AssigneeTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("AssigneeTitle"), p.Name));
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("AssigneeDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("AssigneeDescription"), p.Name));
             feed.Items = feedItems;
         }
 
@@ -720,11 +706,11 @@ namespace BugNET
             var p = ProjectManager.GetById(_projectId);
             feed.Title =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("OpenIssuesTitle").ToString(), p.Name));
+                    string.Format(GetLocalString("OpenIssuesTitle"), p.Name));
 
             feed.Description =
                 SyndicationContent.CreatePlaintextContent(
-                    string.Format(GetLocalResourceObject("OpenIssuesDescription").ToString(), p.Name));
+                    string.Format(GetLocalString("OpenIssuesDescription"), p.Name));
 
             feed.Items = feedItems;
         }
@@ -736,134 +722,62 @@ namespace BugNET
         /// <summary>
         /// Returns the component Id from the query string
         /// </summary>
-        public string IssueCategoryId
-        {
-            get
-            {
-                return Request.Get("c", string.Empty);
-            }
-        }
+        public string IssueCategoryId => Request.Get("c", string.Empty);
 
         /// <summary>
         /// Returns the keywords from the query string
         /// </summary>
-        public string Key
-        {
-            get
-            {
-                return Request.Get("key", string.Empty).Replace("+", " ");
-            }
-        }
+        public string Key => Request.Get("key", string.Empty).Replace("+", " ");
 
         /// <summary>
         /// Returns the Milestone Id from the query string
         /// </summary>
-        public string IssueMilestoneId
-        {
-            get
-            {
-                return Request.Get("m", string.Empty);
-            }
-        }
+        public string IssueMilestoneId => Request.Get("m", string.Empty);
 
         /// <summary>
         /// Returns the priority Id from the query string
         /// </summary>
-        public string IssuePriorityId
-        {
-            get
-            {
-                return Request.Get("p", string.Empty);
-            }
-        }
+        public string IssuePriorityId => Request.Get("p", string.Empty);
 
         /// <summary>
         /// Returns the Type Id from the query string
         /// </summary>
-        public string IssueTypeId
-        {
-            get
-            {
-                return Request.Get("t", string.Empty);
-            }
-        }
+        public string IssueTypeId => Request.Get("t", string.Empty);
 
         /// <summary>
         /// Returns the status Id from the query string
         /// </summary>
-        public string IssueStatusId
-        {
-            get
-            {
-                return Request.Get("s", string.Empty);
-            }
-        }
+        public string IssueStatusId => Request.Get("s", string.Empty);
 
         /// <summary>
         /// Returns the assigned to user Id from the query string
         /// </summary>
-        public string AssignedUserName
-        {
-            get
-            {
-                return Request.Get("u", string.Empty);
-            }
-        }
+        public string AssignedUserName => Request.Get("u", string.Empty);
 
         /// <summary>
         /// Gets the name of the owner user.
         /// </summary>
         /// <value>The name of the owner user.</value>
-        public string OwnerUserName
-        {
-            get
-            {
-                return Request.Get("ou", string.Empty);
-            }
-        }
+        public string OwnerUserName => Request.Get("ou", string.Empty);
 
         /// <summary>
         /// Gets the name of the reporter user.
         /// </summary>
         /// <value>The name of the reporter user.</value>
-        public string ReporterUserName
-        {
-            get
-            {
-                return Request.Get("ru", string.Empty);
-            }
-        }
+        public string ReporterUserName => Request.Get("ru", string.Empty);
 
         /// <summary>
         /// Returns the hardware Id from the query string
         /// </summary>
-        public string IssueResolutionId
-        {
-            get
-            {
-                return Request.Get("r", string.Empty);
-            }
-        }
+        public string IssueResolutionId => Request.Get("r", string.Empty);
 
         /// <summary>
         /// Gets the issue id.
         /// </summary>
         /// <value>The issue id.</value>
-        public int QueryId
-        {
-            get
-            {
-                return Request.Get("q", -1);
-            }
-        }
+        public int QueryId => Request.Get("q", -1);
 
-        public bool ExcludeClosedIssues
-        {
-            get
-            {
-                return Request.Get("ec", true);
-            }
-        }
+        public bool ExcludeClosedIssues => Request.Get("ec", true);
 
         #endregion
     }

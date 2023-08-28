@@ -2,20 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.UserControls
 {
     /// <summary>
     ///    Display Issues grid
     /// </summary>
-    public partial class DisplayIssues : UserControl
+    public partial class DisplayIssues : BugNetUserControl
     {
         /// <summary>
         /// Datasource 
@@ -30,7 +29,10 @@ namespace BugNET.UserControls
         /// <summary>
         /// Array of issue columns
         /// </summary>
-        private string[] _arrIssueColumns = new[] { "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22" };
+        private string[] _arrIssueColumns = new[]
+        {
+            "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22"
+        };
 
         //store amount of fixed search columns due to bad string above
         private const int FIXED_COLUMNS = 22;
@@ -64,10 +66,8 @@ namespace BugNET.UserControls
                 var httpCookie = Request.Cookies[Globals.IssueColumns];
 
                 if (httpCookie != null)
-                {
-                    if (httpCookie.Value != String.Empty)
+                    if (httpCookie.Value != string.Empty)
                         _arrIssueColumns = httpCookie.Value.Split();
-                }
             }
         }
 
@@ -77,7 +77,7 @@ namespace BugNET.UserControls
         /// <value>The RSS  URL.</value>
         public string RssUrl
         {
-            set { lnkRSS.NavigateUrl = value; }
+            set => lnkRSS.NavigateUrl = value;
         }
 
         /// <summary>
@@ -86,8 +86,8 @@ namespace BugNET.UserControls
         /// <value>The data source.</value>
         public List<Issue> DataSource
         {
-            get { return _dataSource; }
-            set { _dataSource = value; }
+            get => _dataSource;
+            set => _dataSource = value;
         }
 
         /// <summary>
@@ -97,7 +97,6 @@ namespace BugNET.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         /// <summary>
@@ -130,7 +129,6 @@ namespace BugNET.UserControls
 
                         //if there is custom fields add them
                         if (firstIssue.IssueCustomFields.Count > 0)
-                        {
                             foreach (var value in firstIssue.IssueCustomFields)
                             {
                                 //increments nr of columns
@@ -148,11 +146,14 @@ namespace BugNET.UserControls
                                 lstIssueColumns.Items.Add(lstValue);
 
                                 //create column for custom control
-                                var tf = new TemplateField { HeaderText = value.FieldName, SortExpression = value.DatabaseFieldName.Replace(" ", "[]") };
+                                var tf = new TemplateField
+                                {
+                                    HeaderText = value.FieldName,
+                                    SortExpression = value.DatabaseFieldName.Replace(" ", "[]")
+                                };
                                 tf.HeaderStyle.Wrap = false;
                                 gvIssues.Columns.Add(tf);
                             }
-                        }
                     }
                 }
 
@@ -179,7 +180,8 @@ namespace BugNET.UserControls
                         lstIssueColumns.Items.Remove(lstIssueColumns.Items.FindByValue("4"));
                     }
 
-                    if (Page.User.Identity.IsAuthenticated && UserManager.HasPermission(projectId, Common.Permission.EditIssue.ToString()))
+                    if (Page.User.Identity.IsAuthenticated &&
+                        UserManager.HasPermission(projectId, Common.Permission.EditIssue.ToString()))
                     {
                         LeftButtonContainerPanel.Visible = true;
 
@@ -215,10 +217,8 @@ namespace BugNET.UserControls
                     }
                 }
 
-                foreach (var item in _arrIssueColumns.Select(colIndex => lstIssueColumns.Items.FindByValue(colIndex)).Where(item => item != null))
-                {
-                    item.Selected = true;
-                }
+                foreach (var item in _arrIssueColumns.Select(colIndex => lstIssueColumns.Items.FindByValue(colIndex))
+                             .Where(item => item != null)) item.Selected = true;
 
                 gvIssues.DataSource = DataSource;
                 gvIssues.DataBind();
@@ -231,7 +231,6 @@ namespace BugNET.UserControls
                 gvIssues.Visible = false;
                 pager.Visible = false;
             }
-
         }
 
         /// <summary>
@@ -264,11 +263,9 @@ namespace BugNET.UserControls
 
             // Display columns based on the _arrIssueColumns array (retrieved from cookie)
             foreach (var colIndex in _arrIssueColumns)
-            {
                 //ensure custom field exist for this project
-                if (Int32.Parse(colIndex) < gvIssues.Columns.Count)
-                    gvIssues.Columns[Int32.Parse(colIndex)].Visible = true;
-            }
+                if (int.Parse(colIndex) < gvIssues.Columns.Count)
+                    gvIssues.Columns[int.Parse(colIndex)].Visible = true;
         }
 
         /// <summary>
@@ -289,13 +286,10 @@ namespace BugNET.UserControls
                 for (var i = customFieldValues.Count - 1; i >= 0; i--)
                 {
                     var value = customFieldValues[i];
-                    if (string.IsNullOrEmpty(value.Value))
-                    {
-                        customFieldValues.RemoveAt(i);
-                    }
+                    if (string.IsNullOrEmpty(value.Value)) customFieldValues.RemoveAt(i);
                 }
 
-                foreach (var s in ids.Split(new[] { ',' }))
+                foreach (var s in ids.Split(new[] {','}))
                 {
                     int issueId;
 
@@ -308,40 +302,59 @@ namespace BugNET.UserControls
 
                     if (DueDate.SelectedValue != null)
                     {
-                        var dueDate = (DateTime)DueDate.SelectedValue;
+                        var dueDate = (DateTime) DueDate.SelectedValue;
 
                         if (dueDate != null)
-                        issue.DueDate = dueDate;
+                            issue.DueDate = dueDate;
                     }
 
-                    if (chkDueDateReset.Checked)
-                    {
-                        issue.DueDate = DateTime.MinValue;
-                    }
+                    if (chkDueDateReset.Checked) issue.DueDate = DateTime.MinValue;
 
                     issue.CategoryId = dropCategory.SelectedValue != 0 ? dropCategory.SelectedValue : issue.CategoryId;
-                    issue.CategoryName = dropCategory.SelectedValue != 0 ? dropCategory.SelectedText : issue.CategoryName;
+                    issue.CategoryName =
+                        dropCategory.SelectedValue != 0 ? dropCategory.SelectedText : issue.CategoryName;
 
-                    issue.MilestoneId = dropMilestone.SelectedValue != 0 ? dropMilestone.SelectedValue : issue.MilestoneId;
-                    issue.MilestoneName = dropMilestone.SelectedValue != 0 ? dropMilestone.SelectedText : issue.MilestoneName;
+                    issue.MilestoneId = dropMilestone.SelectedValue != 0
+                        ? dropMilestone.SelectedValue
+                        : issue.MilestoneId;
+                    issue.MilestoneName = dropMilestone.SelectedValue != 0
+                        ? dropMilestone.SelectedText
+                        : issue.MilestoneName;
 
                     issue.IssueTypeId = dropType.SelectedValue != 0 ? dropType.SelectedValue : issue.IssueTypeId;
                     issue.IssueTypeName = dropType.SelectedValue != 0 ? dropType.SelectedText : issue.IssueTypeName;
 
                     issue.PriorityId = dropPriority.SelectedValue != 0 ? dropPriority.SelectedValue : issue.PriorityId;
-                    issue.PriorityName = dropPriority.SelectedValue != 0 ? dropPriority.SelectedText : issue.PriorityName;
+                    issue.PriorityName =
+                        dropPriority.SelectedValue != 0 ? dropPriority.SelectedText : issue.PriorityName;
 
-                    issue.AssignedDisplayName = dropAssigned.SelectedValue != string.Empty ? dropAssigned.SelectedText : issue.AssignedDisplayName;
-                    issue.AssignedUserName = dropAssigned.SelectedValue != string.Empty ? dropAssigned.SelectedValue : issue.AssignedUserName;
+                    issue.AssignedDisplayName = dropAssigned.SelectedValue != string.Empty
+                        ? dropAssigned.SelectedText
+                        : issue.AssignedDisplayName;
+                    issue.AssignedUserName = dropAssigned.SelectedValue != string.Empty
+                        ? dropAssigned.SelectedValue
+                        : issue.AssignedUserName;
 
-                    issue.OwnerDisplayName = dropOwner.SelectedValue != string.Empty ? dropOwner.SelectedText : issue.OwnerDisplayName;
-                    issue.OwnerUserName = dropOwner.SelectedValue != string.Empty ? dropOwner.SelectedValue : issue.OwnerUserName;
+                    issue.OwnerDisplayName = dropOwner.SelectedValue != string.Empty
+                        ? dropOwner.SelectedText
+                        : issue.OwnerDisplayName;
+                    issue.OwnerUserName = dropOwner.SelectedValue != string.Empty
+                        ? dropOwner.SelectedValue
+                        : issue.OwnerUserName;
 
-                    issue.AffectedMilestoneId = dropAffectedMilestone.SelectedValue != 0 ? dropAffectedMilestone.SelectedValue : issue.AffectedMilestoneId;
-                    issue.AffectedMilestoneName = dropAffectedMilestone.SelectedValue != 0 ? dropAffectedMilestone.SelectedText : issue.AffectedMilestoneName;
+                    issue.AffectedMilestoneId = dropAffectedMilestone.SelectedValue != 0
+                        ? dropAffectedMilestone.SelectedValue
+                        : issue.AffectedMilestoneId;
+                    issue.AffectedMilestoneName = dropAffectedMilestone.SelectedValue != 0
+                        ? dropAffectedMilestone.SelectedText
+                        : issue.AffectedMilestoneName;
 
-                    issue.ResolutionId = dropResolution.SelectedValue != 0 ? dropResolution.SelectedValue : issue.ResolutionId;
-                    issue.ResolutionName = dropResolution.SelectedValue != 0 ? dropResolution.SelectedText : issue.ResolutionName;
+                    issue.ResolutionId = dropResolution.SelectedValue != 0
+                        ? dropResolution.SelectedValue
+                        : issue.ResolutionId;
+                    issue.ResolutionName = dropResolution.SelectedValue != 0
+                        ? dropResolution.SelectedText
+                        : issue.ResolutionName;
 
                     issue.StatusId = dropStatus.SelectedValue != 0 ? dropStatus.SelectedValue : issue.StatusId;
                     issue.StatusName = dropStatus.SelectedValue != 0 ? dropStatus.SelectedText : issue.StatusName;
@@ -357,6 +370,7 @@ namespace BugNET.UserControls
 
             OnRebindCommand(EventArgs.Empty);
         }
+
         /// <summary>
         /// Gets the selected issues.
         /// </summary>
@@ -369,11 +383,12 @@ namespace BugNET.UserControls
             {
                 if (gvr.RowType != DataControlRowType.DataRow) continue;
 
-                if (!((CheckBox)gvr.Cells[0].Controls[1]).Checked) continue;
+                if (!((CheckBox) gvr.Cells[0].Controls[1]).Checked) continue;
                 var dataKey = gvIssues.DataKeys[gvr.RowIndex];
                 if (dataKey != null) ids += dataKey.Value + ",";
             }
-            return ids.EndsWith(",") ? ids.TrimEnd(new[] { ',' }) : ids;
+
+            return ids.EndsWith(",") ? ids.TrimEnd(new[] {','}) : ids;
         }
 
         /// <summary>
@@ -381,9 +396,10 @@ namespace BugNET.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void SaveClick(Object s, EventArgs e)
+        protected void SaveClick(object s, EventArgs e)
         {
-            var strIssueColumns = lstIssueColumns.Items.Cast<ListItem>().Where(item => item.Selected).Aggregate(" 0", (current, item) => current + (" " + item.Value));
+            var strIssueColumns = lstIssueColumns.Items.Cast<ListItem>().Where(item => item.Selected)
+                .Aggregate(" 0", (current, item) => current + " " + item.Value);
 
             strIssueColumns = strIssueColumns.Trim();
 
@@ -395,7 +411,8 @@ namespace BugNET.UserControls
 
                 if (projectId > 0)
                 {
-                    UserManager.SetSelectedIssueColumnsByUserName(Security.GetUserName(), projectId, strIssueColumns.Trim());
+                    UserManager.SetSelectedIssueColumnsByUserName(Security.GetUserName(), projectId,
+                        strIssueColumns.Trim());
                 }
                 else //if it is MyIssue and not a specific project
                 {
@@ -405,7 +422,8 @@ namespace BugNET.UserControls
             }
             else
             {
-                var httpCookie = new HttpCookie(Globals.IssueColumns) { Path = "/", Expires = DateTime.MaxValue, Value = strIssueColumns };
+                var httpCookie = new HttpCookie(Globals.IssueColumns)
+                    {Path = "/", Expires = DateTime.MaxValue, Value = strIssueColumns};
 
                 Response.Cookies.Add(httpCookie);
             }
@@ -417,7 +435,7 @@ namespace BugNET.UserControls
         /// Raises the rebind command event.
         /// </summary>
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
-        void OnRebindCommand(EventArgs e)
+        private void OnRebindCommand(EventArgs e)
         {
             if (RebindCommand != null)
                 RebindCommand(this, e);
@@ -429,8 +447,8 @@ namespace BugNET.UserControls
         /// <value>The index of the current page.</value>
         public int CurrentPageIndex
         {
-            get { return gvIssues.PageIndex; }
-            set { gvIssues.PageIndex = value; }
+            get => gvIssues.PageIndex;
+            set => gvIssues.PageIndex = value;
         }
 
         /// <summary>
@@ -439,8 +457,8 @@ namespace BugNET.UserControls
         /// <value><c>true</c> if [show project column]; otherwise, <c>false</c>.</value>
         public bool ShowProjectColumn
         {
-            get { return ViewState.Get("ShowProjectColumn", false); }
-            set { ViewState.Set("ShowProjectColumn", value); }
+            get => ViewState.Get("ShowProjectColumn", false);
+            set => ViewState.Set("ShowProjectColumn", value);
         }
 
         /// <summary>
@@ -449,7 +467,7 @@ namespace BugNET.UserControls
         /// <value>The sort field.</value>
         public string SortField
         {
-            get { return ViewState.Get("SortField", String.Empty); }
+            get => ViewState.Get("SortField", string.Empty);
             set
             {
                 if (value == SortField) SortAscending = !SortAscending;
@@ -463,8 +481,8 @@ namespace BugNET.UserControls
         /// <value><c>true</c> if [sort ascending]; otherwise, <c>false</c>.</value>
         public bool SortAscending
         {
-            get { return ViewState.Get("SortAscending", false); }
-            set { ViewState.Set("SortAscending", value); }
+            get => ViewState.Get("SortAscending", false);
+            set => ViewState.Set("SortAscending", value);
         }
 
         /// <summary>
@@ -473,8 +491,8 @@ namespace BugNET.UserControls
         /// <value><c>true</c> if [sort ascending]; otherwise, <c>false</c>.</value>
         public string SortString
         {
-            get { return ViewState.Get("SortString", string.Empty); }
-            set { ViewState.Set("SortString", value); }
+            get => ViewState.Get("SortString", string.Empty);
+            set => ViewState.Set("SortString", value);
         }
 
         /// <summary>
@@ -483,8 +501,8 @@ namespace BugNET.UserControls
         /// <value>The size of the page.</value>
         public int PageSize
         {
-            get { return pager.PageSize; }
-            set { pager.PageSize = value; }
+            get => pager.PageSize;
+            set => pager.PageSize = value;
         }
 
         /// <summary>
@@ -519,32 +537,29 @@ namespace BugNET.UserControls
 
                 // this is not an ideal method to replace user custom field names with the display name.
                 // if a value is stored in any other custom field with the same name as the user then it will be replaced with the display name.
-                if(!string.IsNullOrWhiteSpace(value))
+                if (!string.IsNullOrWhiteSpace(value))
                 {
                     var name = UserManager.GetUserDisplayName(value);
                     e.Row.Cells[i].Text = name;
                 }
 
                 DateTime dt;
-                if(DateTime.TryParse(value, out dt))
-                {
+                if (DateTime.TryParse(value, out dt))
                     e.Row.Cells[i].Text = dt.ToShortDateString();
-                }
                 else if (value.Trim().ToLower().StartsWith("http"))
-                {
                     e.Row.Cells[i].Text = string.Format("<a href='{0}' target='_blank'>{0}</a>", value);
-                }
 
                 i++;
             }
 
             e.Row.FindControl("PrivateIssue").Visible = issue.Visibility != 0;
 
-            ((HtmlControl)e.Row.FindControl("AssignedUser")).Attributes.Add("title", "Id: " + issue.AssignedUser.Id + Environment.NewLine + 
-                                                                                     "UserName: " + issue.AssignedUser.UserName + Environment.NewLine +
-                                                                                     "DisplayName: " + issue.AssignedUser.DisplayName);
-            ((HtmlControl)e.Row.FindControl("ProgressBar")).Attributes.CssStyle.Add("width", issue.Progress + "%");
-            ((HtmlControl)e.Row.FindControl("ProgressBar")).Attributes.Add("aria-valuenow", issue.Progress.ToString());
+            ((HtmlControl) e.Row.FindControl("AssignedUser")).Attributes.Add("title",
+                "Id: " + issue.AssignedUser.Id + Environment.NewLine +
+                "UserName: " + issue.AssignedUser.UserName + Environment.NewLine +
+                "DisplayName: " + issue.AssignedUser.DisplayName);
+            ((HtmlControl) e.Row.FindControl("ProgressBar")).Attributes.CssStyle.Add("width", issue.Progress + "%");
+            ((HtmlControl) e.Row.FindControl("ProgressBar")).Attributes.Add("aria-valuenow", issue.Progress.ToString());
         }
 
         /// <summary>
@@ -572,9 +587,9 @@ namespace BugNET.UserControls
 
         protected string GetDueDate(object dataItem)
         {
-            var issue = (Issue)dataItem;
+            var issue = (Issue) dataItem;
             if (issue.DueDate == DateTime.MinValue)
-                return GetLocalResourceObject("None").ToString();
+                return GetLocalString("None");
             else
                 return issue.DueDate.ToShortDateString();
         }

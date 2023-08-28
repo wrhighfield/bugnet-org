@@ -3,12 +3,12 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
+using BugNET.UI;
 using BugNET.UserControls;
-using BugNET.UserInterfaceLayer;
 
 namespace BugNET.Administration.Projects.UserControls
 {
-    public partial class ProjectResolutions : System.Web.UI.UserControl, IEditProjectControl
+    public partial class ProjectResolutions : BugNetUserControl, IEditProjectControl
     {
         //*********************************************************************
         //
@@ -23,8 +23,8 @@ namespace BugNET.Administration.Projects.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", 0); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", 0);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -49,19 +49,16 @@ namespace BugNET.Administration.Projects.UserControls
         /// Gets a value indicating whether [show save button].
         /// </summary>
         /// <value><c>true</c> if [show save button]; otherwise, <c>false</c>.</value>
-        public bool ShowSaveButton
-        {
-            get { return false; }
-        }
+        public bool ShowSaveButton => false;
 
         /// <summary>
         /// Binds the milestones.
         /// </summary>
         private void BindResolutions()
         {
-            grdResolutions.Columns[1].HeaderText = GetGlobalResourceObject("SharedResources", "Resolution").ToString();
-            grdResolutions.Columns[2].HeaderText = GetGlobalResourceObject("SharedResources", "Image").ToString();
-            grdResolutions.Columns[3].HeaderText = GetGlobalResourceObject("SharedResources", "Order").ToString();
+            grdResolutions.Columns[1].HeaderText = GetGlobalString("SharedResources", "Resolution");
+            grdResolutions.Columns[2].HeaderText = GetGlobalString("SharedResources", "Image");
+            grdResolutions.Columns[3].HeaderText = GetGlobalString("SharedResources", "Order");
 
             grdResolutions.DataSource = ResolutionManager.GetByProjectId(ProjectId);
             grdResolutions.DataKeyField = "Id";
@@ -76,9 +73,9 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
-        protected void grdResolutions_Delete(Object s, DataGridCommandEventArgs e)
+        protected void grdResolutions_Delete(object s, DataGridCommandEventArgs e)
         {
-            var id = (int)grdResolutions.DataKeys[e.Item.ItemIndex];
+            var id = (int) grdResolutions.DataKeys[e.Item.ItemIndex];
             string cannotDeleteMessage;
 
             if (!ResolutionManager.Delete(id, out cannotDeleteMessage))
@@ -119,14 +116,10 @@ namespace BugNET.Administration.Projects.UserControls
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
         protected void grdResolutions_Update(object sender, DataGridCommandEventArgs e)
         {
-            
-            var txtResolutionName = (TextBox)e.Item.FindControl("txtResolutionName");
-            var pickimg = (PickImage)e.Item.FindControl("lstEditImages");
+            var txtResolutionName = (TextBox) e.Item.FindControl("txtResolutionName");
+            var pickimg = (PickImage) e.Item.FindControl("lstEditImages");
 
-            if (txtResolutionName.Text.Trim() == "")
-            {
-                throw new ArgumentNullException("Resolution name is empty.");
-            }
+            if (txtResolutionName.Text.Trim() == "") throw new ArgumentNullException("Resolution name is empty.");
 
             var m = ResolutionManager.GetById(Convert.ToInt32(grdResolutions.DataKeys[e.Item.ItemIndex]));
             m.Name = txtResolutionName.Text.Trim();
@@ -135,7 +128,6 @@ namespace BugNET.Administration.Projects.UserControls
 
             grdResolutions.EditItemIndex = -1;
             BindResolutions();
-
         }
 
         /// <summary>
@@ -148,27 +140,28 @@ namespace BugNET.Administration.Projects.UserControls
             grdResolutions.EditItemIndex = -1;
             grdResolutions.DataBind();
         }
+
         /// <summary>
         /// Handles the ItemDataBound event of the grdResolutions control.
         /// </summary>
         /// <param name="s">The source of the event.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridItemEventArgs"/> instance containing the event data.</param>
-        protected void grdResolutions_ItemDataBound(Object s, DataGridItemEventArgs e)
+        protected void grdResolutions_ItemDataBound(object s, DataGridItemEventArgs e)
         {
             if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
             {
-                var currentResolution = (Resolution)e.Item.DataItem;
+                var currentResolution = (Resolution) e.Item.DataItem;
 
-                var lblResolutionName = (Label)e.Item.FindControl("lblResolutionName");
+                var lblResolutionName = (Label) e.Item.FindControl("lblResolutionName");
                 lblResolutionName.Text = currentResolution.Name;
 
-                var upButton = (ImageButton)e.Item.FindControl("MoveUp");
-                var downButton = (ImageButton)e.Item.FindControl("MoveDown");
+                var upButton = (ImageButton) e.Item.FindControl("MoveUp");
+                var downButton = (ImageButton) e.Item.FindControl("MoveDown");
                 upButton.CommandArgument = currentResolution.Id.ToString();
                 downButton.CommandArgument = currentResolution.Id.ToString();
 
-                var imgResolution = (Image)e.Item.FindControl("imgResolution");
-                if (currentResolution.ImageUrl == String.Empty)
+                var imgResolution = (Image) e.Item.FindControl("imgResolution");
+                if (currentResolution.ImageUrl == string.Empty)
                 {
                     imgResolution.Visible = false;
                 }
@@ -178,16 +171,16 @@ namespace BugNET.Administration.Projects.UserControls
                     imgResolution.AlternateText = currentResolution.Name;
                 }
 
-                var cmdDelete = (ImageButton)e.Item.FindControl("cmdDelete");
-                var message = string.Format(GetLocalResourceObject("ConfirmDelete").ToString(), currentResolution.Name.Trim());
-                cmdDelete.Attributes.Add("onclick", String.Format("return confirm('{0}');", message.JsEncode()));
+                var cmdDelete = (ImageButton) e.Item.FindControl("cmdDelete");
+                var message = string.Format(GetLocalString("ConfirmDelete"), currentResolution.Name.Trim());
+                cmdDelete.Attributes.Add("onclick", $"return confirm('{message.JsEncode()}');");
             }
 
             if (e.Item.ItemType == ListItemType.EditItem)
             {
-                var currentResolution = (Resolution)e.Item.DataItem;
-                var txtResolutionName = (TextBox)e.Item.FindControl("txtResolutionName");
-                var pickimg = (PickImage)e.Item.FindControl("lstEditImages");
+                var currentResolution = (Resolution) e.Item.DataItem;
+                var txtResolutionName = (TextBox) e.Item.FindControl("txtResolutionName");
+                var pickimg = (PickImage) e.Item.FindControl("lstEditImages");
 
                 txtResolutionName.Text = currentResolution.Name;
                 pickimg.Initialize();
@@ -200,20 +193,20 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void AddResolution(Object s, EventArgs e)
+        protected void AddResolution(object s, EventArgs e)
         {
-
             var newName = txtName.Text.Trim();
 
-            if (newName == String.Empty)
+            if (newName == string.Empty)
                 return;
 
-            var newResolution = new Resolution { ProjectId = ProjectId, Name = newName, ImageUrl = lstImages.SelectedValue};
+            var newResolution = new Resolution
+                {ProjectId = ProjectId, Name = newName, ImageUrl = lstImages.SelectedValue};
             if (ResolutionManager.SaveOrUpdate(newResolution))
             {
                 txtName.Text = "";
                 BindResolutions();
-                lstImages.SelectedValue = String.Empty;
+                lstImages.SelectedValue = string.Empty;
             }
             else
             {
@@ -250,6 +243,7 @@ namespace BugNET.Administration.Projects.UserControls
                     ResolutionManager.SaveOrUpdate(m);
                     break;
             }
+
             BindResolutions();
         }
     }

@@ -58,8 +58,8 @@ namespace BugNET.Common
         {
             var lastDashPos = fullId.LastIndexOf("-", StringComparison.Ordinal);
 
-            if (lastDashPos > 0) 
-                fullId = fullId.Substring(lastDashPos+1);
+            if (lastDashPos > 0)
+                fullId = fullId.Substring(lastDashPos + 1);
 
             return fullId.ToOrDefault(-1);
         }
@@ -84,10 +84,7 @@ namespace BugNET.Common
             // BGN-1904
             // Check the length of the upload path
             // 64 characters are allows            
-            if ((tmpPath.Length > Globals.UploadFolderLimit))
-            {
-                isPathValid = true;
-            }
+            if (tmpPath.Length > Globals.UploadFolderLimit) isPathValid = true;
 
             // Now check for funny characters but there is a slight problem.
 
@@ -97,26 +94,18 @@ namespace BugNET.Common
             // So we have to do some magic first
 
             // Reject any UNC paths
-            if (tmpPath.Contains(@"\\"))
-            {
-                isPathValid = true;
-            }
+            if (tmpPath.Contains(@"\\")) isPathValid = true;
 
             // Reject attempts to traverse directories
-            if ((tmpPath.Contains(@"\..")) ||
-                (tmpPath.Contains(@"..\")) || (tmpPath.Contains(@"\.\")))
-            {
+            if (tmpPath.Contains(@"\..") ||
+                tmpPath.Contains(@"..\") || tmpPath.Contains(@"\.\"))
                 isPathValid = true;
-            }
 
             // Now that there are just folders left, remove the "\" character
             tmpPath = tmpPath.Replace(@"\", " ");
 
             //check for illegal filename characters
-            if (tmpPath.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
-            {
-                isPathValid = true;
-            }
+            if (tmpPath.IndexOfAny(Path.GetInvalidFileNameChars()) != -1) isPathValid = true;
 
             // Return the opposite of norty
             return !isPathValid;
@@ -124,12 +113,12 @@ namespace BugNET.Common
 
         public enum ApplicationSettingKeys
         {
-                InstallationDate,
-                NotFoundUrl,
-                SomethingMissingUrl,
-                SessionExpiredUrl,
-                ErrorUrl,
-                AccessDeniedUrl
+            InstallationDate,
+            NotFoundUrl,
+            SomethingMissingUrl,
+            SessionExpiredUrl,
+            ErrorUrl,
+            AccessDeniedUrl
         }
 
         /// <summary>
@@ -138,8 +127,10 @@ namespace BugNET.Common
         /// <param name="key">The key.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        public static string GetApplicationSetting(ApplicationSettingKeys key, string defaultValue) =>
-            ConfigurationManager.AppSettings.Get(key.ToString(), defaultValue);
+        public static string GetApplicationSetting(ApplicationSettingKeys key, string defaultValue)
+        {
+            return ConfigurationManager.AppSettings.Get(key.ToString(), defaultValue);
+        }
 
         /// <summary>
         /// Gets the boolean as string.
@@ -148,7 +139,7 @@ namespace BugNET.Common
         /// <returns></returns>
         public static string GetBooleanAsString(bool value)
         {
-            var boolString = (value) ? bool.TrueString : bool.FalseString;
+            var boolString = value ? bool.TrueString : bool.FalseString;
             return ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, boolString);
         }
 
@@ -193,8 +184,8 @@ namespace BugNET.Common
                 myDataTable.DefaultView.Sort = "iID ASC";
                 foreach (DataRow drCleaningItem in myDataTable.Rows)
                 {
-                    var sOriginalString = (drCleaningItem["sOriginalString"]).ToString();
-                    var sReplacementString = (drCleaningItem["sReplacementString"]).ToString();
+                    var sOriginalString = drCleaningItem["sOriginalString"].ToString();
+                    var sReplacementString = drCleaningItem["sReplacementString"].ToString();
                     sOutputString = Regex.Replace
                         (sOutputString, sOriginalString, sReplacementString, RegexOptions.IgnoreCase);
                 }

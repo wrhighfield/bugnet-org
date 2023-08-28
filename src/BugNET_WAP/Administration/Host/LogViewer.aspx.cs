@@ -4,7 +4,7 @@ using BugNET.BLL;
 using BugNET.BLL.Comparers;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Administration.Host
@@ -12,7 +12,7 @@ namespace BugNET.Administration.Host
     /// <summary>
     /// 
     /// </summary>
-    public partial class LogViewer : BasePage
+    public partial class LogViewer : BugNetBasePage
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(LogViewer));
 
@@ -36,16 +36,14 @@ namespace BugNET.Administration.Host
         /// Gets or sets the sort field.
         /// </summary>
         /// <value>The sort field.</value>
-        string SortField
+        private string SortField
         {
-            get { return ViewState.Get("SortField", string.Empty); }
+            get => ViewState.Get("SortField", string.Empty);
             set
             {
                 if (value == SortField)
-                {
                     // same as current sort file, toggle sort direction
                     SortAscending = !SortAscending;
-                }
                 ViewState.Set("SortField", value);
             }
         }
@@ -54,10 +52,10 @@ namespace BugNET.Administration.Host
         /// Gets or sets a value indicating whether [sort ascending].
         /// </summary>
         /// <value><c>true</c> if [sort ascending]; otherwise, <c>false</c>.</value>
-        bool SortAscending
+        private bool SortAscending
         {
-            get { return ViewState.Get("SortAscending", true); }
-            set { ViewState.Set("SortAscending", value); }
+            get => ViewState.Get("SortAscending", true);
+            set => ViewState.Set("SortAscending", value);
         }
 
         /// <summary>
@@ -107,21 +105,23 @@ namespace BugNET.Administration.Host
         {
             if (e.Row.RowType != DataControlRowType.DataRow) return;
 
-            var logItem = (ApplicationLog)e.Row.DataItem;
+            var logItem = (ApplicationLog) e.Row.DataItem;
 
-            var img = (Image)e.Row.FindControl("imgLevel");
+            var img = (Image) e.Row.FindControl("imgLevel");
             img.ImageUrl = GetLogImageUrl(logItem.Level);
             img.AlternateText = logItem.Level;
-            var LevelLabel = (Label)e.Row.FindControl("LevelLabel");
+            var LevelLabel = (Label) e.Row.FindControl("LevelLabel");
             LevelLabel.Text = logItem.Level;
-            var messageLabel = (Label)e.Row.FindControl("MessageLabel");
-            messageLabel.Text = Server.HtmlEncode((logItem.Message.Length >= 100) ? logItem.Message.Substring(0, 100) + "..." : logItem.Message);
-            var exceptionLabel = (Label)e.Row.FindControl("ExceptionLabel");
+            var messageLabel = (Label) e.Row.FindControl("MessageLabel");
+            messageLabel.Text = Server.HtmlEncode(logItem.Message.Length >= 100
+                ? logItem.Message.Substring(0, 100) + "..."
+                : logItem.Message);
+            var exceptionLabel = (Label) e.Row.FindControl("ExceptionLabel");
             exceptionLabel.Text = Server.HtmlEncode(logItem.Exception);
-            var LoggerLabel = (Label)e.Row.FindControl("LoggerLabel");
+            var LoggerLabel = (Label) e.Row.FindControl("LoggerLabel");
             LoggerLabel.Text = logItem.Logger;
 
-            e.Row.Attributes.Add("onclick", string.Format("ExpandDetails('Exception_{0}')", logItem.Id));
+            e.Row.Attributes.Add("onclick", $"ExpandDetails('Exception_{logItem.Id}')");
             e.Row.Attributes.Add("style", "cursor:pointer");
         }
 
@@ -145,6 +145,7 @@ namespace BugNET.Administration.Host
                 case "DEBUG":
                     return @"~\images\bug.gif";
             }
+
             return string.Empty;
         }
 
@@ -157,12 +158,12 @@ namespace BugNET.Administration.Host
         {
             ApplicationLogManager.ClearLog();
 
-            if (System.Web.HttpContext.Current.User != null && System.Web.HttpContext.Current.User.Identity.IsAuthenticated)
+            if (System.Web.HttpContext.Current.User != null &&
+                System.Web.HttpContext.Current.User.Identity.IsAuthenticated)
                 MDC.Set("user", System.Web.HttpContext.Current.User.Identity.Name);
 
             Log.Info("The error log was cleared.");
             BindData();
         }
     }
-
 }

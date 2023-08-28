@@ -17,9 +17,9 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public class _ParameterBuilder
         {
-            private string                 m_Name;
-            private SortedList<int,string> m_pParts;
-            private Encoding               m_pEncoding;
+            private string m_Name;
+            private SortedList<int, string> m_pParts;
+            private Encoding m_pEncoding;
 
             /// <summary>
             /// Default constructor.
@@ -28,13 +28,11 @@ namespace LumiSoft.Net.MIME
             /// <exception cref="ArgumentNullException">Is raised when <b>name</b> is null reference.</exception>
             public _ParameterBuilder(string name)
             {
-                if(name == null){
-                    throw new ArgumentNullException(nameof(name));
-                }
+                if (name == null) throw new ArgumentNullException(nameof(name));
 
                 m_Name = name;
 
-                m_pParts = new SortedList<int,string>();
+                m_pParts = new SortedList<int, string>();
             }
 
 
@@ -46,10 +44,11 @@ namespace LumiSoft.Net.MIME
             /// <param name="index">Parameter part index.</param>
             /// <param name="encoded">If true parameter part is encoded.</param>
             /// <param name="value">Parameter part value.</param>
-            public void AddPart(int index,bool encoded,string value)
+            public void AddPart(int index, bool encoded, string value)
             {
                 // We should have charset and language information available.
-                if(encoded && index == 0){
+                if (encoded && index == 0)
+                {
                     // Syntax: <charset>'<language>'<value>
                     var charset_language_value = value.Split('\'');
                     m_pEncoding = Encoding.GetEncoding(charset_language_value[0]);
@@ -57,7 +56,7 @@ namespace LumiSoft.Net.MIME
                 }
 
                 // Add parameter to list.
-                m_pParts.Add(index,value);
+                m_pParts.Add(index, value);
             }
 
             #endregion
@@ -72,15 +71,12 @@ namespace LumiSoft.Net.MIME
             {
                 // Concate parts values and decode value. (SortedList takes care for sorting part indexes)
                 var value = new StringBuilder();
-                foreach(var v in m_pParts){
-                    value.Append(v.Value);
-                }
+                foreach (var v in m_pParts) value.Append(v.Value);
 
-                if(m_pEncoding != null){
-                    return new MIME_h_Parameter(m_Name,DecodeExtOctet(value.ToString(),m_pEncoding));
-                }
+                if (m_pEncoding != null)
+                    return new MIME_h_Parameter(m_Name, DecodeExtOctet(value.ToString(), m_pEncoding));
 
-                return new MIME_h_Parameter(m_Name,value.ToString());
+                return new MIME_h_Parameter(m_Name, value.ToString());
             }
 
             #endregion
@@ -98,9 +94,9 @@ namespace LumiSoft.Net.MIME
 
         #endregion
 
-        private bool                                m_IsModified;
-        private MIME_h                              m_pOwner;
-        private Dictionary<string,MIME_h_Parameter> m_pParameters;
+        private bool m_IsModified;
+        private MIME_h m_pOwner;
+        private Dictionary<string, MIME_h_Parameter> m_pParameters;
 
         /// <summary>
         /// Default constructor.
@@ -109,13 +105,11 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>owner</b> is null reference.</exception>
         public MIME_h_ParameterCollection(MIME_h owner)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
 
             m_pOwner = owner;
 
-            m_pParameters = new Dictionary<string,MIME_h_Parameter>(StringComparer.CurrentCultureIgnoreCase);
+            m_pParameters = new Dictionary<string, MIME_h_Parameter>(StringComparer.CurrentCultureIgnoreCase);
         }
 
 
@@ -128,13 +122,9 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>name</b> is null reference.</exception>
         public void Remove(string name)
         {
-            if(name == null){
-                throw new ArgumentNullException(nameof(name));
-            }
+            if (name == null) throw new ArgumentNullException(nameof(name));
 
-            if(m_pParameters.Remove(name)){
-                m_IsModified = true;
-            }
+            if (m_pParameters.Remove(name)) m_IsModified = true;
         }
 
         #endregion
@@ -161,7 +151,7 @@ namespace LumiSoft.Net.MIME
         public MIME_h_Parameter[] ToArray()
         {
             var retVal = new MIME_h_Parameter[m_pParameters.Count];
-            m_pParameters.Values.CopyTo(retVal,0);
+            m_pParameters.Values.CopyTo(retVal, 0);
 
             return retVal;
         }
@@ -191,63 +181,64 @@ namespace LumiSoft.Net.MIME
              *      If parameter conatins 8-bit byte, we need to encode parameter value
              *      If parameter value length bigger than MIME maximum allowed line length,
              *      we need split value.
-            */
+             */
 
-            if(charset == null){
-                charset = Encoding.Default;
-            }
+            if (charset == null) charset = Encoding.Default;
 
             var retVal = new StringBuilder();
-            foreach(var parameter in ToArray()){
-                if(string.IsNullOrEmpty(parameter.Value)){
+            foreach (var parameter in ToArray())
+                if (string.IsNullOrEmpty(parameter.Value))
+                {
                     retVal.Append(";\r\n\t" + parameter.Name);
                 }
                 // We don't need to encode or split value.
-                else if((charset == null || NetUtils.IsAscii(parameter.Value)) && parameter.Value.Length < 76){
+                else if ((charset == null || NetUtils.IsAscii(parameter.Value)) && parameter.Value.Length < 76)
+                {
                     retVal.Append(";\r\n\t" + parameter.Name + "=" + TextUtilities.QuoteString(parameter.Value));
                 }
                 // We need to encode/split value.
-                else{
+                else
+                {
                     var byteValue = charset.GetBytes(parameter.Value);
 
-                    var values = new List<string>();            
+                    var values = new List<string>();
                     // Do encoding/splitting.
-                    var    offset    = 0;
+                    var offset = 0;
                     var valueBuff = new char[50];
-                    foreach(var b in byteValue){                                        
+                    foreach (var b in byteValue)
+                    {
                         // We need split value as RFC 2231 says.
-                        if(offset >= 50 - 3){
-                            values.Add(new string(valueBuff,0,offset));
+                        if (offset >= 50 - 3)
+                        {
+                            values.Add(new string(valueBuff, 0, offset));
                             offset = 0;
                         }
-                        
+
                         // Normal char, we don't need to encode.
-                        if(MIME_Reader.IsAttributeChar((char)b)){
-                            valueBuff[offset++] = (char)b;
+                        if (MIME_Reader.IsAttributeChar((char) b))
+                        {
+                            valueBuff[offset++] = (char) b;
                         }
                         // We need to encode byte as %X2.
-                        else{
+                        else
+                        {
                             valueBuff[offset++] = '%';
                             valueBuff[offset++] = (b >> 4).ToString("X")[0];
                             valueBuff[offset++] = (b & 0xF).ToString("X")[0];
                         }
                     }
-                    // Add pending buffer value.
-                    if(offset > 0){
-                        values.Add(new string(valueBuff,0,offset));
-                    }
 
-                    for(var i=0;i<values.Count;i++){
+                    // Add pending buffer value.
+                    if (offset > 0) values.Add(new string(valueBuff, 0, offset));
+
+                    for (var i = 0; i < values.Count; i++)
                         // Only fist value entry has charset and language info.
-                        if(charset != null && i == 0){
-                            retVal.Append(";\r\n\t" + parameter.Name + "*" + i.ToString() + "*=" + charset.WebName + "''" + values[i]);
-                        }
-                        else{
+                        if (charset != null && i == 0)
+                            retVal.Append(";\r\n\t" + parameter.Name + "*" + i.ToString() + "*=" + charset.WebName +
+                                          "''" + values[i]);
+                        else
                             retVal.Append(";\r\n\t" + parameter.Name + "*" + i.ToString() + "*=" + values[i]);
-                        }
-                    }
                 }
-            }
 
             return retVal.ToString();
         }
@@ -263,9 +254,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>value</b> is null reference.</exception>
         public void Parse(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             Parse(new MIME_Reader(value));
         }
@@ -277,9 +266,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>reader</b> is null reference.</exception>
         public void Parse(MIME_Reader reader)
         {
-            if(reader == null){
-                throw new ArgumentNullException(nameof(reader));
-            }
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
 
             /* RFC 2231.
                 Asterisks ("*") are reused to provide the indicator that language and
@@ -287,7 +274,7 @@ namespace LumiSoft.Net.MIME
                 single quote ("'") is used to delimit the character set and language
                 information at the beginning of the parameter value. Percent signs
                 ("%") are used as the encoding flag, which agrees with RFC 2047.
-                         
+
                 Character set and language information may be combined with the
                 parameter continuation mechanism. For example:
 
@@ -316,60 +303,52 @@ namespace LumiSoft.Net.MIME
                     MUST be present even when the fields are left blank.
             */
 
-            var parameters = new KeyValueCollection<string,_ParameterBuilder>();
+            var parameters = new KeyValueCollection<string, _ParameterBuilder>();
 
             // Parse all parameter parts.
-            var parameterParts = TextUtilities.SplitQuotedString(reader.ToEnd(),';');
-            foreach(var part in parameterParts){
-                if(string.IsNullOrEmpty(part)){
-                    continue;
-                }
+            var parameterParts = TextUtilities.SplitQuotedString(reader.ToEnd(), ';');
+            foreach (var part in parameterParts)
+            {
+                if (string.IsNullOrEmpty(part)) continue;
 
-                var name_value = part.Trim().Split(new[]{'='},2);
-                var   paramName  = name_value[0].Trim();
-                string   paramValue = null;
-                if(name_value.Length == 2){
-                    paramValue = TextUtilities.UnQuoteString(name_value[1].Trim());
-                }
+                var name_value = part.Trim().Split(new[] {'='}, 2);
+                var paramName = name_value[0].Trim();
+                string paramValue = null;
+                if (name_value.Length == 2) paramValue = TextUtilities.UnQuoteString(name_value[1].Trim());
                 // Valueless parameter.
                 //else{
-                                
+
                 var nameParts = paramName.Split('*');
-                var      index     = 0;
-                var     encoded   = nameParts.Length == 3;
+                var index = 0;
+                var encoded = nameParts.Length == 3;
                 // Get multi value parameter index.
-                if(nameParts.Length >= 2){
-                    try{
+                if (nameParts.Length >= 2)
+                    try
+                    {
                         index = Convert.ToInt32(nameParts[1]);
                     }
-                    catch{
+                    catch
+                    {
                     }
-                }
 
                 // Single value parameter and we already have parameter with such name, skip it.
-                if(nameParts.Length < 2 && parameters.ContainsKey(nameParts[0])){
-                    continue;
-                }
+                if (nameParts.Length < 2 && parameters.ContainsKey(nameParts[0])) continue;
 
                 // Parameter builder doesn't exist for the specified parameter, create it.
-                if(!parameters.ContainsKey(nameParts[0])){
-                    parameters.Add(nameParts[0],new _ParameterBuilder(nameParts[0]));
-                }
-              
-                parameters[nameParts[0]].AddPart(index,encoded,paramValue);
+                if (!parameters.ContainsKey(nameParts[0]))
+                    parameters.Add(nameParts[0], new _ParameterBuilder(nameParts[0]));
+
+                parameters[nameParts[0]].AddPart(index, encoded, paramValue);
             }
 
             // Build parameters from parts.
-            foreach(_ParameterBuilder b in parameters){
-                m_pParameters.Add(b.Name,b.GetParamter());
-            }
+            foreach (_ParameterBuilder b in parameters) m_pParameters.Add(b.Name, b.GetParamter());
 
             m_IsModified = false;
         }
 
         #endregion
 
-        
 
         #region static method DecodeExtOctet
 
@@ -380,28 +359,26 @@ namespace LumiSoft.Net.MIME
         /// <param name="charset">Charset to use.</param>
         /// <returns>Returns decoded text.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>text</b> or <b>charset</b> is null.</exception>
-        private static string DecodeExtOctet(string text,Encoding charset)
+        private static string DecodeExtOctet(string text, Encoding charset)
         {
-            if(text == null){
-                throw new ArgumentNullException(nameof(text));
-            }
-            if(charset == null){
-                throw new ArgumentNullException(nameof(charset));
-            }
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            if (charset == null) throw new ArgumentNullException(nameof(charset));
 
-            var    offset        = 0;
-            var decodedBuffer = new byte[text.Length];            
-            for(var i=0;i<text.Length;i++){
-                if(text[i] == '%'){
-                    decodedBuffer[offset++] = byte.Parse(text[i + 1].ToString() + text[i + 2].ToString(),System.Globalization.NumberStyles.HexNumber);
+            var offset = 0;
+            var decodedBuffer = new byte[text.Length];
+            for (var i = 0; i < text.Length; i++)
+                if (text[i] == '%')
+                {
+                    decodedBuffer[offset++] = byte.Parse(text[i + 1].ToString() + text[i + 2].ToString(),
+                        System.Globalization.NumberStyles.HexNumber);
                     i += 2;
                 }
-                else{
-                    decodedBuffer[offset++] = (byte)text[i];
+                else
+                {
+                    decodedBuffer[offset++] = (byte) text[i];
                 }
-            }
 
-            return charset.GetString(decodedBuffer,0,offset);
+            return charset.GetString(decodedBuffer, 0, offset);
         }
 
         #endregion
@@ -410,15 +387,15 @@ namespace LumiSoft.Net.MIME
         #region interface IEnumerator
 
         /// <summary>
-		/// Gets enumerator.
-		/// </summary>
-		/// <returns></returns>
-		public IEnumerator GetEnumerator()
-		{
-			return m_pParameters.Values.GetEnumerator();
-		}
+        /// Gets enumerator.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator GetEnumerator()
+        {
+            return m_pParameters.Values.GetEnumerator();
+        }
 
-		#endregion
+        #endregion
 
         #region Properties implementation
 
@@ -431,15 +408,11 @@ namespace LumiSoft.Net.MIME
         {
             get
             {
-                if(m_IsModified){
-                    return true;
-                }
+                if (m_IsModified) return true;
 
-                foreach(var parameter in ToArray()){
-                    if(parameter.IsModified){
+                foreach (var parameter in ToArray())
+                    if (parameter.IsModified)
                         return true;
-                    }
-                }
 
                 return false;
             }
@@ -463,31 +436,25 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>name</b> is null reference.</exception>
         public string this[string name]
         {
-            get{
-                if(name == null){
-                    throw new ArgumentNullException(nameof(name));
-                }
+            get
+            {
+                if (name == null) throw new ArgumentNullException(nameof(name));
 
                 MIME_h_Parameter retVal = null;
-                if(m_pParameters.TryGetValue(name,out retVal)){
-                    return retVal.Value;
-                }
+                if (m_pParameters.TryGetValue(name, out retVal)) return retVal.Value;
 
                 return null;
             }
 
-            set{
-                if(name == null){
-                    throw new ArgumentNullException(nameof(name));
-                }
+            set
+            {
+                if (name == null) throw new ArgumentNullException(nameof(name));
 
                 MIME_h_Parameter retVal = null;
-                if(m_pParameters.TryGetValue(name,out retVal)){
+                if (m_pParameters.TryGetValue(name, out retVal))
                     retVal.Value = value;
-                }
-                else{
-                    m_pParameters.Add(name,new MIME_h_Parameter(name,value));
-                }
+                else
+                    m_pParameters.Add(name, new MIME_h_Parameter(name, value));
             }
         }
 

@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Web.Security;
 using BugNET.BLL;
+using BugNET.UI;
 
 namespace BugNET.Administration.Users
 {
-    public abstract class BaseUserControlUserAdmin : System.Web.UI.UserControl
+    public abstract class BaseUserControlUserAdmin : BugNetUserControl
     {
         protected MembershipUser MembershipData { get; set; }
 

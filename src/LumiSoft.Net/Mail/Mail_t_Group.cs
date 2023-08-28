@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-
 using LumiSoft.Net.MIME;
 
 namespace LumiSoft.Net.Mail
@@ -10,7 +9,7 @@ namespace LumiSoft.Net.Mail
     /// </summary>
     public class Mail_t_Group : Mail_t_Address
     {
-        private string               m_DisplayName;
+        private string m_DisplayName;
         private List<Mail_t_Mailbox> m_pList;
 
         /// <summary>
@@ -44,24 +43,25 @@ namespace LumiSoft.Net.Mail
         public override string ToString(MIME_Encoding_EncodedWord wordEncoder)
         {
             var retVal = new StringBuilder();
-            if(string.IsNullOrEmpty(m_DisplayName)){
+            if (string.IsNullOrEmpty(m_DisplayName))
+            {
                 retVal.Append(":");
             }
-            else{
-                if(MIME_Encoding_EncodedWord.MustEncode(m_DisplayName)){
+            else
+            {
+                if (MIME_Encoding_EncodedWord.MustEncode(m_DisplayName))
                     retVal.Append(wordEncoder.Encode(m_DisplayName) + ":");
-                }
-                else{
+                else
                     retVal.Append(TextUtilities.QuoteString(m_DisplayName) + ":");
-                }
             }
-            for(var i=0;i<m_pList.Count;i++){
+
+            for (var i = 0; i < m_pList.Count; i++)
+            {
                 retVal.Append(m_pList[i].ToString(wordEncoder));
-                if(i < m_pList.Count - 1){
-                    retVal.Append(",");
-                }
+                if (i < m_pList.Count - 1) retVal.Append(",");
             }
-            retVal.Append(";");            
+
+            retVal.Append(";");
 
             return retVal.ToString();
         }

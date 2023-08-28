@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
@@ -17,7 +17,7 @@ namespace BugNET.Administration.Host.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-           //BGN-1835 Problematic displaying of Languages settings
+            //BGN-1835 Problematic displaying of Languages settings
             lblDefaultLanguage.Text = HostSettingManager.Get(HostSettingNames.ApplicationDefaultLanguage);
         }
 
@@ -29,7 +29,8 @@ namespace BugNET.Administration.Host.UserControls
         /// <returns></returns>
         public bool Update()
         {
-            HostSettingManager.UpdateHostSetting(HostSettingNames.ApplicationDefaultLanguage, ApplicationDefaultLanguage.SelectedValue);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.ApplicationDefaultLanguage,
+                ApplicationDefaultLanguage.SelectedValue);
             return true;
         }
 
@@ -38,30 +39,25 @@ namespace BugNET.Administration.Host.UserControls
         /// </summary>
         public void Initialize()
         {
-          
-            IEnumerable<string> resources = ResourceManager.GetInstalledLanguageResources();
-            List<ListItem> resourceItems = new List<ListItem>();
-            foreach (string code in resources)
+            var resources = ResourceManager.GetInstalledLanguageResources();
+            var resourceItems = new List<ListItem>();
+            foreach (var code in resources)
             {
-                CultureInfo cultureInfo = new CultureInfo(code, false);
+                var cultureInfo = new CultureInfo(code, false);
                 resourceItems.Add(new ListItem(cultureInfo.DisplayName, code));
             }
-
 
 
             ApplicationDefaultLanguage.DataSource = resourceItems;
             ApplicationDefaultLanguage.DataBind();
             LanguagesGridView.DataSource = resourceItems;
             LanguagesGridView.DataBind();
-            
-            ApplicationDefaultLanguage.SelectedValue = HostSettingManager.Get(HostSettingNames.ApplicationDefaultLanguage);
 
+            ApplicationDefaultLanguage.SelectedValue =
+                HostSettingManager.Get(HostSettingNames.ApplicationDefaultLanguage);
         }
 
-        public bool ShowSaveButton
-        {
-            get { return true; }
-        }
+        public bool ShowSaveButton => true;
 
         #endregion
     }

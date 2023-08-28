@@ -22,10 +22,11 @@ namespace BugNET.DAL
         /// </summary>
         private static void Initialize()
         {
-            var configuration = (DataProviderConfiguration)ConfigurationManager.GetSection("DataProvider");
+            var configuration = (DataProviderConfiguration) ConfigurationManager.GetSection("DataProvider");
 
-            if (configuration == null || configuration.DefaultProvider == null || configuration.Providers == null || configuration.Providers.Count < 1)
-                throw new ProviderException("You must specify a valid default data provider.");           
+            if (configuration == null || configuration.DefaultProvider == null || configuration.Providers == null ||
+                configuration.Providers.Count < 1)
+                throw new ProviderException("You must specify a valid default data provider.");
 
             Providers = new DataProviderCollection();
             ProvidersHelper.InstantiateProviders(configuration.Providers, Providers, typeof(DataProvider));

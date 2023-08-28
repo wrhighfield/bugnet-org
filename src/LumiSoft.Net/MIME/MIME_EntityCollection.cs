@@ -9,7 +9,7 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_EntityCollection : IEnumerable
     {
-        private bool              m_IsModified;
+        private bool m_IsModified;
         private List<MIME_Entity> m_pCollection;
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace LumiSoft.Net.MIME
 
 
         #region method Add
-                
+
         /// <summary>
         /// Adds specified MIME enity to the collection.
         /// </summary>
@@ -30,9 +30,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>entity</b> is null reference.</exception>
         public void Add(MIME_Entity entity)
         {
-            if(entity == null){
-                throw new ArgumentNullException(nameof(entity));
-            }
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             m_pCollection.Add(entity);
             m_IsModified = true;
@@ -49,13 +47,11 @@ namespace LumiSoft.Net.MIME
         /// <param name="entity">MIME entity.</param>
         /// <exception cref="IndexOutOfRangeException">Is raised when <b>index</b> is out of range.</exception>
         /// <exception cref="ArgumentNullException">Is raised when <b>entity</b> is null reference.</exception>
-        public void Insert(int index,MIME_Entity entity)
+        public void Insert(int index, MIME_Entity entity)
         {
-            if(entity == null){
-                throw new ArgumentNullException(nameof(entity));
-            }
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
 
-            m_pCollection.Insert(index,entity);
+            m_pCollection.Insert(index, entity);
             m_IsModified = true;
         }
 
@@ -70,9 +66,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>field</b> is null reference.</exception>
         public void Remove(MIME_Entity entity)
         {
-            if(entity == null){
-                throw new ArgumentNullException("field");
-            }
+            if (entity == null) throw new ArgumentNullException("field");
 
             m_pCollection.Remove(entity);
             m_IsModified = true;
@@ -114,9 +108,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>entity</b> is null.</exception>
         public bool Contains(MIME_Entity entity)
         {
-            if(entity == null){
-                throw new ArgumentNullException(nameof(entity));
-            }
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
 
             return m_pCollection.Contains(entity);
         }
@@ -141,15 +133,15 @@ namespace LumiSoft.Net.MIME
         #region interface IEnumerator
 
         /// <summary>
-		/// Gets enumerator.
-		/// </summary>
-		/// <returns>Returns IEnumerator interface.</returns>
-		public IEnumerator GetEnumerator()
-		{
-			return m_pCollection.GetEnumerator();
-		}
+        /// Gets enumerator.
+        /// </summary>
+        /// <returns>Returns IEnumerator interface.</returns>
+        public IEnumerator GetEnumerator()
+        {
+            return m_pCollection.GetEnumerator();
+        }
 
-		#endregion
+        #endregion
 
         #region Properties Implementation
 
@@ -158,18 +150,15 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public bool IsModified
         {
-            get{
-                if(m_IsModified){
-                    return true;
-                }
+            get
+            {
+                if (m_IsModified) return true;
 
-                foreach(var entity in m_pCollection){
-                    if(entity.IsModified){
+                foreach (var entity in m_pCollection)
+                    if (entity.IsModified)
                         return true;
-                    }
-                }
 
-                return false; 
+                return false;
             }
         }
 
@@ -186,6 +175,5 @@ namespace LumiSoft.Net.MIME
         public MIME_Entity this[int index] => m_pCollection[index];
 
         #endregion
-
     }
 }

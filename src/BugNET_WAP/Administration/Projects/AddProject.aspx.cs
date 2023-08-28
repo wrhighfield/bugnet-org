@@ -3,7 +3,7 @@ using System.Collections;
 using System.Web.UI;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Administration.Projects
@@ -11,11 +11,11 @@ namespace BugNET.Administration.Projects
     /// <summary>
     /// Summary description for AddProject.
     /// </summary>
-    public partial class AddProject : BasePage
+    public partial class AddProject : BugNetBasePage
     {
-        readonly ArrayList _wizardSteps = new ArrayList();
+        private readonly ArrayList _wizardSteps = new ArrayList();
 
-        Control _ctlWizardStep;
+        private Control _ctlWizardStep;
 
         private static readonly ILog Log = LogManager.GetLogger(typeof(AddProject));
 
@@ -23,10 +23,10 @@ namespace BugNET.Administration.Projects
         /// Gets or sets the index of the step.
         /// </summary>
         /// <value>The index of the step.</value>
-        int StepIndex
+        private int StepIndex
         {
-            get { return ViewState.Get("StepIndex", 0); }
-            set { ViewState.Set("StepIndex", value); }
+            get => ViewState.Get("StepIndex", 0);
+            set => ViewState.Set("StepIndex", value);
         }
 
         /// <summary>
@@ -36,13 +36,14 @@ namespace BugNET.Administration.Projects
         {
             if (StepIndex < 0) StepIndex = 0;
 
-            _ctlWizardStep = Page.LoadControl((string)_wizardSteps[StepIndex]);
+            _ctlWizardStep = Page.LoadControl((string) _wizardSteps[StepIndex]);
             _ctlWizardStep.ID = "ctlWizardStep";
-            ((IEditProjectControl)_ctlWizardStep).ProjectId = ProjectId;
+            ((IEditProjectControl) _ctlWizardStep).ProjectId = ProjectId;
             plhWizardStep.Controls.Clear();
             plhWizardStep.Controls.Add(_ctlWizardStep);
-            ((IEditProjectControl)_ctlWizardStep).Initialize();
-            lblStepNumber.Text = String.Format("{2} {0} {3} {1}", StepIndex + 1, _wizardSteps.Count, GetLocalResourceObject("Step"), GetLocalResourceObject("Of"));
+            ((IEditProjectControl) _ctlWizardStep).Initialize();
+            lblStepNumber.Text = string.Format("{2} {0} {3} {1}", StepIndex + 1, _wizardSteps.Count,
+                GetLocalString("Step"), GetLocalString("Of"));
 
             //Hide BACK button on StepIndex = 0 (Wizard step 1 of 10)
             btnBack.Visible = StepIndex != 0;
@@ -82,9 +83,7 @@ namespace BugNET.Administration.Projects
         {
             base.OnPreRender(e);
 
-            btnNext.Text = StepIndex == (_wizardSteps.Count - 1) ?
-                GetLocalResourceObject("Finish").ToString() :
-                GetLocalResourceObject("Next").ToString();
+            btnNext.Text = StepIndex == _wizardSteps.Count - 1 ? GetLocalString("Finish") : GetLocalString("Next");
         }
 
         /// <summary>
@@ -96,10 +95,8 @@ namespace BugNET.Administration.Projects
         {
             //delete any project that has already been created to prevent bad project data.
             if (ProjectId != 0)
-            {
                 if (!ProjectManager.Delete(ProjectId))
                     Log.Error("Error Deleting Project");
-            }
             Response.Redirect("ProjectList.aspx");
         }
 
@@ -121,12 +118,12 @@ namespace BugNET.Administration.Projects
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void btnNext_Click(object sender, EventArgs e)
         {
-            if (((IEditProjectControl)_ctlWizardStep).Update())
+            if (((IEditProjectControl) _ctlWizardStep).Update())
             {
-                ProjectId = ((IEditProjectControl)_ctlWizardStep).ProjectId;
-                
+                ProjectId = ((IEditProjectControl) _ctlWizardStep).ProjectId;
+
                 StepIndex++;
-                
+
                 if (StepIndex == _wizardSteps.Count)
                     Response.Redirect("ProjectList.aspx");
                 else

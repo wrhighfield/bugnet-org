@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Web.Security;
+using BugNET.UI;
 
 namespace BugNET.Account
 {
     /// <summary>
     /// 
     /// </summary>
-    public partial class Verify : System.Web.UI.Page
+    public partial class Verify : BugNetBasePage
     {
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -17,9 +18,10 @@ namespace BugNET.Account
         protected void Page_Load(object sender, EventArgs e)
         {
             //Make sure that a valid querystring value was passed through
-            if (string.IsNullOrEmpty(Request.QueryString["ID"]) || !Regex.IsMatch(Request.QueryString["ID"].ToLower(), "[0-9a-f]{8}\\-([0-9a-f]{4}\\-){3}[0-9a-f]{12}"))
+            if (string.IsNullOrEmpty(Request.QueryString["ID"]) || !Regex.IsMatch(Request.QueryString["ID"].ToLower(),
+                    "[0-9a-f]{8}\\-([0-9a-f]{4}\\-){3}[0-9a-f]{12}"))
             {
-                InformationLabel.Text = GetLocalResourceObject("InvalidUserAccountID").ToString();
+                InformationLabel.Text = GetLocalString("InvalidUserAccountID");
                 return;
             }
             else
@@ -28,14 +30,14 @@ namespace BugNET.Account
                 {
                     //ID exists and is kosher, see if this user is already approved
                     //Get the ID sent in the querystring
-                    Guid userId = new Guid(Request.QueryString["ID"]);
+                    var userId = new Guid(Request.QueryString["ID"]);
 
                     //Get information about the user
-                    MembershipUser userInfo = Membership.GetUser(userId);
+                    var userInfo = Membership.GetUser(userId);
                     if (userInfo == null)
                     {
                         //Could not find user!
-                        InformationLabel.Text = GetLocalResourceObject("UserAccountCouldNotBeFound").ToString();
+                        InformationLabel.Text = GetLocalString("UserAccountCouldNotBeFound");
                     }
                     else
                     {
@@ -44,14 +46,14 @@ namespace BugNET.Account
                             //User is valid, approve them
                             userInfo.IsApproved = true;
                             Membership.UpdateUser(userInfo);
-                      
+
                             //Display a message
-                            InformationLabel.Text =  GetLocalResourceObject("AccountVerified").ToString();
+                            InformationLabel.Text = GetLocalString("AccountVerified");
                         }
                         else
                         {
                             //Display a message
-                            InformationLabel.Text = GetLocalResourceObject("AccountDeactivated").ToString();
+                            InformationLabel.Text = GetLocalString("AccountDeactivated");
                             return;
                         }
                     }
@@ -65,7 +67,6 @@ namespace BugNET.Account
 
             // We should never reach here. Just in case redirect some where
             Response.Redirect("~/Default.aspx", true);
-            
         }
     }
 }

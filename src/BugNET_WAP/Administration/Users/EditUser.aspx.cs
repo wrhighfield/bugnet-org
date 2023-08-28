@@ -5,11 +5,11 @@ using System.Web.UI.WebControls;
 using Microsoft.AspNet.FriendlyUrls;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Users
 {
-    public partial class EditUser : BasePage
+    public partial class EditUser : BugNetBasePage
     {
         private static readonly List<AdminMenuItem> MenuItems = new List<AdminMenuItem>();
 
@@ -17,26 +17,23 @@ namespace BugNET.Administration.Users
         /// Gets or sets the admin menu id.
         /// </summary>
         /// <value>The admin menu id.</value>
-        int AdminMenuId
+        private int AdminMenuId
         {
-            get { return ViewState.Get("AdminMenuId", 0); }
-            set { ViewState.Set("AdminMenuId", value); }
+            get => ViewState.Get("AdminMenuId", 0);
+            set => ViewState.Set("AdminMenuId", value);
         }
 
         /// <summary>
         /// Gets the tab id.
         /// </summary>
         /// <value>The tab id.</value>
-        int QueryTabId
+        private int QueryTabId
         {
-            get 
+            get
             {
-                IList<string> segments = Request.GetFriendlyUrlSegments();
+                var segments = Request.GetFriendlyUrlSegments();
                 var queryTabId = 0;
-                if (segments.Count > 1)
-                {
-                    int.TryParse(segments[1], out queryTabId);
-                }
+                if (segments.Count > 1) int.TryParse(segments[1], out queryTabId);
                 return queryTabId;
             }
         }
@@ -45,11 +42,11 @@ namespace BugNET.Administration.Users
         /// Gets the user id.
         /// </summary>
         /// <value>The user id.</value>
-        Guid UserId
+        private Guid UserId
         {
             get
             {
-                IList<string> segments = Request.GetFriendlyUrlSegments();
+                var segments = Request.GetFriendlyUrlSegments();
                 var userId = segments[0];
                 // var userId = Request.QueryString.Get("user", "");
 
@@ -72,7 +69,7 @@ namespace BugNET.Administration.Users
         /// </summary>
         /// <param name="selectedMenuItem">The selected menu item id.</param>
         /// <param name="loadControl">Flag to indicate if the control should be loaded or not</param>
-        void DisplayAdminControl(int selectedMenuItem, bool loadControl = true)
+        private void DisplayAdminControl(int selectedMenuItem, bool loadControl = true)
         {
             AdminMenuId = selectedMenuItem;
 
@@ -89,7 +86,7 @@ namespace BugNET.Administration.Users
                 control.Visible = false;
                 var htmlControl = AdminMenu.Items[adminMenuItem.Id].FindControl("ListItem") as HtmlGenericControl;
 
-                if (htmlControl != null) 
+                if (htmlControl != null)
                     htmlControl.Attributes.Add("class", "");
 
                 if (selectedMenuItem != adminMenuItem.Id) continue;
@@ -108,7 +105,7 @@ namespace BugNET.Administration.Users
         /// </summary>
         /// <param name="sender">The object sending the event</param>
         /// <param name="args">Arguments sent from the parent</param>
-        void EditUserAction(object sender, ActionEventArgs args)
+        private void EditUserAction(object sender, ActionEventArgs args)
         {
             switch (args.Trigger)
             {
@@ -118,19 +115,25 @@ namespace BugNET.Administration.Users
                         var user = UserManager.GetUser(UserId);
                         litUserTitleName.Text = UserManager.GetUserDisplayName(user.UserName);
                     }
+
                     break;
             }
         }
 
-        void LoadAdminMenuItems()
+        private void LoadAdminMenuItems()
         {
             MenuItems.Clear();
 
-            MenuItems.Add(new AdminMenuItem { Id = 0, Text = GetLocalResourceObject("UserDetails").ToString(), Argument = "UserDetails", ImageUrl = "vcard.gif" });
-            MenuItems.Add(new AdminMenuItem { Id = 1, Text = GetLocalResourceObject("UserRoles").ToString(), Argument = "UserRoles", ImageUrl = "shield.gif" });
-            MenuItems.Add(new AdminMenuItem { Id = 2, Text = GetLocalResourceObject("UserPassword").ToString(), Argument = "UserPassword", ImageUrl = "key.gif" });
-            MenuItems.Add(new AdminMenuItem { Id = 3, Text = GetLocalResourceObject("UserProfile").ToString(), Argument = "UserProfile", ImageUrl = "user.gif" });
-            MenuItems.Add(new AdminMenuItem { Id = 4, Text = GetLocalResourceObject("UserDelete").ToString(), Argument = "UserDelete", ImageUrl = "user_delete.gif" });
+            MenuItems.Add(new AdminMenuItem
+                {Id = 0, Text = GetLocalString("UserDetails"), Argument = "UserDetails", ImageUrl = "vcard.gif"});
+            MenuItems.Add(new AdminMenuItem
+                {Id = 1, Text = GetLocalString("UserRoles"), Argument = "UserRoles", ImageUrl = "shield.gif"});
+            MenuItems.Add(new AdminMenuItem
+                {Id = 2, Text = GetLocalString("UserPassword"), Argument = "UserPassword", ImageUrl = "key.gif"});
+            MenuItems.Add(new AdminMenuItem
+                {Id = 3, Text = GetLocalString("UserProfile"), Argument = "UserProfile", ImageUrl = "user.gif"});
+            MenuItems.Add(new AdminMenuItem
+                {Id = 4, Text = GetLocalString("UserDelete"), Argument = "UserDelete", ImageUrl = "user_delete.gif"});
 
             AdminMenu.DataSource = MenuItems;
             AdminMenu.DataBind();
@@ -138,7 +141,7 @@ namespace BugNET.Administration.Users
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (!UserManager.HasPermission(ProjectId, Common.Permission.AdminEditProject.ToString()))
+            if (!UserManager.HasPermission(ProjectId, Permission.AdminEditProject.ToString()))
                 Response.Redirect("~/Errors/AccessDenied.aspx");
 
             if (UserId != Guid.Empty)
@@ -177,10 +180,7 @@ namespace BugNET.Administration.Users
         {
             var menuButton = e.Item.FindControl("MenuButton") as LinkButton;
 
-            if (menuButton != null)
-            {
-                DisplayAdminControl(menuButton.Attributes["data-menu-id"].To<int>());
-            } 
+            if (menuButton != null) DisplayAdminControl(menuButton.Attributes["data-menu-id"].To<int>());
         }
     }
 }

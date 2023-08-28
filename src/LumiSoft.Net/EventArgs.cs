@@ -26,6 +26,5 @@ namespace LumiSoft.Net
         public T Value { get; }
 
         #endregion
-
     }
 }

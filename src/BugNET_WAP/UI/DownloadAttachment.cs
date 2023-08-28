@@ -12,6 +12,7 @@
 // So if a progress bar is used in the upload, it may read 100%, but the upload won't
 // be complete until the file is saved.  So it may look like it is stalled, but it
 // is not.
+
 using System;
 using System.Web;
 using BugNET.BLL;
@@ -19,7 +20,7 @@ using BugNET.Common;
 using log4net;
 
 //using BugNET.BusinessLogicLayer;
-namespace BugNET.UserInterfaceLayer
+namespace BugNET.UI
 {
     /// <summary>
     /// Upload handler for uploading files.
@@ -35,10 +36,7 @@ namespace BugNET.UserInterfaceLayer
         /// </summary>
         /// <value></value>
         /// <returns>true if the <see cref="T:System.Web.IHttpHandler"/> instance is reusable; otherwise, false.</returns>
-        public bool IsReusable
-        {
-            get { return true; }
-        }
+        public bool IsReusable => true;
 
         /// <summary>
         /// Enables processing of HTTP Web requests by a custom HttpHandler that implements the <see cref="T:System.Web.IHttpHandler"/> interface.
@@ -66,7 +64,6 @@ namespace BugNET.UserInterfaceLayer
                 {
                     context.Response.WriteFile("~/Images/noimage.gif");
                 }
-
             }
             else
             {
@@ -85,9 +82,10 @@ namespace BugNET.UserInterfaceLayer
                 {
                     var attachment = IssueAttachmentManager.GetAttachmentForDownload(attachmentId);
 
-                    if(attachment == null)
+                    if (attachment == null)
                     {
-                        context.Response.Write("<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
+                        context.Response.Write(
+                            "<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
                         context.Response.End();
                         return;
                     }
@@ -105,53 +103,52 @@ namespace BugNET.UserInterfaceLayer
                         if (attachment.ContentType.ToLower().StartsWith("image/"))
                         {
                             context.Response.ContentType = attachment.ContentType;
-                            context.Response.AddHeader("Content-Disposition", string.Format("inline; filename=\"{0}\";", fileName));
+                            context.Response.AddHeader("Content-Disposition", $"inline; filename=\"{fileName}\";");
                         }
                         else
                         {
                             context.Response.ContentType = "application/octet-stream";
-                            context.Response.AddHeader("Content-Disposition", string.Format("attachment; filename=\"{0}\";", fileName));
+                            context.Response.AddHeader("Content-Disposition", $"attachment; filename=\"{fileName}\";");
                         }
+
                         context.Response.AddHeader("Content-Length", attachment.Attachment.Length.ToString());
                         context.Response.BinaryWrite(attachment.Attachment);
                     }
                     else
                     {
-
                         var p = ProjectManager.GetById(IssueManager.GetById(attachment.IssueId).ProjectId);
                         var projectPath = p.UploadPath;
 
                         // append a trailing slash if it doesn't exist
                         if (!projectPath.EndsWith(@"\"))
-                            projectPath = String.Concat(projectPath, @"\");
+                            projectPath = string.Concat(projectPath, @"\");
 
-                        var path = String.Concat(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath), projectPath, fileName);
+                        var path = string.Concat(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath),
+                            projectPath, fileName);
 
-                        if(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath).StartsWith("~"))
-                        {
+                        if (HostSettingManager.Get(HostSettingNames.AttachmentUploadPath).StartsWith("~"))
                             path = context.Server.MapPath(path);
-                        }
-                        
+
                         if (System.IO.File.Exists(path))
                         {
                             context.Response.Clear();
                             context.Response.ContentType = attachment.ContentType;
                             context.Response.AddHeader("Content-Disposition",
-                                                       attachment.ContentType.ToLower().StartsWith("image/")
-                                                           ? string.Format("inline; filename=\"{0}\";", cleanFileName)
-                                                           : string.Format("attachment; filename=\"{0}\";",
-                                                                           cleanFileName));
+                                attachment.ContentType.ToLower().StartsWith("image/")
+                                    ? $"inline; filename=\"{cleanFileName}\";"
+                                    : $"attachment; filename=\"{cleanFileName}\";");
                             context.Response.WriteFile(path);
                         }
                         else
                         {
-                            context.Response.Write("<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
+                            context.Response.Write(
+                                "<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
                         }
                     }
                 }
-                catch(DataAccessException dx)
+                catch (DataAccessException dx)
                 {
-                    if(dx.StatusCode > 0)
+                    if (dx.StatusCode > 0)
                     {
                         var statusCode = dx.StatusCode.ToEnum(DownloadAttachmentStatusCodes.NoAccess);
 
@@ -160,21 +157,24 @@ namespace BugNET.UserInterfaceLayer
                         var authority = fullPath.Replace(url, "");
 
                         var redirectUrl =
-                            string.Format("~/Account/Login.aspx?ReturnUrl={0}{1}", authority, context.Server.UrlEncode(url));
+                            $"~/Account/Login.aspx?ReturnUrl={authority}{context.Server.UrlEncode(url)}";
 
-                        switch(statusCode)
+                        switch (statusCode)
                         {
                             case DownloadAttachmentStatusCodes.InvalidAttachmentId:
-                                context.Response.Write("<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
+                                context.Response.Write(
+                                    "<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
                                 break;
                             case DownloadAttachmentStatusCodes.AuthenticationRequired:
                                 context.Response.Redirect(redirectUrl);
                                 break;
                             case DownloadAttachmentStatusCodes.ProjectOrIssueDisabled:
-                                context.Response.Write("<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
+                                context.Response.Write(
+                                    "<h1>Attachment Not Found.</h1>  It may have been deleted from the server.");
                                 break;
                             case DownloadAttachmentStatusCodes.NoAccess:
-                                context.Response.Write("<h1>Access Denied.</h1>  You do not have proper permissions to access this Attachment.");
+                                context.Response.Write(
+                                    "<h1>Access Denied.</h1>  You do not have proper permissions to access this Attachment.");
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException();
@@ -189,5 +189,4 @@ namespace BugNET.UserInterfaceLayer
 
         #endregion
     }
-
 }

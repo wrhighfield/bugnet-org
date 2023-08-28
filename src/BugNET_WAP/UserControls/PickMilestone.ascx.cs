@@ -1,16 +1,16 @@
+using BugNET.UI;
+
 namespace BugNET.UserControls
 {
-    using System;
     using System.Collections.Generic;
     using System.Web.UI.WebControls;
-    using BugNET.Entities;
+    using Entities;
 
     /// <summary>
     ///		Summary description for PickMilestone.
     /// </summary>
-    public partial class PickMilestone : System.Web.UI.UserControl
+    public partial class PickMilestone : BugNetUserControl
     {
-
         /// <summary>
         /// Handles the Load event of the Page control.
         /// </summary>
@@ -21,18 +21,11 @@ namespace BugNET.UserControls
             // Put user code to initialize the page here
         }
 
-        private List<Milestone> _DataSource;
-        private bool _DisplayDefault = false;
-
         /// <summary>
         /// Gets or sets a value indicating whether [display default].
         /// </summary>
         /// <value><c>true</c> if [display default]; otherwise, <c>false</c>.</value>
-        public bool DisplayDefault
-        {
-            get { return _DisplayDefault; }
-            set { _DisplayDefault = value; }
-        }
+        public bool DisplayDefault { get; set; } = false;
 
         /// <summary>
         /// Gets or sets the selected value.
@@ -40,16 +33,11 @@ namespace BugNET.UserControls
         /// <value>The selected value.</value>
         public int SelectedValue
         {
-            get 
-            { 
-                return Int32.Parse(ddlMilestone.SelectedValue); 
-            }
-            set 
-            { 
-                if(ddlMilestone.Items.FindByValue(value.ToString()) != null)
-                { 
+            get => int.Parse(ddlMilestone.SelectedValue);
+            set
+            {
+                if (ddlMilestone.Items.FindByValue(value.ToString()) != null)
                     ddlMilestone.SelectedValue = value.ToString();
-                }
             }
         }
 
@@ -57,20 +45,13 @@ namespace BugNET.UserControls
         /// Gets the selected text.
         /// </summary>
         /// <value>The selected text.</value>
-        public string SelectedText
-        {
-            get { return ddlMilestone.SelectedItem.Text; }
-        }
+        public string SelectedText => ddlMilestone.SelectedItem.Text;
 
         /// <summary>
         /// Gets or sets the data source.
         /// </summary>
         /// <value>The data source.</value>
-        public List<Milestone> DataSource
-        {
-            get { return _DataSource; }
-            set { _DataSource = value; }
-        }
+        public List<Milestone> DataSource { get; set; }
 
         /// <summary>
         /// Binds a data source to the invoked server control and all its child controls.
@@ -78,15 +59,12 @@ namespace BugNET.UserControls
         public override void DataBind()
         {
             ddlMilestone.Items.Clear();
-            ddlMilestone.DataSource = _DataSource;
+            ddlMilestone.DataSource = DataSource;
             ddlMilestone.DataTextField = "Name";
             ddlMilestone.DataValueField = "Id";
             ddlMilestone.DataBind();
 
-            if (_DisplayDefault)
-            {
-                ddlMilestone.Items.Insert(0, new ListItem(GetLocalResourceObject("SelectMilestone").ToString(), "0"));
-            }
+            if (DisplayDefault) ddlMilestone.Items.Insert(0, new ListItem(GetLocalString("SelectMilestone"), "0"));
         }
 
         /// <summary>
@@ -94,7 +72,7 @@ namespace BugNET.UserControls
         /// </summary>
         public void RemoveDefault()
         {
-            ListItem defaultItem = ddlMilestone.Items.FindByValue("0");
+            var defaultItem = ddlMilestone.Items.FindByValue("0");
             if (defaultItem != null)
                 ddlMilestone.Items.Remove(defaultItem);
         }
@@ -105,17 +83,18 @@ namespace BugNET.UserControls
         /// <value><c>true</c> if required; otherwise, <c>false</c>.</value>
         public bool Required
         {
-            get { return reqVal.Visible; }
-            set { reqVal.Visible = value; }
+            get => reqVal.Visible;
+            set => reqVal.Visible = value;
         }
+
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="T:PickMilestone"/> is enabled.
         /// </summary>
         /// <value><c>true</c> if enabled; otherwise, <c>false</c>.</value>
         public bool Enabled
         {
-            get { return ddlMilestone.Enabled; }
-            set { ddlMilestone.Enabled = value; }
+            get => ddlMilestone.Enabled;
+            set => ddlMilestone.Enabled = value;
         }
     }
 }

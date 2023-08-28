@@ -16,7 +16,8 @@ namespace BugNET.Install
     {
         private DateTime _startTime;
 
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -30,10 +31,7 @@ namespace BugNET.Install
 
             var mode = string.Empty;
 
-            if (Request.QueryString["mode"] != null)
-            {
-                mode = Request.QueryString["mode"].ToLower();
-            }
+            if (Request.QueryString["mode"] != null) mode = Request.QueryString["mode"].ToLower();
 
             //Disable Client side caching
             Response.Cache.SetCacheability(HttpCacheability.ServerAndNoCache);
@@ -66,7 +64,7 @@ namespace BugNET.Install
                             InstallerLogout();
                             break;
                         default:
-                            Log.Info(string.Format("The current status [{0}] was not handled during the install process.", status));
+                            Log.Info($"The current status [{status}] was not handled during the install process.");
                             break;
                     }
                 }
@@ -89,9 +87,10 @@ namespace BugNET.Install
             FormsAuthentication.SignOut();
 
             WriteHeader("logout");
-            WriteMessage(string.Format("<h3>You were logged in as user '{0}'</h3>", tmpuser));
+            WriteMessage($"<h3>You were logged in as user '{tmpuser}'</h3>");
             WriteMessage("<h3>You have been logged out of the system automatically.</h3>");
-            WriteMessage("<br/><h2>Please make sure you are using Forms authentication and run the install process from a browser that doesn't have your login credentials remembered.</h2>");
+            WriteMessage(
+                "<br/><h2>Please make sure you are using Forms authentication and run the install process from a browser that doesn't have your login credentials remembered.</h2>");
             WriteMessage("<br/><h2><a href='../Install/Install.aspx'>Click Here to retry the installation.</a></h2>");
             WriteFooter();
         }
@@ -103,10 +102,11 @@ namespace BugNET.Install
         private void NoUpgrade()
         {
             WriteHeader("none");
-            WriteMessage(string.Format("<h2>Current Database Version: {0}</h2>", UpgradeManager.GetInstalledVersion()));
-            WriteMessage(string.Format("<h2>Current Assembly Version: {0}</h2>", UpgradeManager.GetCurrentVersion()));
+            WriteMessage($"<h2>Current Database Version: {UpgradeManager.GetInstalledVersion()}</h2>");
+            WriteMessage($"<h2>Current Assembly Version: {UpgradeManager.GetCurrentVersion()}</h2>");
             WriteMessage("<h2>No Upgrade needed.</h2>");
-            WriteMessage("<br/><br/><h2><a href='../Default.aspx'>Click Here To Access Your BugNET Installation</a></h2>");
+            WriteMessage(
+                "<br/><br/><h2><a href='../Default.aspx'>Click Here To Access Your BugNET Installation</a></h2>");
             WriteFooter();
         }
 
@@ -121,7 +121,7 @@ namespace BugNET.Install
             _startTime = DateTime.Now;
             WriteHeader("install");
 
-            WriteMessage(string.Format("<h2>Version: {0}</h2>", UpgradeManager.GetCurrentVersion()));
+            WriteMessage($"<h2>Version: {UpgradeManager.GetCurrentVersion()}</h2>");
             WriteMessage("&nbsp;");
             WriteMessage("<h2>Installation Status Report</h2>");
 
@@ -132,7 +132,8 @@ namespace BugNET.Install
             else
             {
                 WriteMessage("<h2>Installation Complete</h2>");
-                WriteMessage("<br/><br/><h2><a href='../Default.aspx'>Click Here To Access Your BugNET Installation</a></h2><br/><br/>");
+                WriteMessage(
+                    "<br/><br/><h2><a href='../Default.aspx'>Click Here To Access Your BugNET Installation</a></h2><br/><br/>");
             }
 
             Response.Flush();
@@ -151,17 +152,18 @@ namespace BugNET.Install
 
                 if (!providerPath.StartsWith("ERROR"))
                 {
-                    WriteMessage(string.Format("Installing Version: {0}<br/>", UpgradeManager.GetCurrentVersion()), 0, true);
+                    WriteMessage($"Installing Version: {UpgradeManager.GetCurrentVersion()}<br/>", 0, true);
                     WriteMessage("Installing BugNET Database:<br/>", 0, true);
-                    ExecuteSqlInFile(string.Format("{0}BugNET.Schema.SqlDataProvider.sql", providerPath));
+                    ExecuteSqlInFile($"{providerPath}BugNET.Schema.SqlDataProvider.sql");
                     WriteMessage("Installing BugNET Default Data:<br/>", 0, true);
-                    ExecuteSqlInFile(string.Format("{0}BugNET.Data.SqlDataProvider.sql", providerPath));
+                    ExecuteSqlInFile($"{providerPath}BugNET.Data.SqlDataProvider.sql");
                     WriteMessage("Creating Administrator Account<br/>", 0, true);
 
                     //create admin user
                     MembershipCreateStatus status;
 
-                    var newUser = Membership.CreateUser("Admin", "password", "admin@yourdomain.com", "no question", "no answer", true, out status);
+                    var newUser = Membership.CreateUser("Admin", "password", "admin@yourdomain.com", "no question",
+                        "no answer", true, out status);
 
                     switch (status)
                     {
@@ -180,7 +182,7 @@ namespace BugNET.Install
                         case MembershipCreateStatus.InvalidProviderUserKey:
                         case MembershipCreateStatus.DuplicateProviderUserKey:
                         case MembershipCreateStatus.ProviderError:
-                            var message = string.Format("Creating Administrator Account Failed, status returned: {0} <br/>", status);
+                            var message = $"Creating Administrator Account Failed, status returned: {status} <br/>";
                             WriteMessage(message, 0, true);
                             break;
                         default:
@@ -207,7 +209,9 @@ namespace BugNET.Install
                     }
                     else
                     {
-                        WriteMessage("Created Administrator Account default profile failed, due to status returned from account creation", 0, true);
+                        WriteMessage(
+                            "Created Administrator Account default profile failed, due to status returned from account creation",
+                            0, true);
                         WriteScriptSuccessError(false);
                     }
 
@@ -225,8 +229,10 @@ namespace BugNET.Install
                 WriteErrorMessage(e.Message);
                 return false;
             }
+
             return true;
         }
+
         #endregion
 
         #region Upgrade
@@ -239,9 +245,9 @@ namespace BugNET.Install
             _startTime = DateTime.Now;
             WriteHeader("upgrade");
             WriteMessage("<h2>Upgrade Status Report</h2>");
-            WriteMessage(string.Format("<h2>Current Assembly Version: {0}</h2>", UpgradeManager.GetCurrentVersion()));
-            WriteMessage(string.Format("<h2>Current Database Version: {0}</h2>", UpgradeManager.GetInstalledVersion()));
-            WriteMessage(string.Format("Upgrading To Version: {0}<br/>", UpgradeManager.GetCurrentVersion()), 0, true);
+            WriteMessage($"<h2>Current Assembly Version: {UpgradeManager.GetCurrentVersion()}</h2>");
+            WriteMessage($"<h2>Current Database Version: {UpgradeManager.GetInstalledVersion()}</h2>");
+            WriteMessage($"Upgrading To Version: {UpgradeManager.GetCurrentVersion()}<br/>", 0, true);
             if (UpgradeBugNET())
             {
                 WriteMessage("<h2>Upgrade Complete</h2>");
@@ -254,12 +260,9 @@ namespace BugNET.Install
                 // about the upgrade that was done.
                 var installPath = Server.MapPath("~/Install");
 
-                var versionFile = Path.Combine(installPath, string.Format("{0}.htm", currentVersion));
+                var versionFile = Path.Combine(installPath, $"{currentVersion}.htm");
 
-                if (File.Exists(versionFile))
-                {
-                    WriteMessage(File.ReadAllText(versionFile));
-                }
+                if (File.Exists(versionFile)) WriteMessage(File.ReadAllText(versionFile));
             }
             else
             {
@@ -299,8 +302,12 @@ namespace BugNET.Install
                         }
                         else
                         {
-                            WriteMessage("There was an issue creating the custom fields views for your project, please view the application log for more details<br/>", 0, true);
-                            WriteMessage("You can manually re-generate the custom field views by going to the <a href='../Administration/Projects/ProjectList.aspx'>Project List</a> page and using the generate feature along the top menu<br/>", 0, true);
+                            WriteMessage(
+                                "There was an issue creating the custom fields views for your project, please view the application log for more details<br/>",
+                                0, true);
+                            WriteMessage(
+                                "You can manually re-generate the custom field views by going to the <a href='../Administration/Projects/ProjectList.aspx'>Project List</a> page and using the generate feature along the top menu<br/>",
+                                0, true);
                         }
                     }
 
@@ -326,18 +333,15 @@ namespace BugNET.Install
 
                         //check if script file is relevant for upgrade
                         if (scriptVersion > databaseVersion && scriptVersion <= assemblyVersion)
-                        {
                             arrScriptFiles.Add(file);
-                        }
                     }
 
                     arrScriptFiles.Sort();
 
-                    foreach (var scriptFile in arrScriptFiles.Cast<string>().Where(strScriptFile => databaseVersion != assemblyVersion))
-                    {
+                    foreach (var scriptFile in arrScriptFiles.Cast<string>()
+                                 .Where(strScriptFile => databaseVersion != assemblyVersion))
                         //execute script file (and version upgrades) for version
                         ExecuteSqlInFile(scriptFile);
-                    }
 
                     //check if the admin user is in the super users role.
                     var found = false;
@@ -348,10 +352,7 @@ namespace BugNET.Install
                         if (role != null) found = true;
                     }
 
-                    if (!found)
-                    {
-                        RoleManager.AddUser("Admin", 1);
-                    }
+                    if (!found) RoleManager.AddUser("Admin", 1);
 
                     UpgradeManager.UpdateDatabaseVersion(UpgradeManager.GetCurrentVersion());
 
@@ -380,26 +381,22 @@ namespace BugNET.Install
         /// <returns></returns>
         private void ExecuteSqlInFile(string pathToScriptFile)
         {
-            WriteMessage(string.Format("Executing Script: {0}", pathToScriptFile.Substring(pathToScriptFile.LastIndexOf("\\") + 1)), 2, true);
+            WriteMessage($"Executing Script: {pathToScriptFile.Substring(pathToScriptFile.LastIndexOf("\\") + 1)}", 2,
+                true);
 
             try
             {
                 var statements = new List<string>();
 
                 if (false == File.Exists(pathToScriptFile))
-                {
-                    throw new Exception(string.Format("File {0} does not exist!", pathToScriptFile));
-                }
+                    throw new Exception($"File {pathToScriptFile} does not exist!");
 
                 using (Stream stream = File.OpenRead(pathToScriptFile))
                 {
                     using (var reader = new StreamReader(stream))
                     {
                         string statement;
-                        while ((statement = ReadNextStatementFromStream(reader)) != null)
-                        {
-                            statements.Add(statement);
-                        }
+                        while ((statement = ReadNextStatementFromStream(reader)) != null) statements.Add(statement);
                     }
                 }
 
@@ -426,17 +423,16 @@ namespace BugNET.Install
             while (true)
             {
                 var lineOfText = reader.ReadLine();
-                if (lineOfText == null)
-                {
-                    return sb.Length > 0 ? sb.ToString() : null;
-                }
+                if (lineOfText == null) return sb.Length > 0 ? sb.ToString() : null;
                 if (lineOfText.TrimEnd().ToUpper() == "GO")
                     break;
 
                 sb.Append(lineOfText + Environment.NewLine);
             }
+
             return sb.ToString();
         }
+
         #endregion
 
         #region Html Utility Functions
@@ -465,6 +461,7 @@ namespace BugNET.Install
                 oStreamReader.Close();
                 Response.Write(sHtml);
             }
+
             switch (mode)
             {
                 case "install":
@@ -483,6 +480,7 @@ namespace BugNET.Install
                     Response.Write("<h1>Windows Authentication Detected</h1>");
                     break;
             }
+
             Response.Flush();
         }
 
@@ -492,7 +490,7 @@ namespace BugNET.Install
         /// <param name="message">The message.</param>
         private void WriteErrorMessage(string message)
         {
-            HttpContext.Current.Response.Write(string.Format("<br/><br/><font color='red'>Error: {0}</font>", message));
+            HttpContext.Current.Response.Write($"<br/><br/><font color='red'>Error: {message}</font>");
             HttpContext.Current.Response.Flush();
         }
 
@@ -535,14 +533,15 @@ namespace BugNET.Install
         private void WriteScriptErrorMessage(string file, string message)
         {
             HttpContext.Current.Response.Write("<h2>Error Details</h2>");
-            HttpContext.Current.Response.Write("<table style='color:red;font-size:11px' cellspacing='0' cellpadding='0' border='0'>");
+            HttpContext.Current.Response.Write(
+                "<table style='color:red;font-size:11px' cellspacing='0' cellpadding='0' border='0'>");
             HttpContext.Current.Response.Write("<tr><td>File</td><td>" + file + "</td></tr>");
-            HttpContext.Current.Response.Write(string.Format("<tr><td>Error&nbsp;&nbsp;</td><td>{0}</td></tr>", message));
+            HttpContext.Current.Response.Write($"<tr><td>Error&nbsp;&nbsp;</td><td>{message}</td></tr>");
             HttpContext.Current.Response.Write("</table>");
             HttpContext.Current.Response.Write("<br><br>");
             HttpContext.Current.Response.Flush();
-
         }
+
         #endregion
     }
 }

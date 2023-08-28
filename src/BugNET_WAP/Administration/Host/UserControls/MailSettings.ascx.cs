@@ -4,12 +4,12 @@ using System.Net;
 using System.Net.Mail;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Administration.Host.UserControls
 {
-    public partial class MailSettings : System.Web.UI.UserControl, IEditHostSettingControl
+    public partial class MailSettings : BugNetUserControl, IEditHostSettingControl
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(MailSettings));
 
@@ -30,19 +30,18 @@ namespace BugNET.Administration.Host.UserControls
         /// <returns></returns>
         public bool Update()
         {
-              
-                HostSettingManager.UpdateHostSetting(HostSettingNames.HostEmailAddress, HostEmail.Text);
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPServer, SMTPServer.Text);
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPAuthentication, SMTPEnableAuthentication.Checked.ToString());
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPUsername, SMTPUsername.Text);
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPPassword, SMTPPassword.Text);
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPDomain, SMTPDomain.Text);
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPPort, SMTPPort.Text);
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPUseSSL, SMTPUseSSL.Checked.ToString());
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPEMailFormat, SMTPEmailFormat.SelectedValue);
-                HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPEmailTemplateRoot, SMTPEmailTemplateRoot.Text);
-                return true;
-
+            HostSettingManager.UpdateHostSetting(HostSettingNames.HostEmailAddress, HostEmail.Text);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPServer, SMTPServer.Text);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPAuthentication,
+                SMTPEnableAuthentication.Checked.ToString());
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPUsername, SMTPUsername.Text);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPPassword, SMTPPassword.Text);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPDomain, SMTPDomain.Text);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPPort, SMTPPort.Text);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPUseSSL, SMTPUseSSL.Checked.ToString());
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPEMailFormat, SMTPEmailFormat.SelectedValue);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.SMTPEmailTemplateRoot, SMTPEmailTemplateRoot.Text);
+            return true;
         }
 
         /// <summary>
@@ -52,21 +51,19 @@ namespace BugNET.Administration.Host.UserControls
         {
             HostEmail.Text = HostSettingManager.Get(HostSettingNames.HostEmailAddress);
             SMTPServer.Text = HostSettingManager.Get(HostSettingNames.SMTPServer);
-            SMTPEnableAuthentication.Checked = Boolean.Parse(HostSettingManager.Get(HostSettingNames.SMTPAuthentication));
+            SMTPEnableAuthentication.Checked = bool.Parse(HostSettingManager.Get(HostSettingNames.SMTPAuthentication));
             SMTPUsername.Text = HostSettingManager.Get(HostSettingNames.SMTPUsername);
             SMTPPort.Text = HostSettingManager.Get(HostSettingNames.SMTPPort);
-            SMTPUseSSL.Checked = Boolean.Parse(HostSettingManager.Get(HostSettingNames.SMTPUseSSL));
+            SMTPUseSSL.Checked = bool.Parse(HostSettingManager.Get(HostSettingNames.SMTPUseSSL));
             SMTPPassword.Attributes.Add("value", HostSettingManager.Get(HostSettingNames.SMTPPassword));
             ShowSMTPAuthenticationFields();
-            SMTPEmailFormat.SelectedValue = HostSettingManager.Get(HostSettingNames.SMTPEMailFormat, (int)EmailFormatType.Text).ToString();
+            SMTPEmailFormat.SelectedValue = HostSettingManager
+                .Get(HostSettingNames.SMTPEMailFormat, (int) EmailFormatType.Text).ToString();
             SMTPEmailTemplateRoot.Text = HostSettingManager.Get(HostSettingNames.SMTPEmailTemplateRoot, "~/templates");
             SMTPDomain.Text = HostSettingManager.Get(HostSettingNames.SMTPDomain, string.Empty);
         }
 
-        public bool ShowSaveButton
-        {
-            get { return true; }
-        }
+        public bool ShowSaveButton => true;
 
         #endregion
 
@@ -82,7 +79,7 @@ namespace BugNET.Administration.Host.UserControls
                 if (!string.IsNullOrEmpty(HostEmail.Text))
                 {
                     var smtp = new SmtpClient(SMTPServer.Text, int.Parse(SMTPPort.Text))
-                                   {EnableSsl = SMTPUseSSL.Checked};
+                        {EnableSsl = SMTPUseSSL.Checked};
 
                     if (SMTPEnableAuthentication.Checked)
                     {
@@ -91,31 +88,29 @@ namespace BugNET.Administration.Host.UserControls
                     }
 
                     var message = new MailMessage(HostEmail.Text, HostEmail.Text,
-                                                  string.Format(
-                                                      GetLocalResourceObject("EmailConfigurationTestSubject").ToString(),
-                                                      HostSettingManager.Get(
-                                                          HostSettingNames.ApplicationTitle)), string.Empty)
-                                      {IsBodyHtml = false};
+                            string.Format(
+                                GetLocalString("EmailConfigurationTestSubject"),
+                                HostSettingManager.Get(
+                                    HostSettingNames.ApplicationTitle)), string.Empty)
+                        {IsBodyHtml = false};
 
                     smtp.Send(message);
 
-                    lblEmail.Text = GetLocalResourceObject("EmailConfigurationTestSuccess").ToString();
+                    lblEmail.Text = GetLocalString("EmailConfigurationTestSuccess");
                     lblEmail.ForeColor = Color.Green;
                 }
                 else
                 {
-                    lblEmail.Text = GetLocalResourceObject("MissingHostEmail").ToString();
+                    lblEmail.Text = GetLocalString("MissingHostEmail");
                     lblEmail.ForeColor = Color.Red;
                 }
-
             }
             catch (Exception ex)
             {
-                lblEmail.Text = string.Format(GetLocalResourceObject("SeeErrorLog").ToString(), ex.Message);
+                lblEmail.Text = string.Format(GetLocalString("SeeErrorLog"), ex.Message);
                 lblEmail.ForeColor = Color.Red;
-                Log.Error(GetLocalResourceObject("ConfigurationTestError").ToString(), ex);
+                Log.Error(GetLocalString("ConfigurationTestError"), ex);
             }
-
         }
 
         /// <summary>
@@ -146,6 +141,5 @@ namespace BugNET.Administration.Host.UserControls
                 trSMTPDomain.Visible = true;
             }
         }
-
     }
 }

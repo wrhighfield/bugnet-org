@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class ProjectMailboxManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Static Methods
 
@@ -21,8 +22,10 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(ProjectMailbox entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save milestone, the project id is invalid");
-            if (string.IsNullOrEmpty(entity.Mailbox)) throw new ArgumentException("The mailbox cannot be empty or null");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save milestone, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Mailbox))
+                throw new ArgumentException("The mailbox cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateProjectMailbox(entity);
@@ -82,7 +85,6 @@ namespace BugNET.BLL
 
             return DataProviderManager.Provider.DeleteProjectMailbox(projectMailboxId);
         }
-
 
         #endregion
     }

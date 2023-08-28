@@ -7,11 +7,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BugNET.Administration.Users {
-    
-    
-    public partial class UserList {
-        
+namespace BugNET.Administration.Users
+{
+
+
+    public partial class UserList
+    {
+
         /// <summary>
         /// Title1 control.
         /// </summary>
@@ -20,7 +22,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal Title1;
-        
+
         /// <summary>
         /// pnlSearch control.
         /// </summary>
@@ -29,7 +31,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlSearch;
-        
+
         /// <summary>
         /// Label1 control.
         /// </summary>
@@ -38,7 +40,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label Label1;
-        
+
         /// <summary>
         /// txtSearch control.
         /// </summary>
@@ -47,7 +49,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtSearch;
-        
+
         /// <summary>
         /// SearchField control.
         /// </summary>
@@ -56,7 +58,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList SearchField;
-        
+
         /// <summary>
         /// ibSearch control.
         /// </summary>
@@ -65,7 +67,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.ImageButton ibSearch;
-        
+
         /// <summary>
         /// plLetterSearch control.
         /// </summary>
@@ -74,7 +76,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel plLetterSearch;
-        
+
         /// <summary>
         /// LetterSearch control.
         /// </summary>
@@ -83,7 +85,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater LetterSearch;
-        
+
         /// <summary>
         /// CreateNewUserAction control.
         /// </summary>
@@ -92,7 +94,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl CreateNewUserAction;
-        
+
         /// <summary>
         /// AddUser control.
         /// </summary>
@@ -101,7 +103,7 @@ namespace BugNET.Administration.Users {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.LinkButton AddUser;
-        
+
         /// <summary>
         /// gvUsers control.
         /// </summary>
@@ -109,8 +111,44 @@ namespace BugNET.Administration.Users {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::BugNET.UserInterfaceLayer.WebControls.GridView gvUsers;
-        
+        protected global::BugNET.UI.WebControls.GridView gvUsers;
+
+        /// <summary>
+        /// Edit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ImageButton Edit;
+
+        /// <summary>
+        /// Delete control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ImageButton Delete;
+
+        /// <summary>
+        /// ManageRoles control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ImageButton ManageRoles;
+
+        /// <summary>
+        /// NoResultsLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label NoResultsLabel;
+
         /// <summary>
         /// pager control.
         /// </summary>

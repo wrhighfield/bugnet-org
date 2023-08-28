@@ -10,7 +10,8 @@ namespace BugNET.BLL
 {
     public sealed class HostSettingManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Updates the host setting.
@@ -52,7 +53,7 @@ namespace BugNET.BLL
             var converter = TypeDescriptor.GetConverter(typeof(T));
 
             // this will throw an exception when conversion is not possible
-            val = (T)converter.ConvertFromString(setting);
+            val = (T) converter.ConvertFromString(setting);
 
             return val;
         }
@@ -64,7 +65,9 @@ namespace BugNET.BLL
         /// <param name="defaultValue">The default value if the setting is missing or is an invalid type</param>
         /// <returns></returns>
         public static bool Get(HostSettingNames key, bool defaultValue)
-            => Get(GetHostSettings(), key, defaultValue);
+        {
+            return Get(GetHostSettings(), key, defaultValue);
+        }
 
         public static bool Get(Hashtable settingsTable, HostSettingNames key, bool defaultValue)
         {
@@ -103,10 +106,7 @@ namespace BugNET.BLL
 
             var al = DataProviderManager.Provider.GetHostSettings();
 
-            foreach (var hs in al)
-            {
-                hostSettings.Add(hs.SettingName, hs.SettingValue);
-            }
+            foreach (var hs in al) hostSettings.Add(hs.SettingName, hs.SettingValue);
 
             return hostSettings;
         }

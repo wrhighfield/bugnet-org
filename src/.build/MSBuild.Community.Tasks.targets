@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- $Id$ -->
 
@@ -27,7 +28,8 @@
 
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Ftp.FtpCreateRemoteDirectory" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Ftp.FtpDirectoryExists" />
-  <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Ftp.FtpUploadDirectoryContent" />
+  <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)"
+             TaskName="MSBuild.Community.Tasks.Ftp.FtpUploadDirectoryContent" />
 
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Math.Add" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Math.Divide" />
@@ -81,7 +83,7 @@
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.SourceServer.PdbStr" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.SourceServer.SvnSourceIndex" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.SourceServer.TfsSourceIndex" />
-  
+
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.SqlServer.ExecuteDDL" />
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.SqlServer.SqlPubWiz" />
 
@@ -143,13 +145,13 @@
   <UsingTask AssemblyFile="$(MSBuildCommunityTasksLib)" TaskName="MSBuild.Community.Tasks.Git.GitPendingChanges" />
 
   <ItemGroup>
-    <FxCopRuleAssemblies Include="UsageRules.dll"/>
-    <FxCopRuleAssemblies Include="SecurityRules.dll"/>
-    <FxCopRuleAssemblies Include="PortabilityRules.dll"/>
-    <FxCopRuleAssemblies Include="PerformanceRules.dll"/>
-    <FxCopRuleAssemblies Include="MobilityRules.dll"/>
-    <FxCopRuleAssemblies Include="InteroperabilityRules.dll"/>
-    <FxCopRuleAssemblies Include="GlobalizationRules.dll"/>
-    <FxCopRuleAssemblies Include="DesignRules.dll"/>
+    <FxCopRuleAssemblies Include="UsageRules.dll" />
+    <FxCopRuleAssemblies Include="SecurityRules.dll" />
+    <FxCopRuleAssemblies Include="PortabilityRules.dll" />
+    <FxCopRuleAssemblies Include="PerformanceRules.dll" />
+    <FxCopRuleAssemblies Include="MobilityRules.dll" />
+    <FxCopRuleAssemblies Include="InteroperabilityRules.dll" />
+    <FxCopRuleAssemblies Include="GlobalizationRules.dll" />
+    <FxCopRuleAssemblies Include="DesignRules.dll" />
   </ItemGroup>
 </Project>

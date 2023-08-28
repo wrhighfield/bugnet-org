@@ -19,6 +19,7 @@ namespace BugNET.Entities
             Title = string.Empty;
             DateCreated = DateTime.Now;
         }
+
         #endregion
 
         /// <Summary>

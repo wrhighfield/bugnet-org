@@ -7,22 +7,20 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_h_Parameter
     {
-        private bool   m_IsModified;
-        private string m_Name       = "";
-        private string m_Value      = "";
+        private bool m_IsModified;
+        private string m_Name = "";
+        private string m_Value = "";
 
         /// <summary>
         /// Default constructor.
         /// </summary>
         /// <param name="name">Parameter name.</param>
         /// <param name="value">Parameter value. Value null means not specified.</param>
-        public MIME_h_Parameter(string name,string value)
+        public MIME_h_Parameter(string name, string value)
         {
-            if(name == null){
-                throw new ArgumentNullException(nameof(name));
-            }
+            if (name == null) throw new ArgumentNullException(nameof(name));
 
-            m_Name  = name;
+            m_Name = name;
             m_Value = value;
         }
 
@@ -48,13 +46,13 @@ namespace LumiSoft.Net.MIME
         {
             get => m_Value;
 
-            set{ 
-                m_Value      = value;
+            set
+            {
+                m_Value = value;
                 m_IsModified = true;
             }
         }
 
         #endregion
-
     }
 }

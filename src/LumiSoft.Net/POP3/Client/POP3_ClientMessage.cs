@@ -12,11 +12,11 @@ namespace LumiSoft.Net.POP3.Client
     public class POP3_ClientMessage
     {
         private POP3_Client m_Pop3Client;
-        private int         m_SequenceNumber      = 1;
-        private string      m_UID                 = "";
-        private int         m_Size;
-        private bool        m_IsMarkedForDeletion;
-        private bool        m_IsDisposed;
+        private int m_SequenceNumber = 1;
+        private string m_UID = "";
+        private int m_Size;
+        private bool m_IsMarkedForDeletion;
+        private bool m_IsDisposed;
 
         /// <summary>
         /// Default constructor.
@@ -24,11 +24,11 @@ namespace LumiSoft.Net.POP3.Client
         /// <param name="pop3">Owner POP3 client.</param>
         /// <param name="seqNumber">Message 1 based sequence number.</param>
         /// <param name="size">Message size in bytes.</param>
-        internal POP3_ClientMessage(POP3_Client pop3,int seqNumber,int size)
+        internal POP3_ClientMessage(POP3_Client pop3, int seqNumber, int size)
         {
-            m_Pop3Client     = pop3;
+            m_Pop3Client = pop3;
             m_SequenceNumber = seqNumber;
-            m_Size           = size;
+            m_Size = size;
         }
 
 
@@ -41,27 +41,19 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="POP3_ClientException">Is raised when POP3 serveer returns error.</exception>
         public void MarkForDeletion()
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
-            if(IsMarkedForDeletion){
-                return;
-            }
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsMarkedForDeletion) return;
 
-            using(var op = new MarkForDeletionAsyncOP()){
-                using(var wait = new ManualResetEvent(false)){
-                    op.CompletedAsync += delegate(object s1,EventArgs<MarkForDeletionAsyncOP> e1){
-                        wait.Set();
-                    };
-                    if(!MarkForDeletionAsync(op)){
-                        wait.Set();
-                    }
+            using (var op = new MarkForDeletionAsyncOP())
+            {
+                using (var wait = new ManualResetEvent(false))
+                {
+                    op.CompletedAsync += delegate(object s1, EventArgs<MarkForDeletionAsyncOP> e1) { wait.Set(); };
+                    if (!MarkForDeletionAsync(op)) wait.Set();
                     wait.WaitOne();
                     wait.Close();
 
-                    if(op.Error != null){
-                        throw op.Error;
-                    }
+                    if (op.Error != null) throw op.Error;
                 }
             }
         }
@@ -75,14 +67,14 @@ namespace LumiSoft.Net.POP3.Client
         /// <summary>
         /// This class represents <see cref="POP3_ClientMessage.MarkForDeletionAsync"/> asynchronous operation.
         /// </summary>
-        public class MarkForDeletionAsyncOP : IDisposable,IAsyncOp
+        public class MarkForDeletionAsyncOP : IDisposable, IAsyncOp
         {
-            private object             m_pLock         = new object();
-            private AsyncOpState      m_State         = AsyncOpState.WaitingForStart;
-            private Exception          m_pException;
+            private object m_pLock = new object();
+            private AsyncOpState m_State = AsyncOpState.WaitingForStart;
+            private Exception m_pException;
             private POP3_ClientMessage m_pOwner;
-            private POP3_Client        m_pPop3Client;
-            private bool               m_RiseCompleted;
+            private POP3_Client m_pPop3Client;
+            private bool m_RiseCompleted;
 
             /// <summary>
             /// Default constructor.
@@ -98,13 +90,11 @@ namespace LumiSoft.Net.POP3.Client
             /// </summary>
             public void Dispose()
             {
-                if(m_State == AsyncOpState.Disposed){
-                    return;
-                }
+                if (m_State == AsyncOpState.Disposed) return;
                 SetState(AsyncOpState.Disposed);
-                
-                m_pException  = null;
-                m_pOwner      = null;
+
+                m_pException = null;
+                m_pOwner = null;
                 m_pPop3Client = null;
 
                 CompletedAsync = null;
@@ -123,16 +113,15 @@ namespace LumiSoft.Net.POP3.Client
             /// <exception cref="ArgumentNullException">Is raised when <b>owner</b> is null reference.</exception>
             internal bool Start(POP3_ClientMessage owner)
             {
-                if(owner == null){
-                    throw new ArgumentNullException(nameof(owner));
-                }
+                if (owner == null) throw new ArgumentNullException(nameof(owner));
 
-                m_pOwner      = owner;
+                m_pOwner = owner;
                 m_pPop3Client = owner.m_Pop3Client;
 
                 SetState(AsyncOpState.Active);
 
-                try{
+                try
+                {
                     /* RFC 1939 5. DELE
                          Arguments:
                              a message-number (required) which may NOT refer to a
@@ -158,25 +147,27 @@ namespace LumiSoft.Net.POP3.Client
                                 ...
                              C: DELE 2
                              S: -ERR message 2 already deleted
-			        */
+                    */
 
                     var buffer = Encoding.UTF8.GetBytes("DELE " + owner.SequenceNumber.ToString() + "\r\n");
 
                     // Log
-                    m_pPop3Client.LogAddWrite(buffer.Length,"DELE " + owner.SequenceNumber.ToString());
+                    m_pPop3Client.LogAddWrite(buffer.Length, "DELE " + owner.SequenceNumber.ToString());
 
                     // Start command sending.
-                    m_pPop3Client.TcpStream.BeginWrite(buffer,0,buffer.Length,DeleCommandSendingCompleted,null);
+                    m_pPop3Client.TcpStream.BeginWrite(buffer, 0, buffer.Length, DeleCommandSendingCompleted, null);
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
 
                 // Set flag rise CompletedAsync event flag. The event is raised when async op completes.
                 // If already completed sync, that flag has no effect.
-                lock(m_pLock){
+                lock (m_pLock)
+                {
                     m_RiseCompleted = true;
 
                     return m_State == AsyncOpState.Active;
@@ -194,16 +185,13 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="state">New state.</param>
             private void SetState(AsyncOpState state)
             {
-                if(m_State == AsyncOpState.Disposed){
-                    return;
-                }
+                if (m_State == AsyncOpState.Disposed) return;
 
-                lock(m_pLock){
+                lock (m_pLock)
+                {
                     m_State = state;
 
-                    if(m_State == AsyncOpState.Completed && m_RiseCompleted){
-                        OnCompletedAsync();
-                    }
+                    if (m_State == AsyncOpState.Completed && m_RiseCompleted) OnCompletedAsync();
                 }
             }
 
@@ -217,21 +205,22 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="ar">Asynchronous result.</param>
             private void DeleCommandSendingCompleted(IAsyncResult ar)
             {
-                try{
+                try
+                {
                     m_pPop3Client.TcpStream.EndWrite(ar);
-                    
+
                     // Read POP3 server response.
-                    var op = new SmartStream.ReadLineAsyncOP(new byte[8000],SizeExceededAction.JunkAndThrowException);
-                    op.Completed += delegate(object s,EventArgs<SmartStream.ReadLineAsyncOP> e){
+                    var op = new SmartStream.ReadLineAsyncOP(new byte[8000], SizeExceededAction.JunkAndThrowException);
+                    op.Completed += delegate(object s, EventArgs<SmartStream.ReadLineAsyncOP> e)
+                    {
                         DeleReadResponseCompleted(op);
                     };
-                    if(m_pPop3Client.TcpStream.ReadLine(op,true)){
-                        DeleReadResponseCompleted(op);
-                    }
+                    if (m_pPop3Client.TcpStream.ReadLine(op, true)) DeleReadResponseCompleted(op);
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
             }
@@ -239,40 +228,47 @@ namespace LumiSoft.Net.POP3.Client
             #endregion
 
             #region method DeleReadResponseCompleted
-            
+
             /// <summary>
             /// Is called when POP3 server DELE response reading has completed.
             /// </summary>
             /// <param name="op">Asynchronous operation.</param>
             private void DeleReadResponseCompleted(SmartStream.ReadLineAsyncOP op)
             {
-                try{
+                try
+                {
                     // Operation failed.
-                    if(op.Error != null){
+                    if (op.Error != null)
+                    {
                         m_pException = op.Error;
-                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message,op.Error);
+                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message, op.Error);
                         SetState(AsyncOpState.Completed);
                     }
                     // Operation succeeded.
-                    else{
+                    else
+                    {
                         // Log
-                        m_pPop3Client.LogAddRead(op.BytesInBuffer,op.LineUtf8);
-                                            
+                        m_pPop3Client.LogAddRead(op.BytesInBuffer, op.LineUtf8);
+
                         // Server returned success response.
-                        if(string.Equals(op.LineUtf8.Split(new[]{' '},2)[0],"+OK",StringComparison.InvariantCultureIgnoreCase)){
+                        if (string.Equals(op.LineUtf8.Split(new[] {' '}, 2)[0], "+OK",
+                                StringComparison.InvariantCultureIgnoreCase))
+                        {
                             m_pOwner.m_IsMarkedForDeletion = true;
                             SetState(AsyncOpState.Completed);
                         }
                         // Server returned error response.
-                        else{
+                        else
+                        {
                             m_pException = new POP3_ClientException(op.LineUtf8);
                             SetState(AsyncOpState.Completed);
                         }
                     }
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
 
@@ -296,15 +292,14 @@ namespace LumiSoft.Net.POP3.Client
             /// <exception cref="InvalidOperationException">Is raised when this property is accessed other than <b>AsyncOP_State.Completed</b> state.</exception>
             public Exception Error
             {
-                get{ 
-                    if(m_State == AsyncOpState.Disposed){
-                        throw new ObjectDisposedException(GetType().Name);
-                    }
-                    if(m_State != AsyncOpState.Completed){
-                        throw new InvalidOperationException("Property 'Error' is accessible only in 'AsyncOP_State.Completed' state.");
-                    }
+                get
+                {
+                    if (m_State == AsyncOpState.Disposed) throw new ObjectDisposedException(GetType().Name);
+                    if (m_State != AsyncOpState.Completed)
+                        throw new InvalidOperationException(
+                            "Property 'Error' is accessible only in 'AsyncOP_State.Completed' state.");
 
-                    return m_pException; 
+                    return m_pException;
                 }
             }
 
@@ -324,9 +319,7 @@ namespace LumiSoft.Net.POP3.Client
             /// </summary>
             private void OnCompletedAsync()
             {
-                if(CompletedAsync != null){
-                    CompletedAsync(this,new EventArgs<MarkForDeletionAsyncOP>(this));
-                }
+                if (CompletedAsync != null) CompletedAsync(this, new EventArgs<MarkForDeletionAsyncOP>(this));
             }
 
             #endregion
@@ -347,18 +340,12 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="ArgumentNullException">Is raised when <b>op</b> is null reference.</exception>
         public bool MarkForDeletionAsync(MarkForDeletionAsyncOP op)
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }          
-            if(IsMarkedForDeletion){
-                throw new InvalidOperationException("Message is already marked for deletion.");
-            }
-            if(op == null){
-                throw new ArgumentNullException(nameof(op));
-            }
-            if(op.State != AsyncOpState.WaitingForStart){
-                throw new ArgumentException("Invalid argument 'op' state, 'op' must be in 'AsyncOP_State.WaitingForStart' state.",nameof(op));
-            }
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsMarkedForDeletion) throw new InvalidOperationException("Message is already marked for deletion.");
+            if (op == null) throw new ArgumentNullException(nameof(op));
+            if (op.State != AsyncOpState.WaitingForStart)
+                throw new ArgumentException(
+                    "Invalid argument 'op' state, 'op' must be in 'AsyncOP_State.WaitingForStart' state.", nameof(op));
 
             return op.Start(this);
         }
@@ -376,12 +363,9 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="POP3_ClientException">Is raised when POP3 serveer returns error.</exception>
         public string HeaderToString()
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
-            if(IsMarkedForDeletion){
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsMarkedForDeletion)
                 throw new InvalidOperationException("Can't access message, it's marked for deletion.");
-            }
 
             return Encoding.Default.GetString(HeaderToByte());
         }
@@ -399,15 +383,12 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="POP3_ClientException">Is raised when POP3 serveer returns error.</exception>
         public byte[] HeaderToByte()
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
-            if(IsMarkedForDeletion){
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsMarkedForDeletion)
                 throw new InvalidOperationException("Can't access message, it's marked for deletion.");
-            }
 
             var retVal = new MemoryStream();
-            MessageTopLinesToStream(retVal,0);
+            MessageTopLinesToStream(retVal, 0);
 
             return retVal.ToArray();
         }
@@ -425,17 +406,12 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="POP3_ClientException">Is raised when POP3 serveer returns error.</exception>
         public void HeaderToStream(Stream stream)
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
-            if(stream == null){
-                throw new ArgumentNullException("Argument 'stream' value can't be null.");
-            }
-            if(IsMarkedForDeletion){
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (stream == null) throw new ArgumentNullException("Argument 'stream' value can't be null.");
+            if (IsMarkedForDeletion)
                 throw new InvalidOperationException("Can't access message, it's marked for deletion.");
-            }
 
-            MessageTopLinesToStream(stream,0);
+            MessageTopLinesToStream(stream, 0);
         }
 
         #endregion
@@ -451,12 +427,9 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="POP3_ClientException">Is raised when POP3 server returns error.</exception>
         public byte[] MessageToByte()
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
-            if(IsMarkedForDeletion){
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsMarkedForDeletion)
                 throw new InvalidOperationException("Can't access message, it's marked for deletion.");
-            }
 
             var retVal = new MemoryStream();
             MessageToStream(retVal);
@@ -478,30 +451,21 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="POP3_ClientException">Is raised when POP3 serveer returns error.</exception>
         public void MessageToStream(Stream stream)
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
-            if(stream == null){
-                throw new ArgumentNullException("Argument 'stream' value can't be null.");
-            }
-            if(IsMarkedForDeletion){
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (stream == null) throw new ArgumentNullException("Argument 'stream' value can't be null.");
+            if (IsMarkedForDeletion)
                 throw new InvalidOperationException("Can't access message, it's marked for deletion.");
-            }
 
-            using(var op = new MessageToStreamAsyncOP(stream)){
-                using(var wait = new ManualResetEvent(false)){
-                    op.CompletedAsync += delegate(object s1,EventArgs<MessageToStreamAsyncOP> e1){
-                        wait.Set();
-                    };
-                    if(!MessageToStreamAsync(op)){
-                        wait.Set();
-                    }
+            using (var op = new MessageToStreamAsyncOP(stream))
+            {
+                using (var wait = new ManualResetEvent(false))
+                {
+                    op.CompletedAsync += delegate(object s1, EventArgs<MessageToStreamAsyncOP> e1) { wait.Set(); };
+                    if (!MessageToStreamAsync(op)) wait.Set();
                     wait.WaitOne();
                     wait.Close();
 
-                    if(op.Error != null){
-                        throw op.Error;
-                    }
+                    if (op.Error != null) throw op.Error;
                 }
             }
         }
@@ -515,15 +479,15 @@ namespace LumiSoft.Net.POP3.Client
         /// <summary>
         /// This class represents <see cref="POP3_ClientMessage.MessageToStreamAsync"/> asynchronous operation.
         /// </summary>
-        public class MessageToStreamAsyncOP : IDisposable,IAsyncOp
+        public class MessageToStreamAsyncOP : IDisposable, IAsyncOp
         {
-            private object             m_pLock         = new object();
-            private AsyncOpState      m_State         = AsyncOpState.WaitingForStart;
-            private Exception          m_pException;
+            private object m_pLock = new object();
+            private AsyncOpState m_State = AsyncOpState.WaitingForStart;
+            private Exception m_pException;
             private POP3_ClientMessage m_pOwner;
-            private POP3_Client        m_pPop3Client;
-            private bool               m_RiseCompleted;
-            private Stream             m_pStream;
+            private POP3_Client m_pPop3Client;
+            private bool m_RiseCompleted;
+            private Stream m_pStream;
 
             /// <summary>
             /// Default constructor.
@@ -532,9 +496,7 @@ namespace LumiSoft.Net.POP3.Client
             /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
             public MessageToStreamAsyncOP(Stream stream)
             {
-                if(stream == null){
-                    throw new ArgumentNullException(nameof(stream));
-                }
+                if (stream == null) throw new ArgumentNullException(nameof(stream));
 
                 m_pStream = stream;
             }
@@ -546,15 +508,13 @@ namespace LumiSoft.Net.POP3.Client
             /// </summary>
             public void Dispose()
             {
-                if(m_State == AsyncOpState.Disposed){
-                    return;
-                }
+                if (m_State == AsyncOpState.Disposed) return;
                 SetState(AsyncOpState.Disposed);
-                
-                m_pException  = null;
-                m_pOwner      = null;
+
+                m_pException = null;
+                m_pOwner = null;
                 m_pPop3Client = null;
-                m_pStream     = null;
+                m_pStream = null;
 
                 CompletedAsync = null;
             }
@@ -572,16 +532,15 @@ namespace LumiSoft.Net.POP3.Client
             /// <exception cref="ArgumentNullException">Is raised when <b>owner</b> is null reference.</exception>
             internal bool Start(POP3_ClientMessage owner)
             {
-                if(owner == null){
-                    throw new ArgumentNullException(nameof(owner));
-                }
+                if (owner == null) throw new ArgumentNullException(nameof(owner));
 
-                m_pOwner      = owner;
+                m_pOwner = owner;
                 m_pPop3Client = owner.m_Pop3Client;
 
                 SetState(AsyncOpState.Active);
 
-                try{
+                try
+                {
                     /* RFC 1939 5. RETR
                          Arguments:
                              a message-number (required) which may NOT refer to a
@@ -606,25 +565,27 @@ namespace LumiSoft.Net.POP3.Client
                              S: +OK 120 octets
                              S: <the POP3 server sends the entire message here>
                              S: .
-			        */
+                    */
 
                     var buffer = Encoding.UTF8.GetBytes("RETR " + owner.SequenceNumber.ToString() + "\r\n");
 
                     // Log
-                    m_pPop3Client.LogAddWrite(buffer.Length,"RETR " + owner.SequenceNumber.ToString());
+                    m_pPop3Client.LogAddWrite(buffer.Length, "RETR " + owner.SequenceNumber.ToString());
 
                     // Start command sending.
-                    m_pPop3Client.TcpStream.BeginWrite(buffer,0,buffer.Length,RetrCommandSendingCompleted,null);
+                    m_pPop3Client.TcpStream.BeginWrite(buffer, 0, buffer.Length, RetrCommandSendingCompleted, null);
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
 
                 // Set flag rise CompletedAsync event flag. The event is raised when async op completes.
                 // If already completed sync, that flag has no effect.
-                lock(m_pLock){
+                lock (m_pLock)
+                {
                     m_RiseCompleted = true;
 
                     return m_State == AsyncOpState.Active;
@@ -642,16 +603,13 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="state">New state.</param>
             private void SetState(AsyncOpState state)
             {
-                if(m_State == AsyncOpState.Disposed){
-                    return;
-                }
+                if (m_State == AsyncOpState.Disposed) return;
 
-                lock(m_pLock){
+                lock (m_pLock)
+                {
                     m_State = state;
 
-                    if(m_State == AsyncOpState.Completed && m_RiseCompleted){
-                        OnCompletedAsync();
-                    }
+                    if (m_State == AsyncOpState.Completed && m_RiseCompleted) OnCompletedAsync();
                 }
             }
 
@@ -665,21 +623,22 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="ar">Asynchronous result.</param>
             private void RetrCommandSendingCompleted(IAsyncResult ar)
             {
-                try{
+                try
+                {
                     m_pPop3Client.TcpStream.EndWrite(ar);
-                    
+
                     // Read POP3 server response.
-                    var op = new SmartStream.ReadLineAsyncOP(new byte[8000],SizeExceededAction.JunkAndThrowException);
-                    op.Completed += delegate(object s,EventArgs<SmartStream.ReadLineAsyncOP> e){
+                    var op = new SmartStream.ReadLineAsyncOP(new byte[8000], SizeExceededAction.JunkAndThrowException);
+                    op.Completed += delegate(object s, EventArgs<SmartStream.ReadLineAsyncOP> e)
+                    {
                         RetrReadResponseCompleted(op);
                     };
-                    if(m_pPop3Client.TcpStream.ReadLine(op,true)){
-                        RetrReadResponseCompleted(op);
-                    }
+                    if (m_pPop3Client.TcpStream.ReadLine(op, true)) RetrReadResponseCompleted(op);
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
             }
@@ -687,45 +646,54 @@ namespace LumiSoft.Net.POP3.Client
             #endregion
 
             #region method RetrReadResponseCompleted
-            
+
             /// <summary>
             /// Is called when POP3 server RETR response reading has completed.
             /// </summary>
             /// <param name="op">Asynchronous operation.</param>
             private void RetrReadResponseCompleted(SmartStream.ReadLineAsyncOP op)
             {
-                try{
+                try
+                {
                     // Operation failed.
-                    if(op.Error != null){
+                    if (op.Error != null)
+                    {
                         m_pException = op.Error;
-                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message,op.Error);
+                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message, op.Error);
                         SetState(AsyncOpState.Completed);
                     }
                     // Operation succeeded.
-                    else{
+                    else
+                    {
                         // Log
-                        m_pPop3Client.LogAddRead(op.BytesInBuffer,op.LineUtf8);
-                                            
+                        m_pPop3Client.LogAddRead(op.BytesInBuffer, op.LineUtf8);
+
                         // Server returned success response.
-                        if(string.Equals(op.LineUtf8.Split(new[]{' '},2)[0],"+OK",StringComparison.InvariantCultureIgnoreCase)){
-                            var readMsgOP = new SmartStream.ReadPeriodTerminatedAsyncOP(m_pStream,long.MaxValue,SizeExceededAction.ThrowException);
-                            readMsgOP.Completed += delegate(object sender,EventArgs<SmartStream.ReadPeriodTerminatedAsyncOP> e){
+                        if (string.Equals(op.LineUtf8.Split(new[] {' '}, 2)[0], "+OK",
+                                StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            var readMsgOP = new SmartStream.ReadPeriodTerminatedAsyncOP(m_pStream, long.MaxValue,
+                                SizeExceededAction.ThrowException);
+                            readMsgOP.Completed +=
+                                delegate(object sender, EventArgs<SmartStream.ReadPeriodTerminatedAsyncOP> e)
+                                {
+                                    MessageReadingCompleted(readMsgOP);
+                                };
+                            if (m_pPop3Client.TcpStream.ReadPeriodTerminated(readMsgOP, true))
                                 MessageReadingCompleted(readMsgOP);
-                            };
-                            if(m_pPop3Client.TcpStream.ReadPeriodTerminated(readMsgOP,true)){
-                                MessageReadingCompleted(readMsgOP);
-                            }
                         }
                         // Server returned error response.
-                        else{
+                        else
+                        {
                             m_pException = new POP3_ClientException(op.LineUtf8);
                             SetState(AsyncOpState.Completed);
                         }
                     }
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
 
@@ -742,24 +710,29 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="op">Asynchronous operation.</param>
             private void MessageReadingCompleted(SmartStream.ReadPeriodTerminatedAsyncOP op)
             {
-                try{
+                try
+                {
                     // Operation failed.
-                    if(op.Error != null){
+                    if (op.Error != null)
+                    {
                         m_pException = op.Error;
-                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message,op.Error);
+                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message, op.Error);
                         SetState(AsyncOpState.Completed);
                     }
                     // Operation succeeded.
-                    else{
+                    else
+                    {
                         // Log
-                        m_pPop3Client.LogAddRead(op.BytesStored,"Readed period-terminated message " + op.BytesStored.ToString() + " bytes.");
+                        m_pPop3Client.LogAddRead(op.BytesStored,
+                            "Readed period-terminated message " + op.BytesStored.ToString() + " bytes.");
 
                         SetState(AsyncOpState.Completed);
                     }
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
             }
@@ -781,15 +754,14 @@ namespace LumiSoft.Net.POP3.Client
             /// <exception cref="InvalidOperationException">Is raised when this property is accessed other than <b>AsyncOP_State.Completed</b> state.</exception>
             public Exception Error
             {
-                get{ 
-                    if(m_State == AsyncOpState.Disposed){
-                        throw new ObjectDisposedException(GetType().Name);
-                    }
-                    if(m_State != AsyncOpState.Completed){
-                        throw new InvalidOperationException("Property 'Error' is accessible only in 'AsyncOP_State.Completed' state.");
-                    }
+                get
+                {
+                    if (m_State == AsyncOpState.Disposed) throw new ObjectDisposedException(GetType().Name);
+                    if (m_State != AsyncOpState.Completed)
+                        throw new InvalidOperationException(
+                            "Property 'Error' is accessible only in 'AsyncOP_State.Completed' state.");
 
-                    return m_pException; 
+                    return m_pException;
                 }
             }
 
@@ -809,9 +781,7 @@ namespace LumiSoft.Net.POP3.Client
             /// </summary>
             private void OnCompletedAsync()
             {
-                if(CompletedAsync != null){
-                    CompletedAsync(this,new EventArgs<MessageToStreamAsyncOP>(this));
-                }
+                if (CompletedAsync != null) CompletedAsync(this, new EventArgs<MessageToStreamAsyncOP>(this));
             }
 
             #endregion
@@ -832,18 +802,12 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="ArgumentNullException">Is raised when <b>op</b> is null reference.</exception>
         public bool MessageToStreamAsync(MessageToStreamAsyncOP op)
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }          
-            if(IsMarkedForDeletion){
-                throw new InvalidOperationException("Message is already marked for deletion.");
-            }
-            if(op == null){
-                throw new ArgumentNullException(nameof(op));
-            }
-            if(op.State != AsyncOpState.WaitingForStart){
-                throw new ArgumentException("Invalid argument 'op' state, 'op' must be in 'AsyncOP_State.WaitingForStart' state.",nameof(op));
-            }
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsMarkedForDeletion) throw new InvalidOperationException("Message is already marked for deletion.");
+            if (op == null) throw new ArgumentNullException(nameof(op));
+            if (op.State != AsyncOpState.WaitingForStart)
+                throw new ArgumentException(
+                    "Invalid argument 'op' state, 'op' must be in 'AsyncOP_State.WaitingForStart' state.", nameof(op));
 
             return op.Start(this);
         }
@@ -863,18 +827,13 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="POP3_ClientException">Is raised when POP3 serveer returns error.</exception>
         public byte[] MessageTopLinesToByte(int lineCount)
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
-            if(lineCount < 0){
-                throw new ArgumentException("Argument 'lineCount' value must be >= 0.");
-            }
-            if(IsMarkedForDeletion){
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (lineCount < 0) throw new ArgumentException("Argument 'lineCount' value must be >= 0.");
+            if (IsMarkedForDeletion)
                 throw new InvalidOperationException("Can't access message, it's marked for deletion.");
-            }
 
             var retVal = new MemoryStream();
-            MessageTopLinesToStream(retVal,lineCount);
+            MessageTopLinesToStream(retVal, lineCount);
 
             return retVal.ToArray();
         }
@@ -892,32 +851,26 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="ArgumentNullException">Is raised when argument <b>stream</b> value is null.</exception>
         /// <exception cref="InvalidOperationException">Is raised when message is marked for deletion and this method is accessed.</exception>
         /// <exception cref="POP3_ClientException">Is raised when POP3 server returns error.</exception>
-        public void MessageTopLinesToStream(Stream stream,int lineCount)
+        public void MessageTopLinesToStream(Stream stream, int lineCount)
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
-            if(stream == null){
-                throw new ArgumentNullException("Argument 'stream' value can't be null.");
-            }
-            if(IsMarkedForDeletion){
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (stream == null) throw new ArgumentNullException("Argument 'stream' value can't be null.");
+            if (IsMarkedForDeletion)
                 throw new InvalidOperationException("Can't access message, it's marked for deletion.");
-            }
 
-            using(var op = new MessageTopLinesToStreamAsyncOP(stream,lineCount)){
-                using(var wait = new ManualResetEvent(false)){
-                    op.CompletedAsync += delegate(object s1,EventArgs<MessageTopLinesToStreamAsyncOP> e1){
+            using (var op = new MessageTopLinesToStreamAsyncOP(stream, lineCount))
+            {
+                using (var wait = new ManualResetEvent(false))
+                {
+                    op.CompletedAsync += delegate(object s1, EventArgs<MessageTopLinesToStreamAsyncOP> e1)
+                    {
                         wait.Set();
                     };
-                    if(!MessageTopLinesToStreamAsync(op)){
-                        wait.Set();
-                    }
+                    if (!MessageTopLinesToStreamAsync(op)) wait.Set();
                     wait.WaitOne();
                     wait.Close();
 
-                    if(op.Error != null){
-                        throw op.Error;
-                    }
+                    if (op.Error != null) throw op.Error;
                 }
             }
         }
@@ -931,16 +884,16 @@ namespace LumiSoft.Net.POP3.Client
         /// <summary>
         /// This class represents <see cref="POP3_ClientMessage.MessageTopLinesToStreamAsync"/> asynchronous operation.
         /// </summary>
-        public class MessageTopLinesToStreamAsyncOP : IDisposable,IAsyncOp
+        public class MessageTopLinesToStreamAsyncOP : IDisposable, IAsyncOp
         {
-            private object             m_pLock         = new object();
-            private AsyncOpState      m_State         = AsyncOpState.WaitingForStart;
-            private Exception          m_pException;
+            private object m_pLock = new object();
+            private AsyncOpState m_State = AsyncOpState.WaitingForStart;
+            private Exception m_pException;
             private POP3_ClientMessage m_pOwner;
-            private POP3_Client        m_pPop3Client;
-            private bool               m_RiseCompleted;
-            private Stream             m_pStream;
-            private int                m_LineCount;
+            private POP3_Client m_pPop3Client;
+            private bool m_RiseCompleted;
+            private Stream m_pStream;
+            private int m_LineCount;
 
             /// <summary>
             /// Default constructor.
@@ -949,16 +902,13 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="lineCount">Number of lines to get from body(after message header) of the message.</param>
             /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
             /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
-            public MessageTopLinesToStreamAsyncOP(Stream stream,int lineCount)
+            public MessageTopLinesToStreamAsyncOP(Stream stream, int lineCount)
             {
-                if(stream == null){
-                    throw new ArgumentNullException(nameof(stream));
-                }
-                if(lineCount < 0){
-                    throw new ArgumentException("Argument 'lineCount' value must be >= 0.",nameof(lineCount));
-                }
+                if (stream == null) throw new ArgumentNullException(nameof(stream));
+                if (lineCount < 0)
+                    throw new ArgumentException("Argument 'lineCount' value must be >= 0.", nameof(lineCount));
 
-                m_pStream   = stream;
+                m_pStream = stream;
                 m_LineCount = lineCount;
             }
 
@@ -969,15 +919,13 @@ namespace LumiSoft.Net.POP3.Client
             /// </summary>
             public void Dispose()
             {
-                if(m_State == AsyncOpState.Disposed){
-                    return;
-                }
+                if (m_State == AsyncOpState.Disposed) return;
                 SetState(AsyncOpState.Disposed);
-                
-                m_pException  = null;
-                m_pOwner      = null;
+
+                m_pException = null;
+                m_pOwner = null;
                 m_pPop3Client = null;
-                m_pStream     = null;
+                m_pStream = null;
 
                 CompletedAsync = null;
             }
@@ -995,16 +943,15 @@ namespace LumiSoft.Net.POP3.Client
             /// <exception cref="ArgumentNullException">Is raised when <b>owner</b> is null reference.</exception>
             internal bool Start(POP3_ClientMessage owner)
             {
-                if(owner == null){
-                    throw new ArgumentNullException(nameof(owner));
-                }
+                if (owner == null) throw new ArgumentNullException(nameof(owner));
 
-                m_pOwner      = owner;
+                m_pOwner = owner;
                 m_pPop3Client = owner.m_Pop3Client;
 
                 SetState(AsyncOpState.Active);
 
-                try{
+                try
+                {
                     /* RFC 1939 7. TOP
                          Arguments:
                              a message-number (required) which may NOT refer to to a
@@ -1041,25 +988,29 @@ namespace LumiSoft.Net.POP3.Client
                                 ...
                              C: TOP 100 3
                              S: -ERR no such message
-			        */
+                    */
 
-                    var buffer = Encoding.UTF8.GetBytes(string.Format("TOP {0} {1}\r\n", owner.SequenceNumber, m_LineCount));
+                    var buffer =
+                        Encoding.UTF8.GetBytes(string.Format("TOP {0} {1}\r\n", owner.SequenceNumber, m_LineCount));
 
                     // Log
-                    m_pPop3Client.LogAddWrite(buffer.Length,string.Format("TOP {0} {1}", owner.SequenceNumber, m_LineCount));
+                    m_pPop3Client.LogAddWrite(buffer.Length,
+                        string.Format("TOP {0} {1}", owner.SequenceNumber, m_LineCount));
 
                     // Start command sending.
-                    m_pPop3Client.TcpStream.BeginWrite(buffer,0,buffer.Length,TopCommandSendingCompleted,null);
+                    m_pPop3Client.TcpStream.BeginWrite(buffer, 0, buffer.Length, TopCommandSendingCompleted, null);
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
 
                 // Set flag rise CompletedAsync event flag. The event is raised when async op completes.
                 // If already completed sync, that flag has no effect.
-                lock(m_pLock){
+                lock (m_pLock)
+                {
                     m_RiseCompleted = true;
 
                     return m_State == AsyncOpState.Active;
@@ -1077,16 +1028,13 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="state">New state.</param>
             private void SetState(AsyncOpState state)
             {
-                if(m_State == AsyncOpState.Disposed){
-                    return;
-                }
+                if (m_State == AsyncOpState.Disposed) return;
 
-                lock(m_pLock){
+                lock (m_pLock)
+                {
                     m_State = state;
 
-                    if(m_State == AsyncOpState.Completed && m_RiseCompleted){
-                        OnCompletedAsync();
-                    }
+                    if (m_State == AsyncOpState.Completed && m_RiseCompleted) OnCompletedAsync();
                 }
             }
 
@@ -1100,21 +1048,22 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="ar">Asynchronous result.</param>
             private void TopCommandSendingCompleted(IAsyncResult ar)
             {
-                try{
+                try
+                {
                     m_pPop3Client.TcpStream.EndWrite(ar);
-                    
+
                     // Read POP3 server response.
-                    var op = new SmartStream.ReadLineAsyncOP(new byte[8000],SizeExceededAction.JunkAndThrowException);
-                    op.Completed += delegate(object s,EventArgs<SmartStream.ReadLineAsyncOP> e){
+                    var op = new SmartStream.ReadLineAsyncOP(new byte[8000], SizeExceededAction.JunkAndThrowException);
+                    op.Completed += delegate(object s, EventArgs<SmartStream.ReadLineAsyncOP> e)
+                    {
                         TopReadResponseCompleted(op);
                     };
-                    if(m_pPop3Client.TcpStream.ReadLine(op,true)){
-                        TopReadResponseCompleted(op);
-                    }
+                    if (m_pPop3Client.TcpStream.ReadLine(op, true)) TopReadResponseCompleted(op);
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
             }
@@ -1122,45 +1071,54 @@ namespace LumiSoft.Net.POP3.Client
             #endregion
 
             #region method TopReadResponseCompleted
-            
+
             /// <summary>
             /// Is called when POP3 server TOP response reading has completed.
             /// </summary>
             /// <param name="op">Asynchronous operation.</param>
             private void TopReadResponseCompleted(SmartStream.ReadLineAsyncOP op)
             {
-                try{
+                try
+                {
                     // Operation failed.
-                    if(op.Error != null){
+                    if (op.Error != null)
+                    {
                         m_pException = op.Error;
-                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message,op.Error);
+                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message, op.Error);
                         SetState(AsyncOpState.Completed);
                     }
                     // Operation succeeded.
-                    else{
+                    else
+                    {
                         // Log
-                        m_pPop3Client.LogAddRead(op.BytesInBuffer,op.LineUtf8);
-                                            
+                        m_pPop3Client.LogAddRead(op.BytesInBuffer, op.LineUtf8);
+
                         // Server returned success response.
-                        if(string.Equals(op.LineUtf8.Split(new[]{' '},2)[0],"+OK",StringComparison.InvariantCultureIgnoreCase)){
-                            var readMsgOP = new SmartStream.ReadPeriodTerminatedAsyncOP(m_pStream,long.MaxValue,SizeExceededAction.ThrowException);
-                            readMsgOP.Completed += delegate(object sender,EventArgs<SmartStream.ReadPeriodTerminatedAsyncOP> e){
+                        if (string.Equals(op.LineUtf8.Split(new[] {' '}, 2)[0], "+OK",
+                                StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            var readMsgOP = new SmartStream.ReadPeriodTerminatedAsyncOP(m_pStream, long.MaxValue,
+                                SizeExceededAction.ThrowException);
+                            readMsgOP.Completed +=
+                                delegate(object sender, EventArgs<SmartStream.ReadPeriodTerminatedAsyncOP> e)
+                                {
+                                    MessageReadingCompleted(readMsgOP);
+                                };
+                            if (m_pPop3Client.TcpStream.ReadPeriodTerminated(readMsgOP, true))
                                 MessageReadingCompleted(readMsgOP);
-                            };
-                            if(m_pPop3Client.TcpStream.ReadPeriodTerminated(readMsgOP,true)){
-                                MessageReadingCompleted(readMsgOP);
-                            }
                         }
                         // Server returned error response.
-                        else{
+                        else
+                        {
                             m_pException = new POP3_ClientException(op.LineUtf8);
                             SetState(AsyncOpState.Completed);
                         }
                     }
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
 
@@ -1177,24 +1135,29 @@ namespace LumiSoft.Net.POP3.Client
             /// <param name="op">Asynchronous operation.</param>
             private void MessageReadingCompleted(SmartStream.ReadPeriodTerminatedAsyncOP op)
             {
-                try{
+                try
+                {
                     // Operation failed.
-                    if(op.Error != null){
+                    if (op.Error != null)
+                    {
                         m_pException = op.Error;
-                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message,op.Error);
+                        m_pPop3Client.LogAddException("Exception: " + op.Error.Message, op.Error);
                         SetState(AsyncOpState.Completed);
                     }
                     // Operation succeeded.
-                    else{
+                    else
+                    {
                         // Log
-                        m_pPop3Client.LogAddRead(op.BytesStored,"Readed period-terminated message " + op.BytesStored.ToString() + " bytes.");
+                        m_pPop3Client.LogAddRead(op.BytesStored,
+                            "Readed period-terminated message " + op.BytesStored.ToString() + " bytes.");
 
                         SetState(AsyncOpState.Completed);
                     }
                 }
-                catch(Exception x){
+                catch (Exception x)
+                {
                     m_pException = x;
-                    m_pPop3Client.LogAddException("Exception: " + x.Message,x);
+                    m_pPop3Client.LogAddException("Exception: " + x.Message, x);
                     SetState(AsyncOpState.Completed);
                 }
             }
@@ -1216,15 +1179,14 @@ namespace LumiSoft.Net.POP3.Client
             /// <exception cref="InvalidOperationException">Is raised when this property is accessed other than <b>AsyncOP_State.Completed</b> state.</exception>
             public Exception Error
             {
-                get{ 
-                    if(m_State == AsyncOpState.Disposed){
-                        throw new ObjectDisposedException(GetType().Name);
-                    }
-                    if(m_State != AsyncOpState.Completed){
-                        throw new InvalidOperationException("Property 'Error' is accessible only in 'AsyncOP_State.Completed' state.");
-                    }
+                get
+                {
+                    if (m_State == AsyncOpState.Disposed) throw new ObjectDisposedException(GetType().Name);
+                    if (m_State != AsyncOpState.Completed)
+                        throw new InvalidOperationException(
+                            "Property 'Error' is accessible only in 'AsyncOP_State.Completed' state.");
 
-                    return m_pException; 
+                    return m_pException;
                 }
             }
 
@@ -1244,9 +1206,7 @@ namespace LumiSoft.Net.POP3.Client
             /// </summary>
             private void OnCompletedAsync()
             {
-                if(CompletedAsync != null){
-                    CompletedAsync(this,new EventArgs<MessageTopLinesToStreamAsyncOP>(this));
-                }
+                if (CompletedAsync != null) CompletedAsync(this, new EventArgs<MessageTopLinesToStreamAsyncOP>(this));
             }
 
             #endregion
@@ -1267,18 +1227,12 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="ArgumentNullException">Is raised when <b>op</b> is null reference.</exception>
         public bool MessageTopLinesToStreamAsync(MessageTopLinesToStreamAsyncOP op)
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }          
-            if(IsMarkedForDeletion){
-                throw new InvalidOperationException("Message is already marked for deletion.");
-            }
-            if(op == null){
-                throw new ArgumentNullException(nameof(op));
-            }
-            if(op.State != AsyncOpState.WaitingForStart){
-                throw new ArgumentException("Invalid argument 'op' state, 'op' must be in 'AsyncOP_State.WaitingForStart' state.",nameof(op));
-            }
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsMarkedForDeletion) throw new InvalidOperationException("Message is already marked for deletion.");
+            if (op == null) throw new ArgumentNullException(nameof(op));
+            if (op.State != AsyncOpState.WaitingForStart)
+                throw new ArgumentException(
+                    "Invalid argument 'op' state, 'op' must be in 'AsyncOP_State.WaitingForStart' state.", nameof(op));
 
             return op.Start(this);
         }
@@ -1293,9 +1247,7 @@ namespace LumiSoft.Net.POP3.Client
         /// </summary>
         internal void Dispose()
         {
-            if(m_IsDisposed){
-                return;
-            }
+            if (m_IsDisposed) return;
 
             m_IsDisposed = true;
             m_Pop3Client = null;
@@ -1343,12 +1295,11 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public int SequenceNumber
         {
-            get{               
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
-                return m_SequenceNumber; 
+                return m_SequenceNumber;
             }
         }
 
@@ -1359,15 +1310,13 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="NotSupportedException">Is raised when POP3 server doesnt support UIDL command.</exception>
         public string UID
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                if(!m_Pop3Client.IsUidlSupported){
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+                if (!m_Pop3Client.IsUidlSupported)
                     throw new NotSupportedException("POP3 server doesn't support UIDL command.");
-                }
 
-                return m_UID; 
+                return m_UID;
             }
         }
 
@@ -1377,11 +1326,10 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public int Size
         {
-            get{ 
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
                 return m_Size;
             }
         }
@@ -1392,16 +1340,14 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public bool IsMarkedForDeletion
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                return m_IsMarkedForDeletion; 
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                return m_IsMarkedForDeletion;
             }
         }
 
         #endregion
-
     }
 }

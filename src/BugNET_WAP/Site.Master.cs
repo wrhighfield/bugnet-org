@@ -1,12 +1,12 @@
 ﻿using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
-using BugNET.UserInterfaceLayer.WebControls;
 using System;
 using System.Web;
 using System.Web.Security;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using BugNET.UI;
+using BugNET.UI.WebControls;
 
 namespace BugNET
 {
@@ -38,10 +38,7 @@ namespace BugNET
                     HttpOnly = true,
                     Value = _antiXsrfTokenValue
                 };
-                if (FormsAuthentication.RequireSSL && Request.IsSecureConnection)
-                {
-                    responseCookie.Secure = true;
-                }
+                if (FormsAuthentication.RequireSSL && Request.IsSecureConnection) responseCookie.Secure = true;
                 Response.Cookies.Set(responseCookie);
             }
 
@@ -54,26 +51,23 @@ namespace BugNET
             {
                 // Set Anti-XSRF token
                 ViewState[AntiXsrfTokenKey] = Page.ViewStateUserKey;
-                ViewState[AntiXsrfUserNameKey] = Context.User.Identity.Name ?? String.Empty;
+                ViewState[AntiXsrfUserNameKey] = Context.User.Identity.Name ?? string.Empty;
             }
             else
             {
                 // Validate the Anti-XSRF token
-                if ((string)ViewState[AntiXsrfTokenKey] != _antiXsrfTokenValue
-                    || (string)ViewState[AntiXsrfUserNameKey] != (Context.User.Identity.Name ?? String.Empty))
-                {
+                if ((string) ViewState[AntiXsrfTokenKey] != _antiXsrfTokenValue
+                    || (string) ViewState[AntiXsrfUserNameKey] != (Context.User.Identity.Name ?? string.Empty))
                     throw new InvalidOperationException("Validation of Anti-XSRF token failed.");
-                }
             }
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            if(Convert.ToInt32(HostSettingManager.Get(HostSettingNames.UserRegistration)) == (int)UserRegistration.None)
-            {
+            if (Convert.ToInt32(HostSettingManager.Get(HostSettingNames.UserRegistration)) ==
+                (int) UserRegistration.None)
                 if (LoginView1.FindControl("RegisterLink") != null)
                     LoginView1.FindControl("RegisterLink").Visible = false;
-            }
 
             var oHelper = new SuckerFishMenuHelper(ProjectId);
             litMenu.Text = oHelper.GetHtml();
@@ -83,7 +77,7 @@ namespace BugNET
                 var user = Membership.GetUser(Security.GetUserName());
                 if (user != null && user.Email != null)
                 {
-                    Image img =  (System.Web.UI.WebControls.Image)LoginView1.FindControl("Avatar");
+                    var img = (Image) LoginView1.FindControl("Avatar");
                     img.ImageUrl = PresentationUtils.GetGravatarImageUrl(user.Email, 32);
                 }
             }
@@ -91,31 +85,29 @@ namespace BugNET
             ProjectsList.DataTextField = "Name";
             ProjectsList.DataValueField = "Id";
 
-            if (!Page.IsPostBack)
+            if (Page.IsPostBack) return;
+            var localizedSelectProject = GetGlobalResourceObject("SharedResources", "SelectProject").ToString();
+            switch (Page.User.Identity.IsAuthenticated)
             {
-            	string localizedSelectProject = GetGlobalResourceObject("SharedResources", "SelectProject").ToString();
-                if (Page.User.Identity.IsAuthenticated)
-                {
+                case true:
                     ProjectsList.DataSource = ProjectManager.GetByMemberUserName(Security.GetUserName(), true);
                     ProjectsList.DataBind();
                     ProjectsList.Items.Insert(0, new ListItem(localizedSelectProject));
-                }
-                else if (!Page.User.Identity.IsAuthenticated && Boolean.Parse(HostSettingManager.Get(HostSettingNames.AnonymousAccess)))
-                {
+                    break;
+                case false when bool.Parse(HostSettingManager.Get(HostSettingNames.AnonymousAccess)):
                     ProjectsList.DataSource = ProjectManager.GetPublicProjects();
                     ProjectsList.DataBind();
                     ProjectsList.Items.Insert(0, new ListItem(localizedSelectProject));
-                }
-                else
-                {
+                    break;
+                default:
                     ProjectsList.Visible = false;
-                }
-
-                var item = ProjectsList.Items.FindByValue(ProjectId.ToString());
-
-                if (item != null)
-                    ProjectsList.SelectedValue = item.Value;
+                    break;
             }
+
+            var item = ProjectsList.Items.FindByValue(ProjectId.ToString());
+
+            if (item != null)
+                ProjectsList.SelectedValue = item.Value;
         }
 
         /// <summary>
@@ -126,7 +118,7 @@ namespace BugNET
         protected void ProjectList_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ProjectsList.SelectedIndex != 0)
-                Response.Redirect(string.Format("~/Projects/ProjectSummary/{0}", ProjectsList.SelectedValue));
+                Response.Redirect($"~/Projects/ProjectSummary/{ProjectsList.SelectedValue}");
         }
 
         /// <summary>
@@ -140,12 +132,9 @@ namespace BugNET
                 {
                     // do the as test to to see if the basepage is the same as page
                     // if not the page parameter will be null and no exception will be thrown
-                    var page = Page as UserInterfaceLayer.BasePage;
+                    var page = Page as BugNetBasePage;
 
-                    if (page != null)
-                    {
-                        return page.ProjectId;
-                    }
+                    if (page != null) return page.ProjectId;
                     return -1;
                 }
                 catch
@@ -158,21 +147,17 @@ namespace BugNET
         protected void SearchButton_Click(object sender, EventArgs e)
         {
             int issueId;
-            if(Int32.TryParse(SearchBox.Text, out issueId))
+            if (int.TryParse(SearchBox.Text, out issueId))
             {
-                if(IssueManager.GetById(issueId) != null)
-                {
-                    Response.Redirect(string.Format("~/Issues/IssueDetail.aspx?id={0}", issueId));
-                }
+                if (IssueManager.GetById(issueId) != null)
+                    Response.Redirect($"~/Issues/IssueDetail.aspx?id={issueId}");
                 else
-                {
-                    Response.Redirect(string.Format("~/Issues/IssueSearch.aspx?q={0}", SearchBox.Text));
-                }
+                    Response.Redirect($"~/Issues/IssueSearch.aspx?q={SearchBox.Text}");
             }
             else
             {
-                Response.Redirect(string.Format("~/Issues/IssueSearch.aspx?q={0}", SearchBox.Text));
-            } 
+                Response.Redirect($"~/Issues/IssueSearch.aspx?q={SearchBox.Text}");
+            }
         }
     }
 }

@@ -1,15 +1,29 @@
 using System;
+using System.Web.UI;
 using BugNET.BLL;
 using BugNET.Common;
 using Microsoft.AspNet.FriendlyUrls;
-using System.Collections.Generic;
 
-namespace BugNET.UserInterfaceLayer
+namespace BugNET.UI
 {
+    public abstract class BugNetUserControl : UserControl
+    {
+        protected string GetGlobalString(string className, string resourceKey,
+            string defaultValue = "Unset String Resource")
+        {
+            return GetGlobalResourceObject(className, resourceKey)?.ToString() ?? defaultValue;
+        }
+
+        protected string GetLocalString(string resourceKey, string defaultValue = "Unset String Resource")
+        {
+            return GetLocalResourceObject(resourceKey)?.ToString() ?? defaultValue;
+        }
+    }
+
     /// <summary>
     /// Summary description for BasePage.
     /// </summary>
-    public class BasePage : System.Web.UI.Page
+    public abstract class BugNetBasePage : Page
     {
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.Control.Load"></see> event.
@@ -19,7 +33,7 @@ namespace BugNET.UserInterfaceLayer
         {
             base.OnLoad(e);
 
-            Page.Title = string.Format("{0} - {1}", Page.Title, HostSettingManager.Get(HostSettingNames.ApplicationTitle));
+            Page.Title = $@"{Page.Title} - {HostSettingManager.Get(HostSettingNames.ApplicationTitle)}";
         }
 
         /// <summary>
@@ -28,9 +42,9 @@ namespace BugNET.UserInterfaceLayer
         public void ReturnToPreviousPage()
         {
             if (Session["ReferrerUrl"] != null)
-                Response.Redirect((string)Session["ReferrerUrl"]);
+                Response.Redirect((string) Session["ReferrerUrl"]);
             else
-                Response.Redirect(string.Format("~/Issues/IssueList.aspx?pid={0}", ProjectId));
+                Response.Redirect($"~/Issues/IssueList.aspx?pid={ProjectId}");
         }
 
         /// <summary>
@@ -39,8 +53,8 @@ namespace BugNET.UserInterfaceLayer
         /// <value>The project id.</value>
         public virtual int ProjectId
         {
-            get { return ViewState.Get("ProjectId", Globals.NewId); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", Globals.NewId);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -49,12 +63,10 @@ namespace BugNET.UserInterfaceLayer
         /// <param name="e"></param>
         protected override void OnInit(EventArgs e)
         {
-
             base.OnInit(e);
 
             // Check for session timeouts
             if (Context.Session != null && User.Identity.IsAuthenticated)
-            {
                 // check whether a new session was generated
                 if (Session.IsNewSession)
                 {
@@ -64,33 +76,26 @@ namespace BugNET.UserInterfaceLayer
                     {
                         var sessionValue = sessionCookie.Value;
                         if (!string.IsNullOrEmpty(sessionValue))
-                        {
                             if (Session.SessionID != sessionValue)
-                            {
                                 // we have session timeout condition!
                                 ErrorRedirector.TransferToSessionExpiredPage(Page);
-                            }
-                        }
                     }
                 }
-            }
 
             // Security check using the following rules:
             // 1. Application must allow anonymous identification (DisableAnonymousAccess HostSetting)
             // 2. User must be authenticated if anonymous identification is false
             // 3. Default page is not protected so the unauthenticated user may login
-            if (!HostSettingManager.Get(HostSettingNames.AnonymousAccess, false) && 
-                !User.Identity.IsAuthenticated && 
+            if (!HostSettingManager.Get(HostSettingNames.AnonymousAccess, false) &&
+                !User.Identity.IsAuthenticated &&
                 !Request.Url.LocalPath.EndsWith("Default.aspx"))
-            {
                 ErrorRedirector.TransferToLoginPage(Page);
-            }
 
-            int projectId = 0;
+            int projectId;
             try
             {
-                IList<string> segments = Request.GetFriendlyUrlSegments();
-                projectId = Int32.Parse(segments[0]);
+                var segments = Request.GetFriendlyUrlSegments();
+                projectId = int.Parse(segments[0]);
             }
             catch
             {
@@ -100,9 +105,9 @@ namespace BugNET.UserInterfaceLayer
             if (projectId <= Globals.NewId) return;
 
             // Security check: Ensure the project exists (ie PID is valid project)
-            var myProj = ProjectManager.GetById(projectId);
+            var project = ProjectManager.GetById(projectId);
 
-            if (myProj == null)
+            if (project == null)
             {
                 // If myProj is a null it will cause an exception later on the page anyway, but I want to
                 // take extra measures here to prevent leaks of datatypes through exception messages.
@@ -119,27 +124,36 @@ namespace BugNET.UserInterfaceLayer
             // set the project id if we have one
             ProjectId = projectId;
 
-            // Security check using the following rules:
-            // 1. Anonymous user
-            // 2. The project type is private
-            if (!User.Identity.IsAuthenticated &&
-                myProj.AccessType == ProjectAccessType.Private)
+            switch (User.Identity.IsAuthenticated)
             {
-                ErrorRedirector.TransferToLoginPage(Page);
-                return;
+                // Security check using the following rules:
+                // 1. Anonymous user
+                // 2. The project type is private
+                case false when project.AccessType == ProjectAccessType.Private:
+                    ErrorRedirector.TransferToLoginPage(Page);
+                    return;
+                // Security check using the following rules:
+                // 1. Not Super user
+                // 2. Authenticated user
+                // 3. The project type is private 
+                // 4. The user is not a project member
+                case true when !UserManager.IsSuperUser() &&
+                               project.AccessType == ProjectAccessType.Private &&
+                               !ProjectManager.IsUserProjectMember(User.Identity.Name, projectId):
+                    ErrorRedirector.TransferToLoginPage(Page);
+                    break;
             }
+        }
 
-            // Security check using the following rules:
-            // 1. Not Super user
-            // 2. Authenticated user
-            // 3. The project type is private 
-            // 4. The user is not a project member
-            if (User.Identity.IsAuthenticated && !UserManager.IsSuperUser() &&
-                myProj.AccessType == ProjectAccessType.Private &&
-                !ProjectManager.IsUserProjectMember(User.Identity.Name, projectId))
-            {
-                ErrorRedirector.TransferToLoginPage(Page);
-            }
+        protected string GetGlobalString(string className, string resourceKey,
+            string defaultValue = "Unset String Resource")
+        {
+            return GetGlobalResourceObject(className, resourceKey)?.ToString() ?? defaultValue;
+        }
+
+        protected string GetLocalString(string resourceKey, string defaultValue = "Unset String Resource")
+        {
+            return GetLocalResourceObject(resourceKey)?.ToString() ?? defaultValue;
         }
     }
 }

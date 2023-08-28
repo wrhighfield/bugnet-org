@@ -42,51 +42,33 @@ namespace LumiSoft.Net.TCP
         /// <summary>
         /// Gets if session is connected.
         /// </summary>
-        public abstract bool IsConnected
-        {
-            get;
-        }
+        public abstract bool IsConnected { get; }
 
         /// <summary>
         /// Gets session ID.
         /// </summary>
-        public abstract string Id
-        {
-            get;
-        }
+        public abstract string Id { get; }
 
         /// <summary>
         /// Gets the time when session was connected.
         /// </summary>
-        public abstract DateTime ConnectTime
-        {
-            get;
-        }
+        public abstract DateTime ConnectTime { get; }
 
         /// <summary>
         /// Gets the last time when data was sent or received.
         /// </summary>
-        public abstract DateTime LastActivity
-        {
-            get;
-        }
+        public abstract DateTime LastActivity { get; }
 
         /// <summary>
         /// Gets session local IP end point.
         /// </summary>
-        public abstract IPEndPoint LocalEndPoint
-        {
-            get;
-        }
+        public abstract IPEndPoint LocalEndPoint { get; }
 
         /// <summary>
         /// Gets session remote IP end point.
         /// </summary>
-        public abstract IPEndPoint RemoteEndPoint
-        {
-            get;
-        }
-        
+        public abstract IPEndPoint RemoteEndPoint { get; }
+
         /// <summary>
         /// Gets if this session TCP connection is secure connection.
         /// </summary>
@@ -105,12 +87,8 @@ namespace LumiSoft.Net.TCP
         /// <summary>
         /// Gets TCP stream which must be used to send/receive data through this session.
         /// </summary>
-        public abstract SmartStream TcpStream
-        {
-            get;
-        }
+        public abstract SmartStream TcpStream { get; }
 
         #endregion
-
     }
 }

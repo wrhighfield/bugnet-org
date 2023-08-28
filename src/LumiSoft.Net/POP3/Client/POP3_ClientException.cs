@@ -7,7 +7,7 @@ namespace LumiSoft.Net.POP3.Client
     /// </summary>
     public class POP3_ClientException : Exception
     {
-        private string m_StatusCode   = "";
+        private string m_StatusCode = "";
         private string m_ResponseText = "";
 
         /// <summary>
@@ -17,16 +17,12 @@ namespace LumiSoft.Net.POP3.Client
         /// <exception cref="ArgumentNullException">Is raised when <b>responseLine</b> is null.</exception>
         public POP3_ClientException(string responseLine) : base(responseLine)
         {
-            if(responseLine == null){
-                throw new ArgumentNullException(nameof(responseLine));
-            }
+            if (responseLine == null) throw new ArgumentNullException(nameof(responseLine));
 
             // <status-code> SP <response-text>
-            var code_text = responseLine.Split(new char[]{ },2);
+            var code_text = responseLine.Split(new char[] { }, 2);
             m_StatusCode = code_text[0];
-            if(code_text.Length == 2){
-                m_ResponseText = code_text[1];
-            }
+            if (code_text.Length == 2) m_ResponseText = code_text[1];
         }
 
 
@@ -43,6 +39,5 @@ namespace LumiSoft.Net.POP3.Client
         public string ResponseText => m_ResponseText;
 
         #endregion
-
     }
 }

@@ -2,15 +2,14 @@
 
 namespace BugNET.SubversionHooks
 {
-    class Program
+    internal class Program
     {
         /// <summary>
         /// Mains the specified args.
         /// </summary>
         /// <param name="args">The args.</param>
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-
             log4net.Config.XmlConfigurator.Configure();
             var logger = log4net.LogManager.GetLogger("Main");
 
@@ -26,7 +25,9 @@ namespace BugNET.SubversionHooks
                     var repository = args[1];
                     var revision = args[2];
 
-                    logger.InfoFormat("Executing IssueTrackerIntegration.UpdateIssueTrackerFromRevision(\"{0}\", \"{1}\")", repository, revision);
+                    logger.InfoFormat(
+                        "Executing IssueTrackerIntegration.UpdateIssueTrackerFromRevision(\"{0}\", \"{1}\")",
+                        repository, revision);
                     var integration = new IssueTrackerIntegration();
                     integration.UpdateIssueTrackerFromRevision(repository, revision);
                     logger.Info("Finished IssueTrackerIntegration.UpdateIssueTrackerFromRevision\n");

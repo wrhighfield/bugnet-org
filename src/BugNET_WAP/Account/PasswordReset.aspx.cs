@@ -1,9 +1,10 @@
 ﻿using System;
 using BugNET.BLL;
+using BugNET.UI;
 
 namespace BugNET.Account
 {
-    public partial class PasswordReset : System.Web.UI.Page
+    public partial class PasswordReset : BugNetBasePage
     {
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -20,11 +21,7 @@ namespace BugNET.Account
         /// <value>
         /// The message.
         /// </value>
-        protected string Message
-        {
-            get;
-            private set;
-        }
+        protected string Message { get; private set; }
 
         /// <summary>
         /// Handles the Click event of the Submit control.
@@ -36,8 +33,8 @@ namespace BugNET.Account
             if (Page.IsValid)
             {
                 // get the user by the reset token
-                var token  = Request.QueryString["token"];
-                
+                var token = Request.QueryString["token"];
+
                 if (!string.IsNullOrWhiteSpace(token))
                 {
                     var user = UserManager.GetUserByPasswordResetToken(token);
@@ -56,24 +53,23 @@ namespace BugNET.Account
                             profile.Save();
 
                             Response.Redirect("~/Account/PasswordResetSuccess.aspx");
-
                         }
                         catch (System.Web.Security.MembershipPasswordException ex)
                         {
                             Message = ex.Message;
-                            message.Visible = !String.IsNullOrEmpty(Message);
+                            message.Visible = !string.IsNullOrEmpty(Message);
                         }
                     }
                     else
                     {
-                        Message = GetLocalResourceObject("InvalidTokenMessage").ToString();
-                        message.Visible = !String.IsNullOrEmpty(Message);
+                        Message = GetLocalString("InvalidTokenMessage");
+                        message.Visible = !string.IsNullOrEmpty(Message);
                     }
                 }
                 else
                 {
-                    Message = GetLocalResourceObject("InvalidTokenMessage").ToString();
-                    message.Visible = !String.IsNullOrEmpty(Message);
+                    Message = GetLocalString("InvalidTokenMessage");
+                    message.Visible = !string.IsNullOrEmpty(Message);
                 }
             }
         }

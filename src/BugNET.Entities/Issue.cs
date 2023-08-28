@@ -176,10 +176,7 @@ namespace BugNET.Entities
         /// </summary>
         /// <value>The full id.</value>
         [XmlIgnore]
-        public string FullId
-        {
-            get { return string.Concat(ProjectCode, "-", Id); }
-        }
+        public string FullId => string.Concat(ProjectCode, "-", Id);
 
         /// <summary>
         /// Gets the last update.

@@ -52,10 +52,10 @@ namespace LumiSoft.Net.MIME
     /// </remarks>
     public class MIME_h_ContentType : MIME_h
     {
-        private bool                       m_IsModified;
-        private string                     m_ParseValue;
-        private string                     m_Type        = "";
-        private string                     m_SubType     = "";
+        private bool m_IsModified;
+        private string m_ParseValue;
+        private string m_Type = "";
+        private string m_SubType = "";
         private MIME_h_ParameterCollection m_pParameters;
 
         /// <summary>
@@ -65,28 +65,28 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>mediaType</b> is null reference.</exception>
         public MIME_h_ContentType(string mediaType)
         {
-            if(mediaType == null){
-                throw new ArgumentNullException(mediaType);
-            }
+            if (mediaType == null) throw new ArgumentNullException(mediaType);
 
-            var type_subtype = mediaType.Split(new[]{'/',},2);
-            if(type_subtype.Length == 2){
-                if(type_subtype[0] == "" || !MIME_Reader.IsToken(type_subtype[0])){
-                    throw new ArgumentException("Invalid argument 'mediaType' value '" + mediaType + "', value must be token.");
-                }                
-                if(type_subtype[1] == "" || !MIME_Reader.IsToken(type_subtype[1])){
-                    throw new ArgumentException("Invalid argument 'mediaType' value '" + mediaType + "', value must be token.");
-                }
+            var type_subtype = mediaType.Split(new[] {'/'}, 2);
+            if (type_subtype.Length == 2)
+            {
+                if (type_subtype[0] == "" || !MIME_Reader.IsToken(type_subtype[0]))
+                    throw new ArgumentException("Invalid argument 'mediaType' value '" + mediaType +
+                                                "', value must be token.");
+                if (type_subtype[1] == "" || !MIME_Reader.IsToken(type_subtype[1]))
+                    throw new ArgumentException("Invalid argument 'mediaType' value '" + mediaType +
+                                                "', value must be token.");
 
-                m_Type    = type_subtype[0];
+                m_Type = type_subtype[0];
                 m_SubType = type_subtype[1];
             }
-            else{
+            else
+            {
                 throw new ArgumentException("Invalid argument 'mediaType' value '" + mediaType + "'.");
             }
 
             m_pParameters = new MIME_h_ParameterCollection(this);
-            m_IsModified  = true;
+            m_IsModified = true;
         }
 
         /// <summary>
@@ -109,40 +109,30 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public static MIME_h_ContentType Parse(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             // We should not have encoded words here, but some email clients do this, so encoded them if any.
             var valueDecoded = MIME_Encoding_EncodedWord.DecodeS(value);
 
             var retVal = new MIME_h_ContentType();
-            
-            var name_value = valueDecoded.Split(new[]{':'},2);
-            if(name_value.Length != 2){
+
+            var name_value = valueDecoded.Split(new[] {':'}, 2);
+            if (name_value.Length != 2)
                 throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
-            }
-            
+
             var r = new MIME_Reader(name_value[1]);
             var type = r.Token();
-            if(type == null){
-                throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
-            }
+            if (type == null) throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
             retVal.m_Type = type;
 
-            if(r.Char(false) != '/'){
+            if (r.Char(false) != '/')
                 throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
-            }
 
             var subtype = r.Token();
-            if(subtype == null){
-                throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
-            }
+            if (subtype == null) throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
             retVal.m_SubType = subtype;
 
-            if(r.Available > 0){
-                retVal.m_pParameters.Parse(r);
-            }
+            if (r.Available > 0) retVal.m_pParameters.Parse(r);
 
             retVal.m_ParseValue = value;
             retVal.m_IsModified = false;
@@ -162,11 +152,9 @@ namespace LumiSoft.Net.MIME
         /// <param name="parmetersCharset">Charset to use to encode 8-bit characters. Value null means parameters not encoded.</param>
         /// <param name="reEncode">If true always specified encoding is used. If false and header field value not modified, original encoding is kept.</param>
         /// <returns>Returns header field as string.</returns>
-        public override string ToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset,bool reEncode)
+        public override string ToString(MIME_Encoding_EncodedWord wordEncoder, Encoding parmetersCharset, bool reEncode)
         {
-            if(!reEncode && !IsModified){
-                return m_ParseValue;
-            }
+            if (!reEncode && !IsModified) return m_ParseValue;
 
             var retVal = new StringBuilder();
             retVal.Append("Content-Type: " + m_Type + "/" + m_SubType);
@@ -230,7 +218,7 @@ namespace LumiSoft.Net.MIME
 
             set => m_pParameters["name"] = value;
         }
-        
+
         /// <summary>
         /// Gets or sets Content-Type <b>charset</b> parameter value. Value null means not specified.
         /// </summary>

@@ -45,7 +45,10 @@ namespace BugNET.DAL
         public abstract List<Issue> GetIssuesByCreatorUserName(int projectId, string creatorUserName);
         public abstract List<Issue> GetIssuesByOwnerUserName(int projectId, string creatorUserName);
         public abstract List<Issue> GetOpenIssues(int projectId);
-        public abstract List<Issue> GetMonitoredIssuesByUserName(object userId, ICollection<KeyValuePair<string, string>> sortFields, List<int> projects, bool excludeClosedStatus);
+
+        public abstract List<Issue> GetMonitoredIssuesByUserName(object userId,
+            ICollection<KeyValuePair<string, string>> sortFields, List<int> projects, bool excludeClosedStatus);
+
         public abstract List<Issue> GetMonitoredIssuesByUserName(string userName, bool excludeClosedStatus);
         public abstract bool UpdateIssueLastUpdated(int issueId, string lastUpdatedUsername);
         public abstract List<IssueCount> GetIssueStatusCountByProject(int projectId);
@@ -77,18 +80,28 @@ namespace BugNET.DAL
 
         // Queries
         public abstract List<Query> GetQueriesByUserName(string username, int projectId);
-        public abstract bool SaveQuery(string username, int projectId, string queryName, bool isPublic, List<QueryClause> queryClauses);
-        public abstract bool UpdateQuery(int queryId, string username, int projectId, string queryName, bool isPublic, List<QueryClause> queryClauses);
+
+        public abstract bool SaveQuery(string username, int projectId, string queryName, bool isPublic,
+            List<QueryClause> queryClauses);
+
+        public abstract bool UpdateQuery(int queryId, string username, int projectId, string queryName, bool isPublic,
+            List<QueryClause> queryClauses);
+
         public abstract bool DeleteQuery(int queryId);
         public abstract List<RequiredField> GetRequiredFieldsForIssues();
-        public abstract void PerformIssueCommentSearchQuery(ref List<IssueComment> list, List<QueryClause> queryClauses);
+
+        public abstract void
+            PerformIssueCommentSearchQuery(ref List<IssueComment> list, List<QueryClause> queryClauses);
 
         [Obsolete("Please use the new overloaded PerformQuery method")]
         public abstract List<Issue> PerformQuery(int projectId, List<QueryClause> queryClauses);
 
-        public abstract List<Issue> PerformQuery(List<QueryClause> queryClauses, ICollection<KeyValuePair<string, string>> sortFields, int projectId = 0);
+        public abstract List<Issue> PerformQuery(List<QueryClause> queryClauses,
+            ICollection<KeyValuePair<string, string>> sortFields, int projectId = 0);
 
-        public abstract List<Issue> PerformSavedQuery(int projectId, int queryId, ICollection<KeyValuePair<string, string>> sortFields);
+        public abstract List<Issue> PerformSavedQuery(int projectId, int queryId,
+            ICollection<KeyValuePair<string, string>> sortFields);
+
         public abstract List<QueryClause> GetQueryClausesByQueryId(int queryId);
         public abstract Query GetQueryById(int queryId);
 

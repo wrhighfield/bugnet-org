@@ -41,9 +41,9 @@ namespace LumiSoft.Net.MIME
     /// </example>
     public class MIME_h_ContentDisposition : MIME_h
     {
-        private bool                       m_IsModified;
-        private string                     m_ParseValue;
-        private string                     m_DispositionType = "";
+        private bool m_IsModified;
+        private string m_ParseValue;
+        private string m_DispositionType = "";
         private MIME_h_ParameterCollection m_pParameters;
 
         /// <summary>
@@ -54,17 +54,14 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
         public MIME_h_ContentDisposition(string dispositionType)
         {
-            if(dispositionType == null){
-                throw new ArgumentNullException(nameof(dispositionType));
-            }
-            if(dispositionType == string.Empty){
+            if (dispositionType == null) throw new ArgumentNullException(nameof(dispositionType));
+            if (dispositionType == string.Empty)
                 throw new ArgumentException("Argument 'dispositionType' value must be specified.");
-            }
 
             m_DispositionType = dispositionType;
 
             m_pParameters = new MIME_h_ParameterCollection(this);
-            m_IsModified  = true;
+            m_IsModified = true;
         }
 
         /// <summary>
@@ -87,25 +84,21 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public static MIME_h_ContentDisposition Parse(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             // We should not have encoded words here, but some email clients do this, so encoded them if any.
             var valueDecoded = MIME_Encoding_EncodedWord.DecodeS(value);
 
             var retVal = new MIME_h_ContentDisposition();
-            
-            var name_value = valueDecoded.Split(new[]{':'},2);
-            if(name_value.Length != 2){
+
+            var name_value = valueDecoded.Split(new[] {':'}, 2);
+            if (name_value.Length != 2)
                 throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
-            }
 
             var r = new MIME_Reader(name_value[1]);
             var type = r.Token();
-            if(type == null){
+            if (type == null)
                 throw new ParseException("Invalid Content-Disposition: header field value '" + value + "'.");
-            }
             retVal.m_DispositionType = type.Trim();
 
             retVal.m_pParameters.Parse(r);
@@ -116,10 +109,10 @@ namespace LumiSoft.Net.MIME
         }
 
         #endregion
-        
+
 
         #region override method ToString
-                
+
         /// <summary>
         /// Returns header field as string.
         /// </summary>
@@ -127,11 +120,10 @@ namespace LumiSoft.Net.MIME
         /// <param name="parmetersCharset">Charset to use to encode 8-bit characters. Value null means parameters not encoded.</param>
         /// <param name="reEncode">If true always specified encoding is used. If false and header field value not modified, original encoding is kept.</param>
         /// <returns>Returns header field as string.</returns>
-        public override string ToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset,bool reEncode)
+        public override string ToString(MIME_Encoding_EncodedWord wordEncoder, Encoding parmetersCharset, bool reEncode)
         {
-            if(reEncode || IsModified){
+            if (reEncode || IsModified)
                 return "Content-Disposition: " + m_DispositionType + m_pParameters.ToString(parmetersCharset) + "\r\n";
-            }
 
             return m_ParseValue;
         }
@@ -178,22 +170,20 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public DateTime Param_CreationDate
         {
-            get{ 
+            get
+            {
                 var value = Parameters["creation-date"];
-                if(value == null){
-                    return DateTime.MinValue;
-                }
+                if (value == null) return DateTime.MinValue;
 
                 return MIME_Utils.ParseRfc2822DateTime(value);
             }
 
-            set{ 
-                if(value == DateTime.MinValue){
+            set
+            {
+                if (value == DateTime.MinValue)
                     Parameters.Remove("creation-date");
-                }
-                else{
+                else
                     Parameters["creation-date"] = MIME_Utils.DateTimeToRfc2822(value);
-                }
             }
         }
 
@@ -202,22 +192,20 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public DateTime Param_ModificationDate
         {
-            get{
+            get
+            {
                 var value = Parameters["modification-date"];
-                if(value == null){
-                    return DateTime.MinValue;
-                }
+                if (value == null) return DateTime.MinValue;
 
                 return MIME_Utils.ParseRfc2822DateTime(value);
             }
 
-            set{ 
-                if(value == DateTime.MinValue){
+            set
+            {
+                if (value == DateTime.MinValue)
                     Parameters.Remove("modification-date");
-                }
-                else{
+                else
                     Parameters["modification-date"] = MIME_Utils.DateTimeToRfc2822(value);
-                }
             }
         }
 
@@ -226,22 +214,20 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public DateTime Param_ReadDate
         {
-            get{
+            get
+            {
                 var value = Parameters["read-date"];
-                if(value == null){
-                    return DateTime.MinValue;
-                }
+                if (value == null) return DateTime.MinValue;
 
                 return MIME_Utils.ParseRfc2822DateTime(value);
             }
 
-            set{ 
-                if(value == DateTime.MinValue){
+            set
+            {
+                if (value == DateTime.MinValue)
                     Parameters.Remove("read-date");
-                }
-                else{
+                else
                     Parameters["read-date"] = MIME_Utils.DateTimeToRfc2822(value);
-                }
             }
         }
 
@@ -250,22 +236,20 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         public long Param_Size
         {
-            get{
+            get
+            {
                 var value = Parameters["size"];
-                if(value == null){
-                    return -1;
-                }
+                if (value == null) return -1;
 
                 return Convert.ToInt64(value);
             }
 
-            set{ 
-                if(value < 0){
+            set
+            {
+                if (value < 0)
                     Parameters.Remove("size");
-                }
-                else{
+                else
                     Parameters["size"] = value.ToString();
-                }
             }
         }
 

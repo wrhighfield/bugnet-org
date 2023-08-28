@@ -5,10 +5,10 @@
     </HeaderTemplate>
     <ItemTemplate>
         <div class="form-group">
-            <asp:Label id="lblFieldName" Runat="Server" CssClass="control-label col-md-2" />
+            <asp:Label id="lblFieldName" Runat="Server" CssClass="control-label col-md-2"/>
             <div class="col-md-10">
-                <asp:HiddenField ID="Id" runat="server" />
-                <asp:HiddenField ID="Name" runat="server" />
+                <asp:HiddenField ID="Id" runat="server"/>
+                <asp:HiddenField ID="Name" runat="server"/>
                 <asp:PlaceHolder id="PlaceHolder" runat="server">
                 </asp:PlaceHolder>
             </div>

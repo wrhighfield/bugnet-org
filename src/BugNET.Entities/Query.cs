@@ -7,7 +7,6 @@ namespace BugNET.Entities
     /// </summary>
     public class Query
     {
-
         #region Constructors
 
         /// <summary>
@@ -18,6 +17,7 @@ namespace BugNET.Entities
             Name = string.Empty;
             Clauses = new List<QueryClause>();
         }
+
         #endregion
 
         #region Properties
@@ -47,6 +47,5 @@ namespace BugNET.Entities
         public List<QueryClause> Clauses { get; set; }
 
         #endregion
-
     }
 }

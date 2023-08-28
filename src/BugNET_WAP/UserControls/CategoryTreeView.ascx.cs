@@ -4,12 +4,12 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
+using BugNET.UI;
 
 namespace BugNET.UserControls
 {
-    public partial class CategoryTreeView : System.Web.UI.UserControl
+    public partial class CategoryTreeView : BugNetUserControl
     {
-
         private const int MAX_LENGTH_OF_TEXT = 35;
 
         /// <summary>
@@ -19,7 +19,6 @@ namespace BugNET.UserControls
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-            
         }
 
         /// <summary>
@@ -28,8 +27,8 @@ namespace BugNET.UserControls
         /// <value><c>true</c> if [show issue count]; otherwise, <c>false</c>.</value>
         public bool ShowIssueCount
         {
-            get { return ViewState.Get("ShowIssueCount", true); }
-            set { ViewState.Set("ShowIssueCount", value); }
+            get => ViewState.Get("ShowIssueCount", true);
+            set => ViewState.Set("ShowIssueCount", value);
         }
 
         /// <summary>
@@ -38,8 +37,8 @@ namespace BugNET.UserControls
         /// <value><c>true</c> if [show root]; otherwise, <c>false</c>.</value>
         public bool ShowRoot
         {
-            get { return ViewState.Get("ShowRoot", false); }
-            set { ViewState.Set("ShowRoot", value); }
+            get => ViewState.Get("ShowRoot", false);
+            set => ViewState.Set("ShowRoot", value);
         }
 
         /// <summary>
@@ -48,8 +47,8 @@ namespace BugNET.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", -1); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", -1);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -60,10 +59,7 @@ namespace BugNET.UserControls
         {
             get
             {
-                if (ShowRoot && tvCategory.Nodes.Count > 1)
-                {
-                    return tvCategory.Nodes.Count - 1;
-                }
+                if (ShowRoot && tvCategory.Nodes.Count > 1) return tvCategory.Nodes.Count - 1;
                 return tvCategory.Nodes.Count;
             }
         }
@@ -79,20 +75,19 @@ namespace BugNET.UserControls
 
             var tree = tvCategory.Nodes;
 
-            if(ShowRoot)
-                tree.Add(new TreeNode(GetLocalResourceObject("RootCategory").ToString(), ""));
+            if (ShowRoot)
+                tree.Add(new TreeNode(GetLocalString("RootCategory"), ""));
 
             var depth = ShowRoot ? 1 : 0;
 
             PopulateTreeView(tree, depth, allCategories);
 
             var tn = new TreeNode
-                         {
-                             Text = String.Format("{0}</a></td><td style='width:100%;text-align:right;'><a>{1}&nbsp;",
-                                               GetLocalResourceObject("Unassigned"),
-                                               IssueManager.GetCountByProjectAndCategoryId(ProjectId)),
-                             NavigateUrl = String.Format("~/Issues/IssueList.aspx?pid={0}&c={1}", ProjectId, 0)
-                         };
+            {
+                Text =
+                    $@"{GetLocalString("Unassigned")}</a></td><td style='width:100%;text-align:right;'><a>{IssueManager.GetCountByProjectAndCategoryId(ProjectId)}&nbsp;",
+                NavigateUrl = $"~/Issues/IssueList.aspx?pid={ProjectId}&c={0}"
+            };
 
             tvCategory.Nodes.Add(tn);
 
@@ -105,10 +100,10 @@ namespace BugNET.UserControls
         /// <param name="nodes">The tree view nodes to populate</param>
         /// <param name="depth">The current depth of the node structure</param>
         /// <param name="allCategories">All the categories for the project</param>
-        private void PopulateTreeView(TreeNodeCollection nodes,int depth, List<Category> allCategories)
+        private void PopulateTreeView(TreeNodeCollection nodes, int depth, List<Category> allCategories)
         {
-            if (nodes == null) throw new ArgumentNullException("nodes");
-            if (allCategories == null) throw new ArgumentNullException("allCategories");
+            if (nodes == null) throw new ArgumentNullException(nameof(nodes));
+            if (allCategories == null) throw new ArgumentNullException(nameof(allCategories));
 
             var parentCategories = allCategories.FindAll(p => p.ParentCategoryId == 0);
 
@@ -116,17 +111,14 @@ namespace BugNET.UserControls
             {
                 var node = GetTreeNode(pCat, depth);
 
-                if (pCat.ChildCount > 0)
-                {
-                    PopulateChildNodes(pCat, node.ChildNodes, depth + 1, allCategories);
-                }
+                if (pCat.ChildCount > 0) PopulateChildNodes(pCat, node.ChildNodes, depth + 1, allCategories);
 
                 nodes.Add(node);
             }
         }
 
         /// <summary>
-        /// Populate the child nodes for the treeview
+        /// Populate the child nodes for the tree-view
         /// </summary>
         /// <param name="parent">The parent category to populate the children for</param>
         /// <param name="nodes">The actual tree nodes to populate</param>
@@ -138,10 +130,7 @@ namespace BugNET.UserControls
             {
                 var node = GetTreeNode(pCat, depth);
 
-                if (pCat.ChildCount > 0)
-                {
-                    PopulateChildNodes(pCat, node.ChildNodes, depth + 1, all);
-                }
+                if (pCat.ChildCount > 0) PopulateChildNodes(pCat, node.ChildNodes, depth + 1, all);
 
                 nodes.Add(node);
             }
@@ -162,8 +151,9 @@ namespace BugNET.UserControls
 
             if (ShowIssueCount)
             {
-                tNode.Text = String.Format("{0}</a></td><td style='width:100%;text-align:right;'><a>{1}&nbsp;", catText, category.IssueCount);
-                tNode.NavigateUrl = String.Format("~/Issues/IssueList.aspx?pid={0}&c={1}", ProjectId, category.Id);
+                tNode.Text =
+                    $@"{catText}</a></td><td style='width:100%;text-align:right;'><a>{category.IssueCount}&nbsp;";
+                tNode.NavigateUrl = $"~/Issues/IssueList.aspx?pid={ProjectId}&c={category.Id}";
             }
             else
             {
@@ -173,7 +163,7 @@ namespace BugNET.UserControls
             tNode.Value = category.Id.ToString();
 
             //If node has child nodes, then enable on-demand populating
-            tNode.PopulateOnDemand = (category.ChildCount > 0);
+            tNode.PopulateOnDemand = category.ChildCount > 0;
 
             return tNode;
         }
@@ -188,11 +178,11 @@ namespace BugNET.UserControls
         /// break the category list in the project summary page. 
         /// (or anywhere else this control is used)
         ///
-        /// This code performs the required truncation. An elipsis is also added.
-        /// This code does take bool ShowIssueCount in accout by adding 5 to the maxSize
+        /// This code performs the required truncation. An ellipsis is also added.
+        /// This code does take bool ShowIssueCount in account by adding 5 to the maxSize
         ///
         /// Example: The test category "this is a new test category ra ra ra" at a level 4 depth 
-        /// exibits this problem.
+        /// exhibits this problem.
         /// </summary>
         /// <param name="text">The category text</param>
         /// <param name="depth">The depth in the tree view the text will be displayed</param>
@@ -202,17 +192,14 @@ namespace BugNET.UserControls
             var maxSize = MAX_LENGTH_OF_TEXT;
 
             if (depth > 0)
-                maxSize = maxSize - (((depth) - 1)*2);
+                maxSize -= (depth - 1) * 2;
 
-            if (!ShowIssueCount) { maxSize += 5; }
+            if (!ShowIssueCount) maxSize += 5;
 
             // now cut it if it needs it
             var catText = text.Trim();
 
-            if (catText.Length > maxSize)
-            {
-                catText = catText.Remove(maxSize - 1) + ".."; // add an elipsis
-            }
+            if (catText.Length > maxSize) catText = catText.Remove(maxSize - 1) + ".."; // add an ellipsis
 
             return catText;
         }
@@ -224,9 +211,8 @@ namespace BugNET.UserControls
         /// <param name="nodes">The nodes.</param>
         private void PopulateNodes(List<Category> list, TreeNodeCollection nodes)
         {
-            foreach (Category c in list)
+            foreach (var c in list)
             {
-
                 // Modified by Stewart Moss
                 // 10-May-2009
                 //
@@ -242,45 +228,42 @@ namespace BugNET.UserControls
                 // Example: The test category "this is a new test category ra ra ra" at a level 4 depth 
                 // exhibits this problem. 
 
-                TreeNode tn = new TreeNode();
+                var tn = new TreeNode();
                 nodes.Add(tn);
                 try
                 {
                     // Calculate the right trimming length
                     // 
-                    // This is not an exact science here, becuase tn.depth is not always right
-                    int maxSize;
-                    int tmpint = tn.Depth > 0 ? tn.Depth : 1;
-                    maxSize = 35 - (((tmpint) - 1) * 2);
-                    if (!ShowIssueCount) { maxSize += 5; }
+                    // This is not an exact science here, because tn.depth is not always right
+                    var depth = tn.Depth > 0 ? tn.Depth : 1;
+                    var maxSize = 35 - (depth - 1) * 2;
+                    if (!ShowIssueCount) maxSize += 5;
                     // when the depth gets high, the formula goes wonky, so correct it
-                    if (tmpint >= 5) maxSize -= 2;
+                    if (depth >= 5) maxSize -= 2;
 
                     // now cut it if it needs it
-                    string tmpstr = c.Name;
-                    if (tmpstr.Length > maxSize)
-                    {
-                        tmpstr = tmpstr.Remove(maxSize - 1) + ".."; // add an elipsis
-                    }
+                    var text = c.Name;
+                    if (text.Length > maxSize) text = text.Remove(maxSize - 1) + ".."; // add an ellipsis
 
                     if (ShowIssueCount)
                     {
-                        tn.Text = String.Format("{0}</a></td><td style='width:100%;text-align:right;'><a>{1}&nbsp;", tmpstr, c.IssueCount);
-                        tn.NavigateUrl = String.Format("~/Issues/IssueList.aspx?pid={0}&c={1}", ProjectId, c.Id);
+                        tn.Text = $@"{text}</a></td><td style='width:100%;text-align:right;'><a>{c.IssueCount}&nbsp;";
+                        tn.NavigateUrl = $"~/Issues/IssueList.aspx?pid={ProjectId}&c={c.Id}";
                     }
                     else
                     {
-                        tn.Text = tmpstr;
+                        tn.Text = text;
                     }
+
                     tn.Value = c.Id.ToString();
 
                     //If node has child nodes, then enable on-demand populating
-                    tn.PopulateOnDemand = (c.ChildCount > 0);
+                    tn.PopulateOnDemand = c.ChildCount > 0;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     nodes.Remove(tn);
-                    throw ex;
+                    throw;
                 }
             }
         }
@@ -289,27 +272,22 @@ namespace BugNET.UserControls
         /// Gets the selected node.
         /// </summary>
         /// <value>The selected node.</value>
-        public TreeNode SelectedNode
-        {
-            get { return tvCategory.SelectedNode; }
-        }
+        public TreeNode SelectedNode => tvCategory.SelectedNode;
 
         /// <summary>
         /// Gets the selected value.
         /// </summary>
         /// <value>The selected value.</value>
-        public string SelectedValue
-        {
-            get { return tvCategory.SelectedValue; }
-        }
+        public string SelectedValue => tvCategory.SelectedValue;
+
         /// <summary>
         /// Populates the sub level.
         /// </summary>
-        /// <param name="parentid">The parentid.</param>
+        /// <param name="parentId">The parentId.</param>
         /// <param name="parentNode">The parent node.</param>
-        private void PopulateSubLevel(int parentid, TreeNode parentNode)
+        private void PopulateSubLevel(int parentId, TreeNode parentNode)
         {
-            PopulateNodes(CategoryManager.GetChildCategoriesByCategoryId(parentid), parentNode.ChildNodes);
+            PopulateNodes(CategoryManager.GetChildCategoriesByCategoryId(parentId), parentNode.ChildNodes);
         }
 
         /// <summary>
@@ -319,7 +297,7 @@ namespace BugNET.UserControls
         /// <param name="e">The <see cref="T:System.Web.UI.WebControls.TreeNodeEventArgs"/> instance containing the event data.</param>
         protected void tvCategory_TreeNodePopulate(object sender, TreeNodeEventArgs e)
         {
-            PopulateSubLevel(Int32.Parse(e.Node.Value), e.Node);
+            PopulateSubLevel(int.Parse(e.Node.Value), e.Node);
         }
     }
 }

@@ -8,9 +8,9 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_h_Unparsed : MIME_h
     {
-        private string    m_ParseValue;
-        private string    m_Name;
-        private string    m_Value;
+        private string m_ParseValue;
+        private string m_Name;
+        private string m_Value;
         private Exception m_pException;
 
         /// <summary>
@@ -20,19 +20,16 @@ namespace LumiSoft.Net.MIME
         /// <param name="exception">Parsing error.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>value</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
-        internal MIME_h_Unparsed(string value,Exception exception)
+        internal MIME_h_Unparsed(string value, Exception exception)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
-            
-            var name_value = value.Split(new[]{':'},2);
-            if(name_value.Length != 2){
-                throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            m_Name       = name_value[0];
-            m_Value      = name_value[1].Trim();
+            var name_value = value.Split(new[] {':'}, 2);
+            if (name_value.Length != 2)
+                throw new ParseException("Invalid Content-Type: header field value '" + value + "'.");
+
+            m_Name = name_value[0];
+            m_Value = name_value[1].Trim();
             m_ParseValue = value;
             m_pException = exception;
         }
@@ -55,7 +52,7 @@ namespace LumiSoft.Net.MIME
 
 
         #region override method ToString
-                
+
         /// <summary>
         /// Returns header field as string.
         /// </summary>
@@ -63,7 +60,7 @@ namespace LumiSoft.Net.MIME
         /// <param name="parmetersCharset">Charset to use to encode 8-bit characters. Value null means parameters not encoded.</param>
         /// <param name="reEncode">If true always specified encoding is used. If false and header field value not modified, original encoding is kept.</param>
         /// <returns>Returns header field as string.</returns>
-        public override string ToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset,bool reEncode)
+        public override string ToString(MIME_Encoding_EncodedWord wordEncoder, Encoding parmetersCharset, bool reEncode)
         {
             return m_ParseValue;
         }

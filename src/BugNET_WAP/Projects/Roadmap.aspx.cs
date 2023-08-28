@@ -12,14 +12,14 @@ using Microsoft.AspNet.FriendlyUrls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Projects
 {
     /// <summary>
     /// Project Road Map
     /// </summary>
-    public partial class Roadmap : BasePage
+    public partial class Roadmap : BugNetBasePage
     {
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -32,8 +32,8 @@ namespace BugNET.Projects
             {
                 try
                 {
-                    IList<string> segments = Request.GetFriendlyUrlSegments();
-                    ProjectId = Int32.Parse(segments[0]);
+                    var segments = Request.GetFriendlyUrlSegments();
+                    ProjectId = int.Parse(segments[0]);
                 }
                 catch
                 {
@@ -62,13 +62,12 @@ namespace BugNET.Projects
                 ltProject.Text = p.Name;
                 litProjectCode.Text = p.Code;
 
-				Page.Title = string.Format("{0} ({1}) - {2}", p.Name, p.Code, GetLocalResourceObject("Roadmap").ToString());
+                Page.Title = $@"{p.Name} ({p.Code}) - {GetLocalString("Roadmap")}";
 
 
-				BindRoadmap();             
+                BindRoadmap();
             }
 
-			
 
             // The ExpandIssuePaths method is called to handle
             // the SiteMapResolve event.
@@ -80,7 +79,7 @@ namespace BugNET.Projects
         /// </summary>
         private void BindRoadmap()
         {
-            RoadmapRepeater.DataSource = MilestoneManager.GetByProjectId(ProjectId,false);
+            RoadmapRepeater.DataSource = MilestoneManager.GetByProjectId(ProjectId, false);
             RoadmapRepeater.DataBind();
         }
 
@@ -88,16 +87,14 @@ namespace BugNET.Projects
         /// Gets or sets the sort field.
         /// </summary>
         /// <value>The sort field.</value>
-        string SortField
+        private string SortField
         {
-            get { return ViewState.Get("SortField", string.Empty); }
+            get => ViewState.Get("SortField", string.Empty);
             set
             {
                 if (value == SortField)
-                {
                     // same as current sort file, toggle sort direction
                     SortAscending = !SortAscending;
-                }
 
                 ViewState.Set("SortField", value);
             }
@@ -107,23 +104,21 @@ namespace BugNET.Projects
         /// Gets or sets a value indicating whether [sort ascending].
         /// </summary>
         /// <value><c>true</c> if [sort ascending]; otherwise, <c>false</c>.</value>
-        bool SortAscending
+        private bool SortAscending
         {
-            get { return ViewState.Get("SortAscending", true); }
-            set { ViewState.Set("SortAscending", value); }
+            get => ViewState.Get("SortAscending", true);
+            set => ViewState.Set("SortAscending", value);
         }
 
-        string SortHeader
+        private string SortHeader
         {
-            get { return ViewState.Get("SortHeader", string.Empty); }
-            set { ViewState.Set("SortHeader", value); }
+            get => ViewState.Get("SortHeader", string.Empty);
+            set => ViewState.Set("SortHeader", value);
         }
 
         protected void SortIssueClick(object sender, EventArgs e)
         {
-            var button = sender as LinkButton;
-
-            if (button != null)
+            if (sender is LinkButton button)
             {
                 SortField = button.CommandArgument;
                 SortHeader = button.CommandName;
@@ -137,7 +132,7 @@ namespace BugNET.Projects
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void Page_Unload(object sender, System.EventArgs e)
+        protected void Page_Unload(object sender, EventArgs e)
         {
             //remove the event handler
             SiteMap.SiteMapResolve -= ExpandProjectPaths;
@@ -149,7 +144,7 @@ namespace BugNET.Projects
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="System.Web.SiteMapResolveEventArgs"/> instance containing the event data.</param>
         /// <returns></returns>
-        private SiteMapNode ExpandProjectPaths(Object sender, SiteMapResolveEventArgs e)
+        private SiteMapNode ExpandProjectPaths(object sender, SiteMapResolveEventArgs e)
         {
             var currentNode = SiteMap.CurrentNode.Clone(true);
             var tempNode = currentNode;
@@ -157,16 +152,11 @@ namespace BugNET.Projects
             // The current node, and its parents, can be modified to include
             // dynamic querystring information relevant to the currently
             // executing request.
-            if (ProjectId != 0)
-            {
-                tempNode.Url = string.Format("{0}?pid={1}", tempNode.Url, ProjectId);
-            }
+            if (ProjectId != 0) tempNode.Url = $"{tempNode.Url}?pid={ProjectId}";
 
-            if ((null != (tempNode = tempNode.ParentNode)) &&
-                (ProjectId != 0))
-            {
-                tempNode.Url = string.Format("{0}?pid={1}", tempNode.Url, ProjectId);
-            }
+            if (null != (tempNode = tempNode.ParentNode) &&
+                ProjectId != 0)
+                tempNode.Url = $"{tempNode.Url}?pid={ProjectId}";
 
             return currentNode;
         }
@@ -183,15 +173,16 @@ namespace BugNET.Projects
                 case ListItemType.Header:
                     foreach (Control c in e.Item.Controls)
                     {
-                        if (c.GetType() != typeof (HtmlTableCell) || c.ID != string.Format("td{0}", SortHeader)) continue;
+                        if (c.GetType() != typeof(HtmlTableCell) || c.ID != $"td{SortHeader}") continue;
                         var img = new Image
                         {
-                            ImageUrl = string.Format("~/images/{0}.png", (SortAscending ? "bullet_arrow_up" : "bullet_arrow_down")),
+                            ImageUrl = $"~/images/{(SortAscending ? "bullet_arrow_up" : "bullet_arrow_down")}.png",
                             CssClass = "icon"
                         };
                         // setting the dynamically URL of the image
                         c.Controls.Add(img);
                     }
+
                     break;
             }
         }
@@ -204,58 +195,47 @@ namespace BugNET.Projects
         /// <returns>Descriptive text</returns>
         private string GetDueDateDescription(DateTime? dueDate, bool completed)
         {
-            var response = GetLocalResourceObject("NoDueDate").ToString();
+            var response = GetLocalString("NoDueDate");
 
-            if (dueDate != null)
+            if (dueDate == null) return response;
+            var date = (DateTime) dueDate;
+            if (date.Date.Equals(DateTime.Now.Date))
             {
-                var date = (DateTime)dueDate;
-                if (date.Date.Equals(DateTime.Now.Date))
-                {
-                    response = string.Format("{0} <b>{1}</b>", Resources.SharedResources.Due, Resources.SharedResources.Today);
-                }
-                else if (date.Date.Equals(DateTime.Now.AddDays(1).Date))
-                {
-                    response = string.Format("{0} <b>{1}</b>", Resources.SharedResources.Due, Resources.SharedResources.Tomorrow);
-                }
-                else if (date.Date.Equals(DateTime.Now.AddDays(-1).Date))
-                {
-                    response = string.Format("{0} <b>{1}</b>", Resources.SharedResources.Due, Resources.SharedResources.Yesterday);
-                }
-                else
-                {
-                    string diffName;
-                    var diffDays = (date.Date - DateTime.Now.Date).Days;
-
-                    if (Math.Abs(diffDays) < 14)
-                    {
-                        diffName = string.Format("{0} {1}", Math.Abs(diffDays), Resources.SharedResources.Days);
-                    }
-                    else if (Math.Abs(diffDays) < 61)
-                    {
-                        diffName = string.Format("{0} {1}", Math.Abs(Math.Round((decimal)diffDays / 7)), Resources.SharedResources.Weeks);
-                    }
-                    else if (Math.Abs(diffDays) < 730)
-                    {
-                        diffName = string.Format("{0} {1}", Math.Abs(Math.Round((decimal)diffDays / 30)), Resources.SharedResources.Months);
-                    }
-                    else
-                    {
-                        diffName = string.Format("{0} {1}", Math.Abs(Math.Round((decimal)diffDays / 365)), Resources.SharedResources.Years);
-                    }
-
-                    if (diffDays < 0)
-                    {
-                        response = completed ? 
-                            Resources.SharedResources.Finished : 
-                            String.Format("<b>{0}</b> {1}", diffName, Resources.SharedResources.Late);
-                    }
-                    else
-                    {
-                        response = String.Format("{1} {0}", diffName, Resources.SharedResources.DueIn);
-                    }
-                }
-                response += String.Format(" ({0})", date.Date.ToShortDateString());
+                response = $"{Resources.SharedResources.Due} <b>{Resources.SharedResources.Today}</b>";
             }
+            else if (date.Date.Equals(DateTime.Now.AddDays(1).Date))
+            {
+                response = $"{Resources.SharedResources.Due} <b>{Resources.SharedResources.Tomorrow}</b>";
+            }
+            else if (date.Date.Equals(DateTime.Now.AddDays(-1).Date))
+            {
+                response = $"{Resources.SharedResources.Due} <b>{Resources.SharedResources.Yesterday}</b>";
+            }
+            else
+            {
+                string diffName;
+                var diffDays = (date.Date - DateTime.Now.Date).Days;
+
+                if (Math.Abs(diffDays) < 14)
+                    diffName = $"{Math.Abs(diffDays)} {Resources.SharedResources.Days}";
+                else if (Math.Abs(diffDays) < 61)
+                    diffName = $"{Math.Abs(Math.Round((decimal) diffDays / 7))} {Resources.SharedResources.Weeks}";
+                else if (Math.Abs(diffDays) < 730)
+                    diffName =
+                        $"{Math.Abs(Math.Round((decimal) diffDays / 30))} {Resources.SharedResources.Months}";
+                else
+                    diffName =
+                        $"{Math.Abs(Math.Round((decimal) diffDays / 365))} {Resources.SharedResources.Years}";
+
+                if (diffDays < 0)
+                    response = completed
+                        ? Resources.SharedResources.Finished
+                        : $"<b>{diffName}</b> {Resources.SharedResources.Late}";
+                else
+                    response = string.Format("{1} {0}", diffName, Resources.SharedResources.DueIn);
+            }
+
+            response += $" ({date.Date.ToShortDateString()})";
             return response;
         }
 
@@ -268,42 +248,36 @@ namespace BugNET.Projects
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var m = e.Item.DataItem as Milestone;
+            if (!(e.Item.DataItem is Milestone m)) return;
 
-            if (m == null) return;
+            if (!string.IsNullOrWhiteSpace(m.Notes))
+                ((Label) e.Item.FindControl("MilestoneNotes")).Text = " - " + m.Notes;
+            var dueDate = (Label) e.Item.FindControl("lblDueDate");
 
-            if(!string.IsNullOrWhiteSpace(m.Notes))
-            { 
-                ((Label)e.Item.FindControl("MilestoneNotes")).Text = " - " + m.Notes;
-            }
-            var dueDate = (Label)e.Item.FindControl("lblDueDate");
-       
             if (m.DueDate.HasValue)
             {
-                var date = (DateTime)m.DueDate;
+                var date = (DateTime) m.DueDate;
                 dueDate.Text = GetDueDateDescription(date, false);
             }
             else
             {
-                dueDate.Text = GetLocalResourceObject("NoReleaseDate").ToString();
+                dueDate.Text = GetLocalString("NoReleaseDate");
             }
 
-            var list = e.Item.FindControl("IssuesList") as Repeater;
-
-            if (list == null) return;
+            if (!(e.Item.FindControl("IssuesList") is Repeater list)) return;
 
             var queryClauses = new List<QueryClause>
-        	{
-        	    new QueryClause("AND", "iv.[IssueMilestoneId]", "=", m.Id.ToString(), SqlDbType.Int),
+            {
+                new QueryClause("AND", "iv.[IssueMilestoneId]", "=", m.Id.ToString(), SqlDbType.Int),
                 new QueryClause("AND", "iv.[Disabled]", "=", "0", SqlDbType.Int)
-        	};
+            };
 
-            var sortString = (SortAscending) ? "ASC" : "DESC";
+            var sortString = SortAscending ? "ASC" : "DESC";
 
             var sortList = new List<KeyValuePair<string, string>>
-        	{
-				new KeyValuePair<string, string>(SortField, sortString)
-        	};
+            {
+                new KeyValuePair<string, string>(SortField, sortString)
+            };
 
             var issueList = IssueManager.PerformQuery(queryClauses, sortList, ProjectId);
 
@@ -316,26 +290,30 @@ namespace BugNET.Projects
                 list.DataBind();
             }
             else
+            {
                 e.Item.Visible = false;
+            }
 
-            var nfi = new NumberFormatInfo { PercentDecimalDigits = 0 };
+            var nfi = new NumberFormatInfo {PercentDecimalDigits = 0};
 
             var progressValues = ProjectManager.GetRoadMapProgress(ProjectId, m.Id);
             var issueCount = progressValues[1];
             var resolvedCount = progressValues[0];
-            var percent = (issueCount.Equals(0)) ? 0 : resolvedCount.To<double>() / issueCount.To<double>();
+            var percent = issueCount.Equals(0) ? 0 : resolvedCount.To<double>() / issueCount.To<double>();
             var pct = percent.ToString("P", nfi);
 
             var match = Regex.Match(pct, @"\d+").Value.ToOrDefault(0);
 
-            ((Label)e.Item.FindControl("lblProgress")).Text = string.Format(GetLocalResourceObject("ProgressMessage").ToString(), progressValues[0], progressValues[1]);
-  
-            ((HtmlControl)e.Item.FindControl("ProgressBar")).Attributes.CssStyle.Add("width", string.Format("{0}%", match));
-            ((HtmlControl)e.Item.FindControl("ProgressBar")).Attributes.Add("aria-valuenow", match.ToString());
-            ((HtmlControl)e.Item.FindControl("ProgressBar")).Controls.Add(new LiteralControl(string.Format("{0}%", match)));
+            ((Label) e.Item.FindControl("lblProgress")).Text = string.Format(GetLocalString("ProgressMessage"),
+                progressValues[0], progressValues[1]);
 
-            ((HyperLink)e.Item.FindControl("MilestoneLink")).NavigateUrl = string.Format(Page.ResolveUrl("~/Issues/IssueList.aspx") + "?pid={0}&m={1}", ProjectId, m.Id);
-            ((HyperLink)e.Item.FindControl("MilestoneLink")).Text = m.Name;
+            ((HtmlControl) e.Item.FindControl("ProgressBar")).Attributes.CssStyle.Add("width", $"{match}%");
+            ((HtmlControl) e.Item.FindControl("ProgressBar")).Attributes.Add("aria-valuenow", match.ToString());
+            ((HtmlControl) e.Item.FindControl("ProgressBar")).Controls.Add(new LiteralControl($"{match}%"));
+
+            ((HyperLink) e.Item.FindControl("MilestoneLink")).NavigateUrl =
+                string.Format(Page.ResolveUrl("~/Issues/IssueList.aspx") + "?pid={0}&m={1}", ProjectId, m.Id);
+            ((HyperLink) e.Item.FindControl("MilestoneLink")).Text = m.Name;
         }
     }
 }

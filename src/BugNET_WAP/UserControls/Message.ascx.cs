@@ -41,19 +41,13 @@ namespace BugNET.UserControls
 
         #endregion
 
-        private MessageType _messageType;
-
         public bool ShowStatic { get; internal set; }
 
         /// <summary>
         /// Gets or sets the type of the icon.
         /// </summary>
         /// <value>The type of the icon.</value>
-        public MessageType IconType
-        {
-            get { return _messageType; }
-            set { _messageType = value; }
-        }
+        public MessageType IconType { get; set; }
 
         /// <summary>
         /// Gets or sets the text.
@@ -61,8 +55,8 @@ namespace BugNET.UserControls
         /// <value>The text.</value>
         public string Text
         {
-            get { return lblMessage.Text; }
-            set { lblMessage.Text = value; }
+            get => lblMessage.Text;
+            set => lblMessage.Text = value;
         }
 
         /// <summary>
@@ -71,8 +65,8 @@ namespace BugNET.UserControls
         /// <value>The width.</value>
         public Unit Width
         {
-            get { return MessageContainer.Width; }
-            set { MessageContainer.Width = value; }
+            get => MessageContainer.Width;
+            set => MessageContainer.Width = value;
         }
 
         /// <summary>
@@ -93,7 +87,7 @@ namespace BugNET.UserControls
         {
             base.OnPreRender(e);
 
-            switch (_messageType)
+            switch (IconType)
             {
                 case MessageType.Information:
                     MessageContainer.CssClass = "alert alert-info alert-dismissible";

@@ -6,28 +6,22 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Projects.UserControls
 {
     /// <summary>
     /// 
     /// </summary>
-    public partial class ProjectCustomFields : UserControl, IEditProjectControl
+    public partial class ProjectCustomFields : BugNetUserControl, IEditProjectControl
     {
-        private int _projectId = -1;
-
         #region IEditProjectControl Members
 
         /// <summary>
         /// Gets or sets the project id.
         /// </summary>
         /// <value>The project id.</value>
-        public int ProjectId
-        {
-            get { return _projectId; }
-            set { _projectId = value; }
-        }
+        public int ProjectId { get; set; } = -1;
 
 
         /// <summary>
@@ -43,17 +37,14 @@ namespace BugNET.Administration.Projects.UserControls
         /// Gets a value indicating whether [show save button].
         /// </summary>
         /// <value><c>true</c> if [show save button]; otherwise, <c>false</c>.</value>
-        public bool ShowSaveButton
-        {
-            get { return false; }
-        }
+        public bool ShowSaveButton => false;
 
         /// <summary>
         /// Initializes this instance.
         /// </summary>
         public void Initialize()
         {
-            dropDataType.DataSource = Enum.GetNames(typeof (ValidationDataType));
+            dropDataType.DataSource = Enum.GetNames(typeof(ValidationDataType));
             dropDataType.DataBind();
             BindCustomFields();
         }
@@ -67,7 +58,7 @@ namespace BugNET.Administration.Projects.UserControls
         {
             foreach (DataGridItem item in grdCustomFields.Items)
             {
-                var grdSelectionValues = (DataGrid)item.FindControl("grdSelectionValues");
+                var grdSelectionValues = (DataGrid) item.FindControl("grdSelectionValues");
                 if (null == grdSelectionValues) continue;
                 grdSelectionValues.DataSource = GetCustomFieldSelections(Convert.ToInt32(item.Cells[0].Text.Trim()));
                 grdSelectionValues.DataKeyField = "Id";
@@ -142,11 +133,11 @@ namespace BugNET.Administration.Projects.UserControls
         {
             var newName = txtName.Text.Trim();
 
-            if (newName == String.Empty)
+            if (newName == string.Empty)
                 return;
 
-            var dataType = (ValidationDataType)Enum.Parse(typeof(ValidationDataType), dropDataType.SelectedValue);
-            var fieldType = (CustomFieldType)Enum.Parse(typeof(CustomFieldType), rblCustomFieldType.SelectedValue);
+            var dataType = (ValidationDataType) Enum.Parse(typeof(ValidationDataType), dropDataType.SelectedValue);
+            var fieldType = (CustomFieldType) Enum.Parse(typeof(CustomFieldType), rblCustomFieldType.SelectedValue);
             var required = chkRequired.Checked;
 
             var newCustomField = new CustomField
@@ -179,15 +170,15 @@ namespace BugNET.Administration.Projects.UserControls
         protected void grdCustomFields_Update(object sender, DataGridCommandEventArgs e)
         {
             var cf = CustomFieldManager.GetById(Convert.ToInt32(grdCustomFields.DataKeys[e.Item.ItemIndex]));
-            var txtCustomFieldName = (TextBox)e.Item.FindControl("txtCustomFieldName");
-            var customFieldType = (DropDownList)e.Item.FindControl("dropCustomFieldType");
-            var dataType = (DropDownList)e.Item.FindControl("dropEditDataType");
-            var required = (CheckBox)e.Item.FindControl("chkEditRequired");
+            var txtCustomFieldName = (TextBox) e.Item.FindControl("txtCustomFieldName");
+            var customFieldType = (DropDownList) e.Item.FindControl("dropCustomFieldType");
+            var dataType = (DropDownList) e.Item.FindControl("dropEditDataType");
+            var required = (CheckBox) e.Item.FindControl("chkEditRequired");
 
             cf.Name = txtCustomFieldName.Text;
 
-            var DataType = (ValidationDataType)Enum.Parse(typeof(ValidationDataType), dataType.SelectedValue);
-            var FieldType = (CustomFieldType)Enum.Parse(typeof(CustomFieldType), customFieldType.SelectedValue);
+            var DataType = (ValidationDataType) Enum.Parse(typeof(ValidationDataType), dataType.SelectedValue);
+            var FieldType = (CustomFieldType) Enum.Parse(typeof(CustomFieldType), customFieldType.SelectedValue);
 
             cf.FieldType = FieldType;
             cf.DataType = DataType;
@@ -203,43 +194,44 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The source of the event.</param>
         /// <param name="e">The <see cref="T:System.Web.UI.WebControls.DataGridItemEventArgs"/> instance containing the event data.</param>
-        protected void grdCustomFields_ItemDataBound(Object s, DataGridItemEventArgs e)
+        protected void grdCustomFields_ItemDataBound(object s, DataGridItemEventArgs e)
         {
             Control container = e.Item;
 
-            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem || e.Item.ItemType == ListItemType.SelectedItem)
+            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem ||
+                e.Item.ItemType == ListItemType.SelectedItem)
             {
-                if (e.Item.DataItem == null)
-                {
-                    return;
-                }
+                if (e.Item.DataItem == null) return;
 
-                var btnExpandButton = (HtmlImage)container.FindControl("image_");
+                var btnExpandButton = (HtmlImage) container.FindControl("image_");
                 if (btnExpandButton != null)
                 {
-                    var c = (HtmlControl)e.Item.FindControl("divSelectionValues");
-                    btnExpandButton.Attributes.Add("OnClick", string.Format("Toggle('{0}', '{1}');", c.ClientID, btnExpandButton.ClientID));
+                    var c = (HtmlControl) e.Item.FindControl("divSelectionValues");
+                    btnExpandButton.Attributes.Add("OnClick", $"Toggle('{c.ClientID}', '{btnExpandButton.ClientID}');");
                 }
 
-                var currentCustomField = (CustomField)e.Item.DataItem;
+                var currentCustomField = (CustomField) e.Item.DataItem;
 
-                var lblName = (Label)e.Item.FindControl("lblName");
+                var lblName = (Label) e.Item.FindControl("lblName");
                 lblName.Text = currentCustomField.Name;
 
-                var lblDataType = (Label)e.Item.FindControl("lblDataType");
+                var lblDataType = (Label) e.Item.FindControl("lblDataType");
                 lblDataType.Text = currentCustomField.DataType.ToString();
 
-                var lblFieldType = (Label)e.Item.FindControl("lblFieldType");
+                var lblFieldType = (Label) e.Item.FindControl("lblFieldType");
                 lblFieldType.Text = LocalizeFieldType(currentCustomField.FieldType);
 
-                var lblRequired = (Label)e.Item.FindControl("lblRequired");
-                lblRequired.Text = currentCustomField.Required ? Resources.SharedResources.Yes : Resources.SharedResources.No;
+                var lblRequired = (Label) e.Item.FindControl("lblRequired");
+                lblRequired.Text = currentCustomField.Required
+                    ? Resources.SharedResources.Yes
+                    : Resources.SharedResources.No;
 
-                var btnDelete = (ImageButton)e.Item.FindControl("btnDeleteCustomField");
-                var message = string.Format(GetLocalResourceObject("ConfirmDelete").ToString(), currentCustomField.Name.Trim());
-                btnDelete.Attributes.Add("onclick", String.Format("return confirm('{0}');", message.JsEncode()));
+                var btnDelete = (ImageButton) e.Item.FindControl("btnDeleteCustomField");
+                var message = string.Format(GetLocalString("ConfirmDelete"), currentCustomField.Name.Trim());
+                btnDelete.Attributes.Add("onclick", $"return confirm('{message.JsEncode()}');");
 
-                var table = e.Item.Cells[grdCustomFields.Columns.Count - 1].FindControl("tblSelectionValues") as HtmlTable;
+                var table =
+                    e.Item.Cells[grdCustomFields.Columns.Count - 1].FindControl("tblSelectionValues") as HtmlTable;
 
                 if (table != null)
                 {
@@ -250,7 +242,8 @@ namespace BugNET.Administration.Projects.UserControls
                         table.Visible = true;
                         e.Item.Cells[e.Item.Cells.Count - 1].Visible = true;
 
-                        var grid = (DataGrid)e.Item.Cells[grdCustomFields.Columns.Count - 1].FindControl("grdSelectionValues");
+                        var grid = (DataGrid) e.Item.Cells[grdCustomFields.Columns.Count - 1]
+                            .FindControl("grdSelectionValues");
                         ViewState["CustomFieldId"] = currentCustomField.Id;
                         grid.DataSource = GetCustomFieldSelections(currentCustomField.Id);
                         grid.DataKeyField = "Id";
@@ -261,21 +254,21 @@ namespace BugNET.Administration.Projects.UserControls
                         e.Item.FindControl("image_").Visible = false;
                         table.Visible = false;
                         e.Item.Cells[e.Item.Cells.Count - 1].Visible = false;
-                    }   
+                    }
                 }
             }
 
             if (e.Item.ItemType == ListItemType.EditItem)
             {
-                var currentCustomField = (CustomField)e.Item.DataItem;
-                var txtCustomFieldName = (TextBox)e.Item.FindControl("txtCustomFieldName");
-                var customFieldType = (DropDownList)e.Item.FindControl("dropCustomFieldType");
-                var dataType = (DropDownList)e.Item.FindControl("dropEditDataType");
-                var required = (CheckBox)e.Item.FindControl("chkEditRequired");
+                var currentCustomField = (CustomField) e.Item.DataItem;
+                var txtCustomFieldName = (TextBox) e.Item.FindControl("txtCustomFieldName");
+                var customFieldType = (DropDownList) e.Item.FindControl("dropCustomFieldType");
+                var dataType = (DropDownList) e.Item.FindControl("dropEditDataType");
+                var required = (CheckBox) e.Item.FindControl("chkEditRequired");
 
                 required.Checked = currentCustomField.Required;
                 txtCustomFieldName.Text = currentCustomField.Name;
-                customFieldType.SelectedValue = Convert.ToString((int)currentCustomField.FieldType);
+                customFieldType.SelectedValue = Convert.ToString((int) currentCustomField.FieldType);
                 dataType.SelectedValue = currentCustomField.DataType.ToString();
                 dataType.Items.Clear();
                 dataType.DataSource = Enum.GetNames(typeof(ValidationDataType));
@@ -296,39 +289,38 @@ namespace BugNET.Administration.Projects.UserControls
             {
                 case ListItemType.AlternatingItem:
                 case ListItemType.Item:
+                {
+                    if (e.Item.DataItem == null) return;
+                    var cfs = (CustomFieldSelection) e.Item.DataItem;
+                    var btnDelete = (ImageButton) e.Item.FindControl("btnDeleteSelectionValue");
+                    if (btnDelete != null)
                     {
-                        if (e.Item.DataItem == null)
-                        {
-                            return;
-                        }
-                        var cfs = (CustomFieldSelection) e.Item.DataItem;
-                        var btnDelete = (ImageButton)e.Item.FindControl("btnDeleteSelectionValue");
-                        if (btnDelete != null)
-                        {
-                            var message = string.Format(GetLocalResourceObject("ConfirmCustomFieldSelectionDelete").ToString(), cfs.Name.Trim());
-                            btnDelete.Attributes.Add("onclick", String.Format("return confirm('{0}');", message.JsEncode()));
-                        }
+                        var message = string.Format(GetLocalString("ConfirmCustomFieldSelectionDelete"),
+                            cfs.Name.Trim());
+                        btnDelete.Attributes.Add("onclick", $"return confirm('{message.JsEncode()}');");
                     }
+                }
                     break;
                 case ListItemType.Footer:
                     if (ViewState["CustomFieldId"] != null)
                     {
-                        var btnAddSelectionValue = (ImageButton)e.Item.FindControl("btnAddSelectionValue");
+                        var btnAddSelectionValue = (ImageButton) e.Item.FindControl("btnAddSelectionValue");
                         var val1 = (RequiredFieldValidator) e.Item.FindControl("RequiredFieldValidator1");
                         var val2 = (RequiredFieldValidator) e.Item.FindControl("RequiredFieldValidator2");
 
-                        if (val1 != null & val2 != null)
+                        if ((val1 != null) & (val2 != null))
                         {
-                            val1.ValidationGroup = string.Format("AddSelection{0}", ViewState["CustomFieldId"]);
-                            val2.ValidationGroup = string.Format("AddSelection{0}", ViewState["CustomFieldId"]);
+                            val1.ValidationGroup = $"AddSelection{ViewState["CustomFieldId"]}";
+                            val2.ValidationGroup = $"AddSelection{ViewState["CustomFieldId"]}";
                         }
 
                         if (btnAddSelectionValue != null)
                         {
-                            btnAddSelectionValue.ValidationGroup = string.Format("AddSelection{0}", ViewState["CustomFieldId"]);
+                            btnAddSelectionValue.ValidationGroup = $"AddSelection{ViewState["CustomFieldId"]}";
                             btnAddSelectionValue.CommandArgument = ViewState["CustomFieldId"].ToString();
                         }
                     }
+
                     ViewState["CustomFieldId"] = null;
                     break;
             }
@@ -341,11 +333,10 @@ namespace BugNET.Administration.Projects.UserControls
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
         protected void grdSelectionValues_Edit(object sender, DataGridCommandEventArgs e)
         {
-            lblError.Text = String.Empty;
+            lblError.Text = string.Empty;
             var lblCustomFieldId = (Label) e.Item.FindControl("lblCustomFieldId");
 
             if (lblCustomFieldId != null)
-            {
                 foreach (DataGridItem item in grdCustomFields.Items)
                 {
                     var grdSelectionValues = (DataGrid) item.FindControl("grdSelectionValues");
@@ -357,7 +348,6 @@ namespace BugNET.Administration.Projects.UserControls
                     //rebinding the master grid will not fire the update command
                     ViewState["EditingSubGrid"] = true;
                 }
-            }
 
             BindCustomFieldSelections();
         }
@@ -401,14 +391,15 @@ namespace BugNET.Administration.Projects.UserControls
                         var txtAddSelectionValue = (TextBox) e.Item.FindControl("txtAddSelectionValue");
 
                         cfs = new CustomFieldSelection
-                                  {
-                                      CustomFieldId = Convert.ToInt32(e.CommandArgument),
-                                      Name = txtAddSelectionName.Text.Trim(),
-                                      Value = txtAddSelectionValue.Text.Trim()
-                                  };
+                        {
+                            CustomFieldId = Convert.ToInt32(e.CommandArgument),
+                            Name = txtAddSelectionName.Text.Trim(),
+                            Value = txtAddSelectionValue.Text.Trim()
+                        };
 
                         CustomFieldSelectionManager.SaveOrUpdate(cfs);
                     }
+
                     break;
             }
 
@@ -422,7 +413,7 @@ namespace BugNET.Administration.Projects.UserControls
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
         protected void grdSelectionValues_CancelCommand(object source, DataGridCommandEventArgs e)
         {
-            lblError.Text = String.Empty;
+            lblError.Text = string.Empty;
             foreach (DataGridItem item in grdCustomFields.Items)
             {
                 var grdSelectionValues = (DataGrid) item.FindControl("grdSelectionValues");
@@ -432,6 +423,7 @@ namespace BugNET.Administration.Projects.UserControls
                     grdSelectionValues.EditItemIndex = -1;
                 }
             }
+
             ViewState["EditingSubGrid"] = null;
             BindCustomFieldSelections();
             BindCustomFields();
@@ -444,7 +436,7 @@ namespace BugNET.Administration.Projects.UserControls
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
         protected void grdSelectionValues_Update(object source, DataGridCommandEventArgs e)
         {
-            lblError.Text = String.Empty;
+            lblError.Text = string.Empty;
             if (ListItemType.EditItem == e.Item.ItemType)
             {
                 var selectionName = (TextBox) e.Item.FindControl("txtEditSelectionName");
@@ -453,12 +445,12 @@ namespace BugNET.Administration.Projects.UserControls
                 {
                     var customFieldSelectionId = (int) ((DataGrid) source).DataKeys[e.Item.ItemIndex];
 
-                    CustomFieldSelection cfs = CustomFieldSelectionManager.GetById(customFieldSelectionId);
+                    var cfs = CustomFieldSelectionManager.GetById(customFieldSelectionId);
                     cfs.Name = selectionName.Text.Trim();
                     cfs.Value = txtValue.Text.Trim();
                     CustomFieldSelectionManager.SaveOrUpdate(cfs);
 
-                    lblError.Text = String.Empty;
+                    lblError.Text = string.Empty;
 
                     foreach (DataGridItem item in grdCustomFields.Items)
                     {
@@ -470,6 +462,7 @@ namespace BugNET.Administration.Projects.UserControls
                         BindCustomFieldSelections();
                     }
                 }
+
                 ViewState["EditingSubGrid"] = null;
                 BindCustomFields();
             }
@@ -490,14 +483,15 @@ namespace BugNET.Administration.Projects.UserControls
                 (CheckBox) grdCustomFields.Items[grdCustomFields.EditItemIndex].FindControl("chkEditRequired");
 
             dropEditDataType.Items.Clear();
-            dropEditDataType.DataSource = Enum.GetNames(typeof (ValidationDataType));
+            dropEditDataType.DataSource = Enum.GetNames(typeof(ValidationDataType));
             dropEditDataType.DataBind();
             dropEditDataType.Enabled = true;
 
             switch (int.Parse(dropEditCustomFieldType.SelectedValue))
             {
                 case 1:
-                    dropEditDataType.Items.Remove(dropEditDataType.Items.FindByValue(ValidationDataType.Date.ToString()));
+                    dropEditDataType.Items.Remove(
+                        dropEditDataType.Items.FindByValue(ValidationDataType.Date.ToString()));
                     break;
                 case 2:
                     dropEditDataType.SelectedValue = ValidationDataType.String.ToString();
@@ -528,7 +522,7 @@ namespace BugNET.Administration.Projects.UserControls
         protected void rblCustomFieldType_SelectedIndexChanged(object sender, EventArgs e)
         {
             dropDataType.Items.Clear();
-            dropDataType.DataSource = Enum.GetNames(typeof (ValidationDataType));
+            dropDataType.DataSource = Enum.GetNames(typeof(ValidationDataType));
             dropDataType.DataBind();
             dropDataType.Enabled = true;
 
@@ -588,24 +582,25 @@ namespace BugNET.Administration.Projects.UserControls
             else
                 BindCustomFields();
         }
-        
+
         private string LocalizeFieldType(CustomFieldType fieldType)
         {
             switch (fieldType)
             {
                 case CustomFieldType.Text:
-                    return GetLocalResourceObject("TextType.Text").ToString();
+                    return GetLocalString("TextType.Text");
                 case CustomFieldType.DropDownList:
-                    return GetLocalResourceObject("DropDownListType.Text").ToString();
+                    return GetLocalString("DropDownListType.Text");
                 case CustomFieldType.Date:
-                    return GetLocalResourceObject("DateType.Text").ToString();
+                    return GetLocalString("DateType.Text");
                 case CustomFieldType.RichText:
-                    return GetLocalResourceObject("RichTextType.Text").ToString();
+                    return GetLocalString("RichTextType.Text");
                 case CustomFieldType.YesNo:
-                    return GetLocalResourceObject("YesNoType.Text").ToString();
+                    return GetLocalString("YesNoType.Text");
                 case CustomFieldType.UserList:
-                    return GetLocalResourceObject("UserListType.Text").ToString();
+                    return GetLocalString("UserListType.Text");
             }
+
             return "Unknown";
         }
     }

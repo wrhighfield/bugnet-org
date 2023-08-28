@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class UserCustomFieldSelectionManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -37,7 +38,8 @@ namespace BugNET.BLL
         /// <returns></returns>
         public static bool Delete(int customFieldSelectionId)
         {
-            if (customFieldSelectionId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldSelectionId));
+            if (customFieldSelectionId <= Globals.NewId)
+                throw new ArgumentOutOfRangeException(nameof(customFieldSelectionId));
 
             return DataProviderManager.Provider.DeleteUserCustomFieldSelection(customFieldSelectionId);
         }
@@ -60,7 +62,9 @@ namespace BugNET.BLL
         /// </summary>
         /// <param name="id">The id.</param>
         /// <returns></returns>
-        public static UserCustomFieldSelection GetById(int id) =>
-            DataProviderManager.Provider.GetUserCustomFieldSelectionById(id);
+        public static UserCustomFieldSelection GetById(int id)
+        {
+            return DataProviderManager.Provider.GetUserCustomFieldSelectionById(id);
+        }
     }
 }

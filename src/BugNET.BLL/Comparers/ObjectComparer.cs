@@ -17,6 +17,7 @@ namespace BugNET.BLL.Comparers
         private bool multiColumn;
 
         #region Constructor
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ObjectComparer&lt;ComparableObject&gt;"/> class.
         /// </summary>
@@ -29,7 +30,7 @@ namespace BugNET.BLL.Comparers
         /// </summary>
         /// <param name="pPropertyName">Name of the p_property.</param>
         public ObjectComparer(string pPropertyName)
-        {    
+        {
             //We must have a property name for this comparer to work
             PropertyName = pPropertyName;
         }
@@ -45,10 +46,11 @@ namespace BugNET.BLL.Comparers
             PropertyName = pPropertyName;
             MultiColumn = pMultiColumn;
         }
+
         #endregion
 
         #region Property
-    
+
         /// <summary>
         /// Gets or sets a value indicating whether [multi column].
         /// </summary>
@@ -59,7 +61,7 @@ namespace BugNET.BLL.Comparers
             set => multiColumn = value;
         }
 
-     
+
         /// <summary>
         /// Gets or sets the name of the property.
         /// </summary>
@@ -69,9 +71,11 @@ namespace BugNET.BLL.Comparers
             get => propertyName;
             set => propertyName = value;
         }
-        #endregion 
+
+        #endregion
 
         #region IComparer<ComparableObject> Members
+
         /// <summary>
         /// This comparer is used to sort the generic comparer
         /// The constructor sets the PropertyName that is used
@@ -92,7 +96,8 @@ namespace BugNET.BLL.Comparers
                 {
                     string fieldName, direction = "ASC";
                     if (sortExpression.Trim().EndsWith(" DESC"))
-                    {fieldName = sortExpression.Replace(" DESC", "").Trim();
+                    {
+                        fieldName = sortExpression.Replace(" DESC", "").Trim();
                         direction = "DESC";
                     }
                     else
@@ -116,25 +121,24 @@ namespace BugNET.BLL.Comparers
                             : iResult;
                     }
 
-                    throw new Exception($"{fieldName} is not a valid property to sort on. It doesn't exist in the Class.");
+                    throw new Exception(
+                        $"{fieldName} is not a valid property to sort on. It doesn't exist in the Class.");
 
                     //Compare values, using IComparable interface of the property's type
-
                 }
+
                 //Objects have the same sort order
                 return 0;
             }
 
             var val = t.GetProperty(PropertyName);
             if (val != null)
-            {
                 return Comparer.DefaultInvariant.Compare
                     (val.GetValue(x, null), val.GetValue(y, null));
-            }
 
             throw new Exception(PropertyName + "is not a valid property to sort on. It doesn't exist in the Class.");
         }
-    #endregion
 
+        #endregion
     }
 }

@@ -1,20 +1,19 @@
 using System;
 using System.Collections;
 using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
 using System.Web.Security;
+using BugNET.UI;
 
 namespace BugNET.Issues.UserControls
 {
     /// <summary>
     ///		Summary description for Comments.
     /// </summary>
-    public partial class Comments : UserControl, IIssueTab
+    public partial class Comments : BugNetUserControl, IIssueTab
     {
         private Guid _issueOwnerUserId;
 
@@ -24,8 +23,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The issue id.</value>
         public int IssueId
         {
-            get { return ViewState.Get("IssueId", 0); }
-            set { ViewState.Set("IssueId", value); }
+            get => ViewState.Get("IssueId", 0);
+            set => ViewState.Set("IssueId", value);
         }
 
         /// <summary>
@@ -34,8 +33,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", 0); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", 0);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -43,11 +42,11 @@ namespace BugNET.Issues.UserControls
         /// </summary>
         public void Initialize()
         {
-
             BindComments();
 
             //check users role permission for adding a comment
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.AddComment.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.AddComment.ToString()))
                 pnlAddComment.Visible = false;
         }
 
@@ -60,7 +59,7 @@ namespace BugNET.Issues.UserControls
 
             if (comments.Count == 0)
             {
-                lblComments.Text = GetLocalResourceObject("NoComments").ToString();
+                lblComments.Text = GetLocalString("NoComments");
                 lblComments.Visible = true;
                 rptComments.Visible = false;
             }
@@ -84,7 +83,7 @@ namespace BugNET.Issues.UserControls
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var currentComment = (IssueComment)e.Item.DataItem;
+            var currentComment = (IssueComment) e.Item.DataItem;
 
             //if (currentComment.CreatorUserId == _issueOwnerUserId)
             //    ((HtmlControl)e.Item.FindControl("CommentArea")).Attributes["class"] = "commentContainerOwner";
@@ -94,16 +93,16 @@ namespace BugNET.Issues.UserControls
 
             if (pnlEditComment != null) pnlEditComment.Visible = false;
 
-            var creatorDisplayName = (Label)e.Item.FindControl("CreatorDisplayName");
+            var creatorDisplayName = (Label) e.Item.FindControl("CreatorDisplayName");
             creatorDisplayName.Text = UserManager.GetUserDisplayName(currentComment.CreatorUserName);
-            creatorDisplayName.ToolTip = "Id: " + currentComment.CreatorUser.Id + Environment.NewLine + 
+            creatorDisplayName.ToolTip = "Id: " + currentComment.CreatorUser.Id + Environment.NewLine +
                                          "UserName: " + currentComment.CreatorUser.UserName + Environment.NewLine +
                                          "DisplayName: " + currentComment.CreatorUser.DisplayName;
 
-            var lblDateCreated = (Label)e.Item.FindControl("lblDateCreated");
+            var lblDateCreated = (Label) e.Item.FindControl("lblDateCreated");
             lblDateCreated.Text = currentComment.DateCreated.ToString("f");
 
-            var ltlComment = (Literal)e.Item.FindControl("ltlComment");
+            var ltlComment = (Literal) e.Item.FindControl("ltlComment");
 
             // WARNING: Do not decode the text from the HTML control (which supplied the comment),
             // as this was encoded already.
@@ -115,16 +114,17 @@ namespace BugNET.Issues.UserControls
             ltlComment.Text = currentComment.Comment;
 
 
-            var avatar = (Image)e.Item.FindControl("Avatar");
+            var avatar = (Image) e.Item.FindControl("Avatar");
 
             if (HostSettingManager.Get(HostSettingNames.EnableGravatar, true))
             {
                 var user = Membership.GetUser(currentComment.CreatorUserName);
-                if (user != null && user.Email != null) avatar.Attributes.Add("src", PresentationUtils.GetGravatarImageUrl(user.Email, 64));
+                if (user != null && user.Email != null)
+                    avatar.Attributes.Add("src", PresentationUtils.GetGravatarImageUrl(user.Email, 64));
             }
 
-            var hlPermaLink = (HyperLink)e.Item.FindControl("hlPermalink");
-            hlPermaLink.NavigateUrl = String.Format("{0}#{1}", HttpContext.Current.Request.Url, currentComment.Id);
+            var hlPermaLink = (HyperLink) e.Item.FindControl("hlPermalink");
+            hlPermaLink.NavigateUrl = $"{HttpContext.Current.Request.Url}#{currentComment.Id}";
 
 
             var cmdEditComment = e.Item.FindControl("cmdEditComment") as ImageButton;
@@ -135,31 +135,36 @@ namespace BugNET.Issues.UserControls
                 cmdEditComment.Visible = false;
 
                 // Check if the current user is Authenticated and has permission to edit a comment.//If user can edit comments
-                if (Page.User.Identity.IsAuthenticated && UserManager.HasPermission(ProjectId, Common.Permission.EditComment.ToString()))
+                if (Page.User.Identity.IsAuthenticated &&
+                    UserManager.HasPermission(ProjectId, Common.Permission.EditComment.ToString()))
                     cmdEditComment.Visible = true;
-                    // Check if the project admin or a super user trying to edit the comment.
-                else if ((Page.User.Identity.IsAuthenticated && UserManager.IsSuperUser()) || (Page.User.Identity.IsAuthenticated && UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)))
+                // Check if the project admin or a super user trying to edit the comment.
+                else if ((Page.User.Identity.IsAuthenticated && UserManager.IsSuperUser()) ||
+                         (Page.User.Identity.IsAuthenticated &&
+                          UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)))
                     cmdEditComment.Visible = true;
-                    // Check if it is the original user, the project admin or a super user trying to edit the comment.
-                else if (currentComment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() && UserManager.HasPermission(ProjectId, Common.Permission.OwnerEditComment.ToString()))
+                // Check if it is the original user, the project admin or a super user trying to edit the comment.
+                else if (currentComment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() &&
+                         UserManager.HasPermission(ProjectId, Common.Permission.OwnerEditComment.ToString()))
                     cmdEditComment.Visible = true;
             }
 
             var cmdDeleteComment = e.Item.FindControl("cmdDeleteComment") as ImageButton;
 
             // Check if the current user is Authenticated and has the permission to delete a comment			
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.DeleteComment.ToString())) return;
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.DeleteComment.ToString())) return;
 
             if (cmdDeleteComment == null) return;
 
-            cmdDeleteComment.Attributes.Add("onclick", string.Format("return confirm('{0}');", GetLocalResourceObject("DeleteComment").ToString().Trim().JsEncode()));
+            cmdDeleteComment.Attributes.Add("onclick",
+                $"return confirm('{GetLocalString("DeleteComment").Trim().JsEncode()}');");
             cmdDeleteComment.Visible = false;
 
             // Check if it is the original user, the project admin or a super user trying to delete the comment.
-            if (currentComment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() || UserManager.IsSuperUser() || UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole))
-            {
-                cmdDeleteComment.Visible = true;
-            }
+            if (currentComment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() ||
+                UserManager.IsSuperUser() ||
+                UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)) cmdDeleteComment.Visible = true;
         }
 
 
@@ -188,15 +193,15 @@ namespace BugNET.Issues.UserControls
                     {
                         if (editor.Text.Trim().Length == 0) return;
 
-                        commentNumber = (HiddenField)pnlEditComment.FindControl("commentNumber");
+                        commentNumber = (HiddenField) pnlEditComment.FindControl("commentNumber");
                         var commentId = Convert.ToInt32(commentNumber.Value);
 
                         comment = IssueCommentManager.GetById(Convert.ToInt32(commentId));
                         comment.Comment = editor.Text.Trim();
                         IssueCommentManager.SaveOrUpdate(comment);
 
-                        editor.Text = String.Empty;
-                        commentNumber.Value = String.Empty;
+                        editor.Text = string.Empty;
+                        commentNumber.Value = string.Empty;
                     }
 
                     pnlEditComment.Visible = false;
@@ -205,7 +210,7 @@ namespace BugNET.Issues.UserControls
 
                     BindComments();
                     break;
-                case"Cancel":
+                case "Cancel":
                     pnlEditComment.Visible = false;
                     pnlComment.Visible = true;
                     pnlAddComment.Visible = true;
@@ -228,8 +233,8 @@ namespace BugNET.Issues.UserControls
                     if (editor != null) editor.Text = comment.Comment;
 
                     // Save the comment ID for further editting.
-                    commentNumber = (HiddenField)e.Item.FindControl("commentNumber");
-                    if (commentNumber != null) commentNumber.Value = (string)e.CommandArgument;
+                    commentNumber = (HiddenField) e.Item.FindControl("commentNumber");
+                    if (commentNumber != null) commentNumber.Value = (string) e.CommandArgument;
                     break;
             }
         }
@@ -244,16 +249,16 @@ namespace BugNET.Issues.UserControls
             if (CommentHtmlEditor.Text.Trim().Length == 0) return;
 
             var comment = new IssueComment
-                              {
-                                  IssueId = IssueId,
-                                  Comment = CommentHtmlEditor.Text.Trim(),
-                                  CreatorUserName = Security.GetUserName(),
-                                  DateCreated = DateTime.Now
-                              };
+            {
+                IssueId = IssueId,
+                Comment = CommentHtmlEditor.Text.Trim(),
+                CreatorUserName = Security.GetUserName(),
+                DateCreated = DateTime.Now
+            };
 
             var result = IssueCommentManager.SaveOrUpdate(comment);
 
-            if(result)
+            if (result)
             {
                 //add history record
                 var history = new IssueHistory
@@ -261,16 +266,17 @@ namespace BugNET.Issues.UserControls
                     IssueId = IssueId,
                     CreatedUserName = Security.GetUserName(),
                     DateChanged = DateTime.Now,
-                    FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Comment", "Comment"),
+                    FieldChanged =
+                        ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Comment", "Comment"),
                     OldValue = string.Empty,
                     NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Added", "Added"),
                     TriggerLastUpdateChange = true
                 };
 
-                IssueHistoryManager.SaveOrUpdate(history);   
+                IssueHistoryManager.SaveOrUpdate(history);
             }
 
-            CommentHtmlEditor.Text = String.Empty;
+            CommentHtmlEditor.Text = string.Empty;
             BindComments();
         }
     }

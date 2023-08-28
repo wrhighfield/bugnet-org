@@ -1,7 +1,7 @@
 ﻿using System;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
@@ -14,17 +14,15 @@ namespace BugNET.Administration.Host.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         #region IEditHostSettingControl Members
-
 
         /// <summary>
         /// Updates this instance.
         /// </summary>
         public bool Update()
-        {         
+        {
             if (EmailErrors.Checked)
                 LoggingManager.ConfigureEmailLoggingAppender();
             else
@@ -41,13 +39,10 @@ namespace BugNET.Administration.Host.UserControls
         public void Initialize()
         {
             ErrorLoggingEmail.Text = HostSettingManager.Get(HostSettingNames.ErrorLoggingEmailAddress);
-            EmailErrors.Checked = Boolean.Parse(HostSettingManager.Get(HostSettingNames.EmailErrors));
+            EmailErrors.Checked = bool.Parse(HostSettingManager.Get(HostSettingNames.EmailErrors));
         }
 
-        public bool ShowSaveButton
-        {
-            get { return true; }
-        }
+        public bool ShowSaveButton => true;
 
         #endregion
     }

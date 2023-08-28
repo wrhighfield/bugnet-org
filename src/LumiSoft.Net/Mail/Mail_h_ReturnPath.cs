@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-
 using LumiSoft.Net.MIME;
 
 namespace LumiSoft.Net.Mail
@@ -18,7 +17,7 @@ namespace LumiSoft.Net.Mail
     /// </example>
     public class Mail_h_ReturnPath : MIME_h
     {
-        private bool   m_IsModified = false;
+        private bool m_IsModified = false;
         private string m_Address;
 
         /// <summary>
@@ -42,26 +41,20 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public static Mail_h_ReturnPath Parse(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            var name_value = value.Split(new[]{':'},2);
-            if(name_value.Length != 2){
-                throw new ParseException("Invalid header field value '" + value + "'.");
-            }
+            var name_value = value.Split(new[] {':'}, 2);
+            if (name_value.Length != 2) throw new ParseException("Invalid header field value '" + value + "'.");
 
             var retVal = new Mail_h_ReturnPath(null);
 
             var r = new MIME_Reader(name_value[1].Trim());
             r.ToFirstChar();
             // Return-Path missing <>, some server won't be honor RFC.
-            if(!r.StartsWith("<")){
+            if (!r.StartsWith("<"))
                 retVal.m_Address = r.ToEnd();
-            }
-            else{
+            else
                 retVal.m_Address = r.ReadParenthesized();
-            }
 
             return retVal;
         }
@@ -78,11 +71,9 @@ namespace LumiSoft.Net.Mail
         /// <param name="parmetersCharset">Charset to use to encode 8-bit characters. Value null means parameters not encoded.</param>
         /// <param name="reEncode">If true always specified encoding is used. If false and header field value not modified, original encoding is kept.</param>
         /// <returns>Returns header field as string.</returns>
-        public override string ToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset,bool reEncode)
+        public override string ToString(MIME_Encoding_EncodedWord wordEncoder, Encoding parmetersCharset, bool reEncode)
         {
-            if(string.IsNullOrEmpty(m_Address)){
-                return "Return-Path: <>\r\n";
-            }
+            if (string.IsNullOrEmpty(m_Address)) return "Return-Path: <>\r\n";
 
             return "Return-Path: <" + m_Address + ">\r\n";
         }

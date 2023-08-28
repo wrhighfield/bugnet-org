@@ -9,8 +9,8 @@ namespace LumiSoft.Net.MIME
     public class MIME_h_Unstructured : MIME_h
     {
         private string m_ParseValue;
-        private string m_Name       = "";
-        private string m_Value      = "";
+        private string m_Name = "";
+        private string m_Value = "";
 
         /// <summary>
         /// Default constructor.
@@ -18,19 +18,14 @@ namespace LumiSoft.Net.MIME
         /// <param name="name">Header field name.</param>
         /// <param name="value">Header field value.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>name</b> or <b>value</b> is null reference.</exception>
-        public MIME_h_Unstructured(string name,string value)
+        public MIME_h_Unstructured(string name, string value)
         {
-            if(name == null){
-                throw new ArgumentNullException(nameof(name));
-            }
-            if(name == string.Empty){
-                throw new ArgumentException("Argument 'name' value must be specified.",nameof(name));
-            }
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == string.Empty)
+                throw new ArgumentException("Argument 'name' value must be specified.", nameof(name));
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            m_Name  = name;
+            m_Name = name;
             m_Value = value;
         }
 
@@ -53,20 +48,19 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public static MIME_h_Unstructured Parse(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             var retVal = new MIME_h_Unstructured();
 
-            var name_value = value.Split(new[]{':'},2);
-            if(name_value[0].Trim() == string.Empty){
+            var name_value = value.Split(new[] {':'}, 2);
+            if (name_value[0].Trim() == string.Empty)
                 throw new ParseException("Invalid header field '" + value + "' syntax.");
-            }
 
-            retVal.m_Name  = name_value[0];
+            retVal.m_Name = name_value[0];
 
-            retVal.m_Value = MIME_Encoding_EncodedWord.DecodeTextS(MIME_Utils.UnfoldHeader(name_value.Length == 2 ? name_value[1].TrimStart() : ""));
+            retVal.m_Value =
+                MIME_Encoding_EncodedWord.DecodeTextS(
+                    MIME_Utils.UnfoldHeader(name_value.Length == 2 ? name_value[1].TrimStart() : ""));
 
             retVal.m_ParseValue = value;
 
@@ -85,15 +79,11 @@ namespace LumiSoft.Net.MIME
         /// <param name="parmetersCharset">Charset to use to encode 8-bit characters. Value null means parameters not encoded.</param>
         /// <param name="reEncode">If true always specified encoding is used. If false and header field value not modified, original encoding is kept.</param>
         /// <returns>Returns header field as string.</returns>
-        public override string ToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset,bool reEncode)
+        public override string ToString(MIME_Encoding_EncodedWord wordEncoder, Encoding parmetersCharset, bool reEncode)
         {
-            if(!reEncode && m_ParseValue != null){
-                return m_ParseValue;
-            }
+            if (!reEncode && m_ParseValue != null) return m_ParseValue;
 
-            if(wordEncoder != null){
-                return m_Name + ": " + wordEncoder.Encode(m_Value) + "\r\n";
-            }
+            if (wordEncoder != null) return m_Name + ": " + wordEncoder.Encode(m_Value) + "\r\n";
 
             return m_Name + ": " + m_Value + "\r\n";
         }
@@ -123,10 +113,9 @@ namespace LumiSoft.Net.MIME
         {
             get => m_Value;
 
-            set{
-                if(value == null){
-                    throw new ArgumentNullException(nameof(value));
-                }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(value));
 
                 m_Value = value;
                 // Reset parse value.
@@ -135,6 +124,5 @@ namespace LumiSoft.Net.MIME
         }
 
         #endregion
-
     }
 }

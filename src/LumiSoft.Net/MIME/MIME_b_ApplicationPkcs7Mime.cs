@@ -30,20 +30,14 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>strean</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner, MIME_h_ContentType defaultContentType, SmartStream stream)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
-            if(defaultContentType == null){
-                throw new ArgumentNullException(nameof(defaultContentType));
-            }
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (defaultContentType == null) throw new ArgumentNullException(nameof(defaultContentType));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             var retVal = new MIME_b_ApplicationPkcs7Mime();
-            NetUtils.StreamCopy(stream,retVal.EncodedStream,32000);
+            NetUtils.StreamCopy(stream, retVal.EncodedStream, 32000);
 
             return retVal;
         }
@@ -59,9 +53,7 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns certificates contained in pkcs 7. Returns null if no certificates.</returns>
         public X509Certificate2Collection GetCertificates()
         {
-            if(Data == null){
-                return null;
-            }
+            if (Data == null) return null;
 
             var signedCms = new SignedCms();
             signedCms.Decode(Data);
@@ -70,7 +62,7 @@ namespace LumiSoft.Net.MIME
         }
 
         #endregion
-                
+
         #region method VerifySignature
 
         /// <summary>
@@ -81,30 +73,31 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="InvalidOperationException">Is raised when <b>smime-type != signed-data</b>.</exception>
         public bool VerifySignature()
         {
-            if(!string.Equals(Entity.ContentType.Parameters["smime-type"],"signed-data",StringComparison.InvariantCultureIgnoreCase)){
-                throw new InvalidOperationException("The VerifySignature method is only valid if Content-Type parameter smime-type=signed-data.");
-            }
+            if (!string.Equals(Entity.ContentType.Parameters["smime-type"], "signed-data",
+                    StringComparison.InvariantCultureIgnoreCase))
+                throw new InvalidOperationException(
+                    "The VerifySignature method is only valid if Content-Type parameter smime-type=signed-data.");
 
             // Check this.Data exists.
-            if(Data == null){
-               return false;
-            }
+            if (Data == null) return false;
 
-            try{
+            try
+            {
                 var signedCms = new SignedCms();
                 signedCms.Decode(Data);
                 signedCms.CheckSignature(true);
 
                 return true;
             }
-            catch{                
+            catch
+            {
             }
 
             return false;
         }
 
         #endregion
-               
+
         #region method GetSignedMime
 
         /// <summary>
@@ -115,11 +108,13 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="InvalidOperationException">Is raised when <b>smime-type != signed-data</b>.</exception>
         public MIME_Message GetSignedMime()
         {
-            if(!string.Equals(Entity.ContentType.Parameters["smime-type"],"signed-data",StringComparison.InvariantCultureIgnoreCase)){
-                throw new InvalidOperationException("The VerifySignature method is only valid if Content-Type parameter smime-type=signed-data.");
-            }
+            if (!string.Equals(Entity.ContentType.Parameters["smime-type"], "signed-data",
+                    StringComparison.InvariantCultureIgnoreCase))
+                throw new InvalidOperationException(
+                    "The VerifySignature method is only valid if Content-Type parameter smime-type=signed-data.");
 
-            if(Data != null){
+            if (Data != null)
+            {
                 var signedCms = new SignedCms();
                 signedCms.Decode(Data);
 
@@ -130,7 +125,7 @@ namespace LumiSoft.Net.MIME
         }
 
         #endregion
-                
+
         #region method GetEnvelopedMime
 
         /// <summary>
@@ -142,14 +137,13 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="InvalidOperationException">Is raised when <b>smime-type != enveloped-data</b>.</exception>
         public MIME_Message GetEnvelopedMime(X509Certificate2 cert)
         {
-            if(cert == null){
-                throw new ArgumentNullException(nameof(cert));
-            }
-            if(!string.Equals(Entity.ContentType.Parameters["smime-type"],"enveloped-data",StringComparison.InvariantCultureIgnoreCase)){
-                throw new InvalidOperationException("The VerifySignature method is only valid if Content-Type parameter smime-type=enveloped-data.");
-            }
+            if (cert == null) throw new ArgumentNullException(nameof(cert));
+            if (!string.Equals(Entity.ContentType.Parameters["smime-type"], "enveloped-data",
+                    StringComparison.InvariantCultureIgnoreCase))
+                throw new InvalidOperationException(
+                    "The VerifySignature method is only valid if Content-Type parameter smime-type=enveloped-data.");
 
-            var envelopedCms = new EnvelopedCms();          
+            var envelopedCms = new EnvelopedCms();
             envelopedCms.Decode(Data);
 
             var certificates = new X509Certificate2Collection(cert);

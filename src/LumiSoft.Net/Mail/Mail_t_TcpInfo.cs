@@ -16,7 +16,7 @@ namespace LumiSoft.Net.Mail
     public class Mail_t_TcpInfo
     {
         private IPAddress m_pIP;
-        private string    m_HostName;
+        private string m_HostName;
 
         /// <summary>
         /// Default constructor.
@@ -24,13 +24,11 @@ namespace LumiSoft.Net.Mail
         /// <param name="ip">IP address.</param>
         /// <param name="hostName">Host name.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>ip</b> is null reference.</exception>
-        public Mail_t_TcpInfo(IPAddress ip,string hostName)
+        public Mail_t_TcpInfo(IPAddress ip, string hostName)
         {
-            if(ip == null){
-                throw new ArgumentNullException(nameof(ip));
-            }
+            if (ip == null) throw new ArgumentNullException(nameof(ip));
 
-            m_pIP      = ip;
+            m_pIP = ip;
             m_HostName = hostName;
         }
 
@@ -43,9 +41,7 @@ namespace LumiSoft.Net.Mail
         /// <returns>Returns this as string.</returns>
         public override string ToString()
         {
-            if(string.IsNullOrEmpty(m_HostName)){
-                return "["  + m_pIP.ToString() + "]";
-            }
+            if (string.IsNullOrEmpty(m_HostName)) return "[" + m_pIP.ToString() + "]";
 
             return m_HostName + " [" + m_pIP.ToString() + "]";
         }

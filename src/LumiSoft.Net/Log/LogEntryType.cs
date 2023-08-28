@@ -23,6 +23,6 @@ namespace LumiSoft.Net.Log
         /// <summary>
         /// Exception entry.
         /// </summary>
-        Exception,
+        Exception
     }
 }

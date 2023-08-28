@@ -1,4 +1,4 @@
-namespace BugNET.UserInterfaceLayer
+namespace BugNET.UI
 {
     /// <summary>
     /// Summary description for IEditProjectControl.
@@ -9,11 +9,7 @@ namespace BugNET.UserInterfaceLayer
         /// Gets or sets the project id.
         /// </summary>
         /// <value>The project id.</value>
-        int ProjectId
-        {
-            get;
-            set;
-        }
+        int ProjectId { get; set; }
 
         /// <summary>
         /// Updates this instance.
@@ -30,9 +26,6 @@ namespace BugNET.UserInterfaceLayer
         /// Gets a value indicating whether [show save button].
         /// </summary>
         /// <value><c>true</c> if [show save button]; otherwise, <c>false</c>.</value>
-        bool ShowSaveButton
-        {
-            get;
-        }
+        bool ShowSaveButton { get; }
     }
 }

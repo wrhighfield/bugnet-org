@@ -13,7 +13,8 @@ namespace BugNET.GitHooks
     /// </summary>
     public class IssueTrackerIntegration
     {
-        readonly log4net.ILog logger = log4net.LogManager.GetLogger("IssueTrackerIntegration");
+        private readonly log4net.ILog logger = log4net.LogManager.GetLogger("IssueTrackerIntegration");
+
         /// <summary>
         /// Updates the issue tracker from revision.
         /// </summary>
@@ -21,19 +22,23 @@ namespace BugNET.GitHooks
         /// <param name="revision">The revision.</param>
         public void UpdateIssueTrackerFromRevision(string repository, string revision)
         {
-            var command = string.IsNullOrEmpty(Settings.Default.SubversionBinDirectory) ?
-                "git.exe" : Path.Combine(Settings.Default.SubversionBinDirectory, "git.exe");
+            var command = string.IsNullOrEmpty(Settings.Default.SubversionBinDirectory)
+                ? "git.exe"
+                : Path.Combine(Settings.Default.SubversionBinDirectory, "git.exe");
 
             var issueIds = new List<int>();
             logger.Info("Running git.exe...");
 
             // Pretty Format Parameters: https://git-scm.com/docs/pretty-formats
-            var infoOutput = CommandExecutor.RunCommand(command, string.Format("-C \"{1}\" log {0} --max-count 1  --pretty=format:\"%cn%n%ct%n%B\"", revision, repository));
+            var infoOutput = CommandExecutor.RunCommand(command,
+                string.Format("-C \"{1}\" log {0} --max-count 1  --pretty=format:\"%cn%n%ct%n%B\"", revision,
+                    repository));
 
             logger.DebugFormat("git output: {0}", infoOutput);
-            logger.DebugFormat("Looking for search pattern in revision:{0} and repository:{1}...", revision, repository);
+            logger.DebugFormat("Looking for search pattern in revision:{0} and repository:{1}...", revision,
+                repository);
 
-            var infoLines = infoOutput.Split(new[] { '\n' }, 4);
+            var infoLines = infoOutput.Split(new[] {'\n'}, 4);
             // Line 0 is the command
             var author = infoLines[1];
             var dateTime = UnixTimeStampToDateTime(double.Parse(infoLines[2])).ToString(CultureInfo.InvariantCulture);
@@ -41,8 +46,9 @@ namespace BugNET.GitHooks
 
             // Read the push count for check-in. GIT has no numeric revisions
             // TODO: Check if revision can be changed to string to use the hash
-            var revOutput = CommandExecutor.RunCommand(command, string.Format("-C \"{1}\" rev-list --count {0}", revision, repository));
-            var revLines = revOutput.Split(new[] { '\n' }, 3);
+            var revOutput = CommandExecutor.RunCommand(command,
+                string.Format("-C \"{1}\" rev-list --count {0}", revision, repository));
+            var revLines = revOutput.Split(new[] {'\n'}, 3);
             var revisionCount = revLines[1];
 
             // get all the matching issue id's
@@ -52,20 +58,20 @@ namespace BugNET.GitHooks
             logger.InfoFormat("Found {0} matches...", match.Groups.Count);
 
             while (match.Success)
-            {
                 try
                 {
-                    issueIds.Add(int.Parse(match.Groups[1].Value.Substring(match.Groups[1].Value.IndexOf("-", StringComparison.Ordinal) + 1)));
+                    issueIds.Add(int.Parse(match.Groups[1].Value
+                        .Substring(match.Groups[1].Value.IndexOf("-", StringComparison.Ordinal) + 1)));
                 }
                 catch (Exception ex)
                 {
-                    logger.ErrorFormat("An error occurred parsing the issue id: {0} \n\n {1}", ex.Message, ex.StackTrace);
+                    logger.ErrorFormat("An error occurred parsing the issue id: {0} \n\n {1}", ex.Message,
+                        ex.StackTrace);
                 }
                 finally
                 {
                     match = match.NextMatch();
                 }
-            }
 
             if (issueIds.Count <= 0) return;
             {
@@ -87,21 +93,21 @@ namespace BugNET.GitHooks
                         logger.Info("Logging in to BugNET webservices...");
                         var result = services.LogIn(Settings.Default.BugNetUsername, Settings.Default.BugNetPassword);
                         if (result)
-                        {
                             logger.Info("Login successful...");
-                        }
                         else
-                        {
-                            throw new UnauthorizedAccessException("Unauthorized access exception, please check the user name and password settings.");
-                        }
+                            throw new UnauthorizedAccessException(
+                                "Unauthorized access exception, please check the user name and password settings.");
                     }
 
                     foreach (var id in issueIds)
-                    {
                         try
                         {
                             logger.Info("Creating new issue revision...");
-                            logger.DebugFormat("\n Revision:{0} Id:{1} Repository:{2} Author:{3} DateTime:{4} LogMessage:{5}", revision, id, GetRepositoryName(repository), author, dateTime, Regex.Replace(logMessage, Settings.Default.IssueIdRegEx, "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>"));
+                            logger.DebugFormat(
+                                "\n Revision:{0} Id:{1} Repository:{2} Author:{3} DateTime:{4} LogMessage:{5}",
+                                revision, id, GetRepositoryName(repository), author, dateTime,
+                                Regex.Replace(logMessage, Settings.Default.IssueIdRegEx,
+                                    "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>"));
 
                             var success = services.CreateNewIssueRevision(
                                 int.Parse(revisionCount),
@@ -109,7 +115,8 @@ namespace BugNET.GitHooks
                                 GetRepositoryName(repository),
                                 author,
                                 dateTime,
-                                Regex.Replace(logMessage, Settings.Default.IssueIdRegEx, "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>"),
+                                Regex.Replace(logMessage, Settings.Default.IssueIdRegEx,
+                                    "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>"),
                                 revision,
                                 "");
 
@@ -120,10 +127,9 @@ namespace BugNET.GitHooks
                         }
                         catch (Exception ex)
                         {
-                            logger.ErrorFormat("An error occurred adding a new issue revision to BugNET: {0} \n\n {1}", ex.Message, ex.StackTrace);
+                            logger.ErrorFormat("An error occurred adding a new issue revision to BugNET: {0} \n\n {1}",
+                                ex.Message, ex.StackTrace);
                         }
-
-                    }
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -131,7 +137,8 @@ namespace BugNET.GitHooks
                 }
                 catch (Exception ex)
                 {
-                    logger.FatalFormat("An error occurred contacting the BugNET web services: {0} \n\n {1}", ex.Message, ex.StackTrace);
+                    logger.FatalFormat("An error occurred contacting the BugNET web services: {0} \n\n {1}", ex.Message,
+                        ex.StackTrace);
                     Environment.Exit(1);
                 }
             }

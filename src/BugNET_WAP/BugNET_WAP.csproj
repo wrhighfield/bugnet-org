@@ -952,24 +952,24 @@
     <Compile Include="Issues\UserControls\Revisions.ascx.designer.cs">
       <DependentUpon>Revisions.ascx</DependentUpon>
     </Compile>
-    <Compile Include="Old_App_Code\SimpleSqlProfileProvider.cs" />
-    <Compile Include="Old_App_Code\UIL\DownloadAttachment.cs" />
-    <Compile Include="Old_App_Code\UIL\ErrorRedirector.cs">
+    <Compile Include="Providers\SimpleSqlProfileProvider.cs" />
+    <Compile Include="UI\DownloadAttachment.cs" />
+    <Compile Include="UI\ErrorRedirector.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Old_App_Code\UIL\GridViewExportUtil.cs" />
-    <Compile Include="Old_App_Code\UIL\IEditHostSettingControl.cs" />
-    <Compile Include="Old_App_Code\UIL\IEditUserControl.cs" />
-    <Compile Include="Old_App_Code\UIL\IssueListState.cs" />
-    <Compile Include="Old_App_Code\UIL\PresentationUtils.cs" />
-    <Compile Include="Old_App_Code\UIL\QueryListState.cs" />
-    <Compile Include="Old_App_Code\UIL\WebControls\BugNetPagerField.cs" />
-    <Compile Include="Old_App_Code\UIL\WebControls\ButtonDropDownList.cs" />
-    <Compile Include="Old_App_Code\UIL\WebControls\ButtonTextBox.cs" />
-    <Compile Include="Old_App_Code\UIL\WebControls\GridView.cs" />
-    <Compile Include="Old_App_Code\UIL\WebControls\MenuHelper.cs" />
-    <Compile Include="Old_App_Code\UIL\WebControls\MenuHelperRoot.cs" />
-    <Compile Include="Old_App_Code\UIL\WebControls\MenuItem.cs" />
+    <Compile Include="UI\GridViewExportUtil.cs" />
+    <Compile Include="UI\IEditHostSettingControl.cs" />
+    <Compile Include="UI\IEditUserControl.cs" />
+    <Compile Include="UI\IssueListState.cs" />
+    <Compile Include="UI\PresentationUtils.cs" />
+    <Compile Include="UI\QueryListState.cs" />
+    <Compile Include="UI\WebControls\BugNetPagerField.cs" />
+    <Compile Include="UI\WebControls\ButtonDropDownList.cs" />
+    <Compile Include="UI\WebControls\ButtonTextBox.cs" />
+    <Compile Include="UI\WebControls\GridView.cs" />
+    <Compile Include="UI\WebControls\MenuHelper.cs" />
+    <Compile Include="UI\WebControls\MenuHelperRoot.cs" />
+    <Compile Include="UI\WebControls\MenuItem.cs" />
     <Compile Include="Projects\ChangeLog.aspx.cs">
       <DependentUpon>ChangeLog.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1082,14 +1082,14 @@
     <Compile Include="Issues\UserControls\TimeTracking.ascx.designer.cs">
       <DependentUpon>TimeTracking.ascx</DependentUpon>
     </Compile>
-    <Compile Include="Old_App_Code\GlobalSuppressions.cs" />
-    <Compile Include="Old_App_Code\UIL\BasePage.cs">
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="UI\BugNetBasePage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Old_App_Code\UIL\IIssueTab.cs" />
-    <Compile Include="Old_App_Code\UIL\SmartSiteMapProvider.cs" />
-    <Compile Include="Old_App_Code\UIL\IEditProjectControl.cs" />
-    <Compile Include="Old_App_Code\UIL\Tab.cs" />
+    <Compile Include="UI\IIssueTab.cs" />
+    <Compile Include="Providers\SmartSiteMapProvider.cs" />
+    <Compile Include="UI\IEditProjectControl.cs" />
+    <Compile Include="UI\Tab.cs" />
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

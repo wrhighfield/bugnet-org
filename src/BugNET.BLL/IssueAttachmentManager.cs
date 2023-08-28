@@ -58,9 +58,7 @@ namespace BugNET.BLL
             var guidEnd = fileName.LastIndexOf(".", StringComparison.Ordinal);
             var guidStart = guidEnd - guidLength;
             if (guidStart > -1)
-            {
                 fileName = string.Concat(fileName.Substring(0, guidStart), fileName.Substring(guidEnd + 1));
-            }
 
             return fileName;
         }
@@ -73,13 +71,12 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(IssueAttachment entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.IssueId <= Globals.NewId) throw new ArgumentException("Cannot save issue attachment, the issue id is invalid");
-            if (string.IsNullOrEmpty(entity.FileName)) throw new ArgumentException("The attachment file name cannot be empty or null");
+            if (entity.IssueId <= Globals.NewId)
+                throw new ArgumentException("Cannot save issue attachment, the issue id is invalid");
+            if (string.IsNullOrEmpty(entity.FileName))
+                throw new ArgumentException("The attachment file name cannot be empty or null");
 
-            if (!IsValidFile(entity.FileName, out var invalidReason))
-            {
-                throw new ApplicationException(invalidReason);
-            }
+            if (!IsValidFile(entity.FileName, out var invalidReason)) throw new ApplicationException(invalidReason);
 
             //Start new save attachment code
             if (entity.Attachment.Length <= 0) return false;
@@ -99,7 +96,6 @@ namespace BugNET.BLL
                     img.Save(ms, ImageFormat.Png);
                     ms.Seek(0, SeekOrigin.Begin);
                     entity.Attachment = ms.ToArray();
-
                 }
 
                 entity.ContentType = "image/png";
@@ -108,7 +104,8 @@ namespace BugNET.BLL
 
             entity.Size = entity.Attachment.Length;
 
-            if (HostSettingManager.Get(HostSettingNames.AttachmentStorageType, 0) == (int)IssueAttachmentStorageTypes.Database)
+            if (HostSettingManager.Get(HostSettingNames.AttachmentStorageType, 0) ==
+                (int) IssueAttachmentStorageTypes.Database)
             {
                 //save the attachment record to the database.
                 var tempId = DataProviderManager.Provider.CreateNewIssueAttachment(entity);
@@ -122,11 +119,12 @@ namespace BugNET.BLL
             try
             {
                 if (projectPath.Length == 0)
-                    throw new ApplicationException(string.Format(LoggingManager.GetErrorMessageResource("UploadPathNotDefined"), project.Name));
+                    throw new ApplicationException(
+                        string.Format(LoggingManager.GetErrorMessageResource("UploadPathNotDefined"), project.Name));
 
                 var attachmentGuid = Guid.NewGuid();
                 var attachmentBytes = entity.Attachment;
-                entity.Attachment = null;    //set attachment to null    
+                entity.Attachment = null; //set attachment to null    
                 entity.FileName =
                     $"{Path.GetFileNameWithoutExtension(entity.FileName)}.{attachmentGuid}{Path.GetExtension(entity.FileName)}";
 
@@ -141,16 +139,12 @@ namespace BugNET.BLL
                         $@"{$"{HostSettingManager.Get(HostSettingNames.AttachmentUploadPath)}{projectPath}"}\{entity.FileName}";
 
                     if (uploadedFilePath.StartsWith("~"))
-                    {
                         uploadedFilePath = HttpContext.Current.Server.MapPath(uploadedFilePath);
-                    }
                 }
                 else
                 {
-                    if(entity.ProjectFolderPath.Trim().Length > 0)
-                    {
+                    if (entity.ProjectFolderPath.Trim().Length > 0)
                         uploadedFilePath = $"{entity.ProjectFolderPath}\\{entity.FileName}";
-                    } 
                 }
 
                 //save the attachment record to the database.
@@ -162,23 +156,23 @@ namespace BugNET.BLL
                 //save file to file system
                 var fi = new FileInfo(uploadedFilePath);
 
-                if(!Directory.Exists(fi.DirectoryName))
+                if (!Directory.Exists(fi.DirectoryName))
                     Directory.CreateDirectory(fi.DirectoryName);
 
                 File.WriteAllBytes(uploadedFilePath, attachmentBytes);
 
                 return true;
-
             }
             catch (DirectoryNotFoundException ex)
             {
-                if (Log.IsErrorEnabled) 
-                    Log.Error(string.Format(LoggingManager.GetErrorMessageResource("UploadPathNotFound"), projectPath), ex);
+                if (Log.IsErrorEnabled)
+                    Log.Error(string.Format(LoggingManager.GetErrorMessageResource("UploadPathNotFound"), projectPath),
+                        ex);
                 throw;
             }
             catch (Exception ex)
             {
-                if (Log.IsErrorEnabled) 
+                if (Log.IsErrorEnabled)
                     Log.Error(ex.Message, ex);
                 throw;
             }
@@ -231,7 +225,8 @@ namespace BugNET.BLL
                     IssueId = att.IssueId,
                     CreatedUserName = Security.GetUserName(),
                     DateChanged = DateTime.Now,
-                    FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Attachment", "Attachment"),
+                    FieldChanged =
+                        ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Attachment", "Attachment"),
                     OldValue = att.FileName,
                     NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Deleted", "Deleted"),
                     TriggerLastUpdateChange = true
@@ -239,7 +234,7 @@ namespace BugNET.BLL
 
                 IssueHistoryManager.SaveOrUpdate(history);
 
-                var changes = new List<IssueHistory> { history };
+                var changes = new List<IssueHistory> {history};
 
                 IssueNotificationManager.SendIssueNotifications(att.IssueId, changes);
             }
@@ -254,22 +249,16 @@ namespace BugNET.BLL
                 //delete IssueAttachment from file system.
                 try
                 {
-                    var filePath = string.Format(@"{2}{0}\{1}", project.UploadPath, att.FileName, HostSettingManager.Get(HostSettingNames.AttachmentUploadPath));
+                    var filePath = string.Format(@"{2}{0}\{1}", project.UploadPath, att.FileName,
+                        HostSettingManager.Get(HostSettingNames.AttachmentUploadPath));
 
-                    if (filePath.StartsWith("~"))
-                    {
-                        filePath = HttpContext.Current.Server.MapPath(filePath);
-                    }
+                    if (filePath.StartsWith("~")) filePath = HttpContext.Current.Server.MapPath(filePath);
 
                     if (File.Exists(filePath))
-                    {
                         File.Delete(filePath);
-                    }
                     else
-                    {
                         Log.Info(
                             $"Failed to locate file {filePath} to delete, it may have been moved or manually deleted");
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -285,7 +274,6 @@ namespace BugNET.BLL
                 }
             }
             return true;
-
         }
 
         ///// <summary>
@@ -348,7 +336,8 @@ namespace BugNET.BLL
                 return false;
             }
 
-            var allowedFileTypes = HostSettingManager.Get(HostSettingNames.AllowedFileExtensions, string.Empty).Split(';');
+            var allowedFileTypes =
+                HostSettingManager.Get(HostSettingNames.AllowedFileExtensions, string.Empty).Split(';');
             var fileExt = Path.GetExtension(fileName);
             var fileOk = false;
 
@@ -358,10 +347,10 @@ namespace BugNET.BLL
             }
             else
             {
-                if (allowedFileTypes.Select(fileType => fileType.Substring(fileType.LastIndexOf(".", StringComparison.Ordinal))).Any(newFileType => string.Compare(newFileType, fileExt, StringComparison.Ordinal) == 0))
-                {
+                if (allowedFileTypes
+                    .Select(fileType => fileType.Substring(fileType.LastIndexOf(".", StringComparison.Ordinal)))
+                    .Any(newFileType => string.Compare(newFileType, fileExt, StringComparison.Ordinal) == 0))
                     fileOk = true;
-                }
             }
 
             // valid file type
@@ -376,7 +365,6 @@ namespace BugNET.BLL
                     .Any(invalidFileNameChar => fileName.Contains(invalidFileNameChar))) return true;
             inValidReason = string.Format(LoggingManager.GetErrorMessageResource("InvalidFileName"), fileName);
             return false;
-
         }
     }
 }

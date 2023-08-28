@@ -2,7 +2,7 @@
 using System.Linq;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
@@ -10,7 +10,6 @@ namespace BugNET.Administration.Host.UserControls
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         #region IEditHostSettingControl Members
@@ -20,7 +19,8 @@ namespace BugNET.Administration.Host.UserControls
         /// </summary>
         public bool Update()
         {
-            HostSettingManager.UpdateHostSetting(HostSettingNames.AdminNotificationUsername, AdminNotificationUser.SelectedValue);
+            HostSettingManager.UpdateHostSetting(HostSettingNames.AdminNotificationUsername,
+                AdminNotificationUser.SelectedValue);
             return true;
         }
 
@@ -38,15 +38,10 @@ namespace BugNET.Administration.Host.UserControls
             var adminNotifyUsername = HostSettingManager.Get(HostSettingNames.AdminNotificationUsername);
 
             if (users.SingleOrDefault(u => u.UserName == adminNotifyUsername) != null)
-            { 
                 AdminNotificationUser.SelectedValue = adminNotifyUsername;
-            }
         }
-        
-        public bool ShowSaveButton
-        {
-            get { return true; }
-        }
+
+        public bool ShowSaveButton => true;
 
         #endregion
     }

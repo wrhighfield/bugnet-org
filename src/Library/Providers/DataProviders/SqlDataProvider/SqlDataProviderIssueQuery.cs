@@ -22,7 +22,8 @@ namespace BugNET.Providers.DataProviders
         /// It is up to the client caller to define the filters before hand.  For filtering closed and disabled issues use iv.[IsClosed] = 0 and 
         /// iv.[Disabled] = 0
         /// </remarks>
-        public override List<Issue> PerformQuery(List<QueryClause> queryClauses, ICollection<KeyValuePair<string, string>> sortFields, int projectId = 0)
+        public override List<Issue> PerformQuery(List<QueryClause> queryClauses,
+            ICollection<KeyValuePair<string, string>> sortFields, int projectId = 0)
         {
             // build the custom field view name
             var customFieldViewName = string.Format(Globals.ProjectCustomFieldsViewName, projectId);
@@ -35,7 +36,8 @@ namespace BugNET.Providers.DataProviders
             var commandBuilder = new StringBuilder();
 
             // this is our default select statement, the placeholders will be swapped out as we go
-            commandBuilder.Append("SELECT * FROM BugNet_IssuesView iv @PROJECT_CF_JOIN@ @START_WHERE@ @CRITERIA@ @SORT_FIELDS@");
+            commandBuilder.Append(
+                "SELECT * FROM BugNet_IssuesView iv @PROJECT_CF_JOIN@ @START_WHERE@ @CRITERIA@ @SORT_FIELDS@");
 
             // if we have a project id then we can take advantage of the custom field view to help with performance
             if (projectId > 0)
@@ -46,12 +48,10 @@ namespace BugNET.Providers.DataProviders
             }
             else
             {
-                var disabledPresent = queryClauses.Any(queryClause => queryClause.FieldName.ToLowerInvariant().Contains("projectdisabled"));
+                var disabledPresent = queryClauses.Any(queryClause =>
+                    queryClause.FieldName.ToLowerInvariant().Contains("projectdisabled"));
 
-                if (!disabledPresent)
-                {
-                    startWhere = $"WHERE iv.[ProjectDisabled] = {0} ";
-                }
+                if (!disabledPresent) startWhere = $"WHERE iv.[ProjectDisabled] = {0} ";
             }
 
             // swap out the placeholders for the custom field view join logic and the were criteria
@@ -65,7 +65,6 @@ namespace BugNET.Providers.DataProviders
             {
                 // build the sort string (if any)
                 if (sortFields != null)
-                {
                     foreach (var keyValuePair in sortFields)
                     {
                         var field = keyValuePair.Key.Trim();
@@ -83,9 +82,10 @@ namespace BugNET.Providers.DataProviders
                         // if the field contains a period then they might be passing in and alias so don't try and clean up
                         if (!field.Contains("."))
                         {
-                            field = field.Replace("[]", " ").Trim();    // this is used as a placeholder for spaces in custom
-                                                                        // fields used only for sorting
+                            field = field.Replace("[]", " ")
+                                .Trim(); // this is used as a placeholder for spaces in custom
 
+                            // fields used only for sorting
                             if (!field.EndsWith("]"))
                                 field = string.Concat(field, "]");
 
@@ -96,13 +96,9 @@ namespace BugNET.Providers.DataProviders
                         // build proper sort string
                         sortSql = string.Concat(sortSql, " ", field, " ", direction, ",").Trim();
                     }
-                }
 
                 // set a default sort if no sort fields
-                if (sortFields == null || sortFields.Count.Equals(0))
-                {
-                    sortSql = "iv.[IssueId] desc";
-                }
+                if (sortFields == null || sortFields.Count.Equals(0)) sortSql = "iv.[IssueId] desc";
 
                 sortSql = sortSql.TrimEnd(',');
 
@@ -133,16 +129,13 @@ namespace BugNET.Providers.DataProviders
                                     fieldName = string.Concat("[", fieldName);
 
                                 if (!fieldName.EndsWith("]"))
-                                    fieldName = string.Concat(fieldName, "]");   
+                                    fieldName = string.Concat(fieldName, "]");
                             }
                         }
 
                         // handle when we want to create nested Boolean logic in the query clauses
                         // this of course means the order of the query clauses must be correct
-                        if (boolOper.EndsWith(")"))
-                        {
-                            criteriaBuilder.AppendFormat(" {0}", boolOper);
-                        }
+                        if (boolOper.EndsWith(")")) criteriaBuilder.AppendFormat(" {0}", boolOper);
 
                         // if the field name is empty they we must be closing a nested criteria
                         if (fieldName.Length.Equals(0)) continue;
@@ -151,12 +144,12 @@ namespace BugNET.Providers.DataProviders
                         if (string.IsNullOrEmpty(fieldValue))
                         {
                             criteriaBuilder.AppendFormat(" {0} {1} {2} NULL", boolOper, fieldName, compareOper);
-							continue;
+                            continue;
                         }
 
                         criteriaBuilder.AppendFormat(qc.DataType == SqlDbType.DateTime
-                                ? " {0} DATEDIFF(D, @p{3}, {1}) {2} 0"
-                                : " {0} {1} {2} @p{3}", boolOper, fieldName, compareOper, i);
+                            ? " {0} DATEDIFF(D, @p{3}, {1}) {2} 0"
+                            : " {0} {1} {2} @p{3}", boolOper, fieldName, compareOper, i);
                         i++;
                     }
 
@@ -187,12 +180,10 @@ namespace BugNET.Providers.DataProviders
                             {
                                 DateTime dateTimeValue;
                                 if (DateTime.TryParse(value, out dateTimeValue))
-                                {
                                     value = dateTimeValue.ToString("yyyy-MM-dd");
-                                }
                             }
 
-                            var par = new SqlParameter("@p" + i, qc.DataType) { Value = value };
+                            var par = new SqlParameter("@p" + i, qc.DataType) {Value = value};
 
                             sqlCmd.Parameters.Add(par);
 
@@ -227,7 +218,8 @@ namespace BugNET.Providers.DataProviders
             int queryClauseCount;
 
             //assign the queryClauses Count to our variable and then check the result.
-            if ((queryClauseCount = queryClauses.Count) == 0) throw (new ArgumentOutOfRangeException(nameof(queryClauses)));
+            if ((queryClauseCount = queryClauses.Count) == 0)
+                throw new ArgumentOutOfRangeException(nameof(queryClauses));
 
             try
             {
@@ -235,39 +227,37 @@ namespace BugNET.Providers.DataProviders
                 var commandBuilder = new StringBuilder();
                 //'DSS custom fields in the same query   
                 commandBuilder.Append(projectId != 0
-                                          ? "SELECT DISTINCT * FROM BugNet_GetIssuesByProjectIdAndCustomFieldView WHERE ProjectId = @ProjectId AND IssueId IN (SELECT IssueId FROM BugNet_IssuesView WHERE 1 = 1 "
-                                          : "SELECT DISTINCT * FROM BugNet_GetIssuesByProjectIdAndCustomFieldView WHERE IssueId IN (SELECT IssueId FROM BugNet_IssuesView WHERE 1 = 1 ");
+                    ? "SELECT DISTINCT * FROM BugNet_GetIssuesByProjectIdAndCustomFieldView WHERE ProjectId = @ProjectId AND IssueId IN (SELECT IssueId FROM BugNet_IssuesView WHERE 1 = 1 "
+                    : "SELECT DISTINCT * FROM BugNet_GetIssuesByProjectIdAndCustomFieldView WHERE IssueId IN (SELECT IssueId FROM BugNet_IssuesView WHERE 1 = 1 ");
 
                 var i = 0;
 
                 //RW check for Standard Query
                 foreach (var qc in queryClauses)
-                {
                     if (!qc.CustomFieldQuery)
                     {
                         if (qc.BooleanOperator.Trim().Equals(")"))
                             commandBuilder.AppendFormat(" {0}", qc.BooleanOperator);
                         else if (string.IsNullOrEmpty(qc.FieldValue))
-                        {
-                            commandBuilder.AppendFormat(" {0} {1} {2} NULL", qc.BooleanOperator, qc.FieldName, qc.ComparisonOperator);
-                        }
+                            commandBuilder.AppendFormat(" {0} {1} {2} NULL", qc.BooleanOperator, qc.FieldName,
+                                qc.ComparisonOperator);
                         else if (qc.DataType == SqlDbType.DateTime)
-                        {
-                            commandBuilder.AppendFormat(" {0} datediff(day, {1}, @p{3}) {2} 0", qc.BooleanOperator, qc.FieldName, qc.ComparisonOperator, i);
-                        }
+                            commandBuilder.AppendFormat(" {0} datediff(day, {1}, @p{3}) {2} 0", qc.BooleanOperator,
+                                qc.FieldName, qc.ComparisonOperator, i);
                         else
-                        {
-                            commandBuilder.AppendFormat(" {0} {1} {2} @p{3}", qc.BooleanOperator, qc.FieldName, qc.ComparisonOperator, i);
-                        }
+                            commandBuilder.AppendFormat(" {0} {1} {2} @p{3}", qc.BooleanOperator, qc.FieldName,
+                                qc.ComparisonOperator, i);
                         i++;
                     }
                     else
                     {
                         //'DSS customfields in the same query
-                        commandBuilder.AppendFormat(" {0} {1} {2} {3} {4} @p{5}", qc.BooleanOperator, "CustomFieldName=", "'" + qc.FieldName + "'", " AND CustomFieldValue ", qc.ComparisonOperator, i);
+                        commandBuilder.AppendFormat(" {0} {1} {2} {3} {4} @p{5}", qc.BooleanOperator,
+                            "CustomFieldName=", "'" + qc.FieldName + "'", " AND CustomFieldValue ",
+                            qc.ComparisonOperator, i);
                         i += 1;
                     }
-                }
+
                 commandBuilder.Append(") ORDER BY IssueId DESC");
 
                 using (var sqlCmd = new SqlCommand())
@@ -282,14 +272,11 @@ namespace BugNET.Providers.DataProviders
 
                     //RW loop thru and add non custom field queries parameters.
                     foreach (var qc in queryClauses)
-                    {
                         if (!qc.CustomFieldQuery) //RW not a custom field query
                         {
                             //skip if value null
                             if (!string.IsNullOrEmpty(qc.FieldValue))
-                            {
                                 sqlCmd.Parameters.Add("@p" + i.ToString(), qc.DataType).Value = qc.FieldValue;
-                            }
                             i++;
                             //sqlCmd.Parameters.Add("@p" + i.ToString(), qc.DataType).Value = qc.FieldValue;
                             //i++;
@@ -300,7 +287,6 @@ namespace BugNET.Providers.DataProviders
                             sqlCmd.Parameters.Add("@p" + i.ToString(), qc.DataType).Value = qc.FieldValue;
                             i += 1;
                         }
-                    }
 
                     //RW create a new issue collection here
                     var issueList = new List<Issue>();
@@ -324,7 +310,6 @@ namespace BugNET.Providers.DataProviders
             {
                 throw ProcessException(ex);
             }
-
         }
 
 
@@ -338,10 +323,9 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override void PerformIssueCommentSearchQuery(ref List<IssueComment> list, List<QueryClause> queryClauses)
         {
-
             //assign the queryClauses Count to our variable and then check the result.
-            if ((queryClauses.Count) == 0)
-                throw (new ArgumentOutOfRangeException(nameof(queryClauses), 0, "queryClauses == 0"));
+            if (queryClauses.Count == 0)
+                throw new ArgumentOutOfRangeException(nameof(queryClauses), 0, "queryClauses == 0");
 
             //BugNet_IssueCommentsView
             const string sql = @"SELECT * FROM BugNet_IssueCommentsView WHERE 1=1 ";
@@ -360,15 +344,12 @@ namespace BugNET.Providers.DataProviders
                 // But only if the operator is not blank
                 // "William Highfield" Method
                 if (string.IsNullOrEmpty(qc.FieldValue))
-                {
                     commandBuilder.AppendFormat(
                         !string.IsNullOrEmpty(qc.ComparisonOperator) ? " {0} {1} {2} NULL" : " {0} {1} {2}",
                         qc.BooleanOperator, qc.FieldName, qc.ComparisonOperator);
-                }
                 else
-                {
-                    commandBuilder.AppendFormat(" {0} {1} {2} @p{3}", qc.BooleanOperator, qc.FieldName, qc.ComparisonOperator, i);
-                }
+                    commandBuilder.AppendFormat(" {0} {1} {2} @p{3}", qc.BooleanOperator, qc.FieldName,
+                        qc.ComparisonOperator, i);
                 i++;
             }
 
@@ -389,9 +370,7 @@ namespace BugNET.Providers.DataProviders
 
                     //skip if value null
                     if (!string.IsNullOrEmpty(qc.FieldValue))
-                    {
                         sqlCmd.Parameters.Add("@p" + i, qc.DataType).Value = qc.FieldValue;
-                    }
                     i++;
                 }
 

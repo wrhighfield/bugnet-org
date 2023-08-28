@@ -26,7 +26,8 @@ namespace BugNET.Common
             return GetGlobalResource(classKey, resourceKey, cultureInfo, defaultValue);
         }
 
-        public static string GetGlobalResource(GlobalResources classKey, string resourceKey, CultureInfo culture, string defaultValue = "")
+        public static string GetGlobalResource(GlobalResources classKey, string resourceKey, CultureInfo culture,
+            string defaultValue = "")
         {
             if (HttpContext.Current == null) return defaultValue;
             var resource = HttpContext.GetGlobalResourceObject(classKey.ToString(), resourceKey, culture);

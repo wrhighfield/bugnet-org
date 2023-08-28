@@ -2,13 +2,13 @@
 using System.Linq;
 using System.Web.Security;
 using BugNET.BLL;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Users
 {
-    public partial class AddUser : BasePage
+    public partial class AddUser : BugNetBasePage
     {
-        void ResetForNewUser()
+        private void ResetForNewUser()
         {
             UserName.Text = string.Empty;
             FirstName.Text = string.Empty;
@@ -74,7 +74,7 @@ namespace BugNET.Administration.Users
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void AddNewUserClick(object sender, EventArgs e)
         {
-            if (!Page.IsValid) { return; }
+            if (!Page.IsValid) return;
 
             var password = chkRandomPassword.Checked ? Membership.GeneratePassword(7, 0) : Password.Text;
 
@@ -84,7 +84,7 @@ namespace BugNET.Administration.Users
             var userIdText = UserName.Text;
             var emailText = Email.Text;
             var isActive = ActiveUser.Checked;
-            
+
             try
             {
                 var mu = Membership.CreateUser(userIdText, password, emailText);
@@ -99,26 +99,21 @@ namespace BugNET.Administration.Users
 
                     //auto assign user to roles
                     var roles = RoleManager.GetAll();
-                    foreach (var r in roles.Where(r => r.AutoAssign))
-                    {
-                        RoleManager.AddUser(mu.UserName, r.Id);
-                    }
-                }
-                
-                if (!UserCustomFieldManager.SaveCustomFieldValues((Guid)mu.ProviderUserKey, ctlUserCustomFields.Values))
-                {
-                    throw new Exception(Resources.Exceptions.SaveCustomFieldValuesError);
+                    foreach (var r in roles.Where(r => r.AutoAssign)) RoleManager.AddUser(mu.UserName, r.Id);
                 }
 
+                if (!UserCustomFieldManager.SaveCustomFieldValues((Guid) mu.ProviderUserKey,
+                        ctlUserCustomFields.Values))
+                    throw new Exception(Resources.Exceptions.SaveCustomFieldValuesError);
+
                 ResetForNewUser();
-  
-                resultMsg = GetLocalResourceObject("UserCreated").ToString();
+
+                resultMsg = GetLocalString("UserCreated");
                 MessageContainer.IconType = BugNET.UserControls.Message.MessageType.Information;
-                
             }
             catch (Exception ex)
             {
-                resultMsg = GetLocalResourceObject("UserCreatedError") + "<br/>" + ex.Message;
+                resultMsg = GetLocalString("UserCreatedError") + "<br/>" + ex.Message;
                 MessageContainer.IconType = BugNET.UserControls.Message.MessageType.Error;
             }
 

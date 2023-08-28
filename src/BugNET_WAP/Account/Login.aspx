@@ -6,62 +6,64 @@
     <div class="row">
         <div class="col-md-8">
             <section id="loginForm">
-                <asp:Login ID="LoginView" runat="server" ViewStateMode="Disabled" RenderOuterTable="false"  DestinationPageUrl="~/Default">
+                <asp:Login ID="LoginView" runat="server" ViewStateMode="Disabled" RenderOuterTable="false" DestinationPageUrl="~/Default">
                     <LayoutTemplate>
                         <div class="form-horizontal">
-                            <h4><asp:Localize runat="server" meta:resourceKey="UseLocalAccount" Text="[Resource Required]"/></h4>
-                            <hr />
+                            <h4>
+                                <asp:Localize runat="server" meta:resourceKey="UseLocalAccount" Text="[Resource Required]"/>
+                            </h4>
+                            <hr/>
                             <asp:PlaceHolder runat="server" ID="ErrorMessage">
                                 <p class="text-danger">
-                                    <asp:Literal runat="server" ID="FailureText" />
+                                    <asp:Literal runat="server" ID="FailureText"/>
                                 </p>
                             </asp:PlaceHolder>
                             <div class="form-group">
                                 <asp:Label runat="server" AssociatedControlID="UserName" CssClass="col-md-2 control-label" Text="<%$ Resources:SharedResources, UserName%>">User name</asp:Label>
                                 <div class="col-md-5">
-                                    <asp:TextBox runat="server" ID="UserName" CssClass="form-control" />
+                                    <asp:TextBox runat="server" ID="UserName" CssClass="form-control"/>
                                     <asp:RequiredFieldValidator runat="server" ControlToValidate="UserName"
-                                        CssClass="text-danger validation-error" ErrorMessage="<%$ Resources:SharedResources, UsernameRequiredErrorMessage%>" />
+                                                                CssClass="text-danger validation-error" ErrorMessage="<%$ Resources:SharedResources, UsernameRequiredErrorMessage%>"/>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <asp:Label runat="server" AssociatedControlID="Password" CssClass="col-md-2 control-label" Text="<%$ Resources:SharedResources, Password%>">Password</asp:Label>
                                 <div class="col-md-5">
-                                    <asp:TextBox runat="server" ID="Password" TextMode="Password" CssClass="form-control" />
-                                    <asp:RequiredFieldValidator runat="server" ControlToValidate="Password" CssClass="text-danger validation-error" ErrorMessage="<%$ Resources:SharedResources, PasswordRequiredErrorMessage%>" />
+                                    <asp:TextBox runat="server" ID="Password" TextMode="Password" CssClass="form-control"/>
+                                    <asp:RequiredFieldValidator runat="server" ControlToValidate="Password" CssClass="text-danger validation-error" ErrorMessage="<%$ Resources:SharedResources, PasswordRequiredErrorMessage%>"/>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="col-md-offset-2 col-md-10">
                                     <div class="checkbox">
-                                        <asp:CheckBox runat="server" ID="RememberMe" />
-                                        <asp:Label runat="server" AssociatedControlID="RememberMe" meta:resourceKey="RememberMe" Text="[Resource Required]" />
+                                        <asp:CheckBox runat="server" ID="RememberMe"/>
+                                        <asp:Label runat="server" AssociatedControlID="RememberMe" meta:resourceKey="RememberMe" Text="[Resource Required]"/>
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div class="col-md-offset-2 col-md-10">
-                                    <asp:Button id="LoginButton" runat="server" CommandName="Login"  CssClass="btn btn-primary" meta:resourceKey="LoginButton" Text="[Resource Required]" />
+                                    <asp:Button id="LoginButton" runat="server" CommandName="Login" CssClass="btn btn-primary" meta:resourceKey="LoginButton" Text="[Resource Required]"/>
                                 </div>
                             </div>
                         </div>
-                  </LayoutTemplate>
+                    </LayoutTemplate>
                 </asp:Login>
                 <p>
                     <asp:HyperLink ID="PasswordRecoveryLink" runat="server" meta:resourcekey="PasswordRecoveryLink" NavigateUrl="~/Account/ForgotPassword">Forgot your password?</asp:HyperLink>
                 </p>
                 <p>
-                     <asp:Localize runat="server" ID="Register_Localize" />
+                    <asp:Localize runat="server" ID="Register_Localize"/>
                 </p>
-                
+
             </section>
         </div>
 
         <div class="col-md-4">
             <section id="socialLoginForm">
-                <uc:OpenAuthProviders runat="server" ID="OpenAuthLogin" />
+                <uc:OpenAuthProviders runat="server" ID="OpenAuthLogin"/>
             </section>
         </div>
     </div>
-    
+
 </asp:Content>

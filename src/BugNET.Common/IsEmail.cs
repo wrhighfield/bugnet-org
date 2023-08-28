@@ -7,14 +7,14 @@ namespace BugNET.Common
     // PORTED TO C# BY SEAN OTTEY
     /**
      * To validate an email address according to RFCs 5321, 5322 and others
-     * 
+     *
      * Copyright © 2008-2010, Dominic Sayers <br>
      * Test schema documentation Copyright © 2010, Daniel Marschall <br>
      * All rights reserved.
-     * 
+     *
      * Redistribution and use in source and binary forms, with or without
      * modification, are permitted provided that the following conditions are met:
-     * 
+     *
      * - Redistributions of source code must retain the above copyright notice, this
      * list of conditions and the following disclaimer. - Redistributions in binary
      * form must reproduce the above copyright notice, this list of conditions and
@@ -22,7 +22,7 @@ namespace BugNET.Common
      * with the distribution. - Neither the name of Dominic Sayers nor the names of
      * its contributors may be used to endorse or promote products derived from this
      * software without specific prior written permission.
-     * 
+     *
      * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
      * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
      * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -34,7 +34,7 @@ namespace BugNET.Common
      * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
      * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
      * POSSIBILITY OF SUCH DAMAGE.
-     * 
+     *
      * @package com.dominicsayers.isemail
      * @author Dominic Sayers <dominic@sayers.cc><br>
      *         Translated from PHP into Java by Daniel Marschall
@@ -45,7 +45,6 @@ namespace BugNET.Common
      * @link http://www.dominicsayers.com/isemail
      * @version 2010-10-18. Java-Translation of isemail.php:r68.
      */
-
     public class IsEMail
     {
         private List<string> ResultInfo { get; set; }
@@ -53,7 +52,7 @@ namespace BugNET.Common
         /**
          * Checks that an email address conforms to RFCs 5321, 5322 and others. With
          * verbose information.
-         * 
+         *
          * @param email
          *            The email address to check
          * @param checkDNS
@@ -65,10 +64,7 @@ namespace BugNET.Common
         public bool IsEmailValid(string email)
         {
             ResultInfo = new List<string>();
-            if (email == null)
-            {
-                email = string.Empty;
-            }
+            if (email == null) email = string.Empty;
 
             // Check that $email is a valid address. Read the following RFCs to
             // understand the constraints:
@@ -174,10 +170,7 @@ characters (including the punctuation and element separators)
                                 }
                                 else
                                 {
-                                    if (braceDepth++ > 0)
-                                    {
-                                        replaceChar = true; // Increment brace depth
-                                    }
+                                    if (braceDepth++ > 0) replaceChar = true; // Increment brace depth
                                 }
                             }
 
@@ -197,10 +190,7 @@ characters (including the punctuation and element separators)
                                 {
                                     if (--braceDepth > 0)
                                         replaceChar = true; // Decrement brace depth
-                                    if (braceDepth < 0)
-                                    {
-                                        braceDepth = 0;
-                                    }
+                                    if (braceDepth < 0) braceDepth = 0;
                                 }
                             }
 
@@ -213,14 +203,10 @@ characters (including the punctuation and element separators)
                             else
                             {
                                 if (braceDepth == 0)
-                                {
                                     // Are we inside a quoted string?
                                     inQuote = !inQuote;
-                                }
                                 else
-                                {
                                     replaceChar = true;
-                                }
                             }
 
                             break;
@@ -240,13 +226,10 @@ characters (including the punctuation and element separators)
 
                     escapeThisChar = false;
                     if (replaceChar)
-                    {
                         // Replace the offending character with something harmless
                         // revision 1.12: Line above replaced because PHPLint
                         // doesn't like that syntax
                         email = ReplaceCharAt(email, i, 'x');
-                    }
-
                 }
             }
 
@@ -269,6 +252,7 @@ characters (including the punctuation and element separators)
             var partLength = 0;
 
             #region foreach block
+
             foreach (var element in dotArray)
             {
                 var workingElement = element; // for use in our for loop, can't work on a foreach target SCO-04152011
@@ -278,7 +262,6 @@ characters (including the punctuation and element separators)
                 var newElement = repRegex.Replace(workingElement, string.Empty);
 
                 if (!workingElement.Equals(newElement))
-                {
                     // FWS is unlikely in the real world
                     ResultInfo.Add(@"
                 Folding White Space
@@ -287,7 +270,6 @@ characters (including the punctuation and element separators)
 		        obs-local-part = word *(""."" word)
 (http://tools.ietf.org/html/rfc5322#section-3.4.1)
             ");
-                }
                 workingElement = newElement; // version 2.3: Warning condition added
 
                 var elementLength = newElement.Length;
@@ -324,6 +306,7 @@ characters (including the punctuation and element separators)
                             ResultInfo.Add(@"Illegal characters in comment");
                             return false;
                         }
+
                         workingElement = workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 1);
                         elementLength = workingElement.Length;
                     }
@@ -339,12 +322,14 @@ characters (including the punctuation and element separators)
                     if (indexBrace != -1)
                     {
                         var match = new Regex(@"(?<!\\)(?:[\(\)])");
-                        if (match.Matches(workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 2)).Count > 0)
+                        if (match.Matches(workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 2))
+                                .Count > 0)
                         {
                             // Illegal characters in comment						
                             ResultInfo.Add(@"Illegal characters in comment");
                             return false;
                         }
+
                         workingElement = workingElement.Substring(0, indexBrace);
                     }
                 }
@@ -456,6 +441,7 @@ characters (including the punctuation and element separators)
                     //}
                 }
             }
+
             #endregion end foreach
 
             if (partLength > 64)
@@ -503,7 +489,9 @@ characters (including the punctuation and element separators)
 
                 // Extract IPv4 part from the end of the address-literal (if there
                 // is one)
-                var splitRegex = new Regex(@"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
+                var splitRegex =
+                    new Regex(
+                        @"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$");
 
                 var matchesIp1 = splitRegex.Matches(addressLiteral);
                 if (matchesIp1.Count > 0)
@@ -533,6 +521,7 @@ characters (including the punctuation and element separators)
                         ");
                             return false;
                         }
+
                         // -
                         // - $IPv6 = substr($addressLiteral, 5, ($index === 7) ? 2 :
                         // $index - 6);
@@ -553,6 +542,7 @@ characters (including the punctuation and element separators)
                         ");
                         return false;
                     }
+
                     pv6 = addressLiteral.Substring(5);
                     // - $groupMax = 8;
                     // revision 2.1: new IPv6 testing strategy
@@ -588,10 +578,9 @@ characters (including the punctuation and element separators)
                         ");
                         return false;
                     }
-                    if ((currentIndex == 0) || (currentIndex == (pv6.Length - 2)))
-                    {
-                        groupMax++; // RFC 4291 allows :: at the start or end of an
-                    }
+
+                    if (currentIndex == 0 ||
+                        currentIndex == pv6.Length - 2) groupMax++; // RFC 4291 allows :: at the start or end of an
                     // address with 7 other groups in addition
                     if (groupCount > groupMax)
                     {
@@ -602,17 +591,16 @@ characters (including the punctuation and element separators)
                         ");
                         return false;
                     }
+
                     if (groupCount == groupMax)
-                    {
                         // Eliding a single group with :: is deprecated by RFCs 5321 & 5952
                         // & 5952
                         ResultInfo.Add(@"Eliding a single group with :: is deprecated by RFCs 5321 & 5952");
-                    }
                 }
 
                 // Check for single : at start and end of address
                 // Revision 2.7: Daniel Marschall's new IPv6 testing strategy
-                if (pv6.StartsWith(colon) && (!pv6.StartsWith(doubleColon)))
+                if (pv6.StartsWith(colon) && !pv6.StartsWith(doubleColon))
                 {
                     // Address starts with a single colon
                     ResultInfo.Add(@"
@@ -621,7 +609,8 @@ characters (including the punctuation and element separators)
                         ");
                     return false;
                 }
-                if (pv6.EndsWith(colon) && (!pv6.EndsWith(doubleColon)))
+
+                if (pv6.EndsWith(colon) && !pv6.EndsWith(doubleColon))
                 {
                     // Address ends with a single colon
                     ResultInfo.Add(@"
@@ -648,7 +637,6 @@ characters (including the punctuation and element separators)
                 // It's a valid IPv6 address, so...
                 return true;
                 // revision 2.1: bug fix: now correctly return warning status
-
             }
             else
             {
@@ -693,10 +681,7 @@ characters (including the punctuation and element separators)
                 // revision 1.13: Line above added because PHPLint now checks for
                 // Definitely Assigned Variables
 
-                if (dotArray.Length == 1)
-                {
-                    ResultInfo.Add(@"The mail host probably isn't a TLD");
-                }
+                if (dotArray.Length == 1) ResultInfo.Add(@"The mail host probably isn't a TLD");
                 // version 2.0: downgraded to a warning
 
                 foreach (var element in dotArray)
@@ -707,10 +692,7 @@ characters (including the punctuation and element separators)
                     var newReg = new Regex("^" + fws + "|" + fws + "$");
                     var newElement = newReg.Replace(workingElement, string.Empty);
 
-                    if (!element.Equals(newElement))
-                    {
-                        ResultInfo.Add(@"FWS is unlikely in the real world");
-                    }
+                    if (!element.Equals(newElement)) ResultInfo.Add(@"FWS is unlikely in the real world");
                     workingElement = newElement;
                     // version 2.0: Warning condition added
                     var elementLength = workingElement.Length;
@@ -758,6 +740,7 @@ characters (including the punctuation and element separators)
                         ");
                                 return false;
                             }
+
                             workingElement = workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 1);
                             elementLength = workingElement.Length;
                         }
@@ -773,7 +756,9 @@ characters (including the punctuation and element separators)
                         if (indexBrace != -1)
                         {
                             var commentRegex = new Regex(@"(?<!\\)(?:[\(\)])");
-                            if (commentRegex.Matches(workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 2)).Count > 0)
+                            if (commentRegex
+                                    .Matches(workingElement.Substring(indexBrace + 1, elementLength - indexBrace - 2))
+                                    .Count > 0)
                             {
                                 // revision 1.17: Fixed name of constant (also
                                 // spotted by turboflash - thanks!)
@@ -802,10 +787,7 @@ characters (including the punctuation and element separators)
                     // version 2.0: Warning condition added
 
                     // What's left counts towards the maximum length for this part
-                    if (partLength > 0)
-                    {
-                        partLength++; // for the dot
-                    }
+                    if (partLength > 0) partLength++; // for the dot
 
                     partLength += workingElement.Length;
 
@@ -864,12 +846,10 @@ characters (including the punctuation and element separators)
 
                 var foo = new Regex("^[0-9]+$");
                 if (foo.Matches(lastElement).Count > 0)
-                {
                     ResultInfo.Add(@"TLD probably isn't all-numeric
                 (http://www.apps.ietf.org/rfc/rfc3696.html#sec-2)
                 ");
-                    // version 2.0: Downgraded to a warning
-                }
+                // version 2.0: Downgraded to a warning
             }
 
             // Eliminate all other factors, and the one which remains must be the
@@ -879,7 +859,7 @@ characters (including the punctuation and element separators)
 
         /**
          * Replaces a char in a String
-         * 
+         *
          * @param s
          *            The input string
          * @param pos

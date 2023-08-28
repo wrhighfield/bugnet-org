@@ -4,11 +4,11 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Issues.UserControls
 {
-    public partial class TimeTracking : System.Web.UI.UserControl, IIssueTab
+    public partial class TimeTracking : BugNetUserControl, IIssueTab
     {
         private double _total;
 
@@ -25,7 +25,6 @@ namespace BugNET.Issues.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         #region IIssueTab Members
@@ -36,8 +35,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The issue id.</value>
         public int IssueId
         {
-            get { return ViewState.Get("IssueId", 0); }
-            set { ViewState.Set("IssueId", value); }
+            get => ViewState.Get("IssueId", 0);
+            set => ViewState.Set("IssueId", value);
         }
 
         /// <summary>
@@ -46,8 +45,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", 0); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", 0);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -55,17 +54,19 @@ namespace BugNET.Issues.UserControls
         /// </summary>
         public void Initialize()
         {
-            TimeEntriesDataGrid.Columns[0].HeaderText = GetLocalResourceObject("TimeEntriesDataGrid.WorkDateHeader.Text").ToString();
-            TimeEntriesDataGrid.Columns[1].HeaderText = GetLocalResourceObject("TimeEntriesDataGrid.DurationHeader.Text").ToString();
-            TimeEntriesDataGrid.Columns[2].HeaderText = GetLocalResourceObject("TimeEntriesDataGrid.CreatorHeader.Text").ToString();
-            TimeEntriesDataGrid.Columns[3].HeaderText = GetLocalResourceObject("TimeEntriesDataGrid.CommentHeader.Text").ToString();
+            TimeEntriesDataGrid.Columns[0].HeaderText = GetLocalString("TimeEntriesDataGrid.WorkDateHeader.Text");
+            TimeEntriesDataGrid.Columns[1].HeaderText = GetLocalString("TimeEntriesDataGrid.DurationHeader.Text");
+            TimeEntriesDataGrid.Columns[2].HeaderText = GetLocalString("TimeEntriesDataGrid.CreatorHeader.Text");
+            TimeEntriesDataGrid.Columns[3].HeaderText = GetLocalString("TimeEntriesDataGrid.CommentHeader.Text");
 
             BindTimeEntries();
 
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.AddTimeEntry.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.AddTimeEntry.ToString()))
                 AddTimeEntryPanel.Visible = false;
 
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.DeleteTimeEntry.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.DeleteTimeEntry.ToString()))
                 TimeEntriesDataGrid.Columns[4].Visible = false;
         }
 
@@ -89,7 +90,7 @@ namespace BugNET.Issues.UserControls
 
             if (workReports == null || workReports.Count == 0)
             {
-                TimeEntryLabel.Text = GetLocalResourceObject("NoTimeEntries").ToString();
+                TimeEntryLabel.Text = GetLocalString("NoTimeEntries");
                 TimeEntryLabel.Visible = true;
                 TimeEntriesDataGrid.Visible = false;
             }
@@ -113,18 +114,18 @@ namespace BugNET.Issues.UserControls
             if (DurationTextBox.Text.Trim().Length == 0) return;
 
             var selectedWorkDate = TimeEntryDate.SelectedValue == null
-                                       ? DateTime.MinValue
-                                       : (DateTime) TimeEntryDate.SelectedValue;
+                ? DateTime.MinValue
+                : (DateTime) TimeEntryDate.SelectedValue;
             var workDuration = Convert.ToDecimal(DurationTextBox.Text);
 
             var workReport = new IssueWorkReport
-                                 {
-                                     CommentText = CommentHtmlEditor.Text.Trim(), 
-                                     CreatorUserName = Context.User.Identity.Name, 
-                                     Duration = workDuration, 
-                                     IssueId = IssueId, 
-                                     WorkDate = selectedWorkDate
-                                 };
+            {
+                CommentText = CommentHtmlEditor.Text.Trim(),
+                CreatorUserName = Context.User.Identity.Name,
+                Duration = workDuration,
+                IssueId = IssueId,
+                WorkDate = selectedWorkDate
+            };
 
             IssueWorkReportManager.SaveOrUpdate(workReport);
 
@@ -133,7 +134,8 @@ namespace BugNET.Issues.UserControls
                 IssueId = IssueId,
                 CreatedUserName = Security.GetUserName(),
                 DateChanged = DateTime.Now,
-                FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "TimeLogged", "Time Logged"),
+                FieldChanged =
+                    ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "TimeLogged", "Time Logged"),
                 OldValue = string.Empty,
                 NewValue = DurationTextBox.Text.Trim(),
                 TriggerLastUpdateChange = true
@@ -157,7 +159,7 @@ namespace BugNET.Issues.UserControls
         /// </summary>
         /// <param name="source">The source of the event.</param>
         /// <param name="e">The <see cref="T:System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
-        protected void TimeEntriesDataGrid_ItemCommand(object source, System.Web.UI.WebControls.DataGridCommandEventArgs e)
+        protected void TimeEntriesDataGrid_ItemCommand(object source, DataGridCommandEventArgs e)
         {
             var id = Convert.ToInt32(e.CommandArgument);
 
@@ -168,7 +170,8 @@ namespace BugNET.Issues.UserControls
                 IssueId = IssueId,
                 CreatedUserName = Security.GetUserName(),
                 DateChanged = DateTime.Now,
-                FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "TimeLogged", "Time Logged"),
+                FieldChanged =
+                    ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "TimeLogged", "Time Logged"),
                 OldValue = string.Empty,
                 NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Deleted", "Deleted"),
                 TriggerLastUpdateChange = true
@@ -190,18 +193,19 @@ namespace BugNET.Issues.UserControls
         /// <param name="e">The <see cref="T:System.Web.UI.WebControls.DataGridItemEventArgs"/> instance containing the event data.</param>
         protected void TimeEntriesDataGridItemDataBound(object sender, DataGridItemEventArgs e)
         {
-            var delete = string.Format("return confirm('{0}');", GetLocalResourceObject("DeleteTimeEntry"));
+            var delete = $"return confirm('{GetLocalString("DeleteTimeEntry")}');";
 
             switch (e.Item.ItemType)
             {
                 case ListItemType.Item:
                 case ListItemType.AlternatingItem:
                     _total += Convert.ToDouble(e.Item.Cells[1].Text);
-                    ((ImageButton)e.Item.FindControl("cmdDelete")).OnClientClick = delete;
+                    ((ImageButton) e.Item.FindControl("cmdDelete")).OnClientClick = delete;
                     break;
                 case ListItemType.Footer:
                     //Use the footer to display the summary row.
-                    e.Item.Cells[0].Text = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "TotalHours", "Total Hours");
+                    e.Item.Cells[0].Text = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources,
+                        "TotalHours", "Total Hours");
                     e.Item.Cells[0].Attributes.Add("align", "left");
                     e.Item.Cells[0].Style.Add("font-weight", "bold");
                     e.Item.Cells[0].Style.Add("padding-top", "10px");
@@ -215,7 +219,6 @@ namespace BugNET.Issues.UserControls
                     e.Item.Cells[4].Style.Add("border-top", "1px solid #999");
                     break;
             }
-
         }
     }
 }

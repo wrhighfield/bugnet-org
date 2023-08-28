@@ -5,14 +5,14 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Host
 {
     /// <summary>
     /// Administration page that controls the application configuration
     /// </summary>
-    public partial class Settings : BasePage
+    public partial class Settings : BugNetBasePage
     {
         /// <summary>
         /// Message1 control.
@@ -23,8 +23,8 @@ namespace BugNET.Administration.Host
         /// </remarks>
         public BugNET.UserControls.Message Message1;
 
-        Control _ctlHostSettings;
-        readonly Dictionary<string, string> _menuItems = new Dictionary<string, string>();
+        private Control _ctlHostSettings;
+        private readonly Dictionary<string, string> _menuItems = new Dictionary<string, string>();
 
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -36,35 +36,34 @@ namespace BugNET.Administration.Host
             if (!UserManager.IsSuperUser())
                 Response.Redirect("~/Errors/AccessDenied.aspx");
 
-            _menuItems.Add(GetLocalResourceObject("Basic").ToString(), "page_white_gear.png");
-            _menuItems.Add(GetLocalResourceObject("Authentication").ToString(), "lock.gif");
-            _menuItems.Add(GetLocalResourceObject("Mail").ToString(), "email.gif");
-            _menuItems.Add(GetLocalResourceObject("Logging").ToString(), "page_white_error.png");
-            _menuItems.Add(GetLocalResourceObject("Subversion").ToString(), "svnLogo_sm.jpg");
-            _menuItems.Add(GetLocalResourceObject("Notifications").ToString(), "email_go.gif");
-            _menuItems.Add(GetLocalResourceObject("Attachments").ToString(), "attach.gif");
-            _menuItems.Add(GetLocalResourceObject("POP3Mailbox").ToString(), "mailbox.png");
-            _menuItems.Add(GetLocalResourceObject("Languages").ToString(), "page_white_world.png");
-            _menuItems.Add(GetLocalResourceObject("UserCustomFields").ToString(), "user_edit.gif");
+            _menuItems.Add(GetLocalString("Basic"), "page_white_gear.png");
+            _menuItems.Add(GetLocalString("Authentication"), "lock.gif");
+            _menuItems.Add(GetLocalString("Mail"), "email.gif");
+            _menuItems.Add(GetLocalString("Logging"), "page_white_error.png");
+            _menuItems.Add(GetLocalString("Subversion"), "svnLogo_sm.jpg");
+            _menuItems.Add(GetLocalString("Notifications"), "email_go.gif");
+            _menuItems.Add(GetLocalString("Attachments"), "attach.gif");
+            _menuItems.Add(GetLocalString("POP3Mailbox"), "mailbox.png");
+            _menuItems.Add(GetLocalString("Languages"), "page_white_world.png");
+            _menuItems.Add(GetLocalString("UserCustomFields"), "user_edit.gif");
 
             AdminMenu.DataSource = _menuItems;
-            AdminMenu.DataBind();   
- 
+            AdminMenu.DataBind();
+
             if (!IsPostBack)
             {
-                string tabIdStr = Request.QueryString["tid"];
-                if (!String.IsNullOrEmpty(tabIdStr))
+                var tabIdStr = Request.QueryString["tid"];
+                if (!string.IsNullOrEmpty(tabIdStr))
                 {
-                    int result = 0;
-                    bool flag = Int32.TryParse(tabIdStr, out result);
+                    var result = 0;
+                    var flag = int.TryParse(tabIdStr, out result);
                     if (flag && result >= 0 && result <= 8)
                         TabId = result;
                 }
             }
-            
+
             if (TabId != -1)
                 LoadTab(TabId);
-                
         }
 
         /// <summary>
@@ -76,14 +75,14 @@ namespace BugNET.Administration.Host
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var dataItem = (KeyValuePair<string, string>)e.Item.DataItem;
+            var dataItem = (KeyValuePair<string, string>) e.Item.DataItem;
             var listItem = e.Item.FindControl("ListItem") as HtmlGenericControl;
             var lb = e.Item.FindControl("MenuButton") as LinkButton;
 
             //if (listItem != null)
             //	listItem.Attributes.Add("style", string.Format("background: #C4EFA1 url(../../images/{0}) no-repeat 5px 4px;", dataItem.Value));
 
-            if (lb != null) 
+            if (lb != null)
                 lb.Text = dataItem.Key;
         }
 
@@ -104,7 +103,7 @@ namespace BugNET.Administration.Host
         /// <param name="selectedTab">The selected tab.</param>
         private void LoadTab(int selectedTab)
         {
-            string controlName = "BasicSettings.ascx";
+            var controlName = "BasicSettings.ascx";
 
             switch (selectedTab)
             {
@@ -140,21 +139,17 @@ namespace BugNET.Administration.Host
                     break;
             }
 
-            for (int i = 0; i < _menuItems.Count; i++)
-            {
-                if (i == TabId)
-                   ((HtmlGenericControl)AdminMenu.Items[i].FindControl("ListItem")).Attributes.Add("class", "active");
-                else
-                   ((HtmlGenericControl)AdminMenu.Items[i].FindControl("ListItem")).Attributes.Add("class", "");
-            }
-         
+            for (var i = 0; i < _menuItems.Count; i++)
+                ((HtmlGenericControl) AdminMenu.Items[i].FindControl("ListItem")).Attributes.Add("class",
+                    i == TabId ? "active" : "");
+
 
             _ctlHostSettings = Page.LoadControl("~/Administration/Host/UserControls/" + controlName);
             _ctlHostSettings.ID = "ctlHostSetting";
             plhSettingsControl.Controls.Clear();
             plhSettingsControl.Controls.Add(_ctlHostSettings);
 
-            IEditHostSettingControl editHostSettingsControl = (IEditHostSettingControl)_ctlHostSettings;
+            var editHostSettingsControl = (IEditHostSettingControl) _ctlHostSettings;
             editHostSettingsControl.Initialize();
             cmdUpdate.Visible = editHostSettingsControl.ShowSaveButton;
         }
@@ -163,10 +158,10 @@ namespace BugNET.Administration.Host
         /// Gets or sets the tab id.
         /// </summary>
         /// <value>The tab id.</value>
-        int TabId
+        private int TabId
         {
-            get { return ViewState.Get("TabId", 0); }
-            set { ViewState.Set("TabId", value); }
+            get => ViewState.Get("TabId", 0);
+            set => ViewState.Set("TabId", value);
         }
 
         /// <summary>
@@ -178,15 +173,10 @@ namespace BugNET.Administration.Host
         {
             if (!Page.IsValid) return;
 
-            IEditHostSettingControl editHostSettingControl = (IEditHostSettingControl)_ctlHostSettings;
+            var editHostSettingControl = (IEditHostSettingControl) _ctlHostSettings;
 
-            if (editHostSettingControl.Update())
-            {
-                if (Message1.Text.Trim().Length.Equals(0))
-                {
-                    Message1.ShowSuccessMessage(GetLocalResourceObject("SaveMessage").ToString());   
-                }
-            }
+            if (!editHostSettingControl.Update()) return;
+            if (Message1.Text.Trim().Length.Equals(0)) Message1.ShowSuccessMessage(GetLocalString("SaveMessage"));
         }
     }
 }

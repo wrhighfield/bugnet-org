@@ -8,13 +8,13 @@ namespace LumiSoft.Net
     /// </summary>
     internal class AsyncResultState : IAsyncResult
     {
-        private object        m_pAsyncObject;
-        private Delegate      m_pAsyncDelegate;
+        private object m_pAsyncObject;
+        private Delegate m_pAsyncDelegate;
         private AsyncCallback m_pCallback;
-        private object        m_pState;
-        private IAsyncResult  m_pAsyncResult;
-        private bool          m_IsEndCalled;
-                
+        private object m_pState;
+        private IAsyncResult m_pAsyncResult;
+        private bool m_IsEndCalled;
+
         /// <summary>
         /// Default constructor.
         /// </summary>
@@ -22,12 +22,12 @@ namespace LumiSoft.Net
         /// <param name="asyncDelegate">Delegate which is called asynchronously.</param>
         /// <param name="callback">Callback to call when the connect operation is complete.</param>
         /// <param name="state">User data.</param>
-        public AsyncResultState(object asyncObject,Delegate asyncDelegate,AsyncCallback callback,object state)
+        public AsyncResultState(object asyncObject, Delegate asyncDelegate, AsyncCallback callback, object state)
         {
-            m_pAsyncObject   = asyncObject;
+            m_pAsyncObject = asyncObject;
             m_pAsyncDelegate = asyncDelegate;
-            m_pCallback      = callback;
-            m_pState         = state;
+            m_pCallback = callback;
+            m_pState = state;
         }
 
 
@@ -39,9 +39,7 @@ namespace LumiSoft.Net
         /// <param name="asyncResult">Asycnhronous result to wrap.</param>
         public void SetAsyncResult(IAsyncResult asyncResult)
         {
-            if(asyncResult == null){
-                throw new ArgumentNullException(nameof(asyncResult));
-            }
+            if (asyncResult == null) throw new ArgumentNullException(nameof(asyncResult));
 
             m_pAsyncResult = asyncResult;
         }
@@ -56,9 +54,7 @@ namespace LumiSoft.Net
         /// <param name="ar">An IAsyncResult that stores state information and any user defined data for this asynchronous operation.</param>
         public void CompletedCallback(IAsyncResult ar)
         {
-            if(m_pCallback != null){
-                m_pCallback(this);
-            }
+            if (m_pCallback != null) m_pCallback(this);
         }
 
         #endregion
@@ -113,6 +109,5 @@ namespace LumiSoft.Net
         public bool IsCompleted => m_pAsyncResult.IsCompleted;
 
         #endregion
-
     }
 }

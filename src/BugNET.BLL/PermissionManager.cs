@@ -7,7 +7,8 @@ namespace BugNET.BLL
 {
     public static class PermissionManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Static Methods
 
@@ -16,7 +17,9 @@ namespace BugNET.BLL
         /// </summary>
         /// <returns></returns>
         public static List<Permission> GetAll()
-            => DataProviderManager.Provider.GetAllPermissions();
+        {
+            return DataProviderManager.Provider.GetAllPermissions();
+        }
 
         #endregion
     }

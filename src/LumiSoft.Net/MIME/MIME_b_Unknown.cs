@@ -29,28 +29,24 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>strean</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner, MIME_h_ContentType defaultContentType, SmartStream stream)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
-            if(defaultContentType == null){
-                throw new ArgumentNullException(nameof(defaultContentType));
-            }
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (defaultContentType == null) throw new ArgumentNullException(nameof(defaultContentType));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             string mediaType = null;
-            try{
+            try
+            {
                 mediaType = owner.ContentType.TypeWithSubtype;
             }
-            catch{
+            catch
+            {
                 mediaType = "unparsable/unparsable";
             }
 
             var retVal = new MIME_b_Unknown(mediaType);
-            NetUtils.StreamCopy(stream,retVal.EncodedStream,32000);
+            NetUtils.StreamCopy(stream, retVal.EncodedStream, 32000);
 
             return retVal;
         }

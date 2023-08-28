@@ -5,7 +5,7 @@ namespace BugNET.Entities
     /// <summary>
     /// IssueComment Class
     /// </summary>
-    public class IssueComment 
+    public class IssueComment
     {
         #region Constructors
 
@@ -32,10 +32,11 @@ namespace BugNET.Entities
         /// <param name="creatorDisplayName">Display name of the creator.</param>
         /// <param name="created">The created.</param>
         [Obsolete]
-        public IssueComment(int commentId, int issueId, string comment, string creatorUserName, Guid creatorUserId, string creatorDisplayName, DateTime created) :this()
+        public IssueComment(int commentId, int issueId, string comment, string creatorUserName, Guid creatorUserId,
+            string creatorDisplayName, DateTime created) : this()
         {
-
         }
+
         #endregion
 
         #region Properties
@@ -54,7 +55,7 @@ namespace BugNET.Entities
 
         public string CommentForXml
         {
-            get { return string.Format("<![CDATA[{0}]]>", string.IsNullOrEmpty(Comment) ? string.Empty : Comment); }
+            get => string.Format("<![CDATA[{0}]]>", string.IsNullOrEmpty(Comment) ? string.Empty : Comment);
             set { }
         }
 

@@ -51,7 +51,5 @@ namespace BugNET.Entities
         public bool AutoAssign { get; set; }
 
         #endregion
-
-
     }
 }

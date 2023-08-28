@@ -21,7 +21,6 @@ namespace BugNET.Common
     /// </summary>
     public static class Extensions
     {
-
         /// <summary>
         /// Extension method for checking if a DataReader has a specific column in the results
         /// </summary>
@@ -31,10 +30,8 @@ namespace BugNET.Common
         public static bool HasColumn(this IDataRecord dr, string columnName)
         {
             for (var i = 0; i < dr.FieldCount; i++)
-            {
                 if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
                     return true;
-            }
             return false;
         }
 
@@ -54,7 +51,6 @@ namespace BugNET.Common
             if (!omitQuotes)
                 sb.Append("\"");
             foreach (var c in value)
-            {
                 switch (c)
                 {
                     case '\"':
@@ -81,22 +77,18 @@ namespace BugNET.Common
                     default:
                         int i = c;
                         if (i < 32 || i > 127)
-                        {
                             sb.AppendFormat("\\u{0:X04}", i);
-                        }
                         else
-                        {
                             sb.Append(c);
-                        }
                         break;
                 }
-            }
+
             if (!omitQuotes)
                 sb.Append("\"");
 
             var s = sb.ToString();
             return s;
-        } 
+        }
 
         #region XmlSerialize XmlDeserialize
 
@@ -106,7 +98,7 @@ namespace BugNET.Common
         /// <returns>A string that represents Xml, empty otherwise</returns>
         public static string ToXml<T>(this T obj) where T : class
         {
-            var settings = new XmlWriterSettings { OmitXmlDeclaration = true };
+            var settings = new XmlWriterSettings {OmitXmlDeclaration = true};
             var builder = new StringBuilder();
             var xmlnsEmpty = new XmlSerializerNamespaces();
             xmlnsEmpty.Add("", ""); // kill any namespaces
@@ -129,9 +121,10 @@ namespace BugNET.Common
             var xs = new XmlSerializer(typeof(T));
             using (var memoryStream = new MemoryStream(new UTF8Encoding().GetBytes(xml)))
             {
-                return (T)xs.Deserialize(memoryStream);
+                return (T) xs.Deserialize(memoryStream);
             }
         }
+
         #endregion
 
         #region To X conversions
@@ -140,15 +133,10 @@ namespace BugNET.Common
         {
             var t = typeof(T);
 
-            if (!t.IsGenericType || (t.GetGenericTypeDefinition() != typeof (Nullable<>)))
-            {
+            if (!t.IsGenericType || t.GetGenericTypeDefinition() != typeof(Nullable<>))
                 return (T) Convert.ChangeType(obj, t);
-            }
 
-            if (obj == null)
-            {
-                return (T)(object)null;
-            }
+            if (obj == null) return (T) (object) null;
 
             return (T) Convert.ChangeType(obj, Nullable.GetUnderlyingType(t));
         }
@@ -186,9 +174,9 @@ namespace BugNET.Common
         {
             if (!int.TryParse(value.ToString(), out var num)) return defaultValue;
             if (Enum.IsDefined(typeof(T), num))
-                return (T)Enum.ToObject(typeof(T), num);
+                return (T) Enum.ToObject(typeof(T), num);
 
-            return defaultValue; 
+            return defaultValue;
         }
 
         /// <summary>
@@ -204,10 +192,11 @@ namespace BugNET.Common
             if (value == null) throw new ArgumentNullException(nameof(value));
 
             if (Enum.IsDefined(typeof(T), value))
-                return (T)Enum.Parse(typeof(T), value, ignoreCase);
+                return (T) Enum.Parse(typeof(T), value, ignoreCase);
 
             return defaultValue;
         }
+
         #endregion
 
         /// <summary>
@@ -257,9 +246,10 @@ namespace BugNET.Common
                 return true;
             }
             catch
-            { 
-               // ignored
-            }  // hack yes but the only way to deal with the type converter not being to convert the type
+            {
+                // ignored
+            } // hack yes but the only way to deal with the type converter not being to convert the type
+
             return false;
         }
 
@@ -281,7 +271,8 @@ namespace BugNET.Common
             try
             {
                 var property = Expression.Property(param, sortParts[0]);
-                var sortLambda = Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), param);
+                var sortLambda =
+                    Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), param);
 
                 return sortParts.Length > 1 && sortParts[1].Equals("desc", StringComparison.OrdinalIgnoreCase)
                     ? source.AsQueryable().OrderByDescending(sortLambda)
@@ -351,7 +342,7 @@ namespace BugNET.Common
             return Get(request[key], defaultValue);
         }
 
-        private static T Get<T>(object input, T defaultValue = default(T))
+        private static T Get<T>(object input, T defaultValue = default)
         {
             var value = defaultValue;
 
@@ -362,16 +353,16 @@ namespace BugNET.Common
                 var value0 = bool.Parse(inputs[0]);
                 var value1 = bool.Parse(inputs[1]);
 
-                value = (T)Convert.ChangeType(value0 || value1, typeof(T));
+                value = (T) Convert.ChangeType(value0 || value1, typeof(T));
             }
             else
             {
                 if (typeof(T).IsEnum)
                 {
                     if (int.TryParse(input.ToString(), out _))
-                        value = (T)Convert.ChangeType(input, typeof(int));
+                        value = (T) Convert.ChangeType(input, typeof(int));
                     else
-                        value = (T)Enum.Parse(typeof(T), input.ToString());
+                        value = (T) Enum.Parse(typeof(T), input.ToString());
                 }
                 else if (typeof(T) == typeof(bool))
                 {
@@ -381,11 +372,11 @@ namespace BugNET.Common
                     {
                         case "true":
                         case "1":
-                            value = (T)Convert.ChangeType("true", typeof(bool));
+                            value = (T) Convert.ChangeType("true", typeof(bool));
                             break;
                         case "false":
                         case "0":
-                            value = (T)Convert.ChangeType("false", typeof(bool));
+                            value = (T) Convert.ChangeType("false", typeof(bool));
                             break;
                     }
                 }
@@ -398,9 +389,9 @@ namespace BugNET.Common
                     if (underlyingType.IsEnum)
                     {
                         if (int.TryParse(input.ToString(), out _))
-                            value = (T)Convert.ChangeType(input, typeof(int));
+                            value = (T) Convert.ChangeType(input, typeof(int));
                         else
-                            value = (T)Enum.Parse(typeof(T), input.ToString());
+                            value = (T) Enum.Parse(typeof(T), input.ToString());
                     }
                     else if (underlyingType == typeof(bool))
                     {
@@ -410,22 +401,25 @@ namespace BugNET.Common
                         {
                             case "true":
                             case "1":
-                                value = (T)Convert.ChangeType("true", typeof(bool));
+                                value = (T) Convert.ChangeType("true", typeof(bool));
                                 break;
                             case "false":
                             case "0":
-                                value = (T)Convert.ChangeType("false", typeof(bool));
+                                value = (T) Convert.ChangeType("false", typeof(bool));
                                 break;
                         }
                     }
                     else
                     {
-                        value = (T)Convert.ChangeType(input, underlyingType);
+                        value = (T) Convert.ChangeType(input, underlyingType);
                     }
                 }
                 else
-                    value = (T)Convert.ChangeType(input, typeof(T));
+                {
+                    value = (T) Convert.ChangeType(input, typeof(T));
+                }
             }
+
             return value;
         }
     }

@@ -11,8 +11,8 @@ namespace BugNET.MercurialChangeGroupHook
     /// </summary>
     public static class IssueTrackerIntegration
     {
-
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Gets the name of the repository from the directory name repository.
@@ -30,9 +30,8 @@ namespace BugNET.MercurialChangeGroupHook
 
                 var pos = repositoryPath.LastIndexOf(@"\", StringComparison.Ordinal);
                 if (pos > -1 && repositoryPath.Length > 1)
-                {
-                    name = repositoryPath.Substring(repositoryPath.LastIndexOf(@"\", StringComparison.Ordinal) + 1).Replace(")", "").Trim();
-                }
+                    name = repositoryPath.Substring(repositoryPath.LastIndexOf(@"\", StringComparison.Ordinal) + 1)
+                        .Replace(")", "").Trim();
 
                 return name;
             }
@@ -48,7 +47,8 @@ namespace BugNET.MercurialChangeGroupHook
         /// <param name="repository"> </param>
         /// <param name="changeSet"> </param>
         /// <param name="service"> </param>
-        public static void UpdateBugNetForChangeSet(string repository, Changeset changeSet, WebServices.BugNetServices service)
+        public static void UpdateBugNetForChangeSet(string repository, Changeset changeSet,
+            WebServices.BugNetServices service)
         {
             var issuesAffectedList = new List<int>();
             var regEx = new Regex(AppSettings.IssueIdRegEx, RegexOptions.IgnoreCase);
@@ -68,20 +68,19 @@ namespace BugNET.MercurialChangeGroupHook
             while (matchResults.Success)
             {
                 var value = matchResults.Groups[1].Value.Trim();
-                var issueIdParts = value.Split(new[] { '-' });
+                var issueIdParts = value.Split(new[] {'-'});
 
                 if (issueIdParts.Length.Equals(2))
                 {
                     var idString = issueIdParts[1];
 
                     if (int.TryParse(idString, out var issueId))
-                    {
-                        if(service.ValidIssue(issueId)) // check the issue to make sure it exists
+                        if (service.ValidIssue(issueId)) // check the issue to make sure it exists
                         {
-                            commitMessage = Regex.Replace(commitMessage, AppSettings.IssueIdRegEx, "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>");
-                            issuesAffectedList.Add(issueId);   
+                            commitMessage = Regex.Replace(commitMessage, AppSettings.IssueIdRegEx,
+                                "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>");
+                            issuesAffectedList.Add(issueId);
                         }
-                    }
                 }
 
                 matchResults = matchResults.NextMatch();
@@ -96,7 +95,6 @@ namespace BugNET.MercurialChangeGroupHook
             var branch = changeSet.Branch.Trim();
 
             foreach (var id in issuesAffectedList)
-            {
                 try
                 {
                     Log.Info("MercurialChangeGroupHook: Creating new issue revision");
@@ -118,9 +116,10 @@ namespace BugNET.MercurialChangeGroupHook
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorFormat("MercurialChangeGroupHook: An error occurred adding a new issue revision to BugNET: {0} \n\n {1}", ex.Message, ex.StackTrace);
+                    Log.ErrorFormat(
+                        "MercurialChangeGroupHook: An error occurred adding a new issue revision to BugNET: {0} \n\n {1}",
+                        ex.Message, ex.StackTrace);
                 }
-            }
         }
     }
 }

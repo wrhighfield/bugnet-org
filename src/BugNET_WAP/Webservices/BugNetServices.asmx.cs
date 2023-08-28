@@ -29,7 +29,7 @@ namespace BugNET.Webservices
         [WebMethod(EnableSession = true)]
         public bool ValidIssue(int issueId)
         {
-            if (issueId <= 0) throw new ArgumentOutOfRangeException("issueId");
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             var issue = IssueManager.GetById(issueId);
 
@@ -50,27 +50,30 @@ namespace BugNET.Webservices
         /// <returns>The new id of the revision</returns>
         [PrincipalPermission(SecurityAction.Demand, Authenticated = true)]
         [WebMethod(EnableSession = true)]
-        public bool CreateNewIssueRevision(int revision, int issueId, string repository, string revisionAuthor, string revisionDate, string revisionMessage, string changeset = "", string branch = "")
+        public bool CreateNewIssueRevision(int revision, int issueId, string repository, string revisionAuthor,
+            string revisionDate, string revisionMessage, string changeset = "", string branch = "")
         {
-            if (issueId <= 0) throw new ArgumentOutOfRangeException("issueId");
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             var projectId = IssueManager.GetById(issueId).ProjectId;
 
             //authentication checks against user access to project
-            if (ProjectManager.GetById(projectId).AccessType == ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, projectId))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            if (ProjectManager.GetById(projectId).AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, projectId))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
             var issueRevision = new IssueRevision
-                {
-                    Revision = revision,
-                    IssueId = issueId,
-                    Author = revisionAuthor,
-                    Message = revisionMessage,
-                    Repository = repository,
-                    RevisionDate = revisionDate,
-                    Changeset = changeset,
-                    Branch = branch
-                };
+            {
+                Revision = revision,
+                IssueId = issueId,
+                Author = revisionAuthor,
+                Message = revisionMessage,
+                Repository = repository,
+                RevisionDate = revisionDate,
+                Changeset = changeset,
+                Branch = branch
+            };
 
             return IssueRevisionManager.SaveOrUpdate(issueRevision);
         }
@@ -88,15 +91,18 @@ namespace BugNET.Webservices
         /// <returns></returns>
         [PrincipalPermission(SecurityAction.Demand, Authenticated = true)]
         [WebMethod(EnableSession = true)]
-        public bool CreateNewIssueAttachment(int issueId, string creatorUserName, string fileName, string contentType, byte[] attachment, int size, string description)
+        public bool CreateNewIssueAttachment(int issueId, string creatorUserName, string fileName, string contentType,
+            byte[] attachment, int size, string description)
         {
-            if (issueId <= 0) throw new ArgumentOutOfRangeException("issueId");
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             var projectId = IssueManager.GetById(issueId).ProjectId;
 
             //authentication checks against user access to project
-            if (ProjectManager.GetById(projectId).AccessType == Common.ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, projectId))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            if (ProjectManager.GetById(projectId).AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, projectId))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
             var issueAttachment = new IssueAttachment
             {
@@ -126,23 +132,23 @@ namespace BugNET.Webservices
         public void RenameCategory(string categoryId, string name)
         {
             if (string.IsNullOrEmpty(categoryId) || Convert.ToInt32(categoryId) == 0) return;
-            if (string.IsNullOrEmpty(categoryId)) throw new ArgumentNullException("categoryId");
-            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("name");
+            if (string.IsNullOrEmpty(categoryId)) throw new ArgumentNullException(nameof(categoryId));
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 
             //if (string.IsNullOrEmpty(oldText))
             //    throw new ArgumentNullException("oldText");
 
-            Category c = CategoryManager.GetById(Convert.ToInt32(categoryId));
+            var c = CategoryManager.GetById(Convert.ToInt32(categoryId));
             if (c != null)
             {
-                string UserName = Thread.CurrentPrincipal.Identity.Name;
-                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) && !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
+                var UserName = Thread.CurrentPrincipal.Identity.Name;
+                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) &&
+                    !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
                     throw new UnauthorizedAccessException(LoggingManager.GetErrorMessageResource("AccessDenied"));
 
                 c.Name = name;
                 CategoryManager.SaveOrUpdate(c);
             }
-
         }
 
         /// <summary>
@@ -155,22 +161,22 @@ namespace BugNET.Webservices
         [WebMethod]
         public void MoveCategory(string categoryId, string oldParentId, string newParentId)
         {
-            if (string.IsNullOrEmpty(categoryId)) throw new ArgumentNullException("categoryId");
-            if (string.IsNullOrEmpty(oldParentId)) throw new ArgumentNullException("oldParentId");
-            if (string.IsNullOrEmpty(newParentId)) throw new ArgumentNullException("newParentId");
+            if (string.IsNullOrEmpty(categoryId)) throw new ArgumentNullException(nameof(categoryId));
+            if (string.IsNullOrEmpty(oldParentId)) throw new ArgumentNullException(nameof(oldParentId));
+            if (string.IsNullOrEmpty(newParentId)) throw new ArgumentNullException(nameof(newParentId));
 
-            Category c = CategoryManager.GetById(Convert.ToInt32(categoryId));
+            var c = CategoryManager.GetById(Convert.ToInt32(categoryId));
             if (c != null)
             {
-                string UserName = Thread.CurrentPrincipal.Identity.Name;
+                var UserName = Thread.CurrentPrincipal.Identity.Name;
 
-                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) && !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
+                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) &&
+                    !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
                     throw new UnauthorizedAccessException(LoggingManager.GetErrorMessageResource("AccessDenied"));
 
                 c.ParentCategoryId = Convert.ToInt32(newParentId);
                 CategoryManager.SaveOrUpdate(c);
             }
-
         }
 
         /// <summary>
@@ -182,7 +188,7 @@ namespace BugNET.Webservices
         [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
         public string GetCategories(string projectId)
         {
-            if (string.IsNullOrEmpty(projectId)) throw new ArgumentNullException("projectId");
+            if (string.IsNullOrEmpty(projectId)) throw new ArgumentNullException(nameof(projectId));
 
             int pid;
 
@@ -202,10 +208,7 @@ namespace BugNET.Webservices
                     pNode.data = new Data {title = Convert.ToString(pCat.Name), icon = "../../../images/plugin.gif"};
                     tree.Add(pNode);
 
-                    if (pCat.ChildCount > 0)
-                    {
-                        pNode.children = PopulateChildNodes(pCat, allCategories);
-                    }
+                    if (pCat.ChildCount > 0) pNode.children = PopulateChildNodes(pCat, allCategories);
                 }
 
                 return new JavaScriptSerializer().Serialize(tree);
@@ -220,16 +223,13 @@ namespace BugNET.Webservices
 
             foreach (var pCat in all.FindAll(p => p.ParentCategoryId == parent.Id))
             {
-                var pNode = new JsTreeNode { attr = new Attributes() };
+                var pNode = new JsTreeNode {attr = new Attributes()};
                 pNode.attr.id = Convert.ToString(pCat.Id);
                 pNode.attr.rel = "cat" + Convert.ToString(pCat.Id);
-                pNode.data = new Data { title = Convert.ToString(pCat.Name), icon = "../../images/plugin.gif" };
+                pNode.data = new Data {title = Convert.ToString(pCat.Name), icon = "../../images/plugin.gif"};
                 tree.Add(pNode);
 
-                if (pCat.ChildCount > 0)
-                {
-                    pNode.children = PopulateChildNodes(pCat, all);
-                }
+                if (pCat.ChildCount > 0) pNode.children = PopulateChildNodes(pCat, all);
             }
 
             return tree;
@@ -285,9 +285,9 @@ namespace BugNET.Webservices
         [WebMethod(EnableSession = true)]
         public int AddCategory(string projectId, string name, string parentCategoryId)
         {
-            if (string.IsNullOrEmpty(projectId)) throw new ArgumentNullException("projectId");
-            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("name");
-            if (string.IsNullOrEmpty(parentCategoryId)) throw new ArgumentNullException("parentCategoryId");
+            if (string.IsNullOrEmpty(projectId)) throw new ArgumentNullException(nameof(projectId));
+            if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
+            if (string.IsNullOrEmpty(parentCategoryId)) throw new ArgumentNullException(nameof(parentCategoryId));
 
             var validParojectId = 0;
             var validParentCategoryId = 0;
@@ -297,10 +297,12 @@ namespace BugNET.Webservices
 
             var userName = Thread.CurrentPrincipal.Identity.Name;
 
-            if (!UserManager.IsInRole(userName, Convert.ToInt32(projectId), Globals.ProjectAdministratorRole) && !UserManager.IsInRole(userName, 0, Globals.SuperUserRole))
+            if (!UserManager.IsInRole(userName, Convert.ToInt32(projectId), Globals.ProjectAdministratorRole) &&
+                !UserManager.IsInRole(userName, 0, Globals.SuperUserRole))
                 throw new UnauthorizedAccessException(LoggingManager.GetErrorMessageResource("AccessDenied"));
 
-            var entity = new Category { ProjectId = validParojectId, ParentCategoryId = validParentCategoryId, Name = name, ChildCount = 0 };
+            var entity = new Category
+                {ProjectId = validParojectId, ParentCategoryId = validParentCategoryId, Name = name, ChildCount = 0};
             CategoryManager.SaveOrUpdate(entity);
 
             return entity.Id;
@@ -315,14 +317,15 @@ namespace BugNET.Webservices
         public void DeleteCategory(string categoryId)
         {
             if (string.IsNullOrEmpty(categoryId))
-                throw new ArgumentNullException("categoryId");
+                throw new ArgumentNullException(nameof(categoryId));
 
-            Category c = CategoryManager.GetById(Convert.ToInt32(categoryId));
+            var c = CategoryManager.GetById(Convert.ToInt32(categoryId));
             if (c != null)
             {
-                string UserName = Thread.CurrentPrincipal.Identity.Name;
+                var UserName = Thread.CurrentPrincipal.Identity.Name;
 
-                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) && !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
+                if (!UserManager.IsInRole(UserName, c.ProjectId, Globals.ProjectAdministratorRole) &&
+                    !UserManager.IsInRole(UserName, 0, Globals.SuperUserRole))
                     throw new UnauthorizedAccessException(LoggingManager.GetErrorMessageResource("AccessDenied"));
 
                 if (c.ChildCount > 0)
@@ -339,16 +342,15 @@ namespace BugNET.Webservices
         private void DeleteChildCategoriesByCategoryId(int categoryId)
         {
             if (categoryId <= 0)
-                throw new ArgumentOutOfRangeException("categoryId");
+                throw new ArgumentOutOfRangeException(nameof(categoryId));
 
-            Category c = CategoryManager.GetById(categoryId);
+            var c = CategoryManager.GetById(categoryId);
 
-            foreach (Category childCategory in CategoryManager.GetChildCategoriesByCategoryId(c.Id))
+            foreach (var childCategory in CategoryManager.GetChildCategoriesByCategoryId(c.Id))
                 CategoryManager.Delete(childCategory.Id);
 
             if (c.ChildCount > 0)
                 DeleteChildCategoriesByCategoryId(c.Id);
-
         }
 
 
@@ -361,17 +363,16 @@ namespace BugNET.Webservices
         /// <returns>Array of resolutionnames</returns>
         [PrincipalPermission(SecurityAction.Demand, Authenticated = true)]
         [WebMethod(EnableSession = true)]
-        public String[] GetResolutions(int ProjectId)
+        public string[] GetResolutions(int ProjectId)
         {
-            if (ProjectManager.GetById(ProjectId).AccessType == Common.ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, ProjectId))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            if (ProjectManager.GetById(ProjectId).AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, ProjectId))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
-            List<Resolution> resolutions = ResolutionManager.GetByProjectId(ProjectId);
-            List<String> returnval = new List<String>();
-            foreach (Resolution item in resolutions)
-            {
-                returnval.Add(item.Name.ToString());
-            }
+            var resolutions = ResolutionManager.GetByProjectId(ProjectId);
+            var returnval = new List<string>();
+            foreach (var item in resolutions) returnval.Add(item.Name);
             return returnval.ToArray();
         }
 
@@ -382,19 +383,17 @@ namespace BugNET.Webservices
         /// <returns>Array of all milestone names</returns>
         [PrincipalPermission(SecurityAction.Demand, Authenticated = true)]
         [WebMethod(EnableSession = true)]
-        public String[] GetMilestones(int ProjectId)
+        public string[] GetMilestones(int ProjectId)
         {
-            if (ProjectManager.GetById(ProjectId).AccessType == Common.ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, ProjectId))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            if (ProjectManager.GetById(ProjectId).AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, ProjectId))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
-            List<Milestone> milestones = MilestoneManager.GetByProjectId(ProjectId);
-            List<String> returnval = new List<String>();
-            foreach (Milestone item in milestones)
-            {
-                returnval.Add(item.Name.ToString());
-            }
+            var milestones = MilestoneManager.GetByProjectId(ProjectId);
+            var returnval = new List<string>();
+            foreach (var item in milestones) returnval.Add(item.Name);
             return returnval.ToArray();
-
         }
 
         /// <summary>
@@ -404,17 +403,16 @@ namespace BugNET.Webservices
         /// <returns>Array of all issue type names</returns>
         [PrincipalPermission(SecurityAction.Demand, Authenticated = true)]
         [WebMethod(EnableSession = true)]
-        public String[] GetIssueTypes(int ProjectId)
+        public string[] GetIssueTypes(int ProjectId)
         {
-            if (ProjectManager.GetById(ProjectId).AccessType == Common.ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, ProjectId))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            if (ProjectManager.GetById(ProjectId).AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, ProjectId))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
-            List<IssueType> issuetypes = IssueTypeManager.GetByProjectId(ProjectId);
-            List<String> returnval = new List<String>();
-            foreach (IssueType item in issuetypes)
-            {
-                returnval.Add(item.Name.ToString());
-            }
+            var issuetypes = IssueTypeManager.GetByProjectId(ProjectId);
+            var returnval = new List<string>();
+            foreach (var item in issuetypes) returnval.Add(item.Name);
             return returnval.ToArray();
         }
 
@@ -425,17 +423,16 @@ namespace BugNET.Webservices
         /// <returns>Array of all priority names</returns>
         [PrincipalPermission(SecurityAction.Demand, Authenticated = true)]
         [WebMethod(EnableSession = true)]
-        public String[] GetPriorities(int ProjectId)
+        public string[] GetPriorities(int ProjectId)
         {
-            if (ProjectManager.GetById(ProjectId).AccessType == Common.ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, ProjectId))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            if (ProjectManager.GetById(ProjectId).AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, ProjectId))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
-            List<Priority> priorites = PriorityManager.GetByProjectId(ProjectId);
-            List<String> returnval = new List<String>();
-            foreach (Priority item in priorites)
-            {
-                returnval.Add(item.Name.ToString());
-            }
+            var priorites = PriorityManager.GetByProjectId(ProjectId);
+            var returnval = new List<string>();
+            foreach (var item in priorites) returnval.Add(item.Name);
             return returnval.ToArray();
         }
 
@@ -468,17 +465,16 @@ namespace BugNET.Webservices
         /// <returns>Array of all status names</returns>
         [PrincipalPermission(SecurityAction.Demand, Authenticated = true)]
         [WebMethod(EnableSession = true)]
-        public String[] GetStatus(int ProjectId)
+        public string[] GetStatus(int ProjectId)
         {
-            if (ProjectManager.GetById(ProjectId).AccessType == Common.ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, ProjectId))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            if (ProjectManager.GetById(ProjectId).AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, ProjectId))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
-            List<Status> statuslist = StatusManager.GetByProjectId(ProjectId);
-            List<String> returnval = new List<String>();
-            foreach (Status item in statuslist)
-            {
-                returnval.Add(item.Name.ToString());
-            }
+            var statuslist = StatusManager.GetByProjectId(ProjectId);
+            var returnval = new List<string>();
+            foreach (var item in statuslist) returnval.Add(item.Name);
             return returnval.ToArray();
         }
 
@@ -492,9 +488,11 @@ namespace BugNET.Webservices
         [WebMethod(EnableSession = true)]
         public int GetProjectId(string ProjectCode)
         {
-            Project project = ProjectManager.GetByCode(ProjectCode);
-            if (project.AccessType == Common.ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, project.Id))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            var project = ProjectManager.GetByCode(ProjectCode);
+            if (project.AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, project.Id))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
             return project.Id;
         }
@@ -509,8 +507,10 @@ namespace BugNET.Webservices
         [WebMethod(EnableSession = true)]
         public object[] GetProjectIssues(int ProjectId, string Filter)
         {
-            if (ProjectManager.GetById(ProjectId).AccessType == Common.ProjectAccessType.Private && !ProjectManager.IsUserProjectMember(UserName, ProjectId))
-                throw new UnauthorizedAccessException(string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
+            if (ProjectManager.GetById(ProjectId).AccessType == ProjectAccessType.Private &&
+                !ProjectManager.IsUserProjectMember(UserName, ProjectId))
+                throw new UnauthorizedAccessException(
+                    string.Format(LoggingManager.GetErrorMessageResource("ProjectAccessDenied"), UserName));
 
             List<Issue> issues;
             var queryClauses = new List<QueryClause>();
@@ -525,7 +525,6 @@ namespace BugNET.Webservices
                 queryClauses.Add(new QueryClause("AND", "iv.[Disabled]", "=", "0", SqlDbType.Int));
 
                 foreach (var item in Filter.Split('&'))
-                {
                     if (item.StartsWith("status=", StringComparison.CurrentCultureIgnoreCase))
                     {
                         if (item.EndsWith("=notclosed", StringComparison.CurrentCultureIgnoreCase))
@@ -535,30 +534,36 @@ namespace BugNET.Webservices
                         else if (item.EndsWith("=new", StringComparison.CurrentCultureIgnoreCase))
                         {
                             queryClauses.Add(new QueryClause("AND", "iv.[IsClosed]", "=", "0", SqlDbType.Int));
-                            queryClauses.Add(new QueryClause("AND", "iv.[IssueAssignedUserId]", "IS", null, SqlDbType.Int));
+                            queryClauses.Add(new QueryClause("AND", "iv.[IssueAssignedUserId]", "IS", null,
+                                SqlDbType.Int));
                         }
                     }
                     else if (item.StartsWith("owner=", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        queryClauses.Add(new QueryClause("AND", "iv.[OwnerUsername]", "=", item.Substring(item.IndexOf('=') + 1, item.Length - item.IndexOf('=') - 1), SqlDbType.NVarChar));
+                        queryClauses.Add(new QueryClause("AND", "iv.[OwnerUsername]", "=",
+                            item.Substring(item.IndexOf('=') + 1, item.Length - item.IndexOf('=') - 1),
+                            SqlDbType.NVarChar));
                     }
                     else if (item.StartsWith("reporter=", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        queryClauses.Add(new QueryClause("AND", "iv.[CreatorUsername]", "=", item.Substring(item.IndexOf('=') + 1, item.Length - item.IndexOf('=') - 1), SqlDbType.NVarChar));
+                        queryClauses.Add(new QueryClause("AND", "iv.[CreatorUsername]", "=",
+                            item.Substring(item.IndexOf('=') + 1, item.Length - item.IndexOf('=') - 1),
+                            SqlDbType.NVarChar));
                     }
                     else if (item.StartsWith("assigned=", StringComparison.CurrentCultureIgnoreCase))
                     {
-                        queryClauses.Add(new QueryClause("AND", "iv.[AssignedUsername]", "=", item.Substring(item.IndexOf('=') + 1, item.Length - item.IndexOf('=') - 1), SqlDbType.NVarChar));
+                        queryClauses.Add(new QueryClause("AND", "iv.[AssignedUsername]", "=",
+                            item.Substring(item.IndexOf('=') + 1, item.Length - item.IndexOf('=') - 1),
+                            SqlDbType.NVarChar));
                     }
-                }
 
                 issues = IssueManager.PerformQuery(queryClauses, null, ProjectId);
             }
 
-            var issueList = new List<Object>();
+            var issueList = new List<object>();
             foreach (var item in issues)
             {
-                var issueitem = new Object[13];
+                var issueitem = new object[13];
                 issueitem[0] = item.Id;
                 issueitem[1] = item.DateCreated;
                 issueitem[2] = item.LastUpdate;
@@ -574,13 +579,10 @@ namespace BugNET.Webservices
                 issueitem[12] = item.IssueTypeName;
                 issueList.Add(issueitem);
             }
+
             return issueList.ToArray();
         }
 
-
         #endregion
-
-
-
     }
 }

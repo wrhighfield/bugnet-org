@@ -35,27 +35,26 @@ namespace BugNET.BLL.Notifications
 
             SetCultureThread();
 
-            var item = new CultureNotificationContent{CultureString = cultureString};
+            var item = new CultureNotificationContent {CultureString = cultureString};
 
             foreach (var key in contentKeys)
             {
-                var content = item.CultureContents.FirstOrDefault(p => p.CultureString == cultureString && p.ContentKey == key);
+                var content =
+                    item.CultureContents.FirstOrDefault(p => p.CultureString == cultureString && p.ContentKey == key);
 
                 if (content != null) continue;
 
                 var contentString = NotificationManager.LoadNotificationTemplate(key);
 
                 if (contentString.EndsWith(".xslt"))
-                {
                     contentString = NotificationManager.LoadXsltNotificationTemplate(contentString);
-                }
 
                 item.CultureContents.Add(new CultureContent
-                    {
-                        ContentKey = key,
-                        CultureString = cultureString,
-                        Content = contentString
-                    });
+                {
+                    ContentKey = key,
+                    CultureString = cultureString,
+                    Content = contentString
+                });
             }
 
             ResetCultureThread();

@@ -10,17 +10,11 @@ namespace LumiSoft.Net
         /// <summary>
         /// Gets asynchronous operation state.
         /// </summary>
-        AsyncOpState State
-        {
-            get;
-        }
+        AsyncOpState State { get; }
 
         /// <summary>
         /// Gets error happened during operation. Returns null if no error.
         /// </summary>
-        Exception Error
-        {
-            get;
-        }
+        Exception Error { get; }
     }
 }

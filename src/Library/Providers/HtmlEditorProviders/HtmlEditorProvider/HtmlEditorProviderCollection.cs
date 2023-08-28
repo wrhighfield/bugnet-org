@@ -34,7 +34,7 @@ namespace BugNET.Providers.HtmlEditorProviders
         /// GetHtmlEditorProvidertmlEditorProvider"/> with the specified name.
         /// </summary>
         /// <value></value>
-        new public HtmlEditorProvider this[string name] => (HtmlEditorProvider)base[name];
+        public new HtmlEditorProvider this[string name] => (HtmlEditorProvider) base[name];
 
         /// <summary>
         /// Copies to.

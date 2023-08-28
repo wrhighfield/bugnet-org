@@ -22,6 +22,7 @@ namespace BugNET.Providers.DataProviders
     {
         /*** DELEGATE ***/
         private delegate void GenerateListFromReader<T>(SqlDataReader returnData, ref List<T> tempList);
+
         private static readonly ILog Log = LogManager.GetLogger(typeof(SqlDataProvider));
         private string connectionString = string.Empty;
         private string providerPath = string.Empty;
@@ -44,19 +45,21 @@ namespace BugNET.Providers.DataProviders
             connectionString = ConfigurationManager.ConnectionStrings[str].ConnectionString;
 
             if (string.IsNullOrEmpty(str))
-                throw new ProviderException("connectionStringName value not specified in web.config for SqlDataProvider");
+                throw new ProviderException(
+                    "connectionStringName value not specified in web.config for SqlDataProvider");
 
             if (string.IsNullOrEmpty(connectionString))
                 throw new ProviderException("connectionString value not specified in web.config");
 
             if (string.IsNullOrEmpty(providerPath))
-                throw new ProviderException("providerPath folder value not specified in web.config for SqlDataProvider");
-
+                throw new ProviderException(
+                    "providerPath folder value not specified in web.config for SqlDataProvider");
         }
 
         public override string ConnectionString => connectionString;
 
         #region Issue history methods
+
         /// <summary>
         /// Creates the new issue history.
         /// </summary>
@@ -65,20 +68,24 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewIssueHistory(IssueHistory newHistory)
         {
             // Validate Parameters
-            if (newHistory == null) throw (new ArgumentNullException(nameof(newHistory)));
+            if (newHistory == null) throw new ArgumentNullException(nameof(newHistory));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                 AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, newHistory.IssueId);
-                AddParamToSqlCmd(sqlCmd, "@CreatedUserName", SqlDbType.NVarChar, 255, ParameterDirection.Input, newHistory.CreatedUserName);
-                AddParamToSqlCmd(sqlCmd, "@FieldChanged", SqlDbType.NVarChar, 50, ParameterDirection.Input, newHistory.FieldChanged);
-                AddParamToSqlCmd(sqlCmd, "@OldValue", SqlDbType.NVarChar, 50, ParameterDirection.Input, newHistory.OldValue);
-                AddParamToSqlCmd(sqlCmd, "@NewValue", SqlDbType.NVarChar, 50, ParameterDirection.Input, newHistory.NewValue);
+                AddParamToSqlCmd(sqlCmd, "@CreatedUserName", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                    newHistory.CreatedUserName);
+                AddParamToSqlCmd(sqlCmd, "@FieldChanged", SqlDbType.NVarChar, 50, ParameterDirection.Input,
+                    newHistory.FieldChanged);
+                AddParamToSqlCmd(sqlCmd, "@OldValue", SqlDbType.NVarChar, 50, ParameterDirection.Input,
+                    newHistory.OldValue);
+                AddParamToSqlCmd(sqlCmd, "@NewValue", SqlDbType.NVarChar, 50, ParameterDirection.Input,
+                    newHistory.NewValue);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEHISTORY_CREATENEWISSUEHISTORY);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -89,7 +96,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueHistory> GetIssueHistoryByIssueId(int issueId)
         {
-            if (issueId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -99,13 +106,14 @@ namespace BugNET.Providers.DataProviders
                 var issueHistoryList = new List<IssueHistory>();
                 ExecuteReaderCmd(sqlCmd, GenerateIssueHistoryListFromReader, ref issueHistoryList);
 
-                return issueHistoryList;   
+                return issueHistoryList;
             }
         }
 
         #endregion
 
         #region Issue notification methods
+
         /// <summary>
         /// Creates the new issue notification.
         /// </summary>
@@ -114,19 +122,21 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewIssueNotification(IssueNotification newNotification)
         {
             // Validate Parameters
-            if (newNotification == null) throw (new ArgumentNullException(nameof(newNotification)));
+            if (newNotification == null) throw new ArgumentNullException(nameof(newNotification));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, newNotification.IssueId);
-                    AddParamToSqlCmd(sqlCmd, "@NotificationUserName", SqlDbType.NText, 255, ParameterDirection.Input, newNotification.NotificationUsername);
+                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        newNotification.IssueId);
+                    AddParamToSqlCmd(sqlCmd, "@NotificationUserName", SqlDbType.NText, 255, ParameterDirection.Input,
+                        newNotification.NotificationUsername);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUENOTIFICATION_CREATE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -142,17 +152,18 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueNotification> GetIssueNotificationsByIssueId(int issueId)
         {
-            if (issueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, issueId);
-                SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUENOTIFICATION_GETISSUENOTIFICATIONSBYISSUEID);
+                SetCommandType(sqlCmd, CommandType.StoredProcedure,
+                    SP_ISSUENOTIFICATION_GETISSUENOTIFICATIONSBYISSUEID);
 
                 var issueNotificationList = new List<IssueNotification>();
                 ExecuteReaderCmd(sqlCmd, GenerateIssueNotificationListFromReader, ref issueNotificationList);
 
-                return issueNotificationList;   
+                return issueNotificationList;
             }
         }
 
@@ -165,8 +176,8 @@ namespace BugNET.Providers.DataProviders
         public override bool DeleteIssueNotification(int issueId, string userName)
         {
             // Validate Parameters
-            if (issueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(issueId)));
-            if (userName == string.Empty) throw (new ArgumentOutOfRangeException(nameof(userName)));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
+            if (userName == string.Empty) throw new ArgumentOutOfRangeException(nameof(userName));
 
             try
             {
@@ -178,8 +189,8 @@ namespace BugNET.Providers.DataProviders
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUENOTIFICATION_DELETE);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -187,9 +198,11 @@ namespace BugNET.Providers.DataProviders
                 throw ProcessException(ex);
             }
         }
+
         #endregion
 
         #region Issue comment methods
+
         /// <summary>
         /// Creates the new issue comment.
         /// </summary>
@@ -198,18 +211,19 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewIssueComment(IssueComment newComment)
         {
             // Validate Parameters
-            if (newComment == null) throw (new ArgumentNullException(nameof(newComment)));
+            if (newComment == null) throw new ArgumentNullException(nameof(newComment));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                 AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, newComment.IssueId);
-                AddParamToSqlCmd(sqlCmd, "@CreatorUserName", SqlDbType.NVarChar, 255, ParameterDirection.Input, newComment.CreatorUserName);
+                AddParamToSqlCmd(sqlCmd, "@CreatorUserName", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                    newComment.CreatorUserName);
                 AddParamToSqlCmd(sqlCmd, "@Comment", SqlDbType.NText, 0, ParameterDirection.Input, newComment.Comment);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUECOMMENT_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -220,7 +234,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueComment> GetIssueCommentsByIssueId(int issueId)
         {
-            if (issueId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             try
             {
@@ -232,7 +246,7 @@ namespace BugNET.Providers.DataProviders
                     var issueCommentList = new List<IssueComment>();
                     ExecuteReaderCmd(sqlCmd, GenerateIssueCommentListFromReader, ref issueCommentList);
 
-                    return issueCommentList;   
+                    return issueCommentList;
                 }
             }
             catch (Exception ex)
@@ -248,19 +262,20 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override IssueComment GetIssueCommentById(int issueCommentId)
         {
-            if (issueCommentId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueCommentId)));
+            if (issueCommentId <= 0) throw new ArgumentOutOfRangeException(nameof(issueCommentId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
-                    AddParamToSqlCmd(sqlCmd, "@IssueCommentId", SqlDbType.Int, 0, ParameterDirection.Input, issueCommentId);
+                    AddParamToSqlCmd(sqlCmd, "@IssueCommentId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        issueCommentId);
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUECOMMENT_GETISSUECOMMENTBYID);
 
                     var issueCommentList = new List<IssueComment>();
                     ExecuteReaderCmd(sqlCmd, GenerateIssueCommentListFromReader, ref issueCommentList);
 
-                    return issueCommentList.Count > 0 ? issueCommentList[0] : null;   
+                    return issueCommentList.Count > 0 ? issueCommentList[0] : null;
                 }
             }
             catch (Exception ex)
@@ -277,22 +292,26 @@ namespace BugNET.Providers.DataProviders
         public override bool UpdateIssueComment(IssueComment issueCommentToUpdate)
         {
             // Validate Parameters
-            if (issueCommentToUpdate == null) throw (new ArgumentNullException(nameof(issueCommentToUpdate)));
+            if (issueCommentToUpdate == null) throw new ArgumentNullException(nameof(issueCommentToUpdate));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueCommentId", SqlDbType.Int, 0, ParameterDirection.Input, issueCommentToUpdate.Id);
-                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, issueCommentToUpdate.IssueId);
-                    AddParamToSqlCmd(sqlCmd, "@CreatorUserName", SqlDbType.NVarChar, 255, ParameterDirection.Input, issueCommentToUpdate.CreatorUserName);
-                    AddParamToSqlCmd(sqlCmd, "@Comment", SqlDbType.NText, 0, ParameterDirection.Input, issueCommentToUpdate.Comment);
+                    AddParamToSqlCmd(sqlCmd, "@IssueCommentId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        issueCommentToUpdate.Id);
+                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        issueCommentToUpdate.IssueId);
+                    AddParamToSqlCmd(sqlCmd, "@CreatorUserName", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                        issueCommentToUpdate.CreatorUserName);
+                    AddParamToSqlCmd(sqlCmd, "@Comment", SqlDbType.NText, 0, ParameterDirection.Input,
+                        issueCommentToUpdate.Comment);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUECOMMENT_UPDATE);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -319,8 +338,8 @@ namespace BugNET.Providers.DataProviders
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUECOMMENT_DELETE);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -328,9 +347,11 @@ namespace BugNET.Providers.DataProviders
                 throw ProcessException(ex);
             }
         }
+
         #endregion
 
         #region Default issue values methods
+
         /// <summary>
         /// Sets the default issue type by project id.
         /// </summary>
@@ -341,61 +362,101 @@ namespace BugNET.Providers.DataProviders
         {
             // validate Parameters
             if (defaultVal.ProjectId <= Globals.NewId)
-                throw (new ArgumentOutOfRangeException("projectId"));
+                throw new ArgumentOutOfRangeException("projectId");
 
             // Execute SQL Command
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.ProjectId);
                 AddParamToSqlCmd(sqlCmd, "@Type", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.IssueTypeId);
                 AddParamToSqlCmd(sqlCmd, "@StatusId", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.StatusId);
-                AddParamToSqlCmd(sqlCmd, "@IssueOwnerUserName", SqlDbType.NText, 255, ParameterDirection.Input, defaultVal.OwnerUserName);
-                AddParamToSqlCmd(sqlCmd, "@IssuePriorityId", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.PriorityId);
-                AddParamToSqlCmd(sqlCmd, "@IssueAffectedMilestoneId", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.AffectedMilestoneId);
-                AddParamToSqlCmd(sqlCmd, "@IssueAssignedUsername", SqlDbType.NText, 255, ParameterDirection.Input, defaultVal.AssignedUserName);
-                AddParamToSqlCmd(sqlCmd, "@IssueVisibility", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.IssueVisibility);
-                AddParamToSqlCmd(sqlCmd, "@IssueCategoryId", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.CategoryId);
-                AddParamToSqlCmd(sqlCmd, "@IssueDueDate", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.DueDate == null ? DBNull.Value : (object)defaultVal.DueDate);
-                AddParamToSqlCmd(sqlCmd, "@IssueProgress", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.Progress);
-                AddParamToSqlCmd(sqlCmd, "@IssueMilestoneId", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.MilestoneId);
-                AddParamToSqlCmd(sqlCmd, "@IssueEstimation", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.Estimation);
-                AddParamToSqlCmd(sqlCmd, "@IssueResolutionId", SqlDbType.Int, 0, ParameterDirection.Input, defaultVal.ResolutionId);
-                AddParamToSqlCmd(sqlCmd, "@StatusVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.StatusVisibility);
-                AddParamToSqlCmd(sqlCmd, "@OwnedByVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.OwnedByVisibility);
-                AddParamToSqlCmd(sqlCmd, "@PriorityVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.PriorityVisibility);
-                AddParamToSqlCmd(sqlCmd, "@AssignedToVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.AssignedToVisibility);
-                AddParamToSqlCmd(sqlCmd, "@PrivateVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.PrivateVisibility);
-                AddParamToSqlCmd(sqlCmd, "@CategoryVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.CategoryVisibility);
-                AddParamToSqlCmd(sqlCmd, "@DueDateVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.DueDateVisibility);
-                AddParamToSqlCmd(sqlCmd, "@TypeVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.TypeVisibility);
-                AddParamToSqlCmd(sqlCmd, "@PercentCompleteVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.PercentCompleteVisibility);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.MilestoneVisibility);
-                AddParamToSqlCmd(sqlCmd, "@EstimationVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.EstimationVisibility);
-                AddParamToSqlCmd(sqlCmd, "@ResolutionVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.ResolutionVisibility);
-                AddParamToSqlCmd(sqlCmd, "@AffectedMilestoneVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.AffectedMilestoneVisibility);
-                AddParamToSqlCmd(sqlCmd, "@StatusEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.StatusEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@OwnedByEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.OwnedByEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@PriorityEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.PriorityEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@AssignedToEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.AssignedToEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@PrivateEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.PrivateEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@CategoryEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.CategoryEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@DueDateEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.DueDateEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@TypeEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.TypeEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@PercentCompleteEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.PercentCompleteEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.MilestoneEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@EstimationEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.EstimationEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@ResolutionEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.ResolutionEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@AffectedMilestoneEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.AffectedMilestoneEditVisibility);
-                AddParamToSqlCmd(sqlCmd, "@OwnedByNotify", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.OwnedByNotify);
-                AddParamToSqlCmd(sqlCmd, "@AssignedToNotify", SqlDbType.Bit, 0, ParameterDirection.Input, defaultVal.AssignedToNotify);
+                AddParamToSqlCmd(sqlCmd, "@IssueOwnerUserName", SqlDbType.NText, 255, ParameterDirection.Input,
+                    defaultVal.OwnerUserName);
+                AddParamToSqlCmd(sqlCmd, "@IssuePriorityId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.PriorityId);
+                AddParamToSqlCmd(sqlCmd, "@IssueAffectedMilestoneId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.AffectedMilestoneId);
+                AddParamToSqlCmd(sqlCmd, "@IssueAssignedUsername", SqlDbType.NText, 255, ParameterDirection.Input,
+                    defaultVal.AssignedUserName);
+                AddParamToSqlCmd(sqlCmd, "@IssueVisibility", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.IssueVisibility);
+                AddParamToSqlCmd(sqlCmd, "@IssueCategoryId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.CategoryId);
+                AddParamToSqlCmd(sqlCmd, "@IssueDueDate", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.DueDate == null ? DBNull.Value : (object) defaultVal.DueDate);
+                AddParamToSqlCmd(sqlCmd, "@IssueProgress", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.Progress);
+                AddParamToSqlCmd(sqlCmd, "@IssueMilestoneId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.MilestoneId);
+                AddParamToSqlCmd(sqlCmd, "@IssueEstimation", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.Estimation);
+                AddParamToSqlCmd(sqlCmd, "@IssueResolutionId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    defaultVal.ResolutionId);
+                AddParamToSqlCmd(sqlCmd, "@StatusVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.StatusVisibility);
+                AddParamToSqlCmd(sqlCmd, "@OwnedByVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.OwnedByVisibility);
+                AddParamToSqlCmd(sqlCmd, "@PriorityVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.PriorityVisibility);
+                AddParamToSqlCmd(sqlCmd, "@AssignedToVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.AssignedToVisibility);
+                AddParamToSqlCmd(sqlCmd, "@PrivateVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.PrivateVisibility);
+                AddParamToSqlCmd(sqlCmd, "@CategoryVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.CategoryVisibility);
+                AddParamToSqlCmd(sqlCmd, "@DueDateVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.DueDateVisibility);
+                AddParamToSqlCmd(sqlCmd, "@TypeVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.TypeVisibility);
+                AddParamToSqlCmd(sqlCmd, "@PercentCompleteVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.PercentCompleteVisibility);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.MilestoneVisibility);
+                AddParamToSqlCmd(sqlCmd, "@EstimationVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.EstimationVisibility);
+                AddParamToSqlCmd(sqlCmd, "@ResolutionVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.ResolutionVisibility);
+                AddParamToSqlCmd(sqlCmd, "@AffectedMilestoneVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.AffectedMilestoneVisibility);
+                AddParamToSqlCmd(sqlCmd, "@StatusEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.StatusEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@OwnedByEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.OwnedByEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@PriorityEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.PriorityEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@AssignedToEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.AssignedToEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@PrivateEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.PrivateEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@CategoryEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.CategoryEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@DueDateEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.DueDateEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@TypeEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.TypeEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@PercentCompleteEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.PercentCompleteEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.MilestoneEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@EstimationEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.EstimationEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@ResolutionEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.ResolutionEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@AffectedMilestoneEditVisibility", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.AffectedMilestoneEditVisibility);
+                AddParamToSqlCmd(sqlCmd, "@OwnedByNotify", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.OwnedByNotify);
+                AddParamToSqlCmd(sqlCmd, "@AssignedToNotify", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    defaultVal.AssignedToNotify);
 
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_DEFAULTVALUES_SET);
                 ExecuteScalarCmd(sqlCmd);
 
-                int returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0 ? true : false);
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0 ? true : false;
             }
         }
 
@@ -409,21 +470,23 @@ namespace BugNET.Providers.DataProviders
         {
             // validate Parameters
             if (projectId <= Globals.NewId)
-                throw (new ArgumentOutOfRangeException(nameof(projectId)));
+                throw new ArgumentOutOfRangeException(nameof(projectId));
 
             // Execute SQL Command
-            SqlCommand sqlCmd = new SqlCommand();
+            var sqlCmd = new SqlCommand();
 
             AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
 
             SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_DEFAULTVALUES_GETBYPROJECTID);
-            List<DefaultValue> defaultValueList = new List<DefaultValue>();
+            var defaultValueList = new List<DefaultValue>();
             ExecuteReaderCmd(sqlCmd, GenerateDefaultValueListFromReader<DefaultValue>, ref defaultValueList);
             return defaultValueList;
         }
+
         #endregion
 
         #region Host setting methods
+
         /// <summary>
         /// Gets the host settings.
         /// </summary>
@@ -437,7 +500,7 @@ namespace BugNET.Providers.DataProviders
                 var hostSettingList = new List<HostSetting>();
                 ExecuteReaderCmd(sqlCmd, GenerateHostSettingListFromReader, ref hostSettingList);
 
-                return hostSettingList;   
+                return hostSettingList;
             }
         }
 
@@ -455,16 +518,19 @@ namespace BugNET.Providers.DataProviders
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                 AddParamToSqlCmd(sqlCmd, "@SettingName", SqlDbType.NVarChar, 0, ParameterDirection.Input, settingName);
-                AddParamToSqlCmd(sqlCmd, "@SettingValue", SqlDbType.NVarChar, 0, ParameterDirection.Input, settingValue);
+                AddParamToSqlCmd(sqlCmd, "@SettingValue", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    settingValue);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_HOSTSETTING_UPDATEHOSTSETTING);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
+
         #endregion
 
         #region Role methods
+
         /// <summary>
         /// Gets all roles.
         /// </summary>
@@ -476,7 +542,7 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ROLE_GETALLROLES);
                 var roleList = new List<Role>();
                 ExecuteReaderCmd(sqlCmd, GenerateRoleListFromReader, ref roleList);
-                return roleList;   
+                return roleList;
             }
         }
 
@@ -488,7 +554,7 @@ namespace BugNET.Providers.DataProviders
         public override bool UpdateRole(Role roleToUpdate)
         {
             // Validate Parameters
-            if (roleToUpdate == null) throw (new ArgumentNullException(nameof(roleToUpdate)));
+            if (roleToUpdate == null) throw new ArgumentNullException(nameof(roleToUpdate));
 
             try
             {
@@ -496,15 +562,19 @@ namespace BugNET.Providers.DataProviders
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                     AddParamToSqlCmd(sqlCmd, "@RoleId", SqlDbType.Int, 0, ParameterDirection.Input, roleToUpdate.Id);
-                    AddParamToSqlCmd(sqlCmd, "@RoleName", SqlDbType.NText, 256, ParameterDirection.Input, roleToUpdate.Name);
-                    AddParamToSqlCmd(sqlCmd, "@RoleDescription", SqlDbType.NText, 1000, ParameterDirection.Input, roleToUpdate.Description);
-                    AddParamToSqlCmd(sqlCmd, "@AutoAssign", SqlDbType.Bit, 0, ParameterDirection.Input, roleToUpdate.AutoAssign);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, roleToUpdate.ProjectId);
+                    AddParamToSqlCmd(sqlCmd, "@RoleName", SqlDbType.NText, 256, ParameterDirection.Input,
+                        roleToUpdate.Name);
+                    AddParamToSqlCmd(sqlCmd, "@RoleDescription", SqlDbType.NText, 1000, ParameterDirection.Input,
+                        roleToUpdate.Description);
+                    AddParamToSqlCmd(sqlCmd, "@AutoAssign", SqlDbType.Bit, 0, ParameterDirection.Input,
+                        roleToUpdate.AutoAssign);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        roleToUpdate.ProjectId);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ROLE_UPDATEROLE);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -521,7 +591,7 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewRole(Role newRole)
         {
             // Validate Parameters
-            if (newRole == null) throw (new ArgumentNullException(nameof(newRole)));
+            if (newRole == null) throw new ArgumentNullException(nameof(newRole));
 
             try
             {
@@ -529,13 +599,16 @@ namespace BugNET.Providers.DataProviders
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                     AddParamToSqlCmd(sqlCmd, "@RoleName", SqlDbType.NText, 256, ParameterDirection.Input, newRole.Name);
-                    AddParamToSqlCmd(sqlCmd, "@RoleDescription", SqlDbType.NText, 1000, ParameterDirection.Input, newRole.Description);
-                    AddParamToSqlCmd(sqlCmd, "@AutoAssign", SqlDbType.Bit, 0, ParameterDirection.Input, newRole.AutoAssign);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, newRole.ProjectId);
+                    AddParamToSqlCmd(sqlCmd, "@RoleDescription", SqlDbType.NText, 1000, ParameterDirection.Input,
+                        newRole.Description);
+                    AddParamToSqlCmd(sqlCmd, "@AutoAssign", SqlDbType.Bit, 0, ParameterDirection.Input,
+                        newRole.AutoAssign);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        newRole.ProjectId);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ROLE_CREATE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -564,7 +637,7 @@ namespace BugNET.Providers.DataProviders
                     AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ROLE_ROLEEXISTS);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 1);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value == 1;
                 }
             }
             catch (Exception ex)
@@ -590,7 +663,7 @@ namespace BugNET.Providers.DataProviders
 
                 var roleList = new List<Role>();
                 ExecuteReaderCmd(sqlCmd, GenerateRoleListFromReader, ref roleList);
-                return roleList;   
+                return roleList;
             }
         }
 
@@ -602,8 +675,8 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool RemoveUserFromRole(string userName, int roleId)
         {
-            if (roleId <= Globals.NewId) throw (new ArgumentNullException(nameof(roleId)));
-            if (string.IsNullOrEmpty(userName)) throw (new ArgumentNullException(nameof(userName)));
+            if (roleId <= Globals.NewId) throw new ArgumentNullException(nameof(roleId));
+            if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -613,7 +686,7 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ROLE_REMOVEUSERFROMROLE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
 
@@ -625,8 +698,8 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool AddUserToRole(string userName, int roleId)
         {
-            if (roleId <= Globals.NewId) throw (new ArgumentNullException(nameof(roleId)));
-            if (string.IsNullOrEmpty(userName)) throw (new ArgumentNullException(nameof(userName)));
+            if (roleId <= Globals.NewId) throw new ArgumentNullException(nameof(roleId));
+            if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
 
             try
             {
@@ -637,7 +710,7 @@ namespace BugNET.Providers.DataProviders
                     AddParamToSqlCmd(sqlCmd, "@UserName", SqlDbType.NVarChar, 0, ParameterDirection.Input, userName);
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ROLE_ADDUSERTOROLE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
                 }
             }
             catch (Exception ex)
@@ -653,7 +726,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteRole(int roleId)
         {
-            if (roleId <= Globals.NewId) throw (new ArgumentNullException(nameof(roleId)));
+            if (roleId <= Globals.NewId) throw new ArgumentNullException(nameof(roleId));
 
             try
             {
@@ -663,7 +736,7 @@ namespace BugNET.Providers.DataProviders
                     AddParamToSqlCmd(sqlCmd, "@RoleId", SqlDbType.Int, 0, ParameterDirection.Input, roleId);
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ROLE_DELETEROLE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
                 }
             }
             catch (Exception ex)
@@ -679,7 +752,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override Role GetRoleById(int roleId)
         {
-            if (roleId <= Globals.NewId) throw (new ArgumentNullException(nameof(roleId)));
+            if (roleId <= Globals.NewId) throw new ArgumentNullException(nameof(roleId));
 
             try
             {
@@ -691,7 +764,7 @@ namespace BugNET.Providers.DataProviders
 
                     var roleList = new List<Role>();
                     ExecuteReaderCmd(sqlCmd, GenerateRoleListFromReader, ref roleList);
-                    return roleList.Count > 0 ? roleList[0] : null;   
+                    return roleList.Count > 0 ? roleList[0] : null;
                 }
             }
             catch (Exception ex)
@@ -707,7 +780,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Role> GetRolesByUserName(string userName)
         {
-            if (userName == null) throw (new ArgumentNullException(nameof(userName)));
+            if (userName == null) throw new ArgumentNullException(nameof(userName));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -717,7 +790,7 @@ namespace BugNET.Providers.DataProviders
                 var roleList = new List<Role>();
                 ExecuteReaderCmd(sqlCmd, GenerateRoleListFromReader, ref roleList);
 
-                return roleList;   
+                return roleList;
             }
         }
 
@@ -728,7 +801,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Role> GetRolesByProject(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentNullException(nameof(projectId)));
+            if (projectId <= 0) throw new ArgumentNullException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -738,7 +811,7 @@ namespace BugNET.Providers.DataProviders
                 var roleList = new List<Role>();
                 ExecuteReaderCmd(sqlCmd, GenerateRoleListFromReader, ref roleList);
 
-                return roleList;   
+                return roleList;
             }
         }
 
@@ -755,7 +828,7 @@ namespace BugNET.Providers.DataProviders
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PERMISSION_GETALLPERMISSIONS);
                     var permissionList = new List<Permission>();
                     ExecuteReaderCmd(sqlCmd, GeneratePermissionListFromReader, ref permissionList);
-                    return permissionList;   
+                    return permissionList;
                 }
             }
             catch (Exception ex)
@@ -777,7 +850,7 @@ namespace BugNET.Providers.DataProviders
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PERMISSION_GETROLEPERMISSIONS);
                     var rolePermissionList = new List<RolePermission>();
                     ExecuteReaderCmd(sqlCmd, GenerateRolePermissionListFromReader, ref rolePermissionList);
-                    return rolePermissionList;   
+                    return rolePermissionList;
                 }
             }
             catch (Exception ex)
@@ -793,7 +866,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Permission> GetPermissionsByRoleId(int roleId)
         {
-            if (roleId <= Globals.NewId) throw (new ArgumentNullException(nameof(roleId)));
+            if (roleId <= Globals.NewId) throw new ArgumentNullException(nameof(roleId));
 
             try
             {
@@ -803,7 +876,7 @@ namespace BugNET.Providers.DataProviders
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PERMISSION_GETPERMISSIONSBYROLE);
                     var permissionList = new List<Permission>();
                     ExecuteReaderCmd(sqlCmd, GeneratePermissionListFromReader, ref permissionList);
-                    return permissionList;   
+                    return permissionList;
                 }
             }
             catch (Exception ex)
@@ -820,8 +893,8 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeletePermission(int roleId, int permissionId)
         {
-            if (roleId <= Globals.NewId) throw (new ArgumentNullException(nameof(roleId)));
-            if (permissionId <= Globals.NewId) throw (new ArgumentNullException(nameof(permissionId)));
+            if (roleId <= Globals.NewId) throw new ArgumentNullException(nameof(roleId));
+            if (permissionId <= Globals.NewId) throw new ArgumentNullException(nameof(permissionId));
 
             try
             {
@@ -833,8 +906,8 @@ namespace BugNET.Providers.DataProviders
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PERMISSION_DELETEROLEPERMISSION);
                     ExecuteScalarCmd(sqlCmd);
-                    var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                    return (resultValue == 0);   
+                    var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                    return resultValue == 0;
                 }
             }
             catch (Exception ex)
@@ -852,8 +925,8 @@ namespace BugNET.Providers.DataProviders
         public override bool AddPermission(int roleId, int permissionId)
         {
             // Validate Parameters
-            if (roleId <= Globals.NewId) throw (new ArgumentNullException(nameof(roleId)));
-            if (permissionId <= Globals.NewId) throw (new ArgumentNullException(nameof(permissionId)));
+            if (roleId <= Globals.NewId) throw new ArgumentNullException(nameof(roleId));
+            if (permissionId <= Globals.NewId) throw new ArgumentNullException(nameof(permissionId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -863,12 +936,14 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PERMISSION_ADDROLEPERMISSION);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
+
         #endregion
 
         #region User methods
+
         /// <summary>
         /// Gets the users by project id.
         /// </summary>
@@ -876,7 +951,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<ITUser> GetUsersByProjectId(int projectId)
         {
-            return this.GetUsersByProjectId(projectId, false);
+            return GetUsersByProjectId(projectId, false);
         }
 
         /// <summary>
@@ -892,7 +967,8 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USER_GETUSERSBYPROJECTID);
 
                 AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
-                AddParamToSqlCmd(sqlCmd, "@ExcludeReadonlyUsers", SqlDbType.Bit, 0, ParameterDirection.Input, excludeReadOnlyUsers);
+                AddParamToSqlCmd(sqlCmd, "@ExcludeReadonlyUsers", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    excludeReadOnlyUsers);
 
                 var userList = new List<ITUser>();
                 ExecuteReaderCmd(sqlCmd, GenerateUserListFromReader, ref userList);
@@ -913,18 +989,19 @@ namespace BugNET.Providers.DataProviders
                 AddParamToSqlCmd(sqlCmd, "@UserName", SqlDbType.NVarChar, 255, ParameterDirection.Output, null);
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USER_GETUSERNAMEBYPASSWORDRESETTOKEN);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (string)sqlCmd.Parameters["@UserName"].Value;
+                var returnValue = (string) sqlCmd.Parameters["@UserName"].Value;
 
                 return returnValue;
             }
         }
+
         #endregion
 
-#region User custom field & selection methods
+        #region User custom field & selection methods
 
         public override UserCustomField GetUserCustomFieldById(int customFieldId)
         {
-            if (customFieldId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(customFieldId)));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -958,7 +1035,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<UserCustomField> GetUserCustomFieldsByUserId(Guid userId)
         {
-            if (userId == Guid.Empty) throw (new ArgumentOutOfRangeException(nameof(userId)));
+            if (userId == Guid.Empty) throw new ArgumentOutOfRangeException(nameof(userId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -979,15 +1056,19 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldName", SqlDbType.NText, 50, ParameterDirection.Input, newCustomField.Name);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldDataType", SqlDbType.Int, 0, ParameterDirection.Input, newCustomField.DataType);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldRequired", SqlDbType.Bit, 0, ParameterDirection.Input, newCustomField.Required);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldTypeId", SqlDbType.Int, 0, ParameterDirection.Input, (int)newCustomField.FieldType);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    newCustomField.Name);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldDataType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newCustomField.DataType);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldRequired", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    newCustomField.Required);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldTypeId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    (int) newCustomField.FieldType);
 
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USERCUSTOMFIELD_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -998,39 +1079,47 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldName", SqlDbType.NText, 50, ParameterDirection.Input, customFieldToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldDataType", SqlDbType.Int, 0, ParameterDirection.Input, customFieldToUpdate.DataType);;
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldRequired", SqlDbType.Bit, 0, ParameterDirection.Input, customFieldToUpdate.Required);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldTypeId", SqlDbType.Int, 0, ParameterDirection.Input, (int)customFieldToUpdate.FieldType);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    customFieldToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldDataType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldToUpdate.DataType);
+                ;
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldRequired", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    customFieldToUpdate.Required);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldTypeId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    (int) customFieldToUpdate.FieldType);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USERCUSTOMFIELD_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
 
         public override bool DeleteUserCustomField(int customFieldId)
         {
             // Validate Parameters
-            if (customFieldId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(customFieldId)));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
 
             using (var sqlCmd = new SqlCommand())
             {
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldIdToDelete", SqlDbType.Int, 4, ParameterDirection.Input, customFieldId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldIdToDelete", SqlDbType.Int, 4, ParameterDirection.Input,
+                    customFieldId);
                 AddParamToSqlCmd(sqlCmd, "@ResultValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USERCUSTOMFIELD_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                return (resultValue == 0);
+                var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                return resultValue == 0;
             }
         }
 
         public override bool SaveUserCustomFieldValues(Guid userId, List<UserCustomField> fields)
-        {            // Validate Parameters
-            if (fields == null) throw (new ArgumentNullException(nameof(fields)));
-            if (userId == Guid.Empty) throw (new ArgumentOutOfRangeException(nameof(userId)));
+        {
+            // Validate Parameters
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
+            if (userId == Guid.Empty) throw new ArgumentOutOfRangeException(nameof(userId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1049,9 +1138,10 @@ namespace BugNET.Providers.DataProviders
                     sqlCmd.Parameters["@CustomFieldId"].Value = field.Id;
                     sqlCmd.Parameters["@CustomFieldValue"].Value = field.Value;
                     ExecuteScalarCmd(sqlCmd);
-                    if ((int)sqlCmd.Parameters["@ReturnValue"].Value == 1)
+                    if ((int) sqlCmd.Parameters["@ReturnValue"].Value == 1)
                         errors = true;
                 }
+
                 return !errors;
             }
         }
@@ -1063,13 +1153,16 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input, newCustomFieldSelection.CustomFieldId);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionName", SqlDbType.NVarChar, 255, ParameterDirection.Input, newCustomFieldSelection.Name);
-                AddParamToSqlCmd(sqlCmd, "@CUstomFieldSelectionValue", SqlDbType.NVarChar, 255, ParameterDirection.Input, newCustomFieldSelection.Value);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newCustomFieldSelection.CustomFieldId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionName", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                    newCustomFieldSelection.Name);
+                AddParamToSqlCmd(sqlCmd, "@CUstomFieldSelectionValue", SqlDbType.NVarChar, 255,
+                    ParameterDirection.Input, newCustomFieldSelection.Value);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USERCUSTOMFIELDSELECTION_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -1080,23 +1173,25 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionIdToDelete", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionIdToDelete", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionId);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USERCUSTOMFIELDSELECTION_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
         public override List<UserCustomFieldSelection> GetUserCustomFieldSelectionsByCustomFieldId(int customFieldId)
         {
-            if (customFieldId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(customFieldId)));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldId);
-                SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONSBYCUSTOMFIELDID);
+                SetCommandType(sqlCmd, CommandType.StoredProcedure,
+                    SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONSBYCUSTOMFIELDID);
 
                 var customFieldSelectionList = new List<UserCustomFieldSelection>();
                 ExecuteReaderCmd(sqlCmd, GenerateUserCustomFieldSelectionListFromReader, ref customFieldSelectionList);
@@ -1107,12 +1202,15 @@ namespace BugNET.Providers.DataProviders
 
         public override UserCustomFieldSelection GetUserCustomFieldSelectionById(int customFieldSelectionId)
         {
-            if (customFieldSelectionId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(customFieldSelectionId)));
+            if (customFieldSelectionId <= Globals.NewId)
+                throw new ArgumentOutOfRangeException(nameof(customFieldSelectionId));
 
             using (var sqlCmd = new SqlCommand())
             {
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionId);
-                SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONBYID);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionId);
+                SetCommandType(sqlCmd, CommandType.StoredProcedure,
+                    SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONBYID);
 
                 var customFieldSelectionList = new List<UserCustomFieldSelection>();
                 ExecuteReaderCmd(sqlCmd, GenerateUserCustomFieldSelectionListFromReader, ref customFieldSelectionList);
@@ -1123,25 +1221,33 @@ namespace BugNET.Providers.DataProviders
 
         public override bool UpdateUserCustomFieldSelection(UserCustomFieldSelection customFieldSelectionToUpdate)
         {
-            if (customFieldSelectionToUpdate == null) throw new ArgumentNullException(nameof(customFieldSelectionToUpdate));
+            if (customFieldSelectionToUpdate == null)
+                throw new ArgumentNullException(nameof(customFieldSelectionToUpdate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionToUpdate.CustomFieldId);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionName", SqlDbType.NVarChar, 255, ParameterDirection.Input, customFieldSelectionToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionValue", SqlDbType.NVarChar, 255, ParameterDirection.Input, customFieldSelectionToUpdate.Value);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionSortOrder", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionToUpdate.SortOrder);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionToUpdate.CustomFieldId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionName", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                    customFieldSelectionToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionValue", SqlDbType.NVarChar, 255,
+                    ParameterDirection.Input, customFieldSelectionToUpdate.Value);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionSortOrder", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionToUpdate.SortOrder);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_USERCUSTOMFIELDSELECTION_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
-#endregion
+
+        #endregion
 
         #region Project methods
+
         /// <summary>
         /// Creates the new project.
         /// </summary>
@@ -1150,41 +1256,60 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewProject(Project newProject)
         {
             // Validate Parameters
-            if (newProject == null) throw (new ArgumentNullException(nameof(newProject)));
+            if (newProject == null) throw new ArgumentNullException(nameof(newProject));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@AllowAttachments", SqlDbType.Bit, 0, ParameterDirection.Input, newProject.AllowAttachments);
-                AddParamToSqlCmd(sqlCmd, "@ProjectName", SqlDbType.NText, 256, ParameterDirection.Input, newProject.Name);
-                AddParamToSqlCmd(sqlCmd, "@ProjectDescription", SqlDbType.NText, 1000, ParameterDirection.Input, newProject.Description);
-                AddParamToSqlCmd(sqlCmd, "@ProjectManagerUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input, newProject.ManagerUserName);
-                AddParamToSqlCmd(sqlCmd, "@ProjectCreatorUserName", SqlDbType.NText, 255, ParameterDirection.Input, newProject.CreatorUserName);
-                AddParamToSqlCmd(sqlCmd, "@ProjectAccessType", SqlDbType.Int, 0, ParameterDirection.Input, newProject.AccessType);
-                AddParamToSqlCmd(sqlCmd, "@AttachmentUploadPath", SqlDbType.NVarChar, 80, ParameterDirection.Input, newProject.UploadPath);
-                AddParamToSqlCmd(sqlCmd, "@ProjectCode", SqlDbType.NVarChar, 80, ParameterDirection.Input, newProject.Code);
-                AddParamToSqlCmd(sqlCmd, "@SvnRepositoryUrl", SqlDbType.NVarChar, 0, ParameterDirection.Input, newProject.SvnRepositoryUrl);
-                AddParamToSqlCmd(sqlCmd, "@AllowIssueVoting", SqlDbType.Bit, 0, ParameterDirection.Input, newProject.AllowIssueVoting);
-				AddParamToSqlCmd(sqlCmd, "@AttachmentStorageType", SqlDbType.Int, 0, ParameterDirection.Input, newProject.AttachmentStorageType);
+                AddParamToSqlCmd(sqlCmd, "@AllowAttachments", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    newProject.AllowAttachments);
+                AddParamToSqlCmd(sqlCmd, "@ProjectName", SqlDbType.NText, 256, ParameterDirection.Input,
+                    newProject.Name);
+                AddParamToSqlCmd(sqlCmd, "@ProjectDescription", SqlDbType.NText, 1000, ParameterDirection.Input,
+                    newProject.Description);
+                AddParamToSqlCmd(sqlCmd, "@ProjectManagerUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    newProject.ManagerUserName);
+                AddParamToSqlCmd(sqlCmd, "@ProjectCreatorUserName", SqlDbType.NText, 255, ParameterDirection.Input,
+                    newProject.CreatorUserName);
+                AddParamToSqlCmd(sqlCmd, "@ProjectAccessType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newProject.AccessType);
+                AddParamToSqlCmd(sqlCmd, "@AttachmentUploadPath", SqlDbType.NVarChar, 80, ParameterDirection.Input,
+                    newProject.UploadPath);
+                AddParamToSqlCmd(sqlCmd, "@ProjectCode", SqlDbType.NVarChar, 80, ParameterDirection.Input,
+                    newProject.Code);
+                AddParamToSqlCmd(sqlCmd, "@SvnRepositoryUrl", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    newProject.SvnRepositoryUrl);
+                AddParamToSqlCmd(sqlCmd, "@AllowIssueVoting", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    newProject.AllowIssueVoting);
+                AddParamToSqlCmd(sqlCmd, "@AttachmentStorageType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newProject.AttachmentStorageType);
 
-				if (newProject.Image != null)
+                if (newProject.Image != null)
                 {
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileContent", SqlDbType.Binary, 0, ParameterDirection.Input, newProject.Image.ImageContent);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileName", SqlDbType.NVarChar, 150, ParameterDirection.Input, newProject.Image.ImageFileName);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageContentType", SqlDbType.NVarChar, 50, ParameterDirection.Input, newProject.Image.ImageContentType);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileSize", SqlDbType.BigInt, 0, ParameterDirection.Input, newProject.Image.ImageFileLength);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileContent", SqlDbType.Binary, 0, ParameterDirection.Input,
+                        newProject.Image.ImageContent);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileName", SqlDbType.NVarChar, 150, ParameterDirection.Input,
+                        newProject.Image.ImageFileName);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageContentType", SqlDbType.NVarChar, 50,
+                        ParameterDirection.Input, newProject.Image.ImageContentType);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileSize", SqlDbType.BigInt, 0, ParameterDirection.Input,
+                        newProject.Image.ImageFileLength);
                 }
                 else
                 {
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileContent", SqlDbType.Binary, 0, ParameterDirection.Input, DBNull.Value);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileName", SqlDbType.NVarChar, 150, ParameterDirection.Input, DBNull.Value);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageContentType", SqlDbType.NVarChar, 50, ParameterDirection.Input, DBNull.Value);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileSize", SqlDbType.BigInt, 0, ParameterDirection.Input, DBNull.Value);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileContent", SqlDbType.Binary, 0, ParameterDirection.Input,
+                        DBNull.Value);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileName", SqlDbType.NVarChar, 150, ParameterDirection.Input,
+                        DBNull.Value);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageContentType", SqlDbType.NVarChar, 50,
+                        ParameterDirection.Input, DBNull.Value);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileSize", SqlDbType.BigInt, 0, ParameterDirection.Input,
+                        DBNull.Value);
                 }
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -1195,7 +1320,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteProject(int projectId)
         {
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1204,8 +1329,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -1223,7 +1348,7 @@ namespace BugNET.Providers.DataProviders
                 var projectList = new List<Project>();
                 ExecuteReaderCmd(sqlCmd, GenerateProjectListFromReader, ref projectList);
 
-                return projectList;   
+                return projectList;
             }
         }
 
@@ -1234,7 +1359,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override Project GetProjectById(int projectId)
         {
-            if (projectId <= Globals.NewId) throw (new ArgumentNullException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentNullException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1244,7 +1369,7 @@ namespace BugNET.Providers.DataProviders
                 var projectList = new List<Project>();
                 ExecuteReaderCmd(sqlCmd, GenerateProjectListFromReader, ref projectList);
 
-                return projectList.Count > 0 ? projectList[0] : null;   
+                return projectList.Count > 0 ? projectList[0] : null;
             }
         }
 
@@ -1255,7 +1380,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Project> GetProjectsByMemberUserName(string userName)
         {
-            if (userName == null) throw (new ArgumentNullException(nameof(userName)));
+            if (userName == null) throw new ArgumentNullException(nameof(userName));
 
             return GetProjectsByMemberUserName(userName, true);
         }
@@ -1268,7 +1393,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<Project> GetProjectsByMemberUserName(string userName, bool activeOnly)
         {
-            if (userName == null) throw (new ArgumentNullException(nameof(userName)));
+            if (userName == null) throw new ArgumentNullException(nameof(userName));
 
             try
             {
@@ -1281,7 +1406,7 @@ namespace BugNET.Providers.DataProviders
                     var projectList = new List<Project>();
                     ExecuteReaderCmd(sqlCmd, GenerateProjectListFromReader, ref projectList);
 
-                    return projectList;   
+                    return projectList;
                 }
             }
             catch (Exception ex)
@@ -1297,44 +1422,63 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool UpdateProject(Project projectToUpdate)
         {
-            if (projectToUpdate == null) throw (new ArgumentNullException(nameof(projectToUpdate)));
-            if (projectToUpdate.Id <= 0) throw (new ArgumentOutOfRangeException(nameof(projectToUpdate)));
+            if (projectToUpdate == null) throw new ArgumentNullException(nameof(projectToUpdate));
+            if (projectToUpdate.Id <= 0) throw new ArgumentOutOfRangeException(nameof(projectToUpdate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                 AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@AllowAttachments", SqlDbType.Bit, 0, ParameterDirection.Input, projectToUpdate.AllowAttachments);
-                AddParamToSqlCmd(sqlCmd, "@ProjectDisabled", SqlDbType.Bit, 0, ParameterDirection.Input, projectToUpdate.Disabled);
-                AddParamToSqlCmd(sqlCmd, "@ProjectName", SqlDbType.NText, 256, ParameterDirection.Input, projectToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@ProjectDescription", SqlDbType.NText, 1000, ParameterDirection.Input, projectToUpdate.Description);
-                AddParamToSqlCmd(sqlCmd, "@ProjectManagerUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input, projectToUpdate.ManagerUserName);
-                AddParamToSqlCmd(sqlCmd, "@ProjectAccessType", SqlDbType.Int, 0, ParameterDirection.Input, projectToUpdate.AccessType);
-                AddParamToSqlCmd(sqlCmd, "@AttachmentUploadPath", SqlDbType.NVarChar, 80, ParameterDirection.Input, projectToUpdate.UploadPath);
-                AddParamToSqlCmd(sqlCmd, "@ProjectCode", SqlDbType.NVarChar, 80, ParameterDirection.Input, projectToUpdate.Code);
-                AddParamToSqlCmd(sqlCmd, "@SvnRepositoryUrl", SqlDbType.NVarChar, 0, ParameterDirection.Input, projectToUpdate.SvnRepositoryUrl);
-                AddParamToSqlCmd(sqlCmd, "@AllowIssueVoting", SqlDbType.Bit, 0, ParameterDirection.Input, projectToUpdate.AllowIssueVoting);
-				AddParamToSqlCmd(sqlCmd, "@AttachmentStorageType", SqlDbType.Int, 0, ParameterDirection.Input, projectToUpdate.AttachmentStorageType);
+                AddParamToSqlCmd(sqlCmd, "@AllowAttachments", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    projectToUpdate.AllowAttachments);
+                AddParamToSqlCmd(sqlCmd, "@ProjectDisabled", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    projectToUpdate.Disabled);
+                AddParamToSqlCmd(sqlCmd, "@ProjectName", SqlDbType.NText, 256, ParameterDirection.Input,
+                    projectToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@ProjectDescription", SqlDbType.NText, 1000, ParameterDirection.Input,
+                    projectToUpdate.Description);
+                AddParamToSqlCmd(sqlCmd, "@ProjectManagerUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    projectToUpdate.ManagerUserName);
+                AddParamToSqlCmd(sqlCmd, "@ProjectAccessType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    projectToUpdate.AccessType);
+                AddParamToSqlCmd(sqlCmd, "@AttachmentUploadPath", SqlDbType.NVarChar, 80, ParameterDirection.Input,
+                    projectToUpdate.UploadPath);
+                AddParamToSqlCmd(sqlCmd, "@ProjectCode", SqlDbType.NVarChar, 80, ParameterDirection.Input,
+                    projectToUpdate.Code);
+                AddParamToSqlCmd(sqlCmd, "@SvnRepositoryUrl", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    projectToUpdate.SvnRepositoryUrl);
+                AddParamToSqlCmd(sqlCmd, "@AllowIssueVoting", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    projectToUpdate.AllowIssueVoting);
+                AddParamToSqlCmd(sqlCmd, "@AttachmentStorageType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    projectToUpdate.AttachmentStorageType);
 
                 if (projectToUpdate.Image == null)
                 {
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileContent", SqlDbType.Binary, 0, ParameterDirection.Input, DBNull.Value);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileName", SqlDbType.NVarChar, 150, ParameterDirection.Input, DBNull.Value);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageContentType", SqlDbType.NVarChar, 50, ParameterDirection.Input, DBNull.Value);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileSize", SqlDbType.BigInt, 0, ParameterDirection.Input, DBNull.Value);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileContent", SqlDbType.Binary, 0, ParameterDirection.Input,
+                        DBNull.Value);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileName", SqlDbType.NVarChar, 150, ParameterDirection.Input,
+                        DBNull.Value);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageContentType", SqlDbType.NVarChar, 50,
+                        ParameterDirection.Input, DBNull.Value);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileSize", SqlDbType.BigInt, 0, ParameterDirection.Input,
+                        DBNull.Value);
                 }
                 else
                 {
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileContent", SqlDbType.Binary, 0, ParameterDirection.Input, projectToUpdate.Image.ImageContent);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileName", SqlDbType.NVarChar, 150, ParameterDirection.Input, projectToUpdate.Image.ImageFileName);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageContentType", SqlDbType.NVarChar, 50, ParameterDirection.Input, projectToUpdate.Image.ImageContentType);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileSize", SqlDbType.BigInt, 0, ParameterDirection.Input, projectToUpdate.Image.ImageFileLength);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileContent", SqlDbType.Binary, 0, ParameterDirection.Input,
+                        projectToUpdate.Image.ImageContent);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileName", SqlDbType.NVarChar, 150, ParameterDirection.Input,
+                        projectToUpdate.Image.ImageFileName);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageContentType", SqlDbType.NVarChar, 50,
+                        ParameterDirection.Input, projectToUpdate.Image.ImageContentType);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectImageFileSize", SqlDbType.BigInt, 0, ParameterDirection.Input,
+                        projectToUpdate.Image.ImageFileLength);
                 }
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -1347,7 +1491,7 @@ namespace BugNET.Providers.DataProviders
         public override bool AddUserToProject(string userName, int projectId)
         {
             if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= 0) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1356,8 +1500,8 @@ namespace BugNET.Providers.DataProviders
                 AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_ADDUSERTOPROJECT);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -1370,7 +1514,7 @@ namespace BugNET.Providers.DataProviders
         public override bool RemoveUserFromProject(string userName, int projectId)
         {
             if (string.IsNullOrEmpty(userName)) throw new ArgumentNullException(nameof(userName));
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= 0) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1379,8 +1523,8 @@ namespace BugNET.Providers.DataProviders
                 AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_REMOVEUSERFROMPROJECT);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -1394,19 +1538,21 @@ namespace BugNET.Providers.DataProviders
         public override int CloneProject(int projectId, string projectName, string creatorUserName = "")
         {
             if (string.IsNullOrEmpty(projectName)) throw new ArgumentNullException(nameof(projectName));
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= 0) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectName", SqlDbType.NText, 256, ParameterDirection.Input, projectName);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectName", SqlDbType.NText, 256, ParameterDirection.Input,
+                        projectName);
                     AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
-                    AddParamToSqlCmd(sqlCmd, "@CloningUserName", SqlDbType.VarChar, 0, ParameterDirection.Input, creatorUserName);
+                    AddParamToSqlCmd(sqlCmd, "@CloningUserName", SqlDbType.VarChar, 0, ParameterDirection.Input,
+                        creatorUserName);
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_CLONEPROJECT);
                     ExecuteScalarCmd(sqlCmd);
-                    return (int)sqlCmd.Parameters["@ReturnValue"].Value;   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -1422,17 +1568,18 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override Project GetProjectByCode(string projectCode)
         {
-            if (projectCode == null) throw (new ArgumentNullException(nameof(projectCode)));
+            if (projectCode == null) throw new ArgumentNullException(nameof(projectCode));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
-                    AddParamToSqlCmd(sqlCmd, "@ProjectCode", SqlDbType.NVarChar, 0, ParameterDirection.Input, projectCode);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectCode", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                        projectCode);
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_GETPROJECTBYCODE);
                     var projectList = new List<Project>();
                     ExecuteReaderCmd(sqlCmd, GenerateProjectListFromReader, ref projectList);
-                    return projectList.Count > 0 ? projectList[0] : null;   
+                    return projectList.Count > 0 ? projectList[0] : null;
                 }
             }
             catch (Exception ex)
@@ -1454,7 +1601,7 @@ namespace BugNET.Providers.DataProviders
                 var projectList = new List<Project>();
                 ExecuteReaderCmd(sqlCmd, GenerateProjectListFromReader, ref projectList);
 
-                return projectList;   
+                return projectList;
             }
         }
 
@@ -1468,7 +1615,7 @@ namespace BugNET.Providers.DataProviders
         /// </returns>
         public override bool IsUserProjectMember(string userName, int projectId)
         {
-            if (userName == null) throw (new ArgumentNullException(nameof(userName)));
+            if (userName == null) throw new ArgumentNullException(nameof(userName));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1479,7 +1626,7 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_ISUSERPROJECTMEMBER);
                 ExecuteScalarCmd(sqlCmd);
 
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
 
@@ -1490,14 +1637,15 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteProjectImage(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= 0) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
-                    const string commandText = "UPDATE BugNet_Projects SET ProjectImageFileContent = NULL, ProjectImageFileName = NULL, ProjectImageContentType = NULL, ProjectImageFileSize = NULL WHERE ProjectId = @ProjectId";
+                    const string commandText =
+                        "UPDATE BugNet_Projects SET ProjectImageFileContent = NULL, ProjectImageFileName = NULL, ProjectImageContentType = NULL, ProjectImageFileSize = NULL WHERE ProjectId = @ProjectId";
 
                     SetCommandType(sqlCmd, CommandType.Text, commandText);
                     int retVal;
@@ -1509,7 +1657,7 @@ namespace BugNET.Providers.DataProviders
                         retVal = sqlCmd.ExecuteNonQuery();
                     }
 
-                    return retVal != 0;   
+                    return retVal != 0;
                 }
             }
             catch (Exception ex)
@@ -1526,14 +1674,15 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override ProjectImage GetProjectImageById(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= 0) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
-                    sqlCmd.CommandText = "SELECT [ProjectId], [ProjectImageFileContent],[ProjectImageFileName],[ProjectImageContentType],[ProjectImageFileSize] FROM BugNet_Projects WHERE ProjectId = @ProjectId";
+                    sqlCmd.CommandText =
+                        "SELECT [ProjectId], [ProjectImageFileContent],[ProjectImageFileName],[ProjectImageContentType],[ProjectImageFileSize] FROM BugNet_Projects WHERE ProjectId = @ProjectId";
 
                     ProjectImage projectImage = null;
 
@@ -1548,17 +1697,18 @@ namespace BugNET.Providers.DataProviders
                                 byte[] attachmentData;
 
                                 if (dtr["ProjectImageFileContent"] != DBNull.Value)
-                                    attachmentData = (byte[])dtr["ProjectImageFileContent"];
+                                    attachmentData = (byte[]) dtr["ProjectImageFileContent"];
                                 else
                                     return null;
 
-                                projectImage = new ProjectImage((int)dtr["ProjectId"], attachmentData, (string)dtr["ProjectImageFileName"], (long)dtr["ProjectImageFileSize"], (string)dtr["ProjectImageContentType"]);
-
-                            }   
+                                projectImage = new ProjectImage((int) dtr["ProjectId"], attachmentData,
+                                    (string) dtr["ProjectImageFileName"], (long) dtr["ProjectImageFileSize"],
+                                    (string) dtr["ProjectImageContentType"]);
+                            }
                         }
                     }
 
-                    return projectImage;   
+                    return projectImage;
                 }
             }
             catch (Exception ex)
@@ -1574,7 +1724,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns>Generic list of username strings and role strings</returns>
         public override List<MemberRoles> GetProjectMembersRoles(int projectId)
         {
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= 0) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             try
             {
@@ -1586,7 +1736,7 @@ namespace BugNET.Providers.DataProviders
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECT_GETMEMBERROLESBYPROJECTID);
                     var projectMemberRoleList = new List<MemberRoles>();
                     ExecuteReaderCmd(sqlCmd, GenerateProjectMemberRoleListFromReader, ref projectMemberRoleList);
-                    return projectMemberRoleList;   
+                    return projectMemberRoleList;
                 }
             }
             catch (Exception ex)
@@ -1620,17 +1770,18 @@ namespace BugNET.Providers.DataProviders
                         sqlCmd.Connection = cn;
                         cn.Open();
 
-                        using(var returnData = sqlCmd.ExecuteReader())
+                        using (var returnData = sqlCmd.ExecuteReader())
                         {
                             var values = new int[2];
                             while (returnData.Read())
                             {
-                                values[0] = (int)returnData["ClosedCount"];
-                                values[1] = (int)returnData["TotalCount"];
+                                values[0] = (int) returnData["ClosedCount"];
+                                values[1] = (int) returnData["TotalCount"];
                             }
-                            return values;   
+
+                            return values;
                         }
-                    }   
+                    }
                 }
             }
             catch (Exception ex)
@@ -1642,6 +1793,7 @@ namespace BugNET.Providers.DataProviders
         #endregion
 
         #region Project notification methods
+
         /// <summary>
         /// Creates the new project notification.
         /// </summary>
@@ -1650,19 +1802,21 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewProjectNotification(ProjectNotification newProjectNotification)
         {
             // Validate Parameters
-            if (newProjectNotification == null) throw (new ArgumentNullException(nameof(newProjectNotification)));
+            if (newProjectNotification == null) throw new ArgumentNullException(nameof(newProjectNotification));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, newProjectNotification.ProjectId);
-                    AddParamToSqlCmd(sqlCmd, "@NotificationUserName", SqlDbType.NText, 255, ParameterDirection.Input, newProjectNotification.NotificationUsername);
+                    AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        newProjectNotification.ProjectId);
+                    AddParamToSqlCmd(sqlCmd, "@NotificationUserName", SqlDbType.NText, 255, ParameterDirection.Input,
+                        newProjectNotification.NotificationUsername);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECTNOTIFICATION_CREATE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -1678,17 +1832,18 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<ProjectNotification> GetProjectNotificationsByProjectId(int projectId)
         {
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
-                SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECTNOTIFICATION_GETPROJECTNOTIFICATIONSBYPROJECTID);
+                SetCommandType(sqlCmd, CommandType.StoredProcedure,
+                    SP_PROJECTNOTIFICATION_GETPROJECTNOTIFICATIONSBYPROJECTID);
 
                 var projectNotificationList = new List<ProjectNotification>();
                 ExecuteReaderCmd(sqlCmd, GenerateProjectNotificationListFromReader, ref projectNotificationList);
 
-                return projectNotificationList;   
+                return projectNotificationList;
             }
         }
 
@@ -1701,8 +1856,8 @@ namespace BugNET.Providers.DataProviders
         public override bool DeleteProjectNotification(int projectId, string username)
         {
             // Validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
-            if (username == string.Empty) throw (new ArgumentOutOfRangeException(nameof(username)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
+            if (username == string.Empty) throw new ArgumentOutOfRangeException(nameof(username));
 
             try
             {
@@ -1714,8 +1869,8 @@ namespace BugNET.Providers.DataProviders
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECTNOTIFICATION_DELETE);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -1731,19 +1886,21 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<ProjectNotification> GetProjectNotificationsByUsername(string username)
         {
-            if (username == string.Empty) throw (new ArgumentOutOfRangeException(nameof(username)));
+            if (username == string.Empty) throw new ArgumentOutOfRangeException(nameof(username));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@Username", SqlDbType.NVarChar, 255, ParameterDirection.Input, username);
-                SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECTNOTIFICATION_GETPROJECTNOTIFICATIONSBYUSERNAME);
+                SetCommandType(sqlCmd, CommandType.StoredProcedure,
+                    SP_PROJECTNOTIFICATION_GETPROJECTNOTIFICATIONSBYUSERNAME);
 
                 var projectNotificationList = new List<ProjectNotification>();
                 ExecuteReaderCmd(sqlCmd, GenerateProjectNotificationListFromReader, ref projectNotificationList);
 
-                return projectNotificationList;   
+                return projectNotificationList;
             }
         }
+
         #endregion
 
         #region Category methods
@@ -1755,19 +1912,22 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override int CreateNewCategory(Category newCategory)
         {
-            if (newCategory == null) throw (new ArgumentNullException(nameof(newCategory)));
+            if (newCategory == null) throw new ArgumentNullException(nameof(newCategory));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, newCategory.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@CategoryName", SqlDbType.NText, 255, ParameterDirection.Input, newCategory.Name);
-                AddParamToSqlCmd(sqlCmd, "@ParentCategoryId", SqlDbType.Int, 0, ParameterDirection.Input, newCategory.ParentCategoryId);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newCategory.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@CategoryName", SqlDbType.NText, 255, ParameterDirection.Input,
+                    newCategory.Name);
+                AddParamToSqlCmd(sqlCmd, "@ParentCategoryId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newCategory.ParentCategoryId);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CATEGORY_CREATE);
                 ExecuteScalarCmd(sqlCmd);
 
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -1779,7 +1939,7 @@ namespace BugNET.Providers.DataProviders
         public override bool DeleteCategory(int categoryId)
         {
             // Validate Parameters
-            if (categoryId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(categoryId)));
+            if (categoryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(categoryId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1788,8 +1948,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CATEGORY_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -1804,15 +1964,18 @@ namespace BugNET.Providers.DataProviders
 
             AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
             AddParamToSqlCmd(sqlCmd, "@CategoryId", SqlDbType.Int, 0, ParameterDirection.Input, categoryToUpdate.Id);
-            AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, categoryToUpdate.ProjectId);
-            AddParamToSqlCmd(sqlCmd, "@CategoryName", SqlDbType.NText, 255, ParameterDirection.Input, categoryToUpdate.Name);
-            AddParamToSqlCmd(sqlCmd, "@ParentCategoryId", SqlDbType.Int, 0, ParameterDirection.Input, categoryToUpdate.ParentCategoryId);
+            AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                categoryToUpdate.ProjectId);
+            AddParamToSqlCmd(sqlCmd, "@CategoryName", SqlDbType.NText, 255, ParameterDirection.Input,
+                categoryToUpdate.Name);
+            AddParamToSqlCmd(sqlCmd, "@ParentCategoryId", SqlDbType.Int, 0, ParameterDirection.Input,
+                categoryToUpdate.ParentCategoryId);
 
             SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CATEGORY_UPDATE);
             ExecuteScalarCmd(sqlCmd);
 
-            var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-            return (returnValue == 0);
+            var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+            return returnValue == 0;
         }
 
         /// <summary>
@@ -1823,7 +1986,7 @@ namespace BugNET.Providers.DataProviders
         public override List<Category> GetCategoriesByProjectId(int projectId)
         {
             // Validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1832,7 +1995,7 @@ namespace BugNET.Providers.DataProviders
                 var categoryList = new List<Category>();
                 ExecuteReaderCmd(sqlCmd, GenerateCategoryListFromReader, ref categoryList);
 
-                return categoryList;   
+                return categoryList;
             }
         }
 
@@ -1844,7 +2007,7 @@ namespace BugNET.Providers.DataProviders
         public override List<Category> GetRootCategoriesByProjectId(int projectId)
         {
             // Validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1853,7 +2016,7 @@ namespace BugNET.Providers.DataProviders
                 var categoryList = new List<Category>();
                 ExecuteReaderCmd(sqlCmd, GenerateCategoryListFromReader, ref categoryList);
 
-                return categoryList;   
+                return categoryList;
             }
         }
 
@@ -1865,7 +2028,7 @@ namespace BugNET.Providers.DataProviders
         public override List<Category> GetChildCategoriesByCategoryId(int categoryId)
         {
             // Validate Parameters
-            if (categoryId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(categoryId)));
+            if (categoryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(categoryId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1874,7 +2037,7 @@ namespace BugNET.Providers.DataProviders
                 var categoryList = new List<Category>();
                 ExecuteReaderCmd(sqlCmd, GenerateCategoryListFromReader, ref categoryList);
 
-                return categoryList;   
+                return categoryList;
             }
         }
 
@@ -1886,7 +2049,7 @@ namespace BugNET.Providers.DataProviders
         public override Category GetCategoryById(int categoryId)
         {
             // Validate Parameters
-            if (categoryId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(categoryId)));
+            if (categoryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(categoryId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -1895,9 +2058,10 @@ namespace BugNET.Providers.DataProviders
                 var categoryList = new List<Category>();
                 ExecuteReaderCmd(sqlCmd, GenerateCategoryListFromReader, ref categoryList);
 
-                return categoryList.Count > 0 ? categoryList[0] : null;   
+                return categoryList.Count > 0 ? categoryList[0] : null;
             }
         }
+
         #endregion
 
         #region Issue attachment methods
@@ -1919,20 +2083,22 @@ namespace BugNET.Providers.DataProviders
         /// </remarks>
         public override IssueAttachment GetAttachmentForDownload(int attachmentId, string requestingUser = "")
         {
-            if (attachmentId <= 0) throw (new ArgumentOutOfRangeException(nameof(attachmentId)));
+            if (attachmentId <= 0) throw new ArgumentOutOfRangeException(nameof(attachmentId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueAttachmentId", SqlDbType.Int, 0, ParameterDirection.Input, attachmentId);
-                    AddParamToSqlCmd(sqlCmd, "@RequestingUser", SqlDbType.VarChar, 0, ParameterDirection.Input, requestingUser);
+                    AddParamToSqlCmd(sqlCmd, "@IssueAttachmentId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        attachmentId);
+                    AddParamToSqlCmd(sqlCmd, "@RequestingUser", SqlDbType.VarChar, 0, ParameterDirection.Input,
+                        requestingUser);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEATTACHMENT_VALIDATEDOWNLOAD);
                     ExecuteNonQuery(sqlCmd);
 
-                    attachmentId = ((int)sqlCmd.Parameters["@ReturnValue"].Value);
+                    attachmentId = (int) sqlCmd.Parameters["@ReturnValue"].Value;
 
                     return GetIssueAttachmentById(attachmentId);
                 }
@@ -1956,27 +2122,35 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewIssueAttachment(IssueAttachment newAttachment)
         {
             // Validate Parameters
-            if (newAttachment == null) throw (new ArgumentNullException(nameof(newAttachment)));
+            if (newAttachment == null) throw new ArgumentNullException(nameof(newAttachment));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, newAttachment.IssueId);
-                    AddParamToSqlCmd(sqlCmd, "@CreatorUserName", SqlDbType.NVarChar, 255, ParameterDirection.Input, newAttachment.CreatorUserName);
-                    AddParamToSqlCmd(sqlCmd, "@FileName", SqlDbType.NVarChar, 250, ParameterDirection.Input, newAttachment.FileName);
-                    AddParamToSqlCmd(sqlCmd, "@FileSize", SqlDbType.Int, 0, ParameterDirection.Input, newAttachment.Size);
-                    AddParamToSqlCmd(sqlCmd, "@ContentType", SqlDbType.NVarChar, 80, ParameterDirection.Input, newAttachment.ContentType);
-                    AddParamToSqlCmd(sqlCmd, "@Description", SqlDbType.NVarChar, 80, ParameterDirection.Input, newAttachment.Description);
+                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        newAttachment.IssueId);
+                    AddParamToSqlCmd(sqlCmd, "@CreatorUserName", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                        newAttachment.CreatorUserName);
+                    AddParamToSqlCmd(sqlCmd, "@FileName", SqlDbType.NVarChar, 250, ParameterDirection.Input,
+                        newAttachment.FileName);
+                    AddParamToSqlCmd(sqlCmd, "@FileSize", SqlDbType.Int, 0, ParameterDirection.Input,
+                        newAttachment.Size);
+                    AddParamToSqlCmd(sqlCmd, "@ContentType", SqlDbType.NVarChar, 80, ParameterDirection.Input,
+                        newAttachment.ContentType);
+                    AddParamToSqlCmd(sqlCmd, "@Description", SqlDbType.NVarChar, 80, ParameterDirection.Input,
+                        newAttachment.Description);
                     if (newAttachment.Attachment != null)
-                        AddParamToSqlCmd(sqlCmd, "@Attachment", SqlDbType.Image, newAttachment.Attachment.Length, ParameterDirection.Input, newAttachment.Attachment);
+                        AddParamToSqlCmd(sqlCmd, "@Attachment", SqlDbType.Image, newAttachment.Attachment.Length,
+                            ParameterDirection.Input, newAttachment.Attachment);
                     else
-                        AddParamToSqlCmd(sqlCmd, "@Attachment", SqlDbType.Image, 0, ParameterDirection.Input, DBNull.Value);
+                        AddParamToSqlCmd(sqlCmd, "@Attachment", SqlDbType.Image, 0, ParameterDirection.Input,
+                            DBNull.Value);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEATTACHMENT_CREATE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -1992,7 +2166,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueAttachment> GetIssueAttachmentsByIssueId(int issueId)
         {
-            if (issueId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -2002,7 +2176,7 @@ namespace BugNET.Providers.DataProviders
                 var issueAttachmentList = new List<IssueAttachment>();
                 ExecuteReaderCmd(sqlCmd, GenerateIssueAttachmentListFromReader, ref issueAttachmentList);
 
-                return issueAttachmentList;   
+                return issueAttachmentList;
             }
         }
 
@@ -2013,7 +2187,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override IssueAttachment GetIssueAttachmentById(int attachmentId)
         {
-            if (attachmentId <= 0) throw (new ArgumentOutOfRangeException(nameof(attachmentId)));
+            if (attachmentId <= 0) throw new ArgumentOutOfRangeException(nameof(attachmentId));
 
             IssueAttachment attachment = null;
 
@@ -2021,11 +2195,13 @@ namespace BugNET.Providers.DataProviders
             {
                 using (var sqlCmd = new SqlCommand())
                 {
-                    AddParamToSqlCmd(sqlCmd, "@IssueAttachmentId", SqlDbType.Int, 0, ParameterDirection.Input, attachmentId);
+                    AddParamToSqlCmd(sqlCmd, "@IssueAttachmentId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        attachmentId);
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEATTACHMENT_GETATTACHMENTBYID);
 
                     // Execute Reader
-                    if (connectionString == string.Empty) throw (new ArgumentException("Connection string cannot be null or empty"));
+                    if (connectionString == string.Empty)
+                        throw new ArgumentException("Connection string cannot be null or empty");
 
                     using (var cn = new SqlConnection(connectionString))
                     {
@@ -2038,7 +2214,7 @@ namespace BugNET.Providers.DataProviders
                                 byte[] attachmentData = null;
 
                                 if (rdr["Attachment"] != DBNull.Value)
-                                    attachmentData = (byte[])rdr["Attachment"];
+                                    attachmentData = (byte[]) rdr["Attachment"];
 
                                 attachment = new IssueAttachment
                                 {
@@ -2055,7 +2231,7 @@ namespace BugNET.Providers.DataProviders
                                 };
                             }
                         }
-                    }   
+                    }
                 }
 
                 return attachment;
@@ -2073,19 +2249,20 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteIssueAttachment(int attachmentId)
         {
-            if (attachmentId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(attachmentId)));
+            if (attachmentId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(attachmentId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueAttachmentId", SqlDbType.Int, 0, ParameterDirection.Input, attachmentId);
+                    AddParamToSqlCmd(sqlCmd, "@IssueAttachmentId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        attachmentId);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEATTACHMENT_DELETEATTACHMENT);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -2097,6 +2274,7 @@ namespace BugNET.Providers.DataProviders
         #endregion
 
         #region Query methods
+
         /// <summary>
         /// Gets the required fields for issues.
         /// </summary>
@@ -2110,14 +2288,13 @@ namespace BugNET.Providers.DataProviders
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_REQUIREDFIELDS_GETFIELDLIST);
                     var requiredFieldList = new List<RequiredField>();
                     ExecuteReaderCmd(sqlCmd, GenerateRequiredFieldListFromReader, ref requiredFieldList);
-                    return requiredFieldList;   
+                    return requiredFieldList;
                 }
             }
             catch (Exception ex)
             {
                 throw ProcessException(ex);
             }
-
         }
 
         /// <summary>
@@ -2129,7 +2306,7 @@ namespace BugNET.Providers.DataProviders
         public override List<Query> GetQueriesByUserName(string userName, int projectId)
         {
             // Validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -2138,7 +2315,7 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_QUERY_GETQUERIESBYUSERNAME);
                 var queryList = new List<Query>();
                 ExecuteReaderCmd(sqlCmd, GenerateQueryListFromReader, ref queryList);
-                return queryList;   
+                return queryList;
             }
         }
 
@@ -2151,17 +2328,19 @@ namespace BugNET.Providers.DataProviders
         /// <param name="isPublic"></param>
         /// <param name="queryClauses">The query clauses.</param>
         /// <returns></returns>
-        public override bool SaveQuery(string userName, int projectId, string queryName, bool isPublic, List<QueryClause> queryClauses)
+        public override bool SaveQuery(string userName, int projectId, string queryName, bool isPublic,
+            List<QueryClause> queryClauses)
         {
-            if (string.IsNullOrEmpty(queryName)) throw (new ArgumentOutOfRangeException(nameof(queryName)));
-            if (queryClauses.Count == 0) throw (new ArgumentOutOfRangeException(nameof(queryClauses)));
+            if (string.IsNullOrEmpty(queryName)) throw new ArgumentOutOfRangeException(nameof(queryName));
+            if (queryClauses.Count == 0) throw new ArgumentOutOfRangeException(nameof(queryClauses));
 
             using (var sqlCmd = new SqlCommand())
             {
                 var intPublic = isPublic ? 1 : 0;
 
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@Username", SqlDbType.NVarChar, 255, ParameterDirection.Input, userName == string.Empty ? DBNull.Value : (object)userName);
+                AddParamToSqlCmd(sqlCmd, "@Username", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                    userName == string.Empty ? DBNull.Value : (object) userName);
                 AddParamToSqlCmd(sqlCmd, "@projectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
                 AddParamToSqlCmd(sqlCmd, "@QueryName", SqlDbType.NText, 50, ParameterDirection.Input, queryName);
                 AddParamToSqlCmd(sqlCmd, "@IsPublic", SqlDbType.Bit, 0, ParameterDirection.Input, intPublic);
@@ -2183,7 +2362,7 @@ namespace BugNET.Providers.DataProviders
 
                 ExecuteScalarCmd(sqlCmd);
 
-                var queryId = (int)sqlCmd.Parameters["@ReturnValue"].Value;
+                var queryId = (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 if (queryId == 0)
                     return false;
 
@@ -2200,7 +2379,7 @@ namespace BugNET.Providers.DataProviders
                     ExecuteScalarCmd(cmdClause);
                 }
 
-                return true;   
+                return true;
             }
         }
 
@@ -2214,11 +2393,12 @@ namespace BugNET.Providers.DataProviders
         /// <param name="isPublic">if set to <c>true</c> [is public].</param>
         /// <param name="queryClauses">The query clauses.</param>
         /// <returns></returns>
-        public override bool UpdateQuery(int queryId, string userName, int projectId, string queryName, bool isPublic, List<QueryClause> queryClauses)
+        public override bool UpdateQuery(int queryId, string userName, int projectId, string queryName, bool isPublic,
+            List<QueryClause> queryClauses)
         {
             if (queryId <= 0) throw new ArgumentOutOfRangeException(nameof(queryId));
-            if (string.IsNullOrEmpty(queryName)) throw (new ArgumentOutOfRangeException(nameof(queryName)));
-            if (queryClauses.Count == 0) throw (new ArgumentOutOfRangeException(nameof(queryClauses)));
+            if (string.IsNullOrEmpty(queryName)) throw new ArgumentOutOfRangeException(nameof(queryName));
+            if (queryClauses.Count == 0) throw new ArgumentOutOfRangeException(nameof(queryClauses));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -2226,7 +2406,8 @@ namespace BugNET.Providers.DataProviders
 
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                 AddParamToSqlCmd(sqlCmd, "@QueryId", SqlDbType.Int, 0, ParameterDirection.Input, queryId);
-                AddParamToSqlCmd(sqlCmd, "@Username", SqlDbType.NVarChar, 255, ParameterDirection.Input, userName == string.Empty ? DBNull.Value : (object)userName);
+                AddParamToSqlCmd(sqlCmd, "@Username", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                    userName == string.Empty ? DBNull.Value : (object) userName);
                 AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
                 AddParamToSqlCmd(sqlCmd, "@QueryName", SqlDbType.NText, 50, ParameterDirection.Input, queryName);
                 AddParamToSqlCmd(sqlCmd, "@IsPublic", SqlDbType.Bit, 0, ParameterDirection.Input, intPublic);
@@ -2260,7 +2441,7 @@ namespace BugNET.Providers.DataProviders
                     ExecuteScalarCmd(cmdClause);
                 }
 
-                return true;   
+                return true;
             }
         }
 
@@ -2270,11 +2451,12 @@ namespace BugNET.Providers.DataProviders
         /// <param name="projectId">The project id.</param>
         /// <param name="queryId">The query id.</param>
         /// <returns></returns>
-        public override List<Issue> PerformSavedQuery(int projectId, int queryId, ICollection<KeyValuePair<string, string>> sortFields)
+        public override List<Issue> PerformSavedQuery(int projectId, int queryId,
+            ICollection<KeyValuePair<string, string>> sortFields)
         {
             // Validate Parameters
-            if (queryId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(queryId)));
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (queryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(queryId));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -2289,7 +2471,7 @@ namespace BugNET.Providers.DataProviders
 
                 ExecuteReaderCmd(sqlCmd, GenerateQueryClauseListFromReader, ref queryClauses);
 
-                return PerformQuery(queryClauses, sortFields, projectId);   
+                return PerformQuery(queryClauses, sortFields, projectId);
             }
         }
 
@@ -2312,8 +2494,8 @@ namespace BugNET.Providers.DataProviders
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_QUERY_DELETEQUERY);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -2336,7 +2518,7 @@ namespace BugNET.Providers.DataProviders
 
                 var queryClauses = new List<QueryClause>();
                 ExecuteReaderCmd(sqlCmd, GenerateQueryClauseListFromReader, ref queryClauses);
-                return queryClauses;   
+                return queryClauses;
             }
         }
 
@@ -2348,7 +2530,7 @@ namespace BugNET.Providers.DataProviders
         public override Query GetQueryById(int queryId)
         {
             // Validate Parameters
-            if (queryId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(queryId)));
+            if (queryId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(queryId));
 
             Query query;
 
@@ -2362,11 +2544,10 @@ namespace BugNET.Providers.DataProviders
 
                 query = queryList[0];
 
-                if(query != null) query.Clauses = new List<QueryClause>();
+                if (query != null) query.Clauses = new List<QueryClause>();
             }
 
             if (query != null)
-            {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@QueryId", SqlDbType.Int, 0, ParameterDirection.Input, queryId);
@@ -2376,11 +2557,11 @@ namespace BugNET.Providers.DataProviders
                     var queryClauses = new List<QueryClause>();
                     ExecuteReaderCmd(sqlCmd, GenerateQueryClauseListFromReader, ref queryClauses);
                     query.Clauses = queryClauses;
-                }   
-            }
+                }
 
             return query;
         }
+
         #endregion
 
         #region Related issue methods
@@ -2392,18 +2573,19 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<RelatedIssue> GetChildIssues(int issueId)
         {
-            if (issueId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, issueId);
-                AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.ParentChild);
+                AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    IssueRelationTypes.ParentChild);
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_GETCHILDISSUES);
 
                 var relatedIssueList = new List<RelatedIssue>();
                 ExecuteReaderCmd(sqlCmd, GenerateRelatedIssueListFromReader, ref relatedIssueList);
 
-                return relatedIssueList;   
+                return relatedIssueList;
             }
         }
 
@@ -2414,18 +2596,19 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<RelatedIssue> GetParentIssues(int issueId)
         {
-            if (issueId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, issueId);
-                AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.ParentChild);
+                AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    IssueRelationTypes.ParentChild);
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_GETPARENTISSUES);
 
                 var relatedIssueList = new List<RelatedIssue>();
                 ExecuteReaderCmd(sqlCmd, GenerateRelatedIssueListFromReader, ref relatedIssueList);
 
-                return relatedIssueList;   
+                return relatedIssueList;
             }
         }
 
@@ -2436,20 +2619,21 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<RelatedIssue> GetRelatedIssues(int issueId)
         {
-            if (issueId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, issueId);
-                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.Related);
+                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                        IssueRelationTypes.Related);
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_GETRELATEDISSUES);
 
                     var relatedIssueList = new List<RelatedIssue>();
                     ExecuteReaderCmd(sqlCmd, GenerateRelatedIssueListFromReader, ref relatedIssueList);
 
-                    return relatedIssueList;   
+                    return relatedIssueList;
                 }
             }
             catch (Exception ex)
@@ -2467,21 +2651,24 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewChildIssue(int primaryIssueId, int secondaryIssueId)
         {
             // Validate Parameters
-            if (primaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(primaryIssueId)));
-            if (secondaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(secondaryIssueId)));
+            if (primaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(primaryIssueId));
+            if (secondaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(secondaryIssueId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, primaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, secondaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.ParentChild);
+                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        primaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        secondaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                        IssueRelationTypes.ParentChild);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_CREATENEWCHILDISSUE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -2499,22 +2686,25 @@ namespace BugNET.Providers.DataProviders
         public override bool DeleteChildIssue(int primaryIssueId, int secondaryIssueId)
         {
             // Validate Parameters
-            if (primaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(primaryIssueId)));
-            if (secondaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(secondaryIssueId)));
+            if (primaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(primaryIssueId));
+            if (secondaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(secondaryIssueId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, primaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, secondaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.ParentChild);
+                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        primaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        secondaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                        IssueRelationTypes.ParentChild);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_DELETECHILDISSUE);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -2532,21 +2722,24 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewParentIssue(int primaryIssueId, int secondaryIssueId)
         {
             // Validate Parameters
-            if (primaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(primaryIssueId)));
-            if (secondaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(secondaryIssueId)));
+            if (primaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(primaryIssueId));
+            if (secondaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(secondaryIssueId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, primaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, secondaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.ParentChild);
+                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        primaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        secondaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                        IssueRelationTypes.ParentChild);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_CREATENEWPARENTISSUE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -2564,22 +2757,25 @@ namespace BugNET.Providers.DataProviders
         public override bool DeleteParentIssue(int primaryIssueId, int secondaryIssueId)
         {
             // Validate Parameters
-            if (primaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(primaryIssueId)));
-            if (secondaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(secondaryIssueId)));
+            if (primaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(primaryIssueId));
+            if (secondaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(secondaryIssueId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, primaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, secondaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.ParentChild);
+                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        primaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        secondaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                        IssueRelationTypes.ParentChild);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_DELETEPARENTISSUE);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -2597,21 +2793,24 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewRelatedIssue(int primaryIssueId, int secondaryIssueId)
         {
             // Validate Parameters
-            if (primaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(primaryIssueId)));
-            if (secondaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(secondaryIssueId)));
+            if (primaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(primaryIssueId));
+            if (secondaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(secondaryIssueId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, primaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, secondaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.Related);
+                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        primaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        secondaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                        IssueRelationTypes.Related);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_CREATENEWRELATEDISSUE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -2629,22 +2828,25 @@ namespace BugNET.Providers.DataProviders
         public override bool DeleteRelatedIssue(int primaryIssueId, int secondaryIssueId)
         {
             // Validate Parameters
-            if (primaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(primaryIssueId)));
-            if (secondaryIssueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(secondaryIssueId)));
+            if (primaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(primaryIssueId));
+            if (secondaryIssueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(secondaryIssueId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, primaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input, secondaryIssueId);
-                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input, IssueRelationTypes.Related);
+                    AddParamToSqlCmd(sqlCmd, "@PrimaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        primaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@SecondaryIssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        secondaryIssueId);
+                    AddParamToSqlCmd(sqlCmd, "@RelationType", SqlDbType.Int, 0, ParameterDirection.Input,
+                        IssueRelationTypes.Related);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RELATEDISSUE_DELETERELATEDISSUE);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 0);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 0;
                 }
             }
             catch (Exception ex)
@@ -2652,9 +2854,11 @@ namespace BugNET.Providers.DataProviders
                 throw ProcessException(ex);
             }
         }
+
         #endregion
 
         #region Issue revision methods
+
         /// <summary>
         /// Creates the new issue revision.
         /// </summary>
@@ -2669,18 +2873,26 @@ namespace BugNET.Providers.DataProviders
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@Revision", SqlDbType.Int, 0, ParameterDirection.Input, newIssueRevision.Revision);
-                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, newIssueRevision.IssueId);
-                    AddParamToSqlCmd(sqlCmd, "@Repository", SqlDbType.NVarChar, 400, ParameterDirection.Input, newIssueRevision.Repository);
-                    AddParamToSqlCmd(sqlCmd, "@RevisionAuthor", SqlDbType.NVarChar, 100, ParameterDirection.Input, newIssueRevision.Author);
-                    AddParamToSqlCmd(sqlCmd, "@RevisionDate", SqlDbType.NVarChar, 100, ParameterDirection.Input, newIssueRevision.RevisionDate);
-                    AddParamToSqlCmd(sqlCmd, "@RevisionMessage", SqlDbType.NText, 0, ParameterDirection.Input, newIssueRevision.Message);
-                    AddParamToSqlCmd(sqlCmd, "@Changeset", SqlDbType.NVarChar, 100, ParameterDirection.Input, newIssueRevision.Changeset);
-                    AddParamToSqlCmd(sqlCmd, "@Branch", SqlDbType.NVarChar, 255, ParameterDirection.Input, newIssueRevision.Branch);
+                    AddParamToSqlCmd(sqlCmd, "@Revision", SqlDbType.Int, 0, ParameterDirection.Input,
+                        newIssueRevision.Revision);
+                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        newIssueRevision.IssueId);
+                    AddParamToSqlCmd(sqlCmd, "@Repository", SqlDbType.NVarChar, 400, ParameterDirection.Input,
+                        newIssueRevision.Repository);
+                    AddParamToSqlCmd(sqlCmd, "@RevisionAuthor", SqlDbType.NVarChar, 100, ParameterDirection.Input,
+                        newIssueRevision.Author);
+                    AddParamToSqlCmd(sqlCmd, "@RevisionDate", SqlDbType.NVarChar, 100, ParameterDirection.Input,
+                        newIssueRevision.RevisionDate);
+                    AddParamToSqlCmd(sqlCmd, "@RevisionMessage", SqlDbType.NText, 0, ParameterDirection.Input,
+                        newIssueRevision.Message);
+                    AddParamToSqlCmd(sqlCmd, "@Changeset", SqlDbType.NVarChar, 100, ParameterDirection.Input,
+                        newIssueRevision.Changeset);
+                    AddParamToSqlCmd(sqlCmd, "@Branch", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                        newIssueRevision.Branch);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEREVISION_CREATE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -2707,7 +2919,7 @@ namespace BugNET.Providers.DataProviders
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEREVISION_GETISSUEREVISIONSBYISSUEID);
                     var revisionList = new List<IssueRevision>();
                     ExecuteReaderCmd(sqlCmd, GenerateIssueRevisionListFromReader, ref revisionList);
-                    return revisionList;   
+                    return revisionList;
                 }
             }
             catch (Exception ex)
@@ -2723,18 +2935,19 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteIssueRevision(int issueRevisionId)
         {
-            if (issueRevisionId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueRevisionId)));
+            if (issueRevisionId <= 0) throw new ArgumentOutOfRangeException(nameof(issueRevisionId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueRevisionId", SqlDbType.Int, 0, ParameterDirection.Input, issueRevisionId);
+                    AddParamToSqlCmd(sqlCmd, "@IssueRevisionId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        issueRevisionId);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEREVISION_DELETE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
                 }
             }
             catch (Exception ex)
@@ -2746,6 +2959,7 @@ namespace BugNET.Providers.DataProviders
         #endregion
 
         #region Issue vote methods
+
         /// <summary>
         /// Creates the new issue vote.
         /// </summary>
@@ -2754,19 +2968,21 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewIssueVote(IssueVote newIssueVote)
         {
             // Validate Parameters
-            if (newIssueVote == null) throw (new ArgumentNullException(nameof(newIssueVote)));
+            if (newIssueVote == null) throw new ArgumentNullException(nameof(newIssueVote));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input, newIssueVote.IssueId);
-                    AddParamToSqlCmd(sqlCmd, "@VoteUserName", SqlDbType.NText, 255, ParameterDirection.Input, newIssueVote.VoteUsername);
+                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        newIssueVote.IssueId);
+                    AddParamToSqlCmd(sqlCmd, "@VoteUserName", SqlDbType.NText, 255, ParameterDirection.Input,
+                        newIssueVote.VoteUsername);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEVOTE_CREATE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -2786,7 +3002,7 @@ namespace BugNET.Providers.DataProviders
         public override bool HasUserVoted(int issueId, string username)
         {
             if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
-            if (username == string.Empty) throw (new ArgumentOutOfRangeException(nameof(username)));
+            if (username == string.Empty) throw new ArgumentOutOfRangeException(nameof(username));
 
             try
             {
@@ -2798,19 +3014,20 @@ namespace BugNET.Providers.DataProviders
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEVOTE_HASUSERVOTED);
                     ExecuteScalarCmd(sqlCmd);
-                    var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                    return (returnValue == 1);   
+                    var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                    return returnValue == 1;
                 }
             }
             catch (Exception ex)
             {
                 throw ProcessException(ex);
             }
-
         }
+
         #endregion
 
         #region Milestone methods
+
         /// <summary>
         /// Creates the new milestone.
         /// </summary>
@@ -2819,31 +3036,38 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewMilestone(Milestone newMileStone)
         {
             // Validate Parameters
-            if (newMileStone == null) throw (new ArgumentNullException(nameof(newMileStone)));
+            if (newMileStone == null) throw new ArgumentNullException(nameof(newMileStone));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, newMileStone.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneName", SqlDbType.NText, 50, ParameterDirection.Input, newMileStone.Name);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneImageUrl", SqlDbType.NText, 255, ParameterDirection.Input, newMileStone.ImageUrl);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneCompleted", SqlDbType.Bit, 0, ParameterDirection.Input, newMileStone.IsCompleted);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneNotes", SqlDbType.NText, 255, ParameterDirection.Input, newMileStone.Notes);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newMileStone.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    newMileStone.Name);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneImageUrl", SqlDbType.NText, 255, ParameterDirection.Input,
+                    newMileStone.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneCompleted", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    newMileStone.IsCompleted);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneNotes", SqlDbType.NText, 255, ParameterDirection.Input,
+                    newMileStone.Notes);
 
                 //Bypass to AddParamToSQLCmd method which doesn't handle null values properly
                 if (newMileStone.DueDate.HasValue)
-                    AddParamToSqlCmd(sqlCmd, "@MilestoneDueDate", SqlDbType.DateTime, 0, ParameterDirection.Input, newMileStone.DueDate);
+                    AddParamToSqlCmd(sqlCmd, "@MilestoneDueDate", SqlDbType.DateTime, 0, ParameterDirection.Input,
+                        newMileStone.DueDate);
                 else
                     sqlCmd.Parameters.AddWithValue("@MilestoneDueDate", DBNull.Value);
 
                 if (newMileStone.ReleaseDate.HasValue)
-                    AddParamToSqlCmd(sqlCmd, "@MilestoneReleaseDate", SqlDbType.DateTime, 0, ParameterDirection.Input, newMileStone.ReleaseDate);
+                    AddParamToSqlCmd(sqlCmd, "@MilestoneReleaseDate", SqlDbType.DateTime, 0, ParameterDirection.Input,
+                        newMileStone.ReleaseDate);
                 else
                     sqlCmd.Parameters.AddWithValue("@MilestoneReleaseDate", DBNull.Value);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_MILESTONE_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -2855,19 +3079,20 @@ namespace BugNET.Providers.DataProviders
         public override bool DeleteMilestone(int milestoneId)
         {
             // Validate Parameters
-            if (milestoneId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(milestoneId)));
+            if (milestoneId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(milestoneId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
-                    AddParamToSqlCmd(sqlCmd, "@MilestoneIdToDelete", SqlDbType.Int, 4, ParameterDirection.Input, milestoneId);
+                    AddParamToSqlCmd(sqlCmd, "@MilestoneIdToDelete", SqlDbType.Int, 4, ParameterDirection.Input,
+                        milestoneId);
                     AddParamToSqlCmd(sqlCmd, "@ResultValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_MILESTONE_DELETE);
                     ExecuteScalarCmd(sqlCmd);
-                    var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                    return (resultValue == 0);
+                    var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                    return resultValue == 0;
                 }
             }
             catch (Exception ex)
@@ -2884,7 +3109,7 @@ namespace BugNET.Providers.DataProviders
         public override bool CanDeleteMilestone(int milestoneId)
         {
             // Validate Parameters
-            if (milestoneId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(milestoneId)));
+            if (milestoneId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(milestoneId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -2893,8 +3118,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_MILESTONE_CANDELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                return (resultValue == 1);
+                var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                return resultValue == 1;
             }
         }
 
@@ -2918,17 +3143,18 @@ namespace BugNET.Providers.DataProviders
         public override List<Milestone> GetMilestonesByProjectId(int projectId, bool milestoneCompleted)
         {
             // Validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, projectId);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneCompleted", SqlDbType.Bit, 0, ParameterDirection.Input, milestoneCompleted);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneCompleted", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    milestoneCompleted);
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_MILESTONE_GETMILESTONEBYPROJECTID);
                 var milestoneList = new List<Milestone>();
                 ExecuteReaderCmd(sqlCmd, GenerateMilestoneListFromReader, ref milestoneList);
 
-                return milestoneList;   
+                return milestoneList;
             }
         }
 
@@ -2940,7 +3166,7 @@ namespace BugNET.Providers.DataProviders
         public override Milestone GetMilestoneById(int milestoneId)
         {
             // Validate Parameters
-            if (milestoneId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(milestoneId)));
+            if (milestoneId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(milestoneId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -2949,7 +3175,7 @@ namespace BugNET.Providers.DataProviders
                 var milestoneList = new List<Milestone>();
                 ExecuteReaderCmd(sqlCmd, GenerateMilestoneListFromReader, ref milestoneList);
 
-                return milestoneList.Count > 0 ? milestoneList[0] : null;   
+                return milestoneList.Count > 0 ? milestoneList[0] : null;
             }
         }
 
@@ -2961,39 +3187,50 @@ namespace BugNET.Providers.DataProviders
         public override bool UpdateMilestone(Milestone milestoneToUpdate)
         {
             // Validate Parameters
-            if (milestoneToUpdate == null) throw (new ArgumentNullException(nameof(milestoneToUpdate)));
+            if (milestoneToUpdate == null) throw new ArgumentNullException(nameof(milestoneToUpdate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneId", SqlDbType.Int, 0, ParameterDirection.Input, milestoneToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, milestoneToUpdate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input, milestoneToUpdate.SortOrder);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneName", SqlDbType.NText, 50, ParameterDirection.Input, milestoneToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneImageUrl", SqlDbType.NText, 50, ParameterDirection.Input, milestoneToUpdate.ImageUrl);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneCompleted", SqlDbType.Bit, 0, ParameterDirection.Input, milestoneToUpdate.IsCompleted);
-                AddParamToSqlCmd(sqlCmd, "@MilestoneNotes", SqlDbType.NText, 255, ParameterDirection.Input, milestoneToUpdate.Notes);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    milestoneToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    milestoneToUpdate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input,
+                    milestoneToUpdate.SortOrder);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    milestoneToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneImageUrl", SqlDbType.NText, 50, ParameterDirection.Input,
+                    milestoneToUpdate.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneCompleted", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    milestoneToUpdate.IsCompleted);
+                AddParamToSqlCmd(sqlCmd, "@MilestoneNotes", SqlDbType.NText, 255, ParameterDirection.Input,
+                    milestoneToUpdate.Notes);
 
                 //Bypass to AddParamToSQLCmd method which doesn't handle null values properly
                 if (milestoneToUpdate.DueDate.HasValue)
-                    AddParamToSqlCmd(sqlCmd, "@MilestoneDueDate", SqlDbType.DateTime, 0, ParameterDirection.Input, milestoneToUpdate.DueDate);
+                    AddParamToSqlCmd(sqlCmd, "@MilestoneDueDate", SqlDbType.DateTime, 0, ParameterDirection.Input,
+                        milestoneToUpdate.DueDate);
                 else
                     sqlCmd.Parameters.AddWithValue("@MilestoneDueDate", DBNull.Value);
 
                 if (milestoneToUpdate.ReleaseDate.HasValue)
-                    AddParamToSqlCmd(sqlCmd, "@MilestoneReleaseDate", SqlDbType.DateTime, 0, ParameterDirection.Input, milestoneToUpdate.ReleaseDate);
+                    AddParamToSqlCmd(sqlCmd, "@MilestoneReleaseDate", SqlDbType.DateTime, 0, ParameterDirection.Input,
+                        milestoneToUpdate.ReleaseDate);
                 else
                     sqlCmd.Parameters.AddWithValue("@MilestoneReleaseDate", DBNull.Value);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_MILESTONE_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
+
         #endregion
 
         #region Priority methods
+
         /// <summary>
         /// Creates the new priority.
         /// </summary>
@@ -3002,18 +3239,21 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewPriority(Priority newPriority)
         {
             // Validate Parameters
-            if (newPriority == null) throw (new ArgumentNullException(nameof(newPriority)));
+            if (newPriority == null) throw new ArgumentNullException(nameof(newPriority));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, newPriority.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@PriorityName", SqlDbType.NText, 50, ParameterDirection.Input, newPriority.Name);
-                AddParamToSqlCmd(sqlCmd, "@PriorityImageUrl", SqlDbType.NText, 50, ParameterDirection.Input, newPriority.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newPriority.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@PriorityName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    newPriority.Name);
+                AddParamToSqlCmd(sqlCmd, "@PriorityImageUrl", SqlDbType.NText, 50, ParameterDirection.Input,
+                    newPriority.ImageUrl);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PRIORITY_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -3025,7 +3265,7 @@ namespace BugNET.Providers.DataProviders
         public override bool DeletePriority(int priorityId)
         {
             // Validate Parameters
-            if (priorityId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(priorityId)));
+            if (priorityId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(priorityId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3034,8 +3274,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PRIORITY_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -3047,7 +3287,7 @@ namespace BugNET.Providers.DataProviders
         public override bool CanDeletePriority(int priorityId)
         {
             // Validate Parameters
-            if (priorityId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(priorityId)));
+            if (priorityId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(priorityId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3056,8 +3296,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PRIORITY_CANDELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                return (resultValue == 1);
+                var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                return resultValue == 1;
             }
         }
 
@@ -3069,7 +3309,7 @@ namespace BugNET.Providers.DataProviders
         public override List<Priority> GetPrioritiesByProjectId(int projectId)
         {
             // Validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3077,7 +3317,7 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PRIORITY_GETPRIORITIESBYPROJECTID);
                 var priorityList = new List<Priority>();
                 ExecuteReaderCmd(sqlCmd, GeneratePriorityListFromReader, ref priorityList);
-                return priorityList;   
+                return priorityList;
             }
         }
 
@@ -3089,7 +3329,7 @@ namespace BugNET.Providers.DataProviders
         public override Priority GetPriorityById(int priorityId)
         {
             // Validate Parameters
-            if (priorityId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(priorityId)));
+            if (priorityId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(priorityId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3097,7 +3337,7 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PRIORITY_GETPRIORITYBYID);
                 var priorityList = new List<Priority>();
                 ExecuteReaderCmd(sqlCmd, GeneratePriorityListFromReader, ref priorityList);
-                return priorityList.Count > 0 ? priorityList[0] : null;   
+                return priorityList.Count > 0 ? priorityList[0] : null;
             }
         }
 
@@ -3109,23 +3349,29 @@ namespace BugNET.Providers.DataProviders
         public override bool UpdatePriority(Priority priorityToUpdate)
         {
             // Validate Parameters
-            if (priorityToUpdate == null) throw (new ArgumentNullException(nameof(priorityToUpdate)));
+            if (priorityToUpdate == null) throw new ArgumentNullException(nameof(priorityToUpdate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@PriorityId", SqlDbType.Int, 0, ParameterDirection.Input, priorityToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, priorityToUpdate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input, priorityToUpdate.SortOrder);
-                AddParamToSqlCmd(sqlCmd, "@PriorityName", SqlDbType.NText, 50, ParameterDirection.Input, priorityToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@PriorityImageUrl", SqlDbType.NText, 50, ParameterDirection.Input, priorityToUpdate.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@PriorityId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    priorityToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    priorityToUpdate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input,
+                    priorityToUpdate.SortOrder);
+                AddParamToSqlCmd(sqlCmd, "@PriorityName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    priorityToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@PriorityImageUrl", SqlDbType.NText, 50, ParameterDirection.Input,
+                    priorityToUpdate.ImageUrl);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PRIORITY_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
+
         #endregion
 
         #region Project mailbox methods
@@ -3138,18 +3384,19 @@ namespace BugNET.Providers.DataProviders
         public override ProjectMailbox GetProjectMailboxByMailboxId(int projectMailboxId)
         {
             // validate input
-            if (projectMailboxId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectMailboxId)));
+            if (projectMailboxId <= 0) throw new ArgumentOutOfRangeException(nameof(projectMailboxId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECTMAILBOX_GETMAILBOXBYID);
 
-                AddParamToSqlCmd(sqlCmd, "@ProjectMailboxId", SqlDbType.Int, 0, ParameterDirection.Input, projectMailboxId);
+                AddParamToSqlCmd(sqlCmd, "@ProjectMailboxId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    projectMailboxId);
 
                 var projectList = new List<ProjectMailbox>();
                 ExecuteReaderCmd(sqlCmd, GenerateProjectMailboxListFromReader, ref projectList);
 
-                return projectList.Count > 0 ? projectList[0] : null;   
+                return projectList.Count > 0 ? projectList[0] : null;
             }
         }
 
@@ -3172,7 +3419,7 @@ namespace BugNET.Providers.DataProviders
                 var projectList = new List<ProjectMailbox>();
                 ExecuteReaderCmd(sqlCmd, GenerateProjectMailboxListFromReader, ref projectList);
 
-                return projectList.Count > 0 ? projectList[0] : null;   
+                return projectList.Count > 0 ? projectList[0] : null;
             }
         }
 
@@ -3184,7 +3431,7 @@ namespace BugNET.Providers.DataProviders
         public override List<ProjectMailbox> GetMailboxsByProjectId(int projectId)
         {
             // validate input
-            if (projectId <= 0) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= 0) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3194,7 +3441,7 @@ namespace BugNET.Providers.DataProviders
 
                 var projectList = new List<ProjectMailbox>();
                 ExecuteReaderCmd(sqlCmd, GenerateProjectMailboxListFromReader, ref projectList);
-                return projectList;   
+                return projectList;
             }
         }
 
@@ -3212,14 +3459,19 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECTMAILBOX_CREATEPROJECTMAILBOX);
 
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, mailboxToUpdate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@MailBox", SqlDbType.NVarChar, 0, ParameterDirection.Input, mailboxToUpdate.Mailbox);
-                AddParamToSqlCmd(sqlCmd, "@AssignToUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input, mailboxToUpdate.AssignToUserName);
-                AddParamToSqlCmd(sqlCmd, "@IssueTypeId", SqlDbType.Int, 0, ParameterDirection.Input, mailboxToUpdate.IssueTypeId);
-                AddParamToSqlCmd(sqlCmd, "@CategoryId", SqlDbType.Int, 0, ParameterDirection.Input, mailboxToUpdate.CategoryId);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    mailboxToUpdate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@MailBox", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    mailboxToUpdate.Mailbox);
+                AddParamToSqlCmd(sqlCmd, "@AssignToUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    mailboxToUpdate.AssignToUserName);
+                AddParamToSqlCmd(sqlCmd, "@IssueTypeId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    mailboxToUpdate.IssueTypeId);
+                AddParamToSqlCmd(sqlCmd, "@CategoryId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    mailboxToUpdate.CategoryId);
 
                 ExecuteScalarCmd(sqlCmd);
-                return (int)sqlCmd.Parameters["@ReturnValue"].Value;   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -3237,16 +3489,22 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_PROJECTMAILBOX_UPDATEPROJECTMAILBOX);
 
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ProjectMailboxId", SqlDbType.Int, 0, ParameterDirection.Input, mailboxToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, mailboxToUpdate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@MailBoxEmailAddress", SqlDbType.NVarChar, 0, ParameterDirection.Input, mailboxToUpdate.Mailbox);
-                AddParamToSqlCmd(sqlCmd, "@AssignToUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input, mailboxToUpdate.AssignToUserName);
-                AddParamToSqlCmd(sqlCmd, "@IssueTypeId", SqlDbType.Int, 0, ParameterDirection.Input, mailboxToUpdate.IssueTypeId);
-                AddParamToSqlCmd(sqlCmd, "@CategoryId", SqlDbType.Int, 0, ParameterDirection.Input, mailboxToUpdate.CategoryId);
+                AddParamToSqlCmd(sqlCmd, "@ProjectMailboxId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    mailboxToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    mailboxToUpdate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@MailBoxEmailAddress", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    mailboxToUpdate.Mailbox);
+                AddParamToSqlCmd(sqlCmd, "@AssignToUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    mailboxToUpdate.AssignToUserName);
+                AddParamToSqlCmd(sqlCmd, "@IssueTypeId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    mailboxToUpdate.IssueTypeId);
+                AddParamToSqlCmd(sqlCmd, "@CategoryId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    mailboxToUpdate.CategoryId);
 
                 ExecuteScalarCmd(sqlCmd);
 
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
 
@@ -3267,12 +3525,14 @@ namespace BugNET.Providers.DataProviders
                 AddParamToSqlCmd(sqlCmd, "@ProjectMailboxId", SqlDbType.Int, 0, ParameterDirection.Input, mailboxId);
 
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
+
         #endregion
 
         #region Status methods
+
         /// <summary>
         /// Creates the new status.
         /// </summary>
@@ -3281,19 +3541,22 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewStatus(Status newStatus)
         {
             // Validate Parameters
-            if (newStatus == null) throw (new ArgumentNullException(nameof(newStatus)));
+            if (newStatus == null) throw new ArgumentNullException(nameof(newStatus));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                 AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, newStatus.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@StatusName", SqlDbType.NVarChar, 0, ParameterDirection.Input, newStatus.Name);
-                AddParamToSqlCmd(sqlCmd, "@StatusImageUrl", SqlDbType.NText, 255, ParameterDirection.Input, newStatus.ImageUrl);
-                AddParamToSqlCmd(sqlCmd, "@IsClosedState", SqlDbType.Bit, 0, ParameterDirection.Input, newStatus.IsClosedState);
+                AddParamToSqlCmd(sqlCmd, "@StatusName", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    newStatus.Name);
+                AddParamToSqlCmd(sqlCmd, "@StatusImageUrl", SqlDbType.NText, 255, ParameterDirection.Input,
+                    newStatus.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@IsClosedState", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    newStatus.IsClosedState);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_STATUS_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -3304,7 +3567,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteStatus(int statusId)
         {
-            if (statusId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(statusId)));
+            if (statusId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(statusId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3313,8 +3576,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_STATUS_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -3326,7 +3589,7 @@ namespace BugNET.Providers.DataProviders
         public override bool CanDeleteStatus(int statusId)
         {
             // Validate Parameters
-            if (statusId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(statusId)));
+            if (statusId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(statusId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3335,8 +3598,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_STATUS_CANDELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                return (resultValue == 1);
+                var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                return resultValue == 1;
             }
         }
 
@@ -3348,7 +3611,7 @@ namespace BugNET.Providers.DataProviders
         public override List<Status> GetStatusByProjectId(int projectId)
         {
             // validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3357,7 +3620,7 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_STATUS_GETSTATUSBYPROJECTID);
                 var statusList = new List<Status>();
                 ExecuteReaderCmd(sqlCmd, GenerateStatusListFromReader, ref statusList);
-                return statusList;   
+                return statusList;
             }
         }
 
@@ -3370,22 +3633,27 @@ namespace BugNET.Providers.DataProviders
         public override bool UpdateStatus(Status statusToUpdate)
         {
             // Validate Parameters
-            if (statusToUpdate == null) throw (new ArgumentNullException(nameof(statusToUpdate)));
+            if (statusToUpdate == null) throw new ArgumentNullException(nameof(statusToUpdate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
                 AddParamToSqlCmd(sqlCmd, "@StatusId", SqlDbType.Int, 0, ParameterDirection.Input, statusToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, statusToUpdate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input, statusToUpdate.SortOrder);
-                AddParamToSqlCmd(sqlCmd, "@StatusName", SqlDbType.NVarChar, 0, ParameterDirection.Input, statusToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@StatusImageUrl", SqlDbType.NText, 255, ParameterDirection.Input, statusToUpdate.ImageUrl);
-                AddParamToSqlCmd(sqlCmd, "@IsClosedState", SqlDbType.Bit, 0, ParameterDirection.Input, statusToUpdate.IsClosedState);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    statusToUpdate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input,
+                    statusToUpdate.SortOrder);
+                AddParamToSqlCmd(sqlCmd, "@StatusName", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                    statusToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@StatusImageUrl", SqlDbType.NText, 255, ParameterDirection.Input,
+                    statusToUpdate.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@IsClosedState", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    statusToUpdate.IsClosedState);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_STATUS_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -3397,7 +3665,7 @@ namespace BugNET.Providers.DataProviders
         public override Status GetStatusById(int statusId)
         {
             // validate Parameters
-            if (statusId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(statusId)));
+            if (statusId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(statusId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3407,9 +3675,10 @@ namespace BugNET.Providers.DataProviders
                 var statusList = new List<Status>();
                 ExecuteReaderCmd(sqlCmd, GenerateStatusListFromReader, ref statusList);
 
-                return statusList.Count > 0 ? statusList[0] : null;   
+                return statusList.Count > 0 ? statusList[0] : null;
             }
         }
+
         #endregion
 
         #region Custom field & selection methods
@@ -3421,7 +3690,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override CustomField GetCustomFieldById(int customFieldId)
         {
-            if (customFieldId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(customFieldId)));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3431,7 +3700,7 @@ namespace BugNET.Providers.DataProviders
                 var customFieldList = new List<CustomField>();
                 ExecuteReaderCmd(sqlCmd, GenerateCustomFieldListFromReader, ref customFieldList);
 
-                return customFieldList.Count > 0 ? customFieldList[0] : null;   
+                return customFieldList.Count > 0 ? customFieldList[0] : null;
             }
         }
 
@@ -3442,7 +3711,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<CustomField> GetCustomFieldsByProjectId(int projectId)
         {
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3452,7 +3721,7 @@ namespace BugNET.Providers.DataProviders
                 var customFieldList = new List<CustomField>();
                 ExecuteReaderCmd(sqlCmd, GenerateCustomFieldListFromReader, ref customFieldList);
 
-                return customFieldList;   
+                return customFieldList;
             }
         }
 
@@ -3463,7 +3732,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<CustomField> GetCustomFieldsByIssueId(int issueId)
         {
-            if (issueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3473,7 +3742,7 @@ namespace BugNET.Providers.DataProviders
                 var customFieldList = new List<CustomField>();
                 ExecuteReaderCmd(sqlCmd, GenerateCustomFieldListFromReader, ref customFieldList);
 
-                return customFieldList;   
+                return customFieldList;
             }
         }
 
@@ -3489,16 +3758,21 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldName", SqlDbType.NText, 50, ParameterDirection.Input, newCustomField.Name);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldDataType", SqlDbType.Int, 0, ParameterDirection.Input, newCustomField.DataType);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, newCustomField.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldRequired", SqlDbType.Bit, 0, ParameterDirection.Input, newCustomField.Required);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldTypeId", SqlDbType.Int, 0, ParameterDirection.Input, (int)newCustomField.FieldType);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    newCustomField.Name);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldDataType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newCustomField.DataType);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newCustomField.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldRequired", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    newCustomField.Required);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldTypeId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    (int) newCustomField.FieldType);
 
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CUSTOMFIELD_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -3514,16 +3788,22 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldName", SqlDbType.NText, 50, ParameterDirection.Input, customFieldToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldDataType", SqlDbType.Int, 0, ParameterDirection.Input, customFieldToUpdate.DataType);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldToUpdate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldRequired", SqlDbType.Bit, 0, ParameterDirection.Input, customFieldToUpdate.Required);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldTypeId", SqlDbType.Int, 0, ParameterDirection.Input, (int)customFieldToUpdate.FieldType);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    customFieldToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldDataType", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldToUpdate.DataType);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldToUpdate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldRequired", SqlDbType.Bit, 0, ParameterDirection.Input,
+                    customFieldToUpdate.Required);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldTypeId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    (int) customFieldToUpdate.FieldType);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CUSTOMFIELD_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
 
@@ -3535,17 +3815,18 @@ namespace BugNET.Providers.DataProviders
         public override bool DeleteCustomField(int customFieldId)
         {
             // Validate Parameters
-            if (customFieldId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(customFieldId)));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
 
             using (var sqlCmd = new SqlCommand())
             {
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldIdToDelete", SqlDbType.Int, 4, ParameterDirection.Input, customFieldId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldIdToDelete", SqlDbType.Int, 4, ParameterDirection.Input,
+                    customFieldId);
                 AddParamToSqlCmd(sqlCmd, "@ResultValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CUSTOMFIELD_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                return (resultValue == 0);   
+                var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                return resultValue == 0;
             }
         }
 
@@ -3558,8 +3839,8 @@ namespace BugNET.Providers.DataProviders
         public override bool SaveCustomFieldValues(int issueId, List<CustomField> fields)
         {
             // Validate Parameters
-            if (fields == null) throw (new ArgumentNullException(nameof(fields)));
-            if (issueId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (fields == null) throw new ArgumentNullException(nameof(fields));
+            if (issueId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3578,10 +3859,11 @@ namespace BugNET.Providers.DataProviders
                     sqlCmd.Parameters["@CustomFieldId"].Value = field.Id;
                     sqlCmd.Parameters["@CustomFieldValue"].Value = field.Value;
                     ExecuteScalarCmd(sqlCmd);
-                    if ((int)sqlCmd.Parameters["@ReturnValue"].Value == 1)
+                    if ((int) sqlCmd.Parameters["@ReturnValue"].Value == 1)
                         errors = true;
                 }
-                return !errors;   
+
+                return !errors;
             }
         }
 
@@ -3597,12 +3879,13 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionIdToDelete", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionIdToDelete", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionId);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CUSTOMFIELDSELECTION_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -3613,17 +3896,18 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<CustomFieldSelection> GetCustomFieldSelectionsByCustomFieldId(int customFieldId)
         {
-            if (customFieldId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(customFieldId)));
+            if (customFieldId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(customFieldId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldId);
-                SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONSBYCUSTOMFIELDID);
+                SetCommandType(sqlCmd, CommandType.StoredProcedure,
+                    SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONSBYCUSTOMFIELDID);
 
                 var customFieldSelectionList = new List<CustomFieldSelection>();
                 ExecuteReaderCmd(sqlCmd, GenerateCustomFieldSelectionListFromReader, ref customFieldSelectionList);
 
-                return customFieldSelectionList;   
+                return customFieldSelectionList;
             }
         }
 
@@ -3634,17 +3918,20 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override CustomFieldSelection GetCustomFieldSelectionById(int customFieldSelectionId)
         {
-            if (customFieldSelectionId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(customFieldSelectionId)));
+            if (customFieldSelectionId <= Globals.NewId)
+                throw new ArgumentOutOfRangeException(nameof(customFieldSelectionId));
 
             using (var sqlCmd = new SqlCommand())
             {
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionId);
-                SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONBYID);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionId);
+                SetCommandType(sqlCmd, CommandType.StoredProcedure,
+                    SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONBYID);
 
                 var customFieldSelectionList = new List<CustomFieldSelection>();
                 ExecuteReaderCmd(sqlCmd, GenerateCustomFieldSelectionListFromReader, ref customFieldSelectionList);
 
-                return customFieldSelectionList.Count > 0 ? customFieldSelectionList[0] : null;   
+                return customFieldSelectionList.Count > 0 ? customFieldSelectionList[0] : null;
             }
         }
 
@@ -3660,13 +3947,16 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input, newCustomFieldSelection.CustomFieldId);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionName", SqlDbType.NVarChar, 255, ParameterDirection.Input, newCustomFieldSelection.Name);
-                AddParamToSqlCmd(sqlCmd, "@CUstomFieldSelectionValue", SqlDbType.NVarChar, 255, ParameterDirection.Input, newCustomFieldSelection.Value);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    newCustomFieldSelection.CustomFieldId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionName", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                    newCustomFieldSelection.Name);
+                AddParamToSqlCmd(sqlCmd, "@CUstomFieldSelectionValue", SqlDbType.NVarChar, 255,
+                    ParameterDirection.Input, newCustomFieldSelection.Value);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CUSTOMFIELDSELECTION_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -3677,25 +3967,33 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool UpdateCustomFieldSelection(CustomFieldSelection customFieldSelectionToUpdate)
         {
-            if (customFieldSelectionToUpdate == null) throw new ArgumentNullException(nameof(customFieldSelectionToUpdate));
+            if (customFieldSelectionToUpdate == null)
+                throw new ArgumentNullException(nameof(customFieldSelectionToUpdate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionToUpdate.CustomFieldId);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionId", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionName", SqlDbType.NVarChar, 255, ParameterDirection.Input, customFieldSelectionToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionValue", SqlDbType.NVarChar, 255, ParameterDirection.Input, customFieldSelectionToUpdate.Value);
-                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionSortOrder", SqlDbType.Int, 0, ParameterDirection.Input, customFieldSelectionToUpdate.SortOrder);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionToUpdate.CustomFieldId);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionName", SqlDbType.NVarChar, 255, ParameterDirection.Input,
+                    customFieldSelectionToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionValue", SqlDbType.NVarChar, 255,
+                    ParameterDirection.Input, customFieldSelectionToUpdate.Value);
+                AddParamToSqlCmd(sqlCmd, "@CustomFieldSelectionSortOrder", SqlDbType.Int, 0, ParameterDirection.Input,
+                    customFieldSelectionToUpdate.SortOrder);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_CUSTOMFIELDSELECTION_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
+
         #endregion
 
         #region Issue type methods
+
         /// <summary>
         /// Gets the issue type by id.
         /// </summary>
@@ -3704,7 +4002,7 @@ namespace BugNET.Providers.DataProviders
         public override IssueType GetIssueTypeById(int issueTypeId)
         {
             // validate Parameters
-            if (issueTypeId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(issueTypeId)));
+            if (issueTypeId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueTypeId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3714,7 +4012,7 @@ namespace BugNET.Providers.DataProviders
                 var issueTypeList = new List<IssueType>();
                 ExecuteReaderCmd(sqlCmd, GenerateIssueTypeListFromReader, ref issueTypeList);
 
-                return issueTypeList.Count > 0 ? issueTypeList[0] : null;   
+                return issueTypeList.Count > 0 ? issueTypeList[0] : null;
             }
         }
 
@@ -3726,18 +4024,21 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewIssueType(IssueType issueTypeToCreate)
         {
             // Validate Parameters
-            if (issueTypeToCreate == null) throw (new ArgumentNullException(nameof(issueTypeToCreate)));
+            if (issueTypeToCreate == null) throw new ArgumentNullException(nameof(issueTypeToCreate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, issueTypeToCreate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@IssueTypeName", SqlDbType.NText, 50, ParameterDirection.Input, issueTypeToCreate.Name);
-                AddParamToSqlCmd(sqlCmd, "@IssueTypeImageUrl", SqlDbType.NText, 255, ParameterDirection.Input, issueTypeToCreate.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    issueTypeToCreate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@IssueTypeName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    issueTypeToCreate.Name);
+                AddParamToSqlCmd(sqlCmd, "@IssueTypeImageUrl", SqlDbType.NText, 255, ParameterDirection.Input,
+                    issueTypeToCreate.ImageUrl);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUETYPE_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -3748,17 +4049,18 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteIssueType(int issueTypeId)
         {
-            if (issueTypeId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(issueTypeId)));
+            if (issueTypeId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueTypeId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@IssueTypeIdToDelete", SqlDbType.Int, 0, ParameterDirection.Input, issueTypeId);
+                AddParamToSqlCmd(sqlCmd, "@IssueTypeIdToDelete", SqlDbType.Int, 0, ParameterDirection.Input,
+                    issueTypeId);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUETYPE_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -3770,7 +4072,7 @@ namespace BugNET.Providers.DataProviders
         public override bool CanDeleteIssueType(int issueTypeId)
         {
             // Validate Parameters
-            if (issueTypeId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(issueTypeId)));
+            if (issueTypeId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(issueTypeId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3779,8 +4081,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUETYPE_CANDELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                return (resultValue == 1);
+                var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                return resultValue == 1;
             }
         }
 
@@ -3792,20 +4094,25 @@ namespace BugNET.Providers.DataProviders
         public override bool UpdateIssueType(IssueType issueTypeToUpdate)
         {
             // Validate Parameters
-            if (issueTypeToUpdate == null) throw (new ArgumentNullException(nameof(issueTypeToUpdate)));
+            if (issueTypeToUpdate == null) throw new ArgumentNullException(nameof(issueTypeToUpdate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@IssueTypeId", SqlDbType.Int, 0, ParameterDirection.Input, issueTypeToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input, issueTypeToUpdate.SortOrder);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, issueTypeToUpdate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@IssueTypeName", SqlDbType.NText, 50, ParameterDirection.Input, issueTypeToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@IssueTypeImageUrl", SqlDbType.NText, 50, ParameterDirection.Input, issueTypeToUpdate.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@IssueTypeId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    issueTypeToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input,
+                    issueTypeToUpdate.SortOrder);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    issueTypeToUpdate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@IssueTypeName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    issueTypeToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@IssueTypeImageUrl", SqlDbType.NText, 50, ParameterDirection.Input,
+                    issueTypeToUpdate.ImageUrl);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUETYPE_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
 
@@ -3817,7 +4124,7 @@ namespace BugNET.Providers.DataProviders
         public override List<IssueType> GetIssueTypesByProjectId(int projectId)
         {
             // validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3826,13 +4133,14 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUETYPE_GETISSUETYPESBYPROJECTID);
                 var issueTypeList = new List<IssueType>();
                 ExecuteReaderCmd(sqlCmd, GenerateIssueTypeListFromReader, ref issueTypeList);
-                return issueTypeList;   
+                return issueTypeList;
             }
         }
 
         #endregion
 
         #region Resolution methods
+
         /// <summary>
         /// Gets the resolution by id.
         /// </summary>
@@ -3841,7 +4149,7 @@ namespace BugNET.Providers.DataProviders
         public override Resolution GetResolutionById(int resolutionId)
         {
             // validate Parameters
-            if (resolutionId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(resolutionId)));
+            if (resolutionId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(resolutionId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3851,7 +4159,7 @@ namespace BugNET.Providers.DataProviders
                 var resolutionList = new List<Resolution>();
                 ExecuteReaderCmd(sqlCmd, GenerateResolutionListFromReader, ref resolutionList);
 
-                return resolutionList.Count > 0 ? resolutionList[0] : null;   
+                return resolutionList.Count > 0 ? resolutionList[0] : null;
             }
         }
 
@@ -3863,18 +4171,21 @@ namespace BugNET.Providers.DataProviders
         public override int CreateNewResolution(Resolution resolutionToCreate)
         {
             // Validate Parameters
-            if (resolutionToCreate == null) throw (new ArgumentNullException(nameof(resolutionToCreate)));
+            if (resolutionToCreate == null) throw new ArgumentNullException(nameof(resolutionToCreate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, resolutionToCreate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@ResolutionName", SqlDbType.NText, 50, ParameterDirection.Input, resolutionToCreate.Name);
-                AddParamToSqlCmd(sqlCmd, "@ResolutionImageUrl", SqlDbType.NText, 255, ParameterDirection.Input, resolutionToCreate.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    resolutionToCreate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@ResolutionName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    resolutionToCreate.Name);
+                AddParamToSqlCmd(sqlCmd, "@ResolutionImageUrl", SqlDbType.NText, 255, ParameterDirection.Input,
+                    resolutionToCreate.ImageUrl);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RESOLUTION_CREATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value;
             }
         }
 
@@ -3885,17 +4196,18 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteResolution(int resolutionId)
         {
-            if (resolutionId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(resolutionId)));
+            if (resolutionId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(resolutionId));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ResolutionIdToDelete", SqlDbType.Int, 0, ParameterDirection.Input, resolutionId);
+                AddParamToSqlCmd(sqlCmd, "@ResolutionIdToDelete", SqlDbType.Int, 0, ParameterDirection.Input,
+                    resolutionId);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RESOLUTION_DELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var returnValue = (int)sqlCmd.Parameters["@ReturnValue"].Value;
-                return (returnValue == 0);   
+                var returnValue = (int) sqlCmd.Parameters["@ReturnValue"].Value;
+                return returnValue == 0;
             }
         }
 
@@ -3907,7 +4219,7 @@ namespace BugNET.Providers.DataProviders
         public override bool CanDeleteResolution(int resolutionId)
         {
             // Validate Parameters
-            if (resolutionId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(resolutionId)));
+            if (resolutionId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(resolutionId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3916,8 +4228,8 @@ namespace BugNET.Providers.DataProviders
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RESOLUTION_CANDELETE);
                 ExecuteScalarCmd(sqlCmd);
-                var resultValue = (int)sqlCmd.Parameters["@ResultValue"].Value;
-                return (resultValue == 1);
+                var resultValue = (int) sqlCmd.Parameters["@ResultValue"].Value;
+                return resultValue == 1;
             }
         }
 
@@ -3929,20 +4241,25 @@ namespace BugNET.Providers.DataProviders
         public override bool UpdateResolution(Resolution resolutionToUpdate)
         {
             // Validate Parameters
-            if (resolutionToUpdate == null) throw (new ArgumentNullException(nameof(resolutionToUpdate)));
+            if (resolutionToUpdate == null) throw new ArgumentNullException(nameof(resolutionToUpdate));
 
             using (var sqlCmd = new SqlCommand())
             {
                 AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                AddParamToSqlCmd(sqlCmd, "@ResolutionId", SqlDbType.Int, 0, ParameterDirection.Input, resolutionToUpdate.Id);
-                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input, resolutionToUpdate.SortOrder);
-                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input, resolutionToUpdate.ProjectId);
-                AddParamToSqlCmd(sqlCmd, "@ResolutionName", SqlDbType.NText, 50, ParameterDirection.Input, resolutionToUpdate.Name);
-                AddParamToSqlCmd(sqlCmd, "@ResolutionImageUrl", SqlDbType.NText, 50, ParameterDirection.Input, resolutionToUpdate.ImageUrl);
+                AddParamToSqlCmd(sqlCmd, "@ResolutionId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    resolutionToUpdate.Id);
+                AddParamToSqlCmd(sqlCmd, "@SortOrder", SqlDbType.Int, 0, ParameterDirection.Input,
+                    resolutionToUpdate.SortOrder);
+                AddParamToSqlCmd(sqlCmd, "@ProjectId", SqlDbType.Int, 0, ParameterDirection.Input,
+                    resolutionToUpdate.ProjectId);
+                AddParamToSqlCmd(sqlCmd, "@ResolutionName", SqlDbType.NText, 50, ParameterDirection.Input,
+                    resolutionToUpdate.Name);
+                AddParamToSqlCmd(sqlCmd, "@ResolutionImageUrl", SqlDbType.NText, 50, ParameterDirection.Input,
+                    resolutionToUpdate.ImageUrl);
 
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RESOLUTION_UPDATE);
                 ExecuteScalarCmd(sqlCmd);
-                return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
             }
         }
 
@@ -3954,7 +4271,7 @@ namespace BugNET.Providers.DataProviders
         public override List<Resolution> GetResolutionsByProjectId(int projectId)
         {
             // validate Parameters
-            if (projectId <= Globals.NewId) throw (new ArgumentOutOfRangeException(nameof(projectId)));
+            if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -3963,13 +4280,14 @@ namespace BugNET.Providers.DataProviders
                 SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_RESOLUTION_GETRESOLUTIONSBYPROJECTID);
                 var resolutionList = new List<Resolution>();
                 ExecuteReaderCmd(sqlCmd, GenerateResolutionListFromReader, ref resolutionList);
-                return resolutionList;   
+                return resolutionList;
             }
         }
 
         #endregion
 
         #region Issue Work Reports
+
         /// <summary>
         /// Creates the new issue work report.
         /// </summary>
@@ -3977,23 +4295,28 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override int CreateNewIssueWorkReport(IssueWorkReport issueWorkReportToCreate)
         {
-            if (issueWorkReportToCreate == null) throw (new ArgumentNullException(nameof(issueWorkReportToCreate)));
+            if (issueWorkReportToCreate == null) throw new ArgumentNullException(nameof(issueWorkReportToCreate));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.NVarChar, 0, ParameterDirection.Input, issueWorkReportToCreate.IssueId);
-                    AddParamToSqlCmd(sqlCmd, "@CreatorUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input, issueWorkReportToCreate.CreatorUserName);
-                    AddParamToSqlCmd(sqlCmd, "@WorkDate", SqlDbType.DateTime, 0, ParameterDirection.Input, issueWorkReportToCreate.WorkDate);
-                    AddParamToSqlCmd(sqlCmd, "@Duration", SqlDbType.Decimal, 0, ParameterDirection.Input, issueWorkReportToCreate.Duration);
-                    AddParamToSqlCmd(sqlCmd, "@IssueCommentId", SqlDbType.Int, 0, ParameterDirection.Input, issueWorkReportToCreate.CommentId);
+                    AddParamToSqlCmd(sqlCmd, "@IssueId", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                        issueWorkReportToCreate.IssueId);
+                    AddParamToSqlCmd(sqlCmd, "@CreatorUserName", SqlDbType.NVarChar, 0, ParameterDirection.Input,
+                        issueWorkReportToCreate.CreatorUserName);
+                    AddParamToSqlCmd(sqlCmd, "@WorkDate", SqlDbType.DateTime, 0, ParameterDirection.Input,
+                        issueWorkReportToCreate.WorkDate);
+                    AddParamToSqlCmd(sqlCmd, "@Duration", SqlDbType.Decimal, 0, ParameterDirection.Input,
+                        issueWorkReportToCreate.Duration);
+                    AddParamToSqlCmd(sqlCmd, "@IssueCommentId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        issueWorkReportToCreate.CommentId);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEWORKREPORT_CREATE);
                     ExecuteScalarCmd(sqlCmd);
 
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value);
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value;
                 }
             }
             catch (Exception ex)
@@ -4009,7 +4332,7 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override List<IssueWorkReport> GetIssueWorkReportsByIssueId(int issueId)
         {
-            if (issueId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueId)));
+            if (issueId <= 0) throw new ArgumentOutOfRangeException(nameof(issueId));
 
             using (var sqlCmd = new SqlCommand())
             {
@@ -4019,7 +4342,7 @@ namespace BugNET.Providers.DataProviders
                 var issueTimeEntryList = new List<IssueWorkReport>();
                 ExecuteReaderCmd(sqlCmd, GenerateIssueTimeEntryListFromReader, ref issueTimeEntryList);
 
-                return issueTimeEntryList;   
+                return issueTimeEntryList;
             }
         }
 
@@ -4030,18 +4353,19 @@ namespace BugNET.Providers.DataProviders
         /// <returns></returns>
         public override bool DeleteIssueWorkReport(int issueWorkReportId)
         {
-            if (issueWorkReportId <= 0) throw (new ArgumentOutOfRangeException(nameof(issueWorkReportId)));
+            if (issueWorkReportId <= 0) throw new ArgumentOutOfRangeException(nameof(issueWorkReportId));
 
             try
             {
                 using (var sqlCmd = new SqlCommand())
                 {
                     AddParamToSqlCmd(sqlCmd, "@ReturnValue", SqlDbType.Int, 0, ParameterDirection.ReturnValue, null);
-                    AddParamToSqlCmd(sqlCmd, "@IssueWorkReportId", SqlDbType.Int, 0, ParameterDirection.Input, issueWorkReportId);
+                    AddParamToSqlCmd(sqlCmd, "@IssueWorkReportId", SqlDbType.Int, 0, ParameterDirection.Input,
+                        issueWorkReportId);
 
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_ISSUEWORKREPORT_DELETE);
                     ExecuteScalarCmd(sqlCmd);
-                    return ((int)sqlCmd.Parameters["@ReturnValue"].Value == 0);   
+                    return (int) sqlCmd.Parameters["@ReturnValue"].Value == 0;
                 }
             }
             catch (Exception ex)
@@ -4072,9 +4396,11 @@ namespace BugNET.Providers.DataProviders
         {
             throw new NotImplementedException();
         }
+
         #endregion
 
         #region Appliation log methods
+
         /// <summary>
         /// Gets the application log.
         /// </summary>
@@ -4089,10 +4415,11 @@ namespace BugNET.Providers.DataProviders
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_APPLICATIONLOG_GETLOG);
 
                     var applicationLogList = new List<ApplicationLog>();
-                    AddParamToSqlCmd(sqlCmd, "@FilterType", SqlDbType.NVarChar, 50, ParameterDirection.Input, (filterType.Length == 0) ? DBNull.Value : (object)filterType);
+                    AddParamToSqlCmd(sqlCmd, "@FilterType", SqlDbType.NVarChar, 50, ParameterDirection.Input,
+                        filterType.Length == 0 ? DBNull.Value : (object) filterType);
                     ExecuteReaderCmd(sqlCmd, GenerateApplicationLogListFromReader, ref applicationLogList);
 
-                    return applicationLogList;   
+                    return applicationLogList;
                 }
             }
             catch (Exception ex)
@@ -4111,7 +4438,7 @@ namespace BugNET.Providers.DataProviders
                 using (var sqlCmd = new SqlCommand())
                 {
                     SetCommandType(sqlCmd, CommandType.StoredProcedure, SP_APPLICATIONLOG_CLEARLOG);
-                    ExecuteScalarCmd(sqlCmd);   
+                    ExecuteScalarCmd(sqlCmd);
                 }
             }
             catch (Exception ex)
@@ -4119,7 +4446,7 @@ namespace BugNET.Providers.DataProviders
                 throw ProcessException(ex);
             }
         }
-        #endregion
 
+        #endregion
     }
 }

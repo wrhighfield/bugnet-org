@@ -5,7 +5,6 @@ using System.Web.Services;
 
 namespace BugNET.Webservices
 {
-
     /// <summary>
     /// Base abstract class for webservices to handle user authentication.
     /// </summary>
@@ -36,22 +35,15 @@ namespace BugNET.Webservices
         {
             get
             {
-                if (IsAuthenticated)
-                {
-                    return (string)Session["UserName"];
-                }
+                if (IsAuthenticated) return (string) Session["UserName"];
                 return "";
             }
             set
             {
                 if (IsAuthenticated)
-                {
                     Session["UserName"] = value;
-                }
                 else
-                {
                     throw new UnauthorizedAccessException("Cannot set unauthenticated user name");
-                }
             }
         }
 
@@ -65,19 +57,13 @@ namespace BugNET.Webservices
         {
             get
             {
-                object state = Session["IsAuthenticated"];
-                if (state != null)
-                {
-                    return (bool)state;
-                }
+                var state = Session["IsAuthenticated"];
+                if (state != null) return (bool) state;
                 //Must be first request in session
                 IsAuthenticated = false;
                 return false;
             }
-            set
-            {
-                Session["IsAuthenticated"] = value;
-            }
+            set => Session["IsAuthenticated"] = value;
         }
 
         /// <summary>
@@ -93,10 +79,7 @@ namespace BugNET.Webservices
             authenticated = System.Web.Security.Membership.ValidateUser(userName, password);
             IsAuthenticated = authenticated;
 
-            if (authenticated)
-            {
-                UserName = userName;
-            }
+            if (authenticated) UserName = userName;
             return authenticated;
         }
 

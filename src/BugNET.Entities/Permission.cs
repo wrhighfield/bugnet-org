@@ -39,7 +39,5 @@ namespace BugNET.Entities
         public string Key { get; private set; }
 
         #endregion
-
-
     }
 }

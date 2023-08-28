@@ -3,7 +3,7 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using BugNET.UserControls;
 
 namespace BugNET.Administration.Projects.UserControls
@@ -11,7 +11,7 @@ namespace BugNET.Administration.Projects.UserControls
     /// <summary>
     ///		Summary description for Status.
     /// </summary>
-    public partial class ProjectStatus : System.Web.UI.UserControl, IEditProjectControl
+    public partial class ProjectStatus : BugNetUserControl, IEditProjectControl
     {
         //*********************************************************************
         //
@@ -26,8 +26,8 @@ namespace BugNET.Administration.Projects.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", 0); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", 0);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -52,21 +52,17 @@ namespace BugNET.Administration.Projects.UserControls
         /// Gets a value indicating whether [show save button].
         /// </summary>
         /// <value><c>true</c> if [show save button]; otherwise, <c>false</c>.</value>
-        public bool ShowSaveButton
-        {
-            get { return false; }
-        }
+        public bool ShowSaveButton => false;
 
         /// <summary>
         /// Binds the status.
         /// </summary>
-        void BindStatus()
+        private void BindStatus()
         {
-
-            grdStatus.Columns[1].HeaderText = GetGlobalResourceObject("SharedResources", "Status").ToString();
-            grdStatus.Columns[2].HeaderText = GetGlobalResourceObject("SharedResources", "Image").ToString();
-            grdStatus.Columns[3].HeaderText = GetLocalResourceObject("IsClosedState.Text").ToString();
-            grdStatus.Columns[4].HeaderText = GetGlobalResourceObject("SharedResources", "Order").ToString();
+            grdStatus.Columns[1].HeaderText = GetGlobalString("SharedResources", "Status");
+            grdStatus.Columns[2].HeaderText = GetGlobalString("SharedResources", "Image");
+            grdStatus.Columns[3].HeaderText = GetLocalString("IsClosedState.Text");
+            grdStatus.Columns[4].HeaderText = GetGlobalString("SharedResources", "Order");
 
             grdStatus.DataSource = StatusManager.GetByProjectId(ProjectId);
             grdStatus.DataKeyField = "Id";
@@ -104,6 +100,7 @@ namespace BugNET.Administration.Projects.UserControls
                     StatusManager.SaveOrUpdate(s);
                     break;
             }
+
             BindStatus();
         }
 
@@ -112,20 +109,24 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void AddStatus(Object s, EventArgs e)
+        protected void AddStatus(object s, EventArgs e)
         {
-            string newName = txtName.Text.Trim();
+            var newName = txtName.Text.Trim();
 
-            if (newName == String.Empty)
+            if (newName == string.Empty)
                 return;
 
-            var newStatus = new Status { ProjectId = ProjectId, Name = newName, ImageUrl = lstImages.SelectedValue, IsClosedState = chkClosedState.Checked };
+            var newStatus = new Status
+            {
+                ProjectId = ProjectId, Name = newName, ImageUrl = lstImages.SelectedValue,
+                IsClosedState = chkClosedState.Checked
+            };
 
             if (StatusManager.SaveOrUpdate(newStatus))
             {
                 txtName.Text = "";
                 BindStatus();
-                lstImages.SelectedValue = String.Empty;
+                lstImages.SelectedValue = string.Empty;
                 chkClosedState.Checked = false;
             }
             else
@@ -140,9 +141,9 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
-        protected void grdStatus_Delete(Object s, DataGridCommandEventArgs e)
+        protected void grdStatus_Delete(object s, DataGridCommandEventArgs e)
         {
-            var id = (int)grdStatus.DataKeys[e.Item.ItemIndex];
+            var id = (int) grdStatus.DataKeys[e.Item.ItemIndex];
             string cannotDeleteMessage;
 
             if (!StatusManager.Delete(id, out cannotDeleteMessage))
@@ -172,17 +173,13 @@ namespace BugNET.Administration.Projects.UserControls
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
         protected void grdStatus_Update(object sender, DataGridCommandEventArgs e)
         {
+            var txtStatusName = (TextBox) e.Item.FindControl("txtStatusName");
+            var pickimg = (PickImage) e.Item.FindControl("lstEditImages");
+            var chkClosed = (CheckBox) e.Item.FindControl("chkEditClosedState");
 
-            var txtStatusName = (TextBox)e.Item.FindControl("txtStatusName");
-            var pickimg = (PickImage)e.Item.FindControl("lstEditImages");
-            var chkClosed = (CheckBox)e.Item.FindControl("chkEditClosedState");
+            if (txtStatusName.Text.Trim() == "") throw new ArgumentNullException("Status Name empty");
 
-            if (txtStatusName.Text.Trim() == "")
-            {
-                throw new ArgumentNullException("Status Name empty");
-            }
-
-            Status s = StatusManager.GetById(Convert.ToInt32(grdStatus.DataKeys[e.Item.ItemIndex]));
+            var s = StatusManager.GetById(Convert.ToInt32(grdStatus.DataKeys[e.Item.ItemIndex]));
             s.IsClosedState = chkClosed.Checked;
             s.Name = txtStatusName.Text.Trim();
             s.ImageUrl = pickimg.SelectedValue;
@@ -190,7 +187,6 @@ namespace BugNET.Administration.Projects.UserControls
 
             grdStatus.EditItemIndex = -1;
             BindStatus();
-
         }
 
         /// <summary>
@@ -210,17 +206,17 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The source of the event.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridItemEventArgs"/> instance containing the event data.</param>
-        protected void grdStatus_ItemDataBound(Object s, DataGridItemEventArgs e)
+        protected void grdStatus_ItemDataBound(object s, DataGridItemEventArgs e)
         {
             if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
             {
-                var currentStatus = (Status)e.Item.DataItem;
+                var currentStatus = (Status) e.Item.DataItem;
 
-                var lblStatusName = (Label)e.Item.FindControl("lblStatusName");
+                var lblStatusName = (Label) e.Item.FindControl("lblStatusName");
                 lblStatusName.Text = currentStatus.Name;
 
-                var imgStatus = (Image)e.Item.FindControl("imgStatus");
-                if (currentStatus.ImageUrl == String.Empty)
+                var imgStatus = (Image) e.Item.FindControl("imgStatus");
+                if (currentStatus.ImageUrl == string.Empty)
                 {
                     imgStatus.Visible = false;
                 }
@@ -229,20 +225,21 @@ namespace BugNET.Administration.Projects.UserControls
                     imgStatus.ImageUrl = "~/Images/Status/" + currentStatus.ImageUrl;
                     imgStatus.AlternateText = currentStatus.Name;
                 }
-                var closedState = (CheckBox)e.Item.FindControl("chkClosedState");
+
+                var closedState = (CheckBox) e.Item.FindControl("chkClosedState");
                 closedState.Checked = currentStatus.IsClosedState;
 
-                var cmdDelete = (ImageButton)e.Item.FindControl("cmdDelete");
-                var message = string.Format(GetLocalResourceObject("ConfirmDelete").ToString(), currentStatus.Name.Trim());
-                cmdDelete.Attributes.Add("onclick", String.Format("return confirm('{0}');", message.JsEncode()));
+                var cmdDelete = (ImageButton) e.Item.FindControl("cmdDelete");
+                var message = string.Format(GetLocalString("ConfirmDelete"), currentStatus.Name.Trim());
+                cmdDelete.Attributes.Add("onclick", $"return confirm('{message.JsEncode()}');");
             }
 
             if (e.Item.ItemType == ListItemType.EditItem)
             {
-                var currentStatus = (Status)e.Item.DataItem;
-                var txtStatusName = (TextBox)e.Item.FindControl("txtStatusName");
-                var pickimg = (PickImage)e.Item.FindControl("lstEditImages");
-                var closedState = (CheckBox)e.Item.FindControl("chkEditClosedState");
+                var currentStatus = (Status) e.Item.DataItem;
+                var txtStatusName = (TextBox) e.Item.FindControl("txtStatusName");
+                var pickimg = (PickImage) e.Item.FindControl("lstEditImages");
+                var closedState = (CheckBox) e.Item.FindControl("chkEditClosedState");
 
                 txtStatusName.Text = currentStatus.Name;
                 pickimg.Initialize();
@@ -257,7 +254,7 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.ServerValidateEventArgs"/> instance containing the event data.</param>
-        protected void ValidateStatus(Object s, ServerValidateEventArgs e)
+        protected void ValidateStatus(object s, ServerValidateEventArgs e)
         {
             e.IsValid = grdStatus.Items.Count > 0;
         }

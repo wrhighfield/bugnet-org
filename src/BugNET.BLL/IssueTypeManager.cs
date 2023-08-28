@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class IssueTypeManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -18,8 +19,10 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(IssueType entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save issue type, the project id is invalid");
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The issue type name cannot be empty or null");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save issue type, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The issue type name cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateIssueType(entity);
@@ -67,8 +70,11 @@ namespace BugNET.BLL
             if (canBeDeleted)
                 return DataProviderManager.Provider.DeleteIssueType(entity.Id);
 
-            cannotDeleteMessage = ResourceStrings.GetGlobalResource(GlobalResources.Exceptions, "DeleteItemAssignedToIssueError");
-            cannotDeleteMessage = string.Format(cannotDeleteMessage, entity.Name,  ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "IssueType", "issue type").ToLower());
+            cannotDeleteMessage =
+                ResourceStrings.GetGlobalResource(GlobalResources.Exceptions, "DeleteItemAssignedToIssueError");
+            cannotDeleteMessage = string.Format(cannotDeleteMessage, entity.Name,
+                ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "IssueType", "issue type")
+                    .ToLower());
 
             return false;
         }

@@ -1,25 +1,25 @@
 using System;
-using System.Collections.Generic;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
 using System.Linq;
+using BugNET.UI;
 
 namespace BugNET.Issues
 {
     /// <summary>
     /// Issue Detail Page
     /// </summary>
-    public partial class IssueDetail : BasePage
+    public partial class IssueDetail : BugNetBasePage
     {
-        Issue _currentIssue;
-        Project _currentProject;
+        private Issue _currentIssue;
+        private Project _currentProject;
 
         #region Private Events
+
         /// <summary>
         /// Page Load Event
         /// </summary>
@@ -29,15 +29,15 @@ namespace BugNET.Issues
         {
             if (!Page.IsPostBack)
             {
-                var s = GetLocalResourceObject("DeleteIssueQuestion").ToString().Trim().JsEncode();
-                lnkDelete.Attributes.Add("onclick", string.Format("return confirm('{0}');", s));
+                var s = GetLocalString("DeleteIssueQuestion").Trim().JsEncode();
+                lnkDelete.Attributes.Add("onclick", $"return confirm('{s}');");
 
                 IssueId = Request.QueryString.Get("id", 0);
 
                 // If don't know issue id then redirect to something missing page
                 if (IssueId == 0)
                     ErrorRedirector.TransferToSomethingMissingPage(Page);
-                
+
                 //set up global properties
                 _currentIssue = IssueManager.GetById(IssueId);
 
@@ -51,10 +51,7 @@ namespace BugNET.Issues
                 var issueVisible = IssueManager.CanViewIssue(_currentIssue, Security.GetUserName());
 
                 //private issue check
-                if (!issueVisible)
-                {
-                    ErrorRedirector.TransferToLoginPage(Page);
-                }
+                if (!issueVisible) ErrorRedirector.TransferToLoginPage(Page);
 
                 _currentProject = ProjectManager.GetById(_currentIssue.ProjectId);
 
@@ -67,28 +64,22 @@ namespace BugNET.Issues
                 ProjectId = _currentProject.Id;
 
                 if (_currentProject.AccessType == ProjectAccessType.Private && !User.Identity.IsAuthenticated)
-                {
                     ErrorRedirector.TransferToLoginPage(Page);
-                }
-                else if (User.Identity.IsAuthenticated && _currentProject.AccessType == ProjectAccessType.Private 
-                    && !ProjectManager.IsUserProjectMember(User.Identity.Name, ProjectId))
-                {
+                else if (User.Identity.IsAuthenticated && _currentProject.AccessType == ProjectAccessType.Private
+                                                       && !ProjectManager.IsUserProjectMember(User.Identity.Name,
+                                                           ProjectId))
                     ErrorRedirector.TransferToLoginPage(Page);
-                }
 
                 BindValues(_currentIssue);
 
                 // Page.Title = string.Concat(_currentIssue.FullId, ": ", Server.HtmlDecode(_currentIssue.Title));
-                lblIssueNumber.Text = string.Format("{0}-{1}", _currentProject.Code, IssueId);
+                lblIssueNumber.Text = $"{_currentProject.Code}-{IssueId}";
                 ctlIssueTabs.Visible = true;
 
                 SetFieldSecurity();
 
-                if (!_currentProject.AllowIssueVoting)
-                { 
-                    VoteBox.Visible = false;
-                }
-          
+                if (!_currentProject.AllowIssueVoting) VoteBox.Visible = false;
+
                 //set the referrer url
                 if (Request.UrlReferrer != null)
                 {
@@ -97,9 +88,8 @@ namespace BugNET.Issues
                 }
                 else
                 {
-                    Session["ReferrerUrl"] = string.Format("~/Issues/IssueList.aspx?pid={0}", ProjectId);
+                    Session["ReferrerUrl"] = $"~/Issues/IssueList.aspx?pid={ProjectId}";
                 }
-
             }
 
             Page.Title = string.Concat(lblIssueNumber.Text, ": ", Server.HtmlDecode(TitleTextBox.Text));
@@ -133,7 +123,7 @@ namespace BugNET.Issues
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="System.Web.SiteMapResolveEventArgs"/> instance containing the event data.</param>
         /// <returns></returns>
-        private SiteMapNode ExpandIssuePaths(Object sender, SiteMapResolveEventArgs e)
+        private SiteMapNode ExpandIssuePaths(object sender, SiteMapResolveEventArgs e)
         {
             if (SiteMap.CurrentNode == null) return null;
 
@@ -143,14 +133,13 @@ namespace BugNET.Issues
             // The current node, and its parents, can be modified to include
             // dynamic query string information relevant to the currently
             // executing request.
-            var title = (TitleTextBox.Text.Length >= 30) ? TitleTextBox.Text.Substring(0, 30) + " ..." : TitleTextBox.Text;
-            tempNode.Title = string.Format("{0}: {1}", lblIssueNumber.Text, title);
+            var title = TitleTextBox.Text.Length >= 30
+                ? TitleTextBox.Text.Substring(0, 30) + " ..."
+                : TitleTextBox.Text;
+            tempNode.Title = $"{lblIssueNumber.Text}: {title}";
             tempNode.Url = string.Concat(tempNode.Url, "?id=", IssueId);
 
-            if ((null != (tempNode = tempNode.ParentNode)))
-            {
-                tempNode.Url = string.Format("~/Issues/IssueList.aspx?pid={0}", ProjectId);
-            }
+            if (null != (tempNode = tempNode.ParentNode)) tempNode.Url = $"~/Issues/IssueList.aspx?pid={ProjectId}";
 
             return currentNode;
         }
@@ -173,7 +162,7 @@ namespace BugNET.Issues
 
 
             // SMOSS: XSS Bugfix
-            Description.Text = (currentIssue.Description);
+            Description.Text = currentIssue.Description;
 
             // WARNING: Do Not html decode the text for the editor. 
             // The editor is expecting HtmlEncoded text as input.
@@ -194,7 +183,8 @@ namespace BugNET.Issues
             DropAssignedTo.SelectedValue = currentIssue.AssignedUserName;
             lblLoggedTime.Text = currentIssue.TimeLogged.ToString();
             txtEstimation.Text = currentIssue.Estimation == 0 ? string.Empty : currentIssue.Estimation.ToString();
-            DueDatePicker.SelectedValue = currentIssue.DueDate == DateTime.MinValue ? null : (DateTime?)currentIssue.DueDate;
+            DueDatePicker.SelectedValue =
+                currentIssue.DueDate == DateTime.MinValue ? null : (DateTime?) currentIssue.DueDate;
             chkPrivate.Checked = currentIssue.Visibility != 0;
             ProgressSlider.Text = currentIssue.Progress.ToString();
             IssueVoteCount.Text = currentIssue.Votes.ToString();
@@ -203,7 +193,7 @@ namespace BugNET.Issues
             {
                 VoteButton.Visible = false;
                 VotedLabel.Visible = true;
-                VotedLabel.Text = GetLocalResourceObject("Voted").ToString();
+                VotedLabel.Text = GetLocalString("Voted");
             }
             else
             {
@@ -217,8 +207,8 @@ namespace BugNET.Issues
                 VotedLabel.Visible = false;
             }
 
-            List<DefaultValue> defValues = IssueManager.GetDefaultIssueTypeByProjectId(ProjectId);
-            DefaultValue selectedValue = defValues.FirstOrDefault();
+            var defValues = IssueManager.GetDefaultIssueTypeByProjectId(ProjectId);
+            var selectedValue = defValues.FirstOrDefault();
 
             if (selectedValue != null)
             {
@@ -236,7 +226,6 @@ namespace BugNET.Issues
                 AffectedMilestoneField.Visible = selectedValue.AffectedMilestoneEditVisibility;
                 AssignedToField.Visible = selectedValue.AssignedToEditVisibility;
                 OwnedByField.Visible = selectedValue.OwnedByEditVisibility;
-                
             }
         }
 
@@ -245,7 +234,7 @@ namespace BugNET.Issues
         /// </summary>
         private void BindOptions()
         {
-            List<ITUser> users = UserManager.GetUsersByProjectId(ProjectId, true);
+            var users = UserManager.GetUsersByProjectId(ProjectId, true);
             //Get Type
             DropIssueType.DataSource = IssueTypeManager.GetByProjectId(ProjectId);
             DropIssueType.DataBind();
@@ -275,7 +264,7 @@ namespace BugNET.Issues
             DropAssignedTo.DataBind();
 
             DropOwned.DataSource = users;
-            DropOwned.DataBind();         
+            DropOwned.DataBind();
 
             DropStatus.DataSource = StatusManager.GetByProjectId(ProjectId);
             DropStatus.DataBind();
@@ -297,7 +286,9 @@ namespace BugNET.Issues
         {
             decimal estimation;
             decimal.TryParse(txtEstimation.Text.Trim(), out estimation);
-            var dueDate = DueDatePicker.SelectedValue == null ? DateTime.MinValue : (DateTime)DueDatePicker.SelectedValue;
+            var dueDate = DueDatePicker.SelectedValue == null
+                ? DateTime.MinValue
+                : (DateTime) DueDatePicker.SelectedValue;
 
             // WARNING: DO NOT ENCODE THE HTMLEDITOR TEXT. 
             // It expects raw input. So pass through a raw string. 
@@ -306,56 +297,56 @@ namespace BugNET.Issues
             // (ie no < or > characters), not the IssueDetail.aspx.cs
 
             var issue = new Issue
-                            {
-                                AffectedMilestoneId = DropAffectedMilestone.SelectedValue,
-                                AffectedMilestoneImageUrl = string.Empty,
-                                AffectedMilestoneName = DropAffectedMilestone.SelectedText,
-                                AssignedDisplayName = DropAssignedTo.SelectedText,
-                                AssignedUserId = Guid.Empty,
-                                AssignedUserName = DropAssignedTo.SelectedValue,
-                                CategoryId = DropCategory.SelectedValue,
-                                CategoryName = DropCategory.SelectedText,
-                                CreatorDisplayName = Security.GetDisplayName(),
-                                CreatorUserId = Guid.Empty,
-                                CreatorUserName = Security.GetUserName(),
-                                DateCreated = DateTime.Now,
-                                Description = DescriptionHtmlEditor.Text.Trim(),
-                                Disabled = false,
-                                DueDate = dueDate,
-                                Estimation = estimation,
-                                Id = IssueId,
-                                IsClosed = false,
-                                IssueTypeId = DropIssueType.SelectedValue,
-                                IssueTypeName = DropIssueType.SelectedText,
-                                IssueTypeImageUrl = string.Empty,
-                                LastUpdate = DateTime.Now,
-                                LastUpdateDisplayName = Security.GetDisplayName(),
-                                LastUpdateUserName = Security.GetUserName(),
-                                MilestoneDueDate = null,
-                                MilestoneId = DropMilestone.SelectedValue,
-                                MilestoneImageUrl = string.Empty,
-                                MilestoneName = DropMilestone.SelectedText,
-                                OwnerDisplayName = DropOwned.SelectedText,
-                                OwnerUserId = Guid.Empty,
-                                OwnerUserName = DropOwned.SelectedValue,
-                                PriorityId = DropPriority.SelectedValue,
-                                PriorityImageUrl = string.Empty,
-                                PriorityName = DropPriority.SelectedText,
-                                Progress = Convert.ToInt32(ProgressSlider.Text),
-                                ProjectCode = string.Empty,
-                                ProjectId = ProjectId,
-                                ProjectName = string.Empty,
-                                ResolutionId = DropResolution.SelectedValue,
-                                ResolutionImageUrl = string.Empty,
-                                ResolutionName = DropResolution.SelectedText,
-                                StatusId = DropStatus.SelectedValue,
-                                StatusImageUrl = string.Empty,
-                                StatusName = DropStatus.SelectedText,
-                                Title = Server.HtmlEncode(TitleTextBox.Text),
-                                TimeLogged = 0,
-                                Visibility = chkPrivate.Checked ? 1 : 0,
-                                Votes = 0
-                            };
+            {
+                AffectedMilestoneId = DropAffectedMilestone.SelectedValue,
+                AffectedMilestoneImageUrl = string.Empty,
+                AffectedMilestoneName = DropAffectedMilestone.SelectedText,
+                AssignedDisplayName = DropAssignedTo.SelectedText,
+                AssignedUserId = Guid.Empty,
+                AssignedUserName = DropAssignedTo.SelectedValue,
+                CategoryId = DropCategory.SelectedValue,
+                CategoryName = DropCategory.SelectedText,
+                CreatorDisplayName = Security.GetDisplayName(),
+                CreatorUserId = Guid.Empty,
+                CreatorUserName = Security.GetUserName(),
+                DateCreated = DateTime.Now,
+                Description = DescriptionHtmlEditor.Text.Trim(),
+                Disabled = false,
+                DueDate = dueDate,
+                Estimation = estimation,
+                Id = IssueId,
+                IsClosed = false,
+                IssueTypeId = DropIssueType.SelectedValue,
+                IssueTypeName = DropIssueType.SelectedText,
+                IssueTypeImageUrl = string.Empty,
+                LastUpdate = DateTime.Now,
+                LastUpdateDisplayName = Security.GetDisplayName(),
+                LastUpdateUserName = Security.GetUserName(),
+                MilestoneDueDate = null,
+                MilestoneId = DropMilestone.SelectedValue,
+                MilestoneImageUrl = string.Empty,
+                MilestoneName = DropMilestone.SelectedText,
+                OwnerDisplayName = DropOwned.SelectedText,
+                OwnerUserId = Guid.Empty,
+                OwnerUserName = DropOwned.SelectedValue,
+                PriorityId = DropPriority.SelectedValue,
+                PriorityImageUrl = string.Empty,
+                PriorityName = DropPriority.SelectedText,
+                Progress = Convert.ToInt32(ProgressSlider.Text),
+                ProjectCode = string.Empty,
+                ProjectId = ProjectId,
+                ProjectName = string.Empty,
+                ResolutionId = DropResolution.SelectedValue,
+                ResolutionImageUrl = string.Empty,
+                ResolutionName = DropResolution.SelectedText,
+                StatusId = DropStatus.SelectedValue,
+                StatusImageUrl = string.Empty,
+                StatusName = DropStatus.SelectedText,
+                Title = Server.HtmlEncode(TitleTextBox.Text),
+                TimeLogged = 0,
+                Visibility = chkPrivate.Checked ? 1 : 0,
+                Votes = 0
+            };
 
             if (!IssueManager.SaveOrUpdate(issue))
             {
@@ -373,6 +364,7 @@ namespace BugNET.Issues
 
             return true;
         }
+
         /// <summary>
         /// Handles the Click event of the lnkUpdate control.
         /// </summary>
@@ -382,10 +374,7 @@ namespace BugNET.Issues
         {
             if (!Page.IsValid) return;
 
-            if (SaveIssue())
-            { 
-                Response.Redirect(string.Format("~/Issues/IssueDetail.aspx?id={0}", IssueId));
-            }
+            if (SaveIssue()) Response.Redirect($"~/Issues/IssueDetail.aspx?id={IssueId}");
         }
 
         /// <summary>
@@ -396,9 +385,9 @@ namespace BugNET.Issues
         protected void VoteButtonClick(object sender, EventArgs e)
         {
             if (!User.Identity.IsAuthenticated)
-                Response.Redirect(string.Format("~/Account/Login.aspx?ReturnUrl={0}", Server.UrlEncode(Request.RawUrl)));
+                Response.Redirect($"~/Account/Login.aspx?ReturnUrl={Server.UrlEncode(Request.RawUrl)}");
 
-            var vote = new IssueVote { IssueId = IssueId, VoteUsername = Security.GetUserName() };
+            var vote = new IssueVote {IssueId = IssueId, VoteUsername = Security.GetUserName()};
             IssueVoteManager.SaveOrUpdate(vote);
 
             var count = Convert.ToInt32(IssueVoteCount.Text) + 1;
@@ -435,10 +424,11 @@ namespace BugNET.Issues
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void CancelButtonClick(Object s, EventArgs e)
+        protected void CancelButtonClick(object s, EventArgs e)
         {
             ReturnToPreviousPage();
         }
+
         #endregion
 
         #region Private Methods
@@ -476,10 +466,14 @@ namespace BugNET.Issues
             if (User.Identity.IsAuthenticated)
             {
                 //enable editing of description if user has permission or in admin role
-                if ((UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole) || UserManager.HasPermission(ProjectId, Common.Permission.EditIssueDescription.ToString())) && !DescriptionHtmlEditor.Visible)
+                if ((UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole) ||
+                     UserManager.HasPermission(ProjectId, Common.Permission.EditIssueDescription.ToString())) &&
+                    !DescriptionHtmlEditor.Visible)
                     EditDescription.Visible = true;
 
-                if ((UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole) || UserManager.HasPermission(ProjectId, Common.Permission.EditIssueTitle.ToString())) && !TitleTextBox.Visible)
+                if ((UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole) ||
+                     UserManager.HasPermission(ProjectId, Common.Permission.EditIssueTitle.ToString())) &&
+                    !TitleTextBox.Visible)
                     EditTitle.Visible = true;
 
                 //edit issue permission check
@@ -503,13 +497,12 @@ namespace BugNET.Issues
                 //remove closed status' if user does not have access
                 if (!UserManager.HasPermission(ProjectId, Common.Permission.CloseIssue.ToString()))
                 {
-                    var stat = (DropDownList)DropStatus.FindControl("dropStatus");
+                    var stat = (DropDownList) DropStatus.FindControl("dropStatus");
                     var status = StatusManager.GetByProjectId(ProjectId).FindAll(st => st.IsClosedState);
 
                     foreach (var s in status)
                         stat.Items.Remove(stat.Items.FindByValue(s.Id.ToString()));
                 }
-
             }
             else
             {
@@ -544,6 +537,7 @@ namespace BugNET.Issues
             txtEstimation.Enabled = false;
             ProgressSlider.Visible = false;
         }
+
         #endregion
 
         #region Properties
@@ -552,10 +546,10 @@ namespace BugNET.Issues
         /// Gets or sets the issue id.
         /// </summary>
         /// <value>The issue id.</value>
-        int IssueId
+        private int IssueId
         {
-            get { return ViewState.Get("IssueId", 0); }
-            set { ViewState.Set("IssueId", value); }
+            get => ViewState.Get("IssueId", 0);
+            set => ViewState.Set("IssueId", value);
         }
 
         #endregion

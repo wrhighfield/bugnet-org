@@ -7,20 +7,22 @@ using System.Configuration;
 using System.Configuration.Provider;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Text;
 using System.Web.Hosting;
 using System.Web.Profile;
 
-namespace Altairis.Web.Security {
-
-    [Obsolete("This class is no longer supported and developed. Use SqlTableProfileProvider instead - http://code.msdn.microsoft.com/aspnet4profile")]
-    public class SimpleSqlProfileProvider : ProfileProvider {
-
-        private const string CustomProviderDataFormat = "^[a-zA-Z0-9_]+;[a-zA-Z0-9_]+(;[0-9]{1,})?$";
+namespace Altairis.Web.Security
+{
+    [Obsolete(
+        "This class is no longer supported and developed. Use SqlTableProfileProvider instead - http://code.msdn.microsoft.com/aspnet4profile")]
+    public class SimpleSqlProfileProvider : ProfileProvider
+    {
+        private const string CUSTOM_PROVIDER_DATA_FORMAT = "^[a-zA-Z0-9_]+;[a-zA-Z0-9_]+(;[0-9]{1,})?$";
 
         // Initialization and configuration
 
-        private string applicationName, connectionString, tableName, keyColumnName, lastUpdateColumnName;
+        private string applicationName, connectionString;
 
         private System.Collections.Specialized.NameValueCollection configuration;
 
@@ -32,11 +34,13 @@ namespace Altairis.Web.Security {
         /// <exception cref="T:System.ArgumentNullException">The name of the provider is null.</exception>
         /// <exception cref="T:System.ArgumentException">The name of the provider has a length of zero.</exception>
         /// <exception cref="T:System.InvalidOperationException">An attempt is made to call <see cref="M:System.Configuration.Provider.ProviderBase.Initialize(System.String,System.Collections.Specialized.NameValueCollection)"/> on a provider after the provider has already been initialized.</exception>
-        public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config) {
+        public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
+        {
             // Validate arguments
-            if (config == null) throw new ArgumentNullException("config");
+            if (config == null) throw new ArgumentNullException(nameof(config));
             if (string.IsNullOrEmpty(name)) name = "SimpleSqlProfileProvider";
-            if (String.IsNullOrEmpty(config["description"])) {
+            if (string.IsNullOrEmpty(config["description"]))
+            {
                 config.Remove("description");
                 config.Add("description", "Simple SQL profile provider");
             }
@@ -45,22 +49,23 @@ namespace Altairis.Web.Security {
             base.Initialize(name, config);
 
             // Basic init
-            this.configuration = config;
-            this.applicationName = GetConfig("applicationName", "");
+            configuration = config;
+            applicationName = GetConfig("applicationName", "");
 
             // Initialize connection string
-            ConnectionStringSettings ConnectionStringSettings = ConfigurationManager.ConnectionStrings[config["connectionStringName"]];
-            if (ConnectionStringSettings == null || ConnectionStringSettings.ConnectionString.Trim() == "") throw new ProviderException("Connection string cannot be blank.");
-            this.connectionString = ConnectionStringSettings.ConnectionString;
+            var connectionStringSettings = ConfigurationManager.ConnectionStrings[config["connectionStringName"]];
+            if (connectionStringSettings == null || connectionStringSettings.ConnectionString.Trim() == "")
+                throw new ProviderException("Connection string cannot be blank.");
+            connectionString = connectionStringSettings.ConnectionString;
 
             // Initialize table name
-            this.tableName = GetConfig("tableName", "Profiles");
+            TableName = GetConfig("tableName", "Profiles");
 
             // Initialize key column name
-            this.keyColumnName = GetConfig("keyColumnName", "UserName");
+            KeyColumnName = GetConfig("keyColumnName", "UserName");
 
             // Initialize last update column name
-            this.lastUpdateColumnName = GetConfig("lastUpdateColumnName", "LastUpdate");
+            LastUpdateColumnName = GetConfig("lastUpdateColumnName", "LastUpdate");
         }
 
         /// <summary>
@@ -68,34 +73,29 @@ namespace Altairis.Web.Security {
         /// </summary>
         /// <value></value>
         /// <returns>A <see cref="T:System.String"/> that contains the application's shortened name, which does not contain a full path or extension, for example, SimpleAppSettings.</returns>
-        public override string ApplicationName {
-            get { return this.applicationName; }
-            set { this.applicationName = value; }
+        public override string ApplicationName
+        {
+            get => applicationName;
+            set => applicationName = value;
         }
 
         /// <summary>
         /// Gets the name of the database table to store profile data into.
         /// </summary>
         /// <value>The name of the table.</value>
-        public string TableName {
-            get { return tableName; }
-        }
+        public string TableName { get; private set; }
 
         /// <summary>
         /// Gets the name of the table column used as primary search key (user name).
         /// </summary>
         /// <value>The name of the key column.</value>
-        public string KeyColumnName {
-            get { return this.keyColumnName; }
-        }
+        public string KeyColumnName { get; private set; }
 
         /// <summary>
         /// Gets the name of the table column used for storing last update time.
         /// </summary>
         /// <value>The name of the last update time column.</value>
-        public string LastUpdateColumnName {
-            get { return this.lastUpdateColumnName; }
-        }
+        public string LastUpdateColumnName { get; private set; }
 
         // Profile provider implementation
 
@@ -106,25 +106,31 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// The number of profiles deleted from the data source.
         /// </returns>
-        public override int DeleteProfiles(string[] usernames) {
+        public override int DeleteProfiles(string[] usernames)
+        {
             if (usernames == null) throw new ArgumentNullException();
             if (usernames.Length == 0) return 0; // no work here
 
-            int count = 0;
-            try {
+            var count = 0;
+            try
+            {
                 using (HostingEnvironment.Impersonate())
-                using (SqlConnection db = OpenDatabase())
-                using (SqlCommand cmd = new SqlCommand(this.ExpandCommand("DELETE FROM $Profiles WHERE $UserName=@UserName"), db)) {
+                using (var db = OpenDatabase())
+                using (var cmd = new SqlCommand(ExpandCommand("DELETE FROM $Profiles WHERE $UserName=@UserName"), db))
+                {
                     cmd.Parameters.Add("@UserName", SqlDbType.VarChar, 100);
-                    foreach (string userName in usernames) {
+                    foreach (var userName in usernames)
+                    {
                         cmd.Parameters["@UserName"].Value = userName;
                         count += cmd.ExecuteNonQuery();
                     }
                 }
             }
-            catch {
+            catch
+            {
                 throw;
             }
+
             return count;
         }
 
@@ -135,25 +141,31 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// The number of profiles deleted from the data source.
         /// </returns>
-        public override int DeleteProfiles(ProfileInfoCollection profiles) {
+        public override int DeleteProfiles(ProfileInfoCollection profiles)
+        {
             if (profiles == null) throw new ArgumentNullException();
             if (profiles.Count == 0) return 0; // no work here
 
-            int count = 0;
-            try {
+            var count = 0;
+            try
+            {
                 using (HostingEnvironment.Impersonate())
-                using (SqlConnection db = OpenDatabase())
-                using (SqlCommand cmd = new SqlCommand(this.ExpandCommand("DELETE FROM $Profiles WHERE $UserName=@UserName"), db)) {
+                using (var db = OpenDatabase())
+                using (var cmd = new SqlCommand(ExpandCommand("DELETE FROM $Profiles WHERE $UserName=@UserName"), db))
+                {
                     cmd.Parameters.Add("@UserName", SqlDbType.VarChar, 100);
-                    foreach (ProfileInfo pi in profiles) {
+                    foreach (ProfileInfo pi in profiles)
+                    {
                         cmd.Parameters["@UserName"].Value = pi.UserName;
                         count += cmd.ExecuteNonQuery();
                     }
                 }
             }
-            catch {
+            catch
+            {
                 throw;
             }
+
             return count;
         }
 
@@ -165,60 +177,63 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// A <see cref="T:System.Configuration.SettingsPropertyValueCollection"/> containing the values for the specified settings property group.
         /// </returns>
-        public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context, SettingsPropertyCollection collection) {
-            SettingsPropertyValueCollection svc = new SettingsPropertyValueCollection();
+        public override SettingsPropertyValueCollection GetPropertyValues(SettingsContext context,
+            SettingsPropertyCollection collection)
+        {
+            var svc = new SettingsPropertyValueCollection();
 
             // Validate arguments
-            if (collection == null || collection.Count < 1 || context == null) return svc;
-            string userName = (string)context["UserName"];
-            if (String.IsNullOrEmpty(userName)) return svc;
+            if (collection.Count < 1) return svc;
+            var userName = (string) context["UserName"];
+            if (string.IsNullOrEmpty(userName)) return svc;
 
-            using (DataTable dt = new DataTable()) {
-                try {
-                    // Get profile row from db
-                    using (HostingEnvironment.Impersonate())
-                    using (SqlConnection db = OpenDatabase())
-                    using (SqlCommand cmd = new SqlCommand(this.ExpandCommand("SELECT * FROM $Profiles WHERE $UserName=@UserName"), db)) {
-                        cmd.Parameters.Add("@UserName", SqlDbType.VarChar, 100).Value = userName;
-                        using (SqlDataAdapter da = new SqlDataAdapter(cmd)) da.Fill(dt);
+            using (var dt = new DataTable())
+            {
+                // Get profile row from db
+                using (HostingEnvironment.Impersonate())
+                using (var db = OpenDatabase())
+                using (var cmd = new SqlCommand(ExpandCommand("SELECT * FROM $Profiles WHERE $UserName=@UserName"), db))
+                {
+                    cmd.Parameters.Add("@UserName", SqlDbType.VarChar, 100).Value = userName;
+                    using (var da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
                     }
-                }
-                catch {
-                    throw;
                 }
 
                 // Process properties
-                foreach (SettingsProperty prop in collection) {
-                    SettingsPropertyValue value = new SettingsPropertyValue(prop);
-                    if (dt.Rows.Count == 0) {
-                        if(value.Property.PropertyType == typeof(System.DateTime))
-                        { 
-                            value.PropertyValue = null; 
-                        }
-                        else
-                        {
-                            value.PropertyValue = System.Convert.ChangeType(value.Property.DefaultValue, value.Property.PropertyType);
-                        }
+                foreach (SettingsProperty prop in collection)
+                {
+                    var value = new SettingsPropertyValue(prop);
+                    if (dt.Rows.Count == 0)
+                    {
+                        value.PropertyValue = value.Property.PropertyType == typeof(DateTime)
+                            ? null
+                            : Convert.ChangeType(value.Property.DefaultValue, value.Property.PropertyType);
 
                         value.IsDirty = false;
                         value.Deserialized = true;
                     }
-                    else {
-                        string columnName = GetPropertyMapInfo(prop).ColumnName; if (dt.Columns.IndexOf(columnName) == -1) throw new ProviderException(string.Format("Column '{0}' required for property '{1}' was not found in table '{2}'.", columnName, prop.Name, this.TableName));
-                        object columnValue = dt.Rows[0][columnName];
+                    else
+                    {
+                        var columnName = GetPropertyMapInfo(prop).ColumnName;
+                        if (dt.Columns.IndexOf(columnName) == -1)
+                            throw new ProviderException(
+                                $"Column '{columnName}' required for property '{prop.Name}' was not found in table '{TableName}'.");
+                        var columnValue = dt.Rows[0][columnName];
 
                         value.IsDirty = false;
                         value.Deserialized = true;
-                        if (!(columnValue is DBNull || columnValue == null)) {
+                        if (!(columnValue is DBNull || columnValue == null))
                             value.PropertyValue = columnValue;
-                        }
-                        else {
-                        	value.PropertyValue = null;
-                        }
+                        else
+                            value.PropertyValue = null;
                     }
+
                     svc.Add(value);
                 }
             }
+
             return svc;
         }
 
@@ -227,26 +242,31 @@ namespace Altairis.Web.Security {
         /// </summary>
         /// <param name="context">A <see cref="T:System.Configuration.SettingsContext"/> describing the current application usage.</param>
         /// <param name="collection">A <see cref="T:System.Configuration.SettingsPropertyValueCollection"/> representing the group of property settings to set.</param>
-        public override void SetPropertyValues(SettingsContext context, SettingsPropertyValueCollection collection) {
+        public override void SetPropertyValues(SettingsContext context, SettingsPropertyValueCollection collection)
+        {
             // Validate arguments
-            if (!(bool)context["IsAuthenticated"]) throw new NotSupportedException("This provider does not support anonymous profiles");
-            string userName = (string)context["UserName"];
-            if (string.IsNullOrEmpty(userName) || collection.Count == 0 || !this.HasDirtyProperties(collection)) return; // no work here
+            if (!(bool) context["IsAuthenticated"])
+                throw new NotSupportedException("This provider does not support anonymous profiles");
+            var userName = (string) context["UserName"];
+            if (string.IsNullOrEmpty(userName) || collection.Count == 0 || !HasDirtyProperties(collection))
+                return; // no work here
 
             // Construct command
-            using (SqlCommand cmd = new SqlCommand()) {
-                StringBuilder insertCommandText1 = new StringBuilder("INSERT INTO $Profiles ($UserName, $LastUpdate");
-                StringBuilder insertCommandText2 = new StringBuilder(" VALUES (@UserName, GETDATE()");
-                StringBuilder updateCommandText = new StringBuilder("UPDATE $Profiles SET $LastUpdate=GETDATE()");
+            using (var cmd = new SqlCommand())
+            {
+                var insertCommandText1 = new StringBuilder("INSERT INTO $Profiles ($UserName, $LastUpdate");
+                var insertCommandText2 = new StringBuilder(" VALUES (@UserName, GETDATE()");
+                var updateCommandText = new StringBuilder("UPDATE $Profiles SET $LastUpdate=GETDATE()");
                 cmd.Parameters.Add("@UserName", SqlDbType.VarChar, 100).Value = userName;
 
                 // Cycle trough collection
-                int i = 0;
-                foreach (SettingsPropertyValue propVal in collection) {
-                    PropertyMapInfo pmi = GetPropertyMapInfo(propVal.Property);
+                var i = 0;
+                foreach (SettingsPropertyValue propVal in collection)
+                {
+                    var pmi = GetPropertyMapInfo(propVal.Property);
 
                     // Always add parameter
-                    SqlParameter p = new SqlParameter("@Param" + i, pmi.Type);
+                    var p = new SqlParameter("@Param" + i, pmi.Type);
                     if (pmi.Length != 0) p.Size = pmi.Length;
                     if (propVal.Deserialized && propVal.PropertyValue == null) p.Value = DBNull.Value;
                     else p.Value = propVal.PropertyValue;
@@ -266,18 +286,16 @@ namespace Altairis.Web.Security {
                 insertCommandText1.Append(")");
                 insertCommandText2.Append(")");
                 updateCommandText.Append(" WHERE $UserName=@UserName");
-                cmd.CommandText = this.ExpandCommand("IF EXISTS (SELECT * FROM $Profiles WHERE $UserName=@UserName) BEGIN " + updateCommandText.ToString() + " END ELSE BEGIN " + insertCommandText1.ToString() + insertCommandText2.ToString() + " END");
+                cmd.CommandText = ExpandCommand("IF EXISTS (SELECT * FROM $Profiles WHERE $UserName=@UserName) BEGIN " +
+                                                updateCommandText + " END ELSE BEGIN " + insertCommandText1 +
+                                                insertCommandText2 + " END");
 
                 // Execute command
-                try {
-                    using (HostingEnvironment.Impersonate())
-                    using (SqlConnection db = OpenDatabase()) {
-                        cmd.Connection = db;
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                catch (Exception) {
-                    throw;
+                using (HostingEnvironment.Impersonate())
+                using (var db = OpenDatabase())
+                {
+                    cmd.Connection = db;
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
@@ -293,44 +311,60 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// A <see cref="T:System.Web.Profile.ProfileInfoCollection"/> containing user-profile information for profiles where the user name matches the supplied <paramref name="usernameToMatch"/> parameter.
         /// </returns>
-        public override ProfileInfoCollection FindProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, int pageIndex, int pageSize, out int totalRecords) {
+        public override ProfileInfoCollection FindProfilesByUserName(ProfileAuthenticationOption authenticationOption,
+            string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
+        {
             // Validate arguments
-            if (pageIndex < 0) throw new ArgumentOutOfRangeException("pageIndex");
-            if (pageSize < 1) throw new ArgumentOutOfRangeException("pageSize");
-            if (authenticationOption == ProfileAuthenticationOption.Anonymous) {
+            if (pageIndex < 0) throw new ArgumentOutOfRangeException(nameof(pageIndex));
+            if (pageSize < 1) throw new ArgumentOutOfRangeException(nameof(pageSize));
+            if (authenticationOption == ProfileAuthenticationOption.Anonymous)
+            {
                 // Anonymous profiles not supported
                 totalRecords = 0;
                 return new ProfileInfoCollection();
             }
 
-            using (DataTable dt = new DataTable()) {
+            using (var dt = new DataTable())
+            {
                 // Prepare sql command
-                using (SqlConnection db = this.OpenDatabase())
-                using (SqlCommand cmd = new SqlCommand("", db)) {
-                    if (string.IsNullOrEmpty(usernameToMatch)) {
-                        cmd.CommandText = this.ExpandCommand("SELECT $UserName AS UserName, $LastUpdate AS LastUpdate FROM $Profiles WHERE $UserName=@UserName ORDER BY $UserName");
+                using (var db = OpenDatabase())
+                using (var cmd = new SqlCommand("", db))
+                {
+                    if (string.IsNullOrEmpty(usernameToMatch))
+                    {
+                        cmd.CommandText =
+                            ExpandCommand(
+                                "SELECT $UserName AS UserName, $LastUpdate AS LastUpdate FROM $Profiles WHERE $UserName=@UserName ORDER BY $UserName");
                     }
-                    else {
-                        cmd.CommandText = this.ExpandCommand("SELECT $UserName AS UserName, $LastUpdate AS LastUpdate FROM $Profiles WHERE $UserName=@UserName ORDER BY $UserName");
+                    else
+                    {
+                        cmd.CommandText =
+                            ExpandCommand(
+                                "SELECT $UserName AS UserName, $LastUpdate AS LastUpdate FROM $Profiles WHERE $UserName=@UserName ORDER BY $UserName");
                         cmd.Parameters.Add("@UserName", SqlDbType.VarChar, 100).Value = usernameToMatch;
                     }
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd)) da.Fill(dt);
+
+                    using (var da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
                 }
 
                 // Prepare paging
-                ProfileInfoCollection pic = new ProfileInfoCollection();
+                var pic = new ProfileInfoCollection();
                 totalRecords = dt.Rows.Count;
-                int minIndex = pageIndex * pageSize; if (minIndex > totalRecords - 1) return pic;
-                int maxIndex = minIndex + pageSize - 1; if (maxIndex > totalRecords - 1) maxIndex = totalRecords - 1;
+                var minIndex = pageIndex * pageSize;
+                if (minIndex > totalRecords - 1) return pic;
+                var maxIndex = minIndex + pageSize - 1;
+                if (maxIndex > totalRecords - 1) maxIndex = totalRecords - 1;
 
                 // Populate collection from data table
-                for (int i = minIndex; i <= maxIndex; i++) {
-                    pic.Add(new ProfileInfo(System.Convert.ToString(dt.Rows[i]["UserName"]),
-                            false,
-                            DateTime.Now,
-                            System.Convert.ToDateTime(dt.Rows[i]["LastUpdate"]),
-                            0));
-                }
+                for (var i = minIndex; i <= maxIndex; i++)
+                    pic.Add(new ProfileInfo(Convert.ToString(dt.Rows[i]["UserName"]),
+                        false,
+                        DateTime.Now,
+                        Convert.ToDateTime(dt.Rows[i]["LastUpdate"]),
+                        0));
                 return pic;
             }
         }
@@ -345,13 +379,16 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// A <see cref="T:System.Web.Profile.ProfileInfoCollection"/> containing user-profile information for all profiles in the data source.
         /// </returns>
-        public override ProfileInfoCollection GetAllProfiles(ProfileAuthenticationOption authenticationOption, int pageIndex, int pageSize, out int totalRecords) {
+        public override ProfileInfoCollection GetAllProfiles(ProfileAuthenticationOption authenticationOption,
+            int pageIndex, int pageSize, out int totalRecords)
+        {
             return FindProfilesByUserName(authenticationOption, string.Empty, pageIndex, pageSize, out totalRecords);
         }
 
         // Private support functions
 
-        private struct PropertyMapInfo {
+        private struct PropertyMapInfo
+        {
             public string ColumnName;
             public SqlDbType Type;
             public int Length;
@@ -362,23 +399,33 @@ namespace Altairis.Web.Security {
         /// </summary>
         /// <param name="prop">The property.</param>
         /// <returns></returns>
-        private PropertyMapInfo GetPropertyMapInfo(SettingsProperty prop) {
+        private PropertyMapInfo GetPropertyMapInfo(SettingsProperty prop)
+        {
             // Perform general validation
             if (prop == null) throw new ArgumentNullException();
-            string cpd = System.Convert.ToString(prop.Attributes["CustomProviderData"]);
-            if (string.IsNullOrEmpty(cpd)) throw new ProviderException(string.Format("CustomProviderData is missing or empty for property {0}.", prop.Name));
-            if (!System.Text.RegularExpressions.Regex.IsMatch(cpd, CustomProviderDataFormat)) throw new ProviderException(string.Format("Invalid format of CustomProviderData for property {0}.", prop.Name));
-            string[] parts = cpd.Split(';');
+            var cpd = Convert.ToString(prop.Attributes["CustomProviderData"]);
+            if (string.IsNullOrEmpty(cpd))
+                throw new ProviderException(
+                    $"CustomProviderData is missing or empty for property {prop.Name}.");
+            if (!System.Text.RegularExpressions.Regex.IsMatch(cpd, CUSTOM_PROVIDER_DATA_FORMAT))
+                throw new ProviderException(
+                    $"Invalid format of CustomProviderData for property {prop.Name}.");
+            var parts = cpd.Split(';');
 
-            PropertyMapInfo pmi = new PropertyMapInfo();
-            pmi.ColumnName = parts[0];
-            try {
-                pmi.Type = (SqlDbType)Enum.Parse(typeof(SqlDbType), parts[1], true);
+            var pmi = new PropertyMapInfo
+            {
+                ColumnName = parts[0]
+            };
+            try
+            {
+                pmi.Type = (SqlDbType) Enum.Parse(typeof(SqlDbType), parts[1], true);
             }
-            catch {
-                throw new ProviderException(string.Format("SqlDbType '{0}' specified for property {1} is invalid.", parts[1], prop.Name));
+            catch
+            {
+                throw new ProviderException($"SqlDbType '{parts[1]}' specified for property {prop.Name} is invalid.");
             }
-            if (parts.Length == 3) pmi.Length = System.Convert.ToInt32(parts[2]);
+
+            if (parts.Length == 3) pmi.Length = Convert.ToInt32(parts[2]);
             return pmi;
         }
 
@@ -389,11 +436,9 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// 	<c>true</c> if collection has dirty properties; otherwise, <c>false</c>.
         /// </returns>
-        private bool HasDirtyProperties(SettingsPropertyValueCollection props) {
-            foreach (SettingsPropertyValue prop in props) {
-                if (prop.IsDirty) return true;
-            }
-            return false;
+        private static bool HasDirtyProperties(SettingsPropertyValueCollection props)
+        {
+            return props.Cast<SettingsPropertyValue>().Any(prop => prop.IsDirty);
         }
 
         /// <summary>
@@ -401,10 +446,11 @@ namespace Altairis.Web.Security {
         /// </summary>
         /// <param name="sql">The SQL command text.</param>
         /// <returns>Expanded SQL command text.</returns>
-        private string ExpandCommand(string sql) {
-            sql = sql.Replace("$Profiles", this.TableName);
-            sql = sql.Replace("$UserName", this.KeyColumnName);
-            sql = sql.Replace("$LastUpdate", this.LastUpdateColumnName);
+        private string ExpandCommand(string sql)
+        {
+            sql = sql.Replace("$Profiles", TableName);
+            sql = sql.Replace("$UserName", KeyColumnName);
+            sql = sql.Replace("$LastUpdate", LastUpdateColumnName);
             return sql;
         }
 
@@ -412,8 +458,9 @@ namespace Altairis.Web.Security {
         /// Opens the database connection.
         /// </summary>
         /// <returns></returns>
-        private SqlConnection OpenDatabase() {
-            SqlConnection db = new SqlConnection(this.connectionString);
+        private SqlConnection OpenDatabase()
+        {
+            var db = new SqlConnection(connectionString);
             db.Open();
             return db;
         }
@@ -424,12 +471,13 @@ namespace Altairis.Web.Security {
         /// <param name="name">The configuration property name.</param>
         /// <param name="defaultValue">The default value.</param>
         /// <returns></returns>
-        private string GetConfig(string name, string defaultValue) {
+        private string GetConfig(string name, string defaultValue)
+        {
             // Validate input arguments
             if (string.IsNullOrEmpty(name)) throw new ArgumentNullException("Name");
 
             // Get value from configuration
-            string Value = this.configuration[name];
+            var Value = configuration[name];
             if (string.IsNullOrEmpty(Value)) Value = defaultValue;
             return Value;
         }
@@ -444,7 +492,9 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// The number of profiles deleted from the data source.
         /// </returns>
-        public override int DeleteInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate) {
+        public override int DeleteInactiveProfiles(ProfileAuthenticationOption authenticationOption,
+            DateTime userInactiveSinceDate)
+        {
             throw new NotImplementedException();
         }
 
@@ -460,7 +510,10 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// A <see cref="T:System.Web.Profile.ProfileInfoCollection"/> containing user profile information for inactive profiles where the user name matches the supplied <paramref name="usernameToMatch"/> parameter.
         /// </returns>
-        public override ProfileInfoCollection FindInactiveProfilesByUserName(ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords) {
+        public override ProfileInfoCollection FindInactiveProfilesByUserName(
+            ProfileAuthenticationOption authenticationOption, string usernameToMatch, DateTime userInactiveSinceDate,
+            int pageIndex, int pageSize, out int totalRecords)
+        {
             throw new NotImplementedException();
         }
 
@@ -475,7 +528,9 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// A <see cref="T:System.Web.Profile.ProfileInfoCollection"/> containing user-profile information about the inactive profiles.
         /// </returns>
-        public override ProfileInfoCollection GetAllInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords) {
+        public override ProfileInfoCollection GetAllInactiveProfiles(ProfileAuthenticationOption authenticationOption,
+            DateTime userInactiveSinceDate, int pageIndex, int pageSize, out int totalRecords)
+        {
             throw new NotImplementedException();
         }
 
@@ -487,11 +542,12 @@ namespace Altairis.Web.Security {
         /// <returns>
         /// The number of profiles in which the last activity date occurred on or before the specified date.
         /// </returns>
-        public override int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption, DateTime userInactiveSinceDate) {
+        public override int GetNumberOfInactiveProfiles(ProfileAuthenticationOption authenticationOption,
+            DateTime userInactiveSinceDate)
+        {
             throw new NotImplementedException();
         }
 
         #endregion
-
     }
 }

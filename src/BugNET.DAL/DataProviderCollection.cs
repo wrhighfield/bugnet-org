@@ -6,9 +6,6 @@ namespace BugNET.DAL
     {
         // Return an instance of DataProvider  
         // for a specified provider name  
-        new public DataProvider this[string name]
-        {
-            get { return (DataProvider)base[name]; }
-        }  
+        public new DataProvider this[string name] => (DataProvider) base[name];
     }
 }

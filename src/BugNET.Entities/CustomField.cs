@@ -1,4 +1,3 @@
-using System;
 using System.Web.UI.WebControls;
 using BugNET.Common;
 
@@ -13,8 +12,8 @@ namespace BugNET.Entities
 
         public CustomField()
         {
-            Name = String.Empty;
-            Value = String.Empty;
+            Name = string.Empty;
+            Value = string.Empty;
         }
 
         #endregion

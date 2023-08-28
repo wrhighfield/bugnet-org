@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class StatusManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -18,8 +19,10 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(Status entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save status, the project id is invalid");
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The status name cannot be empty or null");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save status, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The status name cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateStatus(entity);
@@ -65,8 +68,10 @@ namespace BugNET.BLL
             if (canBeDeleted)
                 return DataProviderManager.Provider.DeleteStatus(entity.Id);
 
-            cannotDeleteMessage = ResourceStrings.GetGlobalResource(GlobalResources.Exceptions, "DeleteItemAssignedToIssueError");
-            cannotDeleteMessage = string.Format(cannotDeleteMessage, entity.Name, ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Status", "status").ToLower());
+            cannotDeleteMessage =
+                ResourceStrings.GetGlobalResource(GlobalResources.Exceptions, "DeleteItemAssignedToIssueError");
+            cannotDeleteMessage = string.Format(cannotDeleteMessage, entity.Name,
+                ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Status", "status").ToLower());
 
             return false;
         }

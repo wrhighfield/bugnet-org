@@ -1,7 +1,7 @@
 ﻿using System;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
@@ -14,35 +14,37 @@ namespace BugNET.Administration.Host.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-          
         }
 
         #region IEditHostSettingControl Members
-
 
         /// <summary>
         /// Updates this instance.
         /// </summary>
         public bool Update()
-        {         
+        {
             HostSettingManager.UpdateHostSetting(HostSettingNames.UserAccountSource, UserAccountSource.SelectedValue);
             HostSettingManager.UpdateHostSetting(HostSettingNames.ADUserName, ADUserName.Text);
             HostSettingManager.UpdateHostSetting(HostSettingNames.ADPath, ADPath.Text);
             HostSettingManager.UpdateHostSetting(HostSettingNames.UserRegistration, UserRegistration.SelectedValue);
             HostSettingManager.UpdateHostSetting(HostSettingNames.AnonymousAccess, AnonymousAccess.SelectedValue);
             HostSettingManager.UpdateHostSetting(HostSettingNames.ADPassword, ADPassword.Text);
-            HostSettingManager.UpdateHostSetting(HostSettingNames.TwitterAuthentication, TwitterAuthentication.Checked.ToString());
+            HostSettingManager.UpdateHostSetting(HostSettingNames.TwitterAuthentication,
+                TwitterAuthentication.Checked.ToString());
             HostSettingManager.UpdateHostSetting(HostSettingNames.TwitterConsumerKey, TwitterConsumerKey.Text);
             HostSettingManager.UpdateHostSetting(HostSettingNames.TwitterConsumerSecret, TwitterConsumerSecret.Text);
-            HostSettingManager.UpdateHostSetting(HostSettingNames.FacebookAuthentication, FacebookAuthentication.Checked.ToString());
+            HostSettingManager.UpdateHostSetting(HostSettingNames.FacebookAuthentication,
+                FacebookAuthentication.Checked.ToString());
             HostSettingManager.UpdateHostSetting(HostSettingNames.FacebookAppId, FacebookAppId.Text);
             HostSettingManager.UpdateHostSetting(HostSettingNames.FacebookAppSecret, FacebookAppSecret.Text);
-            HostSettingManager.UpdateHostSetting(HostSettingNames.GoogleAuthentication, GoogleAuthentication.Checked.ToString());
+            HostSettingManager.UpdateHostSetting(HostSettingNames.GoogleAuthentication,
+                GoogleAuthentication.Checked.ToString());
             HostSettingManager.UpdateHostSetting(HostSettingNames.GoogleClientId, GoogleClientId.Text);
             HostSettingManager.UpdateHostSetting(HostSettingNames.GoogleClientSecret, GoogleClientSecret.Text);
             HostSettingManager.UpdateHostSetting(HostSettingNames.MicrosoftClientId, MicrosoftClientId.Text);
             HostSettingManager.UpdateHostSetting(HostSettingNames.MicrosoftClientSecret, MicrosoftClientSecret.Text);
-            HostSettingManager.UpdateHostSetting(HostSettingNames.MicrosoftAuthentication, MicrosoftAuthentication.Checked.ToString());
+            HostSettingManager.UpdateHostSetting(HostSettingNames.MicrosoftAuthentication,
+                MicrosoftAuthentication.Checked.ToString());
 
             return true;
         }
@@ -55,12 +57,14 @@ namespace BugNET.Administration.Host.UserControls
             UserAccountSource.SelectedValue = HostSettingManager.Get(HostSettingNames.UserAccountSource);
             ADUserName.Text = HostSettingManager.Get(HostSettingNames.ADUserName);
             ADPath.Text = HostSettingManager.Get(HostSettingNames.ADPath);
-            UserRegistration.SelectedValue = HostSettingManager.Get(HostSettingNames.UserRegistration,(int)Common.UserRegistration.Public).ToString();
+            UserRegistration.SelectedValue = HostSettingManager
+                .Get(HostSettingNames.UserRegistration, (int) Common.UserRegistration.Public).ToString();
             AnonymousAccess.SelectedValue = HostSettingManager.Get(HostSettingNames.AnonymousAccess, true).ToString();
             ADPassword.Attributes.Add("value", HostSettingManager.Get(HostSettingNames.ADPassword));
             TwitterAuthentication.Checked = HostSettingManager.Get(HostSettingNames.TwitterAuthentication, false);
             TwitterConsumerKey.Text = HostSettingManager.Get(HostSettingNames.TwitterConsumerKey);
-            TwitterConsumerSecret.Attributes.Add("value", HostSettingManager.Get(HostSettingNames.TwitterConsumerSecret));
+            TwitterConsumerSecret.Attributes.Add("value",
+                HostSettingManager.Get(HostSettingNames.TwitterConsumerSecret));
             FacebookAuthentication.Checked = HostSettingManager.Get(HostSettingNames.FacebookAuthentication, false);
             FacebookAppId.Text = HostSettingManager.Get(HostSettingNames.FacebookAppId);
             FacebookAppSecret.Attributes.Add("value", HostSettingManager.Get(HostSettingNames.FacebookAppSecret));
@@ -69,14 +73,12 @@ namespace BugNET.Administration.Host.UserControls
             GoogleClientSecret.Attributes.Add("value", HostSettingManager.Get(HostSettingNames.GoogleClientSecret));
             MicrosoftAuthentication.Checked = HostSettingManager.Get(HostSettingNames.MicrosoftAuthentication, false);
             MicrosoftClientId.Text = HostSettingManager.Get(HostSettingNames.MicrosoftClientId);
-            MicrosoftClientSecret.Attributes.Add("value", HostSettingManager.Get(HostSettingNames.MicrosoftClientSecret));
+            MicrosoftClientSecret.Attributes.Add("value",
+                HostSettingManager.Get(HostSettingNames.MicrosoftClientSecret));
             ShowHideUserAccountSourceCredentials();
         }
 
-        public bool ShowSaveButton
-        {
-            get { return true; }
-        }
+        public bool ShowSaveButton => true;
 
         #endregion
 
@@ -88,7 +90,6 @@ namespace BugNET.Administration.Host.UserControls
         protected void UserAccountSource_SelectedIndexChanged(object sender, EventArgs e)
         {
             ShowHideUserAccountSourceCredentials();
-
         }
 
         /// <summary>

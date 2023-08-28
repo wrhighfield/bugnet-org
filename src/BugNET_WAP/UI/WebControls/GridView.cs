@@ -5,7 +5,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using BugNET.Common;
 
-namespace BugNET.UserInterfaceLayer.WebControls
+namespace BugNET.UI.WebControls
 {
     /// <summary>
     /// 
@@ -18,54 +18,58 @@ namespace BugNET.UserInterfaceLayer.WebControls
         /// </summary>
         private static readonly object EventTotalRowCountAvailable = new object();
 
-        bool _enableMultiColumnSorting;
-
-        public GridView()
-        {
-            SortAscImageUrl = string.Empty;
-            SortDescImageUrl = string.Empty;
-        }
+        private bool enableMultiColumnSorting;
 
         #region Multi-Column Sorting
 
         public string SortField
         {
-            get { return ViewState.Get("SortField", string.Empty); }
-            set { ViewState.Set("SortField", value); }
+            get => ViewState.Get("SortField", string.Empty);
+            set => ViewState.Set("SortField", value);
         }
 
         /// <summary>
         /// Enable/Disable MultiColumn Sorting.
         /// </summary>
-        [
-        Description("Sorting On more than one column is enabled or not"),
-        Category("Behavior"),
-        DefaultValue("false"),
-        ]
+        [Description("Sorting On more than one column is enabled or not")]
+        [Category("Behavior")]
+        [DefaultValue("false")]
         public bool EnableMultiColumnSorting
         {
-            get { return  _enableMultiColumnSorting; }
-            set { AllowSorting = true; _enableMultiColumnSorting = value; }
+            get => enableMultiColumnSorting;
+            set
+            {
+                AllowSorting = true;
+                enableMultiColumnSorting = value;
+            }
         }
 
         /// <summary>
         /// Enable/Disable Sort Sequence visibility.
         /// </summary>
-        [Description("Show Sort Sequence or not"), Category("Behavior"), DefaultValue("false")]
+        [Description("Show Sort Sequence or not")]
+        [Category("Behavior")]
+        [DefaultValue("false")]
         public bool ShowSortSequence { get; set; }
 
         /// <summary>
         /// Get/Set Image for displaying Ascending Sort order.
         /// </summary>
         /// <value>The sort asc image URL.</value>
-        [Description("Image to display for Ascending Sort"), Category("Misc"), Editor("System.Web.UI.Design.UrlEditor", typeof(System.Drawing.Design.UITypeEditor)), DefaultValue("")]
-        public string SortAscImageUrl { get; set; }
+        [Description("Image to display for Ascending Sort")]
+        [Category("Misc")]
+        [Editor("System.Web.UI.Design.UrlEditor", typeof(System.Drawing.Design.UITypeEditor))]
+        [DefaultValue("")]
+        public string SortAscImageUrl { get; set; } = string.Empty;
 
         /// <summary>
         /// Get/Set Image for displaying Descending Sort order.
         /// </summary>
-        [Description("Image to display for Descending Sort"), Category("Misc"), Editor("System.Web.UI.Design.UrlEditor", typeof(System.Drawing.Design.UITypeEditor)), DefaultValue("")]
-        public string SortDescImageUrl { get; set; }
+        [Description("Image to display for Descending Sort")]
+        [Category("Misc")]
+        [Editor("System.Web.UI.Design.UrlEditor", typeof(System.Drawing.Design.UITypeEditor))]
+        [DefaultValue("")]
+        public string SortDescImageUrl { get; set; } = string.Empty;
 
         /// <summary>
         /// Raises the <see cref="E:System.Web.UI.WebControls.GridView.Sorting"/> event.
@@ -87,10 +91,8 @@ namespace BugNET.UserInterfaceLayer.WebControls
         protected override void OnRowCreated(GridViewRowEventArgs e)
         {
             if (e.Row.RowType == DataControlRowType.Header)
-            {
-                if (SortField != String.Empty)
+                if (SortField != string.Empty)
                     ShowSortOrderImages(SortField, e.Row);
-            }
             base.OnRowCreated(e);
         }
 
@@ -101,16 +103,12 @@ namespace BugNET.UserInterfaceLayer.WebControls
         {
             string[] sortColumns = null;
             var sortAttribute = SortField;
-            if (sortAttribute != String.Empty)
-            {
-                sortColumns = sortAttribute.Split(",".ToCharArray());
-            }
+            if (sortAttribute != string.Empty) sortColumns = sortAttribute.Split(",".ToCharArray());
             if (sortAttribute.IndexOf(e.SortExpression) > 0 || sortAttribute.StartsWith(e.SortExpression))
                 sortAttribute = UpdateSortExpression(sortColumns, e.SortExpression);
             else
-                sortAttribute += String.Concat(",", e.SortExpression, " ASC ");
+                sortAttribute += string.Concat(",", e.SortExpression, " ASC ");
             return sortAttribute.TrimStart(",".ToCharArray()).TrimEnd(",".ToCharArray());
-
         }
 
         /// <summary>
@@ -118,36 +116,33 @@ namespace BugNET.UserInterfaceLayer.WebControls
         /// </summary>
         private static string UpdateSortExpression(string[] sortColumns, string sortExpression)
         {
-            string ascSortExpression = String.Concat(sortExpression, " ASC ");
-            string descSortExpression = String.Concat(sortExpression, " DESC ");
-            for (int i = 0; i < sortColumns.Length; i++)
-            {
+            var ascSortExpression = string.Concat(sortExpression, " ASC ");
+            var descSortExpression = string.Concat(sortExpression, " DESC ");
+            for (var i = 0; i < sortColumns.Length; i++)
                 if (ascSortExpression.Equals(sortColumns[i]))
                     sortColumns[i] = descSortExpression;
                 else if (descSortExpression.Equals(sortColumns[i]))
                     Array.Clear(sortColumns, i, 1);
-            }
-            return String.Join(",", sortColumns).Replace(",,", ",").TrimStart(",".ToCharArray());
+            return string.Join(",", sortColumns).Replace(",,", ",").TrimStart(",".ToCharArray());
         }
 
         /// <summary>
         ///  Lookup the Current Sort Expression to determine the Order of a specific item.
         /// </summary>
-        private void SearchSortExpression(string[] sortColumns, string sortColumn, out string sortOrder, out int sortOrderNo)
+        private void SearchSortExpression(string[] sortColumns, string sortColumn, out string sortOrder,
+            out int sortOrderNo)
         {
             sortOrder = "";
             sortOrderNo = -1;
-            for (int i = 0; i < sortColumns.Length; i++)
-            {
+            for (var i = 0; i < sortColumns.Length; i++)
                 if (sortColumns[i].StartsWith(sortColumn))
                 {
                     sortOrderNo = i + 1;
                     if (EnableMultiColumnSorting)
                         sortOrder = sortColumns[i].Substring(sortColumn.Length).Trim();
                     else
-                        sortOrder = ((SortDirection == SortDirection.Ascending) ? "ASC" : "DESC");
+                        sortOrder = SortDirection == SortDirection.Ascending ? "ASC" : "DESC";
                 }
-            }
         }
 
         /// <summary>
@@ -155,33 +150,32 @@ namespace BugNET.UserInterfaceLayer.WebControls
         /// </summary>
         private void ShowSortOrderImages(string sortExpression, GridViewRow dgItem)
         {
-            string[] sortColumns = sortExpression.Split(",".ToCharArray());
-            for (int i = 0; i < dgItem.Cells.Count; i++)
-            {
+            var sortColumns = sortExpression.Split(",".ToCharArray());
+            for (var i = 0; i < dgItem.Cells.Count; i++)
                 if (dgItem.Cells[i].Controls.Count > 0 && dgItem.Cells[i].Controls[0] is LinkButton)
                 {
                     string sortOrder;
                     int sortOrderNo;
-                    string column = ((LinkButton)dgItem.Cells[i].Controls[0]).CommandArgument;
+                    var column = ((LinkButton) dgItem.Cells[i].Controls[0]).CommandArgument;
                     SearchSortExpression(sortColumns, column, out sortOrder, out sortOrderNo);
                     if (sortOrderNo > 0)
                     {
-                        string sortImgLoc = (sortOrder.Equals("ASC") ? SortAscImageUrl : SortDescImageUrl);
+                        var sortImgLoc = sortOrder.Equals("ASC") ? SortAscImageUrl : SortDescImageUrl;
 
-                        if (sortImgLoc != String.Empty)
+                        if (sortImgLoc != string.Empty)
                         {
-                            Image imgSortDirection = new Image();
+                            var imgSortDirection = new Image();
                             imgSortDirection.ImageUrl = sortImgLoc;
 
-                            Label lblSortDir = new Label();
+                            var lblSortDir = new Label();
                             lblSortDir.CssClass = sortOrder;
-                            ((LinkButton)dgItem.Cells[i].Controls[0]).CssClass = sortOrder;
+                            ((LinkButton) dgItem.Cells[i].Controls[0]).CssClass = sortOrder;
                             // dgItem.Cells[i].Controls.Add(imgSortDirection);
                             dgItem.Cells[i].Controls.Add(lblSortDir);
 
                             if (EnableMultiColumnSorting && ShowSortSequence)
                             {
-                                Label lblSortOrder = new Label();
+                                var lblSortOrder = new Label();
                                 lblSortOrder.Font.Size = FontUnit.XSmall;
                                 lblSortOrder.Font.Name = "verdana";
                                 lblSortOrder.Font.Bold = false;
@@ -191,23 +185,23 @@ namespace BugNET.UserInterfaceLayer.WebControls
                         }
                         else
                         {
-                            Label lblSortDirection = new Label();
+                            var lblSortDirection = new Label();
                             lblSortDirection.Font.Size = FontUnit.XSmall;
                             lblSortDirection.Font.Name = "verdana";
                             lblSortDirection.EnableTheming = false;
-                            lblSortDirection.Text = (sortOrder.Equals("ASC") ? "^" : "v");
+                            lblSortDirection.Text = sortOrder.Equals("ASC") ? "^" : "v";
                             dgItem.Cells[i].Controls.Add(lblSortDirection);
                             if (EnableMultiColumnSorting && ShowSortSequence)
                             {
-                                Literal litSortSeq = new Literal();
+                                var litSortSeq = new Literal();
                                 litSortSeq.Text = sortOrderNo.ToString();
                                 dgItem.Cells[i].Controls.Add(litSortSeq);
                             }
                         }
                     }
                 }
-            }
         }
+
         #endregion
 
         /// <summary>
@@ -218,37 +212,29 @@ namespace BugNET.UserInterfaceLayer.WebControls
         /// <returns></returns>
         protected override int CreateChildControls(IEnumerable dataSource, bool dataBinding)
         {
-            int rows = base.CreateChildControls(dataSource, dataBinding);
+            var rows = base.CreateChildControls(dataSource, dataBinding);
 
             //  if the paging feature is enabled, determine
             //  the total number of rows in the datasource
-            if (this.AllowPaging)
-            {
-                //  if we are databinding, use the number of rows that were created,
-                //  otherwise cast the datasource to an Collection and use that as the count
-                int totalRowCount = dataBinding ? rows : ((ICollection)dataSource).Count;
+            if (!AllowPaging) return rows;
+            //  if we are databinding, use the number of rows that were created,
+            //  otherwise cast the datasource to an Collection and use that as the count
+            var totalRowCount = dataBinding ? rows : ((ICollection) dataSource).Count;
 
-                //  raise the row count available event
-                IPageableItemContainer pageableItemContainer = this as IPageableItemContainer;
-                this.OnTotalRowCountAvailable(
-                    new PageEventArgs(
-                        pageableItemContainer.StartRowIndex,
-                        pageableItemContainer.MaximumRows,
-                        totalRowCount
-                    )
-                );
+            //  raise the row count available event
+            var pageableItemContainer = this as IPageableItemContainer;
+            OnTotalRowCountAvailable(
+                new PageEventArgs(
+                    pageableItemContainer.StartRowIndex,
+                    pageableItemContainer.MaximumRows,
+                    totalRowCount
+                )
+            );
 
-                //  make sure the top and bottom pager rows are not visible
-                if (this.TopPagerRow != null)
-                {
-                    this.TopPagerRow.Visible = false;
-                }
+            //  make sure the top and bottom pager rows are not visible
+            if (TopPagerRow != null) TopPagerRow.Visible = false;
 
-                if (this.BottomPagerRow != null)
-                {
-                    this.BottomPagerRow.Visible = false;
-                }
-            }
+            if (BottomPagerRow != null) BottomPagerRow.Visible = false;
 
             return rows;
         }
@@ -264,67 +250,50 @@ namespace BugNET.UserInterfaceLayer.WebControls
         void IPageableItemContainer.SetPageProperties(
             int startRowIndex, int maximumRows, bool databind)
         {
-            int newPageIndex = (startRowIndex / maximumRows);
-            this.PageSize = maximumRows;
+            var newPageIndex = startRowIndex / maximumRows;
+            PageSize = maximumRows;
 
             //this caused a problem with changing the drop down pager list control.
-            //if (this.PageIndex != newPageIndex)
-            //{
-                bool isCanceled = false;
-                if (databind)
-                {
-                    //  create the event args and raise the event
-                    GridViewPageEventArgs args = new GridViewPageEventArgs(newPageIndex);
-                    OnPageIndexChanging(args);
+            var isCanceled = false;
+            if (databind)
+            {
+                //  create the event args and raise the event
+                var args = new GridViewPageEventArgs(newPageIndex);
+                OnPageIndexChanging(args);
 
-                    isCanceled = args.Cancel;
-                    newPageIndex = args.NewPageIndex;
-                }
+                isCanceled = args.Cancel;
+                newPageIndex = args.NewPageIndex;
+            }
 
-                //  if the event wasn't cancelled
-                //  go ahead and change the paging values
-                if (!isCanceled)
-                {
-                    this.PageIndex = newPageIndex;
+            //  if the event wasn't cancelled
+            //  go ahead and change the paging values
+            if (!isCanceled)
+            {
+                PageIndex = newPageIndex;
 
-                    if (databind)
-                    {
-                        this.OnPageIndexChanged(EventArgs.Empty);
-                    }
-                }
+                if (databind) OnPageIndexChanged(EventArgs.Empty);
+            }
 
-                if (databind)
-                {
-                    this.RequiresDataBinding = true;
-                }
-           // }
-           
-
+            if (databind) RequiresDataBinding = true;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        int IPageableItemContainer.StartRowIndex
-        {
-            get { return this.PageSize * this.PageIndex; }
-        }
+        int IPageableItemContainer.StartRowIndex => PageSize * PageIndex;
 
         /// <summary>
         /// 
         /// </summary>
-        int IPageableItemContainer.MaximumRows
-        {
-            get { return this.PageSize; }
-        }
+        int IPageableItemContainer.MaximumRows => PageSize;
 
         /// <summary>
         /// 
         /// </summary>
         event EventHandler<PageEventArgs> IPageableItemContainer.TotalRowCountAvailable
         {
-            add { base.Events.AddHandler(GridView.EventTotalRowCountAvailable, value); }
-            remove { base.Events.RemoveHandler(GridView.EventTotalRowCountAvailable, value); }
+            add => Events.AddHandler(EventTotalRowCountAvailable, value);
+            remove => Events.RemoveHandler(EventTotalRowCountAvailable, value);
         }
 
         /// <summary>
@@ -333,13 +302,9 @@ namespace BugNET.UserInterfaceLayer.WebControls
         /// <param name="e"></param>
         private void OnTotalRowCountAvailable(PageEventArgs e)
         {
-            EventHandler<PageEventArgs> handler = (EventHandler<PageEventArgs>)base.Events[GridView.EventTotalRowCountAvailable];
-            if (handler != null)
-            {
-                handler(this, e);
-            }
+            var handler = (EventHandler<PageEventArgs>) Events[EventTotalRowCountAvailable];
+            if (handler != null) handler(this, e);
         }
-
 
         #endregion
     }

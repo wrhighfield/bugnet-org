@@ -77,6 +77,5 @@ namespace BugNET.Entities
         public bool IsCompleted { get; set; }
 
         #endregion
-
     }
 }

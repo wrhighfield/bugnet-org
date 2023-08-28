@@ -10,7 +10,7 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public abstract class MIME_b
     {
-        private MIME_Entity        m_pEntity;
+        private MIME_Entity m_pEntity;
         private MIME_h_ContentType m_pContentType;
 
         /// <summary>
@@ -21,9 +21,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
         public MIME_b(MIME_h_ContentType contentType)
         {
-            if(contentType == null){
-                throw new ArgumentNullException(nameof(contentType));
-            }
+            if (contentType == null) throw new ArgumentNullException(nameof(contentType));
 
             m_pContentType = contentType;
         }
@@ -40,17 +38,11 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected static MIME_b Parse(MIME_Entity owner, MIME_h_ContentType defaultContentType, SmartStream stream)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
-            if(defaultContentType == null){
-                throw new ArgumentNullException(nameof(defaultContentType));
-            }
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (defaultContentType == null) throw new ArgumentNullException(nameof(defaultContentType));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             throw new NotImplementedException("Body provider class does not implement required Parse method.");
         }
@@ -65,14 +57,13 @@ namespace LumiSoft.Net.MIME
         /// </summary>
         /// <param name="entity">Owner entity.</param>
         /// <param name="setContentType">If true sets entity.ContentType header value.</param>
-        internal virtual void SetParent(MIME_Entity entity,bool setContentType)
+        internal virtual void SetParent(MIME_Entity entity, bool setContentType)
         {
             m_pEntity = entity;
 
             // Owner entity has no content-type or has different content-type, just add/overwrite it.
-            if(setContentType &&(entity.ContentType == null || !string.Equals(entity.ContentType.TypeWithSubtype,MediaType,StringComparison.InvariantCultureIgnoreCase))){
-                entity.ContentType = m_pContentType;
-            }
+            if (setContentType && (entity.ContentType == null || !string.Equals(entity.ContentType.TypeWithSubtype,
+                    MediaType, StringComparison.InvariantCultureIgnoreCase))) entity.ContentType = m_pContentType;
         }
 
         #endregion
@@ -88,7 +79,8 @@ namespace LumiSoft.Net.MIME
         /// <param name="headerReencode">If true always specified encoding is used for header. If false and header field value not modified, 
         /// original encoding is kept.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
-        protected internal abstract void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode);
+        protected internal abstract void ToStream(Stream stream, MIME_Encoding_EncodedWord headerWordEncoder,
+            Encoding headerParmetersCharset, bool headerReencode);
 
         #endregion
 
@@ -98,10 +90,7 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets if body has modified.
         /// </summary>
-        public abstract bool IsModified
-        {
-            get;
-        }
+        public abstract bool IsModified { get; }
 
         /// <summary>
         /// Gets body owner entity. Returns null if body not bounded to any entity yet.

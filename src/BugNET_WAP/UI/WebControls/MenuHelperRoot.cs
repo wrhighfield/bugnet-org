@@ -1,11 +1,15 @@
-﻿namespace BugNET.UserInterfaceLayer.WebControls
+﻿using System;
+
+namespace BugNET.UI.WebControls
 {
     public class MenuHelperRoot
     {
         public string ULDecoration = "class=\"nav navbar-nav\"";
         public string LICurrentDecoration = "class=\"current\"";
         public string LIAdminDecoration = "class=\"admin\"";
-        public System.Collections.Generic.List<SuckerMenuItem> Items = new System.Collections.Generic.List<SuckerMenuItem>();
+
+        public readonly System.Collections.Generic.List<SuckerMenuItem> Items =
+            new System.Collections.Generic.List<SuckerMenuItem>();
 
         /// <summary>
         /// Determines whether the specified o item is current.
@@ -16,7 +20,8 @@
         /// </returns>
         public virtual bool IsCurrent(SuckerMenuItem oItem)
         {
-            return System.Web.HttpContext.Current.Request.Url.ToString().ToLower().IndexOf(oItem.Link.ToLower()) >= 0;
+            return System.Web.HttpContext.Current.Request.Url.ToString().ToLower()
+                .IndexOf(oItem.Link.ToLower(), StringComparison.Ordinal) >= 0;
         }
 
         /// <summary>
@@ -34,6 +39,5 @@
             oBuilder.Append("</ul>");
             return oBuilder.ToString();
         }
-
-    } 
+    }
 }

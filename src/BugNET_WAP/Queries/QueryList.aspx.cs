@@ -1,120 +1,113 @@
 using System;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
 using log4net;
-using BugNET.Entities;
 using System.Collections.Generic;
+using BugNET.UI;
 using Microsoft.AspNet.FriendlyUrls;
 
 namespace BugNET.Queries
 {
-	/// <summary>
-	/// This page displays a list of existing queries
-	/// </summary>
-	public partial class QueryList : BasePage 
-	{
-
-		private static readonly ILog Log = LogManager.GetLogger(typeof(QueryList));
+    /// <summary>
+    /// This page displays a list of existing queries
+    /// </summary>
+    public partial class QueryList : BugNetBasePage
+    {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(QueryList));
         private const string QUERY_LIST_STATE = "QueryListState";
 
-		/// <summary>
-		/// Binds the queries.
-		/// </summary>
-		void BindQueries() 
-		{         
-			dropQueries.DataSource = QueryManager.GetByUsername(User.Identity.Name,ProjectId);
-			dropQueries.DataBind();
+        /// <summary>
+        /// Binds the queries.
+        /// </summary>
+        private void BindQueries()
+        {
+            dropQueries.DataSource = QueryManager.GetByUsername(User.Identity.Name, ProjectId);
+            dropQueries.DataBind();
 
-            pnlDeleteQuery.Visible = (dropQueries.DataSource.Count > 0);
+            pnlDeleteQuery.Visible = dropQueries.DataSource.Count > 0;
             pnlEditQuery.Visible = pnlDeleteQuery.Visible;
 
-			if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.DeleteQuery.ToString()))
-			{
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Permission.DeleteQuery.ToString()))
                 pnlDeleteQuery.Visible = false;
-			}
 
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.EditQuery.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Permission.EditQuery.ToString())) pnlEditQuery.Visible = false;
+        }
+
+        /// <summary>
+        /// Edits the query.
+        /// </summary>
+        private void EditQuery()
+        {
+            if (dropQueries.SelectedValue == 0)
+                return;
+
+            Response.Redirect($"~/Queries/QueryDetail.aspx?id={dropQueries.SelectedValue}&pid={ProjectId}", true);
+        }
+
+        /// <summary>
+        /// Executes the query.
+        /// </summary>
+        private void ExecuteQuery()
+        {
+            if (dropQueries.SelectedValue == 0)
+                return;
+
+
+            try
             {
-                pnlEditQuery.Visible = false;
-            }
-		}
-
-		/// <summary>
-		/// Edits the query.
-		/// </summary>
-		void EditQuery()
-		{
-			if (dropQueries.SelectedValue == 0)
-				return;
-
-			Response.Redirect(string.Format("~/Queries/QueryDetail.aspx?id={0}&pid={1}", dropQueries.SelectedValue, ProjectId), true);
-		}
-
-		/// <summary>
-		/// Executes the query.
-		/// </summary>
-		void ExecuteQuery() 
-		{
-			if (dropQueries.SelectedValue == 0)
-				return;
-
-
-			try 
-			{
                 var sortColumns = new List<KeyValuePair<string, string>>();
 
                 var sorter = ctlDisplayIssues.SortString;
 
-                if (sorter.Trim().Length.Equals(0))
-                {
-                    sorter = "iv.[IssueId] DESC";
-                }
+                if (sorter.Trim().Length.Equals(0)) sorter = "iv.[IssueId] DESC";
 
                 foreach (var sort in sorter.Split(','))
                 {
-                    var args = sort.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                    var args = sort.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries);
                     if (args.Length.Equals(2))
                         sortColumns.Add(new KeyValuePair<string, string>(args[0], args[1]));
                 }
 
-				var colIssues = IssueManager.PerformSavedQuery(ProjectId, dropQueries.SelectedValue, sortColumns);
-				ctlDisplayIssues.DataSource = colIssues;
-				ctlDisplayIssues.RssUrl = string.Format("~/Feed.aspx?pid={1}&q={0}&channel=13",dropQueries.SelectedValue,ProjectId);
+                var colIssues = IssueManager.PerformSavedQuery(ProjectId, dropQueries.SelectedValue, sortColumns);
+                ctlDisplayIssues.DataSource = colIssues;
+                ctlDisplayIssues.RssUrl = string.Format("~/Feed.aspx?pid={1}&q={0}&channel=13",
+                    dropQueries.SelectedValue, ProjectId);
 
-				// Only bind results if there is no error.                
-				ctlDisplayIssues.DataBind();
+                // Only bind results if there is no error.                
+                ctlDisplayIssues.DataBind();
 
-				Results.Visible = true;
-			} 
-			catch (Exception ex)
-			{
-				lblError.Text = GetLocalResourceObject("QueryError").ToString();
-				if (Log.IsErrorEnabled)                    
-					Log.Warn(string.Format("Error Running Saved Query. Project Id:{0} Query Id:{1}" , ProjectId,dropQueries.SelectedValue), ex);
-			}
+                Results.Visible = true;
+            }
+            catch (Exception ex)
+            {
+                lblError.Text = GetLocalString("QueryError");
+                if (Log.IsErrorEnabled)
+                    Log.Warn($"Error Running Saved Query. Project Id:{ProjectId} Query Id:{dropQueries.SelectedValue}",
+                        ex);
+            }
+        }
 
-		}
+        /// <summary>
+        /// Adds the query.
+        /// </summary>
+        private void AddQuery()
+        {
+            Response.Redirect($"~/Queries/QueryDetail.aspx?pid={ProjectId}");
+        }
 
-		/// <summary>
-		/// Adds the query.
-		/// </summary>
-		void AddQuery() 
-		{
-            Response.Redirect(string.Format("~/Queries/QueryDetail.aspx?pid={0}", ProjectId));
-		}
+        /// <summary>
+        /// Deletes the query.
+        /// </summary>
+        private void DeleteQuery()
+        {
+            if (dropQueries.SelectedValue == 0)
+                return;
 
-		/// <summary>
-		/// Deletes the query.
-		/// </summary>
-		void DeleteQuery() 
-		{
-			if (dropQueries.SelectedValue == 0)
-				return;
-
-			QueryManager.Delete(dropQueries.SelectedValue);
-			BindQueries();
-		}
+            QueryManager.Delete(dropQueries.SelectedValue);
+            BindQueries();
+        }
 
         #region Web Form Designer generated code
 
@@ -135,6 +128,7 @@ namespace BugNET.Queries
         {
             this.ctlDisplayIssues.RebindCommand += new System.EventHandler(IssuesRebind);
         }
+
         #endregion
 
         /// <summary>
@@ -146,8 +140,8 @@ namespace BugNET.Queries
         {
             try
             {
-                IList<string> segments = Request.GetFriendlyUrlSegments();
-                ProjectId = Int32.Parse(segments[0]);
+                var segments = Request.GetFriendlyUrlSegments();
+                ProjectId = int.Parse(segments[0]);
             }
             catch
             {
@@ -161,13 +155,14 @@ namespace BugNET.Queries
             if (ProjectId == 0)
                 ErrorRedirector.TransferToSomethingMissingPage(Page);
 
-            ConfirmDeleteText.Value = GetLocalResourceObject("ConfirmDelete").ToString().JsEncode();
-            Project p = ProjectManager.GetById(ProjectId);
-            if(p != null)
+            ConfirmDeleteText.Value = GetLocalString("ConfirmDelete").JsEncode();
+            var p = ProjectManager.GetById(ProjectId);
+            if (p != null)
             {
                 ltProject.Text = p.Name;
                 litProjectCode.Text = p.Code;
             }
+
             btnDeleteQuery.OnClientClick = "return confirmDelete();";
             lbDeleteQuery.OnClientClick = "return confirmDelete();";
 
@@ -175,13 +170,13 @@ namespace BugNET.Queries
             ctlDisplayIssues.CurrentPageIndex = 0;
             Results.Visible = false;
 
-            var state = (QueryListState)Session[QUERY_LIST_STATE];
+            var state = (QueryListState) Session[QUERY_LIST_STATE];
 
             BindQueries();
 
             if (state == null) return;
 
-            if ((ProjectId > 0) && (ProjectId != state.ProjectId))
+            if (ProjectId > 0 && ProjectId != state.ProjectId)
             {
                 Session.Remove(QUERY_LIST_STATE);
             }
@@ -208,7 +203,7 @@ namespace BugNET.Queries
         {
             // Intention is to restore IssueList page state when if it is redirected back to.
             // Put all necessary data in IssueListState object and save it in the session.
-            var state = (QueryListState)Session[QUERY_LIST_STATE] ?? new QueryListState();
+            var state = (QueryListState) Session[QUERY_LIST_STATE] ?? new QueryListState();
             state.QueryId = dropQueries.SelectedValue;
             state.ProjectId = ProjectId;
             state.IssueListPageIndex = ctlDisplayIssues.CurrentPageIndex;
@@ -223,7 +218,7 @@ namespace BugNET.Queries
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        void IssuesRebind(Object s, EventArgs e)
+        private void IssuesRebind(object s, EventArgs e)
         {
             ExecuteQuery();
         }
@@ -262,5 +257,5 @@ namespace BugNET.Queries
         {
             EditQuery();
         }
-	}
+    }
 }

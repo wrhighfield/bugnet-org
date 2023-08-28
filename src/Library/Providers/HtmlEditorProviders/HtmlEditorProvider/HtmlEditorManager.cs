@@ -27,12 +27,10 @@ namespace BugNET.Providers.HtmlEditorProviders
             _defaultProvider = Providers[qc.DefaultProvider];
 
             if (_defaultProvider == null)
-            {
                 throw new ConfigurationErrorsException(
                     "You must specify a default provider for the feature.",
                     qc.ElementInformation.Properties["defaultProvider"]?.Source,
                     qc.ElementInformation.Properties["defaultProvider"].LineNumber);
-            }
         }
 
         //Public feature API

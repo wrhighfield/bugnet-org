@@ -9,16 +9,16 @@ namespace LumiSoft.Net.Log
     /// </summary>
     public class LogEntry
     {
-        private LogEntryType    m_Type          = LogEntryType.Text;
-        private string          m_ID            = "";
-        private DateTime        m_Time;
+        private LogEntryType m_Type = LogEntryType.Text;
+        private string m_ID = "";
+        private DateTime m_Time;
         private GenericIdentity m_pUserIdentity;
-        private long            m_Size;
-        private string          m_Text          = "";
-        private Exception       m_pException;
-        private IPEndPoint      m_pLocalEP;
-        private IPEndPoint      m_pRemoteEP;
-        private byte[]          m_pData;
+        private long m_Size;
+        private string m_Text = "";
+        private Exception m_pException;
+        private IPEndPoint m_pLocalEP;
+        private IPEndPoint m_pRemoteEP;
+        private byte[] m_pData;
 
         /// <summary>
         /// Default constructor.
@@ -27,10 +27,10 @@ namespace LumiSoft.Net.Log
         /// <param name="id">Log entry ID.</param>
         /// <param name="size">Specified how much data was readed or written.</param>
         /// <param name="text">Description text.</param>
-        public LogEntry(LogEntryType type,string id,long size,string text)
+        public LogEntry(LogEntryType type, string id, long size, string text)
         {
             m_Type = type;
-            m_ID   = id;
+            m_ID = id;
             m_Size = size;
             m_Text = text;
 
@@ -48,17 +48,18 @@ namespace LumiSoft.Net.Log
         /// <param name="localEP">Local IP end point.</param>
         /// <param name="remoteEP">Remote IP end point.</param>
         /// <param name="data">Log data.</param>
-        public LogEntry(LogEntryType type,string id,GenericIdentity userIdentity,long size,string text,IPEndPoint localEP,IPEndPoint remoteEP,byte[] data)
-        {   
-            m_Type          = type;
-            m_ID            = id;
+        public LogEntry(LogEntryType type, string id, GenericIdentity userIdentity, long size, string text,
+            IPEndPoint localEP, IPEndPoint remoteEP, byte[] data)
+        {
+            m_Type = type;
+            m_ID = id;
             m_pUserIdentity = userIdentity;
-            m_Size          = size;
-            m_Text          = text;
-            m_pLocalEP      = localEP;
-            m_pRemoteEP     = remoteEP;
-            m_pData         = data;
-                        
+            m_Size = size;
+            m_Text = text;
+            m_pLocalEP = localEP;
+            m_pRemoteEP = remoteEP;
+            m_pData = data;
+
             m_Time = DateTime.Now;
         }
 
@@ -73,17 +74,18 @@ namespace LumiSoft.Net.Log
         /// <param name="localEP">Local IP end point.</param>
         /// <param name="remoteEP">Remote IP end point.</param>
         /// <param name="exception">Exception happened. Can be null.</param>
-        public LogEntry(LogEntryType type,string id,GenericIdentity userIdentity,long size,string text,IPEndPoint localEP,IPEndPoint remoteEP,Exception exception)
-        {   
-            m_Type          = type;
-            m_ID            = id;
+        public LogEntry(LogEntryType type, string id, GenericIdentity userIdentity, long size, string text,
+            IPEndPoint localEP, IPEndPoint remoteEP, Exception exception)
+        {
+            m_Type = type;
+            m_ID = id;
             m_pUserIdentity = userIdentity;
-            m_Size          = size;
-            m_Text          = text;
-            m_pLocalEP      = localEP;
-            m_pRemoteEP     = remoteEP;
-            m_pException    = exception;
-                        
+            m_Size = size;
+            m_Text = text;
+            m_pLocalEP = localEP;
+            m_pRemoteEP = remoteEP;
+            m_pException = exception;
+
             m_Time = DateTime.Now;
         }
 
@@ -141,6 +143,5 @@ namespace LumiSoft.Net.Log
         public byte[] Data => m_pData;
 
         #endregion
-
     }
 }

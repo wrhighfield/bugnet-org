@@ -34,36 +34,28 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>strean</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner, MIME_h_ContentType defaultContentType, SmartStream stream)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
-            if(defaultContentType == null){
-                throw new ArgumentNullException(nameof(defaultContentType));
-            }
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (defaultContentType == null) throw new ArgumentNullException(nameof(defaultContentType));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             MIME_b_Application retVal = null;
-            if(owner.ContentType != null){
+            if (owner.ContentType != null)
                 retVal = new MIME_b_Application(owner.ContentType.TypeWithSubtype);
-            }
-            else{
+            else
                 retVal = new MIME_b_Application(defaultContentType.TypeWithSubtype);
-            }
 
-            NetUtils.StreamCopy(stream,retVal.EncodedStream,32000);
+            NetUtils.StreamCopy(stream, retVal.EncodedStream, 32000);
 
             return retVal;
         }
 
         #endregion
-        
+
 
         #region Properties implementation
-                
+
         #endregion
     }
 }

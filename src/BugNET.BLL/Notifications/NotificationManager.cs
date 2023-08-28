@@ -26,7 +26,7 @@ namespace BugNET.BLL.Notifications
         {
             var templateKey = emailFormat == EmailFormatType.Text ? "" : "HTML";
             var template = LoadNotificationTemplate(string.Concat(templateName, templateKey));
-            
+
             //load template path from host settings
             var path = HostSettingManager.TemplatePath;
             return XmlXslTransform.LoadEmailXslTemplate(template, path);
@@ -62,39 +62,30 @@ namespace BugNET.BLL.Notifications
         /// <returns></returns>
         public static string GenerateNotificationContent(string template, Dictionary<string, object> data)
         {
-            using(var writer = new System.IO.StringWriter())
+            using (var writer = new System.IO.StringWriter())
             {
                 using (System.Xml.XmlWriter xml = new System.Xml.XmlTextWriter(writer))
                 {
                     xml.WriteStartElement("root");
 
-                    foreach (var de in HostSettingManager.GetHostSettings().Cast<DictionaryEntry>().Where(de => !de.Key.ToString().ToLower().Equals("welcomemessage")))
-                    {
+                    foreach (var de in HostSettingManager.GetHostSettings().Cast<DictionaryEntry>()
+                                 .Where(de => !de.Key.ToString().ToLower().Equals("welcomemessage")))
                         xml.WriteElementString(string.Concat("HostSetting_", de.Key), de.Value.ToString());
-                    }
 
                     foreach (var item in data.Keys)
-                    {
                         if (item.StartsWith("RawXml"))
-                        {
                             xml.WriteRaw(data[item].ToString());
-                        }
                         else if (item.GetType().IsClass)
-                        {
                             xml.WriteRaw(data[item].ToXml());
-                        }
                         else
-                        {
                             xml.WriteElementString(item, data[item].ToString());
-                        }
-                    }
 
                     xml.WriteEndElement();
 #if(DEBUG)
-                    System.Diagnostics.Debug.WriteLine(writer.ToString()); 
+                    System.Diagnostics.Debug.WriteLine(writer.ToString());
 #endif
                     return XmlXslTransform.Transform(writer.ToString(), template);
-                }   
+                }
             }
         }
     }

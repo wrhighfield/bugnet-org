@@ -11,7 +11,8 @@ namespace BugNET.BLL
 {
     public static class ProjectManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -20,7 +21,8 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(Project entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The project name cannot be empty or null");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The project name cannot be empty or null");
 
             if (entity.Id > 0)
                 return Update(entity);
@@ -53,11 +55,9 @@ namespace BugNET.BLL
             if (HostSettingManager.Get(HostSettingNames.AttachmentStorageType, 0) !=
                 (int) IssueAttachmentStorageTypes.FileSystem) return true;
             {
-                var uploadPath = string.Concat(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath), entity.UploadPath);
-                if(uploadPath.StartsWith("~"))
-                {
-                    uploadPath = HttpContext.Current.Server.MapPath(uploadPath);
-                }
+                var uploadPath = string.Concat(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath),
+                    entity.UploadPath);
+                if (uploadPath.StartsWith("~")) uploadPath = HttpContext.Current.Server.MapPath(uploadPath);
 
 
                 try
@@ -74,7 +74,8 @@ namespace BugNET.BLL
                     if (Log.IsErrorEnabled)
                         Log.Error(
                             string.Format(
-                                LoggingManager.GetErrorMessageResource("CouldNotCreateUploadDirectory"), uploadPath), ex);
+                                LoggingManager.GetErrorMessageResource("CouldNotCreateUploadDirectory"), uploadPath),
+                            ex);
                     return false;
                 }
             }
@@ -148,7 +149,9 @@ namespace BugNET.BLL
         /// </summary>
         /// <returns></returns>
         public static List<Project> GetPublicProjects()
-            => DataProviderManager.Provider.GetPublicProjects();
+        {
+            return DataProviderManager.Provider.GetPublicProjects();
+        }
 
         /// <summary>
         /// Gets the name of the projects by user.
@@ -173,7 +176,6 @@ namespace BugNET.BLL
             if (string.IsNullOrEmpty(userName)) throw new ArgumentOutOfRangeException(nameof(userName));
 
             return DataProviderManager.Provider.GetProjectsByMemberUserName(userName, activeOnly);
-
         }
 
         /// <summary>
@@ -244,18 +246,16 @@ namespace BugNET.BLL
 
             try
             {
-
                 uploadPath = string.Concat(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath), uploadPath);
-                if(uploadPath.StartsWith("~"))
-                {
-                    uploadPath = HttpContext.Current.Server.MapPath(uploadPath);
-                }
+                if (uploadPath.StartsWith("~")) uploadPath = HttpContext.Current.Server.MapPath(uploadPath);
 
                 Directory.Delete(uploadPath, true);
             }
             catch (Exception ex)
             {
-                Log.Error(string.Format(LoggingManager.GetErrorMessageResource("DeleteProjectUploadFolderError"), uploadPath, projectId), ex);
+                Log.Error(
+                    string.Format(LoggingManager.GetErrorMessageResource("DeleteProjectUploadFolderError"), uploadPath,
+                        projectId), ex);
             }
 
             return true;
@@ -270,8 +270,9 @@ namespace BugNET.BLL
             try
             {
                 var viewName = string.Format(Globals.ProjectCustomFieldsViewName, projectId);
-                var sql = string.Concat("IF  EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'", viewName, "') AND OBJECTPROPERTY(id, N'IsView') = 1) DROP VIEW ", viewName);
-                DataProviderManager.Provider.ExecuteScript(new[] { sql });
+                var sql = string.Concat("IF  EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'", viewName,
+                    "') AND OBJECTPROPERTY(id, N'IsView') = 1) DROP VIEW ", viewName);
+                DataProviderManager.Provider.ExecuteScript(new[] {sql});
                 return true;
             }
             catch (Exception ex)
@@ -293,7 +294,8 @@ namespace BugNET.BLL
             if (projectId <= Globals.NewId) throw new ArgumentOutOfRangeException(nameof(projectId));
             if (string.IsNullOrEmpty(projectName)) throw new ArgumentNullException(nameof(projectName));
 
-            var newProjectId = DataProviderManager.Provider.CloneProject(projectId, projectName, Security.GetUserName());
+            var newProjectId =
+                DataProviderManager.Provider.CloneProject(projectId, projectName, Security.GetUserName());
 
             if (newProjectId == 0) return 0;
             var newProject = GetById(newProjectId);
@@ -302,19 +304,18 @@ namespace BugNET.BLL
 
             try
             {
-                if (newProject.AllowAttachments && HostSettingManager.Get(HostSettingNames.AttachmentStorageType, 0) == (int)IssueAttachmentStorageTypes.FileSystem)
+                if (newProject.AllowAttachments && HostSettingManager.Get(HostSettingNames.AttachmentStorageType, 0) ==
+                    (int) IssueAttachmentStorageTypes.FileSystem)
                 {
                     // set upload path to new Guid
                     newProject.UploadPath = Guid.NewGuid().ToString();
 
                     DataProviderManager.Provider.UpdateProject(newProject);
 
-                    var fullPath = string.Concat(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath), newProject.UploadPath);
+                    var fullPath = string.Concat(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath),
+                        newProject.UploadPath);
 
-                    if (fullPath.StartsWith("~"))
-                    {
-                        fullPath = HttpContext.Current.Server.MapPath(fullPath);
-                    }
+                    if (fullPath.StartsWith("~")) fullPath = HttpContext.Current.Server.MapPath(fullPath);
 
                     Directory.CreateDirectory(fullPath);
                 }
@@ -322,13 +323,14 @@ namespace BugNET.BLL
             catch (Exception ex)
             {
                 if (Log.IsErrorEnabled)
-                    Log.Error(string.Format(LoggingManager.GetErrorMessageResource("CreateProjectUploadFolderError"), newProject.UploadPath, projectId), ex);
+                    Log.Error(
+                        string.Format(LoggingManager.GetErrorMessageResource("CreateProjectUploadFolderError"),
+                            newProject.UploadPath, projectId), ex);
             }
 
             HttpContext.Current.Cache.Remove("RolePermission");
 
             return newProjectId;
-
         }
 
         /// <summary>
@@ -365,8 +367,8 @@ namespace BugNET.BLL
         {
             var project = GetById(entity.Id);
             return DataProviderManager.Provider.UpdateProject(entity);
-
         }
+
         #endregion
     }
 }

@@ -20,9 +20,10 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
         public MIME_b_MultipartParallel(MIME_h_ContentType contentType) : base(contentType)
         {
-            if(!string.Equals(contentType.TypeWithSubtype,"multipart/parallel",StringComparison.CurrentCultureIgnoreCase)){
-                throw new ArgumentException("Argument 'contentType.TypeWithSubype' value must be 'multipart/parallel'.");
-            }
+            if (!string.Equals(contentType.TypeWithSubtype, "multipart/parallel",
+                    StringComparison.CurrentCultureIgnoreCase))
+                throw new ArgumentException(
+                    "Argument 'contentType.TypeWithSubype' value must be 'multipart/parallel'.");
         }
 
         #region static method Parse
@@ -36,23 +37,16 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner, MIME_h_ContentType defaultContentType, SmartStream stream)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
-            if(defaultContentType == null){
-                throw new ArgumentNullException(nameof(defaultContentType));
-            }
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
-            if(owner.ContentType == null || owner.ContentType.Param_Boundary == null){
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (defaultContentType == null) throw new ArgumentNullException(nameof(defaultContentType));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (owner.ContentType == null || owner.ContentType.Param_Boundary == null)
                 throw new ParseException("Multipart entity has not required 'boundary' paramter.");
-            }
-            
+
             var retVal = new MIME_b_MultipartParallel(owner.ContentType);
-            ParseInternal(owner,owner.ContentType.TypeWithSubtype,stream,retVal);
+            ParseInternal(owner, owner.ContentType.TypeWithSubtype, stream, retVal);
 
             return retVal;
         }

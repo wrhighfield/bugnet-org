@@ -1,11 +1,11 @@
+using BugNET.UI;
+
 namespace BugNET.Administration.Projects.UserControls
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using BugNET.UserInterfaceLayer;
-    using BugNET.Entities;
-    using BugNET.BLL;
+    using Entities;
+    using BLL;
 
 
     /// <summary>
@@ -27,7 +27,7 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         private void ReadDefaultValuesForProject()
         {
-            List<DefaultValue> defValues = IssueManager.GetDefaultIssueTypeByProjectId(ProjectId);
+            var defValues = IssueManager.GetDefaultIssueTypeByProjectId(ProjectId);
             DefaultValue selectedValue = null;
             if (defValues.Count > 0)
                 selectedValue = defValues.ElementAt<DefaultValue>(0);
@@ -41,10 +41,12 @@ namespace BugNET.Administration.Projects.UserControls
                 DropMilestone.SelectedValue = selectedValue.MilestoneId;
                 DropAffectedMilestone.SelectedValue = selectedValue.AffectedMilestoneId;
 
-                if (selectedValue.AssignedUserName != "none" && DropAssignedTo.DataSource.Exists(i => i.UserName == selectedValue.AssignedUserName))
+                if (selectedValue.AssignedUserName != "none" &&
+                    DropAssignedTo.DataSource.Exists(i => i.UserName == selectedValue.AssignedUserName))
                     DropAssignedTo.SelectedValue = selectedValue.AssignedUserName;
 
-                if (selectedValue.OwnerUserName != "none" && DropOwned.DataSource.Exists(i => i.UserName == selectedValue.OwnerUserName))
+                if (selectedValue.OwnerUserName != "none" &&
+                    DropOwned.DataSource.Exists(i => i.UserName == selectedValue.OwnerUserName))
                     DropOwned.SelectedValue = selectedValue.OwnerUserName;
 
                 DropStatus.SelectedValue = selectedValue.StatusId;
@@ -52,11 +54,8 @@ namespace BugNET.Administration.Projects.UserControls
                 if (selectedValue.IssueVisibility == 0) chkPrivate.Checked = false;
                 if (selectedValue.IssueVisibility == 1) chkPrivate.Checked = true;
 
-                if (selectedValue.DueDate.HasValue)
-                {
-                    DueDate.Text = selectedValue.DueDate.Value.ToString();
-                }
-               
+                if (selectedValue.DueDate.HasValue) DueDate.Text = selectedValue.DueDate.Value.ToString();
+
                 ProgressSlider.Text = selectedValue.Progress.ToString();
                 txtEstimation.Text = selectedValue.Estimation.ToString();
 
@@ -91,7 +90,7 @@ namespace BugNET.Administration.Projects.UserControls
                 chkEstimationEditVisibility.Checked = selectedValue.EstimationEditVisibility;
                 chkResolutionEditVisibility.Checked = selectedValue.ResolutionEditVisibility;
                 chkAffectedMilestoneEditVisibility.Checked = selectedValue.AffectedMilestoneEditVisibility;
-            }                                             
+            }
         }
 
         /// <summary>
@@ -99,7 +98,7 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         private void FillDropDownLists()
         {
-            List<ITUser> users = UserManager.GetUsersByProjectId(ProjectId);
+            var users = UserManager.GetUsersByProjectId(ProjectId);
             //Get Type 
 
             DropIssueType.DataSource = IssueTypeManager.GetByProjectId(ProjectId);
@@ -114,7 +113,7 @@ namespace BugNET.Administration.Projects.UserControls
             DropResolution.DataBind();
 
             //Get categories
-            CategoryTree categories = new CategoryTree();
+            var categories = new CategoryTree();
             DropCategory.DataSource = categories.GetCategoryTreeByProjectId(ProjectId);
             DropCategory.DataBind();
 
@@ -135,16 +134,17 @@ namespace BugNET.Administration.Projects.UserControls
             DropStatus.DataSource = StatusManager.GetByProjectId(ProjectId);
             DropStatus.DataBind();
         }
-       
+
         #region IEditProjectControl Members
+
         /// <summary>
         /// Gets or sets the project id.
         /// </summary>
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ((BasePage)Page).ProjectId; }
-            set { ((BasePage)Page).ProjectId = value; }
+            get => ((BugNetBasePage) Page).ProjectId;
+            set => ((BugNetBasePage) Page).ProjectId = value;
         }
 
         /// <summary>
@@ -153,17 +153,14 @@ namespace BugNET.Administration.Projects.UserControls
         /// <value>
         ///   <c>true</c> if [show save button]; otherwise, <c>false</c>.
         /// </value>
-        public bool ShowSaveButton
-        {
-            get { return true; }
-        }
+        public bool ShowSaveButton => true;
 
         /// <summary>
         /// Inits this instance.
         /// </summary>
         public void Initialize()
         {
-            DueDateLabel.Text = String.Format(" ({0})   +", DateTime.Today.ToShortDateString());
+            DueDateLabel.Text = $" ({DateTime.Today.ToShortDateString()})   +";
             BindOptions();
         }
 
@@ -185,26 +182,19 @@ namespace BugNET.Administration.Projects.UserControls
         /// <returns></returns>
         private bool SaveDefaultValues()
         {
-            int privateValue = chkPrivate.Checked ? 1 : 0;
+            var privateValue = chkPrivate.Checked ? 1 : 0;
             int? date = 0;
             if (!string.IsNullOrWhiteSpace(DueDate.Text))
-            {
-                date = Int32.Parse(DueDate.Text);
-            }
+                date = int.Parse(DueDate.Text);
             else
-            {
                 date = null;
-            }
 
-            Decimal estimation = 0;
-            if (!string.IsNullOrWhiteSpace(txtEstimation.Text))
-            {
-                estimation = Convert.ToDecimal(txtEstimation.Text);
-            }
+            decimal estimation = 0;
+            if (!string.IsNullOrWhiteSpace(txtEstimation.Text)) estimation = Convert.ToDecimal(txtEstimation.Text);
 
-            DefaultValue newDefaultValues = new DefaultValue()
+            var newDefaultValues = new DefaultValue()
             {
-                ProjectId = this.ProjectId,
+                ProjectId = ProjectId,
                 IssueTypeId = DropIssueType.SelectedValue,
                 StatusId = DropStatus.SelectedValue,
                 OwnerUserName = DropOwned.SelectedValue,
@@ -250,7 +240,7 @@ namespace BugNET.Administration.Projects.UserControls
 
             return IssueManager.SaveDefaultValues(newDefaultValues);
         }
-    
+
         #endregion
     }
 }

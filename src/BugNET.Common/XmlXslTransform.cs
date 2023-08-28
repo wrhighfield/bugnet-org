@@ -35,7 +35,7 @@ namespace BugNET.Common
         /// <param name="template">The template.</param>
         /// <param name="path">The path.</param>
         /// <returns></returns>
-        public static string LoadEmailXslTemplate(string template,string path)
+        public static string LoadEmailXslTemplate(string template, string path)
         {
             const string ext = ".xslt";
 

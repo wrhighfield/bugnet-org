@@ -8,8 +8,8 @@ namespace LumiSoft.Net.MIME
     /// </summary>
     public class MIME_h_Provider
     {
-        private Type                    m_pDefaultHeaderField;
-        private Dictionary<string,Type> m_pHeadrFields;
+        private Type m_pDefaultHeaderField;
+        private Dictionary<string, Type> m_pHeadrFields;
 
         /// <summary>
         /// Default constructor.
@@ -18,9 +18,9 @@ namespace LumiSoft.Net.MIME
         {
             m_pDefaultHeaderField = typeof(MIME_h_Unstructured);
 
-            m_pHeadrFields = new Dictionary<string,Type>(StringComparer.CurrentCultureIgnoreCase);
-            m_pHeadrFields.Add("Content-Type",typeof(MIME_h_ContentType));
-            m_pHeadrFields.Add("Content-Disposition",typeof(MIME_h_ContentDisposition));
+            m_pHeadrFields = new Dictionary<string, Type>(StringComparer.CurrentCultureIgnoreCase);
+            m_pHeadrFields.Add("Content-Type", typeof(MIME_h_ContentType));
+            m_pHeadrFields.Add("Content-Disposition", typeof(MIME_h_ContentDisposition));
         }
 
 
@@ -35,32 +35,26 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public MIME_h Parse(string field)
         {
-            if(field == null){
-                throw new ArgumentNullException(nameof(field));
-            }
+            if (field == null) throw new ArgumentNullException(nameof(field));
 
             // <CRLF> is misssing from end, add it.
-            if(!field.EndsWith("\r\n")){
-                field += "\r\n";
-            }
+            if (!field.EndsWith("\r\n")) field += "\r\n";
 
-            MIME_h   headerField = null;
-            var name_value  = field.Split(new[]{':'},2);
-            var   name        = name_value[0].Trim();
-            if(name == string.Empty){
-                throw new ParseException("Invalid header field value '" + field + "'.");
-            }
+            MIME_h headerField = null;
+            var name_value = field.Split(new[] {':'}, 2);
+            var name = name_value[0].Trim();
+            if (name == string.Empty) throw new ParseException("Invalid header field value '" + field + "'.");
 
-            try{
-                if(m_pHeadrFields.ContainsKey(name)){ 
-                    headerField = (MIME_h)m_pHeadrFields[name].GetMethod("Parse").Invoke(null,new object[]{field});
-                }
-                else{
-                    headerField = (MIME_h)m_pDefaultHeaderField.GetMethod("Parse").Invoke(null,new object[]{field});
-                }
+            try
+            {
+                if (m_pHeadrFields.ContainsKey(name))
+                    headerField = (MIME_h) m_pHeadrFields[name].GetMethod("Parse").Invoke(null, new object[] {field});
+                else
+                    headerField = (MIME_h) m_pDefaultHeaderField.GetMethod("Parse").Invoke(null, new object[] {field});
             }
-            catch(Exception x){
-                headerField = new MIME_h_Unparsed(field,x.InnerException);
+            catch (Exception x)
+            {
+                headerField = new MIME_h_Unparsed(field, x.InnerException);
             }
 
             return headerField;
@@ -81,13 +75,11 @@ namespace LumiSoft.Net.MIME
         {
             get => m_pDefaultHeaderField;
 
-            set{
-                if(value == null){
-                    throw new ArgumentNullException("DefaultHeaderField");
-                }                
-                if(!value.GetType().IsSubclassOf(typeof(MIME_h))){
+            set
+            {
+                if (value == null) throw new ArgumentNullException("DefaultHeaderField");
+                if (!value.GetType().IsSubclassOf(typeof(MIME_h)))
                     throw new ArgumentException("Property 'DefaultHeaderField' value must be based on MIME_h class.");
-                }
 
                 m_pDefaultHeaderField = value;
             }
@@ -96,7 +88,7 @@ namespace LumiSoft.Net.MIME
         /// <summary>
         /// Gets header fields parsers collection.
         /// </summary>
-        public Dictionary<string,Type> HeaderFields => m_pHeadrFields;
+        public Dictionary<string, Type> HeaderFields => m_pHeadrFields;
 
         #endregion
     }

@@ -66,7 +66,7 @@ namespace BugNET.Providers.HtmlEditorProviders
         /// <exception cref="T:System.InvalidOperationException">An attempt is made to call <see cref="M:System.Configuration.Provider.ProviderBase.Initialize(System.String,System.Collections.Specialized.NameValueCollection)"/> on a provider after the provider has already been initialized.</exception>
         public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
         {
-            if ((config == null) || (config.Count == 0))
+            if (config == null || config.Count == 0)
                 throw new ArgumentNullException(nameof(config), "You must supply a valid configuration dictionary.");
 
             if (string.IsNullOrEmpty(config["description"]))

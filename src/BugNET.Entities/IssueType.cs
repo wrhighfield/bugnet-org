@@ -48,7 +48,5 @@ namespace BugNET.Entities
         public string ImageUrl { get; set; }
 
         #endregion
-
-
     }
 }

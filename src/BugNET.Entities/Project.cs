@@ -4,7 +4,6 @@ using BugNET.Common;
 
 namespace BugNET.Entities
 {
-
     /// <summary>
     /// Summary description for Project.
     /// </summary>

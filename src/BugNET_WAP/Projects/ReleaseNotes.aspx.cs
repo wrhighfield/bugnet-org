@@ -8,21 +8,21 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Projects
 {
-    public partial class ReleaseNotes : BasePage
+    public partial class ReleaseNotes : BugNetBasePage
     {
-        int MilestoneId
+        private int MilestoneId
         {
-            get { return ViewState.Get("MilestoneId", 0); }
-            set { ViewState.Set("MilestoneId", value); }
+            get => ViewState.Get("MilestoneId", 0);
+            set => ViewState.Set("MilestoneId", value);
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            Literal1.Text = GetLocalResourceObject("Page.Title").ToString();
+            Literal1.Text = GetLocalString("Page.Title");
 
             if (!IsPostBack)
             {
@@ -51,7 +51,8 @@ namespace BugNET.Projects
             rptReleaseNotes.DataSource = IssueTypeManager.GetByProjectId(ProjectId);
             rptReleaseNotes.DataBind();
 
-            Output.Text = string.Format("<h1>{2} - {0} - {1}</h1>", litProject.Text, litMilestone.Text, GetLocalResourceObject("Page.Title"));
+            Output.Text = string.Format(@"<h1>{2} - {0} - {1}</h1>", litProject.Text, litMilestone.Text,
+                GetLocalString("Page.Title"));
             Output.Text += RenderControl(rptReleaseNotes);
         }
 
@@ -64,22 +65,22 @@ namespace BugNET.Projects
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var it = (Literal)e.Item.FindControl("IssueType");
-            var issuesList = (Repeater)e.Item.FindControl("IssuesList");
-            var issueType = (IssueType)e.Item.DataItem;
+            var it = (Literal) e.Item.FindControl("IssueType");
+            var issuesList = (Repeater) e.Item.FindControl("IssuesList");
+            var issueType = (IssueType) e.Item.DataItem;
             it.Text = issueType.Name;
 
             var queryClauses = new List<QueryClause>
-        	{
-        	    new QueryClause("AND", "iv.[IssueTypeId]", "=", issueType.Id.ToString(), SqlDbType.Int),
+            {
+                new QueryClause("AND", "iv.[IssueTypeId]", "=", issueType.Id.ToString(), SqlDbType.Int),
                 new QueryClause("AND", "iv.[IssueMilestoneId]", "=", MilestoneId.ToString(), SqlDbType.Int),
-				new QueryClause("AND", "iv.[IsClosed]", "=", "1", SqlDbType.Int)
-        	};
+                new QueryClause("AND", "iv.[IsClosed]", "=", "1", SqlDbType.Int)
+            };
 
             var sortList = new List<KeyValuePair<string, string>>
-        	{
-				new KeyValuePair<string, string>("iv.[IssueId]", "DESC")
-        	};
+            {
+                new KeyValuePair<string, string>("iv.[IssueId]", "DESC")
+            };
 
             var issueList = IssueManager.PerformQuery(queryClauses, sortList, ProjectId);
 
@@ -118,10 +119,11 @@ namespace BugNET.Projects
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var it = (Literal)e.Item.FindControl("Issue");
-            var issue = (Issue)e.Item.DataItem;
+            var it = (Literal) e.Item.FindControl("Issue");
+            var issue = (Issue) e.Item.DataItem;
 
-            it.Text = string.Format("<a href=\"{3}Issues/IssueDetail.aspx?id={2}\">{0}</a> - {1}", issue.FullId, issue.Title, issue.Id, HostSettingManager.DefaultUrl);
+            it.Text = string.Format(@"<a href=""{3}Issues/IssueDetail.aspx?id={2}"">{0}</a> - {1}", issue.FullId,
+                issue.Title, issue.Id, HostSettingManager.DefaultUrl);
         }
     }
 }

@@ -15,6 +15,7 @@ namespace BugNET.Common
         /// Text
         /// </summary>
         Text = 1,
+
         /// <summary>
         /// HTML
         /// </summary>

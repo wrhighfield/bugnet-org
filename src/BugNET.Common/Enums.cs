@@ -43,14 +43,11 @@ namespace BugNET.Common
 
     public enum ProjectAccessType
     {
-        [XmlEnum(Name = "None")]
-        None = 0,
+        [XmlEnum(Name = "None")] None = 0,
 
-        [XmlEnum(Name = "Public")]
-        Public = 1,
+        [XmlEnum(Name = "Public")] Public = 1,
 
-        [XmlEnum(Name = "Private")]
-        Private = 2
+        [XmlEnum(Name = "Private")] Private = 2
     }
 
     public enum IssueVisibility

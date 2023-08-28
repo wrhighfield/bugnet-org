@@ -1,4 +1,4 @@
-﻿namespace BugNET.UserInterfaceLayer
+﻿namespace BugNET.UI
 {
     public interface IEditHostSettingControl
     {
@@ -6,7 +6,7 @@
         /// Updates this instance.
         /// </summary>
         /// <returns></returns>
-       bool Update();
+        bool Update();
 
         /// <summary>
         /// Inits this instance.
@@ -18,9 +18,6 @@
         /// Gets a value indicating whether [show save button].
         /// </summary>
         /// <value><c>true</c> if [show save button]; otherwise, <c>false</c>.</value>
-        bool ShowSaveButton
-        {
-            get;
-        }
+        bool ShowSaveButton { get; }
     }
 }

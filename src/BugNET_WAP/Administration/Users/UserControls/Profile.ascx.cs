@@ -2,18 +2,19 @@ using System;
 using System.Web.UI;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Administration.Users.UserControls
 {
     public partial class Profile : BaseUserControlUserAdmin, IEditUserControl
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public event ActionEventHandler Action;
 
-        void OnAction(ActionEventArgs args)
+        private void OnAction(ActionEventArgs args)
         {
             if (Action != null)
                 Action(this, args);
@@ -21,8 +22,8 @@ namespace BugNET.Administration.Users.UserControls
 
         public Guid UserId
         {
-            get { return ViewState.Get("UserId", Guid.Empty); }
-            set { ViewState.Set("UserId", value); }
+            get => ViewState.Get("UserId", Guid.Empty);
+            set => ViewState.Set("UserId", value);
         }
 
         public void Initialize()
@@ -63,8 +64,8 @@ namespace BugNET.Administration.Users.UserControls
                     profile.FirstName = FirstName.Text;
                     profile.LastName = LastName.Text;
 
-                    ActionMessage.ShowSuccessMessage(GetLocalResourceObject("UpdateProfile").ToString());
-                    OnAction(new ActionEventArgs { Trigger = ActionTriggers.Save });
+                    ActionMessage.ShowSuccessMessage(GetLocalString("UpdateProfile"));
+                    OnAction(new ActionEventArgs {Trigger = ActionTriggers.Save});
                 }
             }
             catch

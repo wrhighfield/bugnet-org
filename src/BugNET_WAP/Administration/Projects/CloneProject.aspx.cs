@@ -1,10 +1,10 @@
 using System;
 using BugNET.BLL;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Projects
 {
-    public partial class CloneProject : BasePage
+    public partial class CloneProject : BugNetBasePage
     {
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -32,7 +32,8 @@ namespace BugNET.Administration.Projects
         {
             if (!IsValid) return;
 
-            var newProjectId = ProjectManager.CloneProject(Convert.ToInt32(ddlProjects.SelectedValue), txtNewProjectName.Text);
+            var newProjectId =
+                ProjectManager.CloneProject(Convert.ToInt32(ddlProjects.SelectedValue), txtNewProjectName.Text);
 
             if (newProjectId > 0)
                 Response.Redirect("ProjectList.aspx");

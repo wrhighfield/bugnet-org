@@ -22,9 +22,7 @@ namespace LumiSoft.Net
         /// <returns>Returns local host name or argument <b>hostName</b> value if it's specified.</returns>
         public static string GetLocalHostName(string hostName)
         {
-            if(string.IsNullOrEmpty(hostName)){
-                return Dns.GetHostName();
-            }
+            if (string.IsNullOrEmpty(hostName)) return Dns.GetHostName();
 
             return hostName;
         }
@@ -39,9 +37,9 @@ namespace LumiSoft.Net
         /// <param name="array1">Array 1.</param>
         /// <param name="array2">Array 2</param>
         /// <returns>Returns true if both arrays are equal.</returns>
-        public static bool CompareArray(Array array1,Array array2)
+        public static bool CompareArray(Array array1, Array array2)
         {
-            return CompareArray(array1,array2,array2.Length);
+            return CompareArray(array1, array2, array2.Length);
         }
 
         /// <summary>
@@ -51,20 +49,12 @@ namespace LumiSoft.Net
         /// <param name="array2">Array 2</param>
         /// <param name="array2Count">Number of bytes in array 2 used for compare.</param>
         /// <returns>Returns true if both arrays are equal.</returns>
-        public static bool CompareArray(Array array1,Array array2,int array2Count)
+        public static bool CompareArray(Array array1, Array array2, int array2Count)
         {
-            if(array1 == null && array2 == null){
-                return true;
-            }
-            if(array1 == null && array2 != null){
-                return false;
-            }
-            if(array1 != null && array2 == null){
-                return false;
-            }            
-            if(array1.Length != array2Count){
-                return false;
-            }
+            if (array1 == null && array2 == null) return true;
+            if (array1 == null && array2 != null) return false;
+            if (array1 != null && array2 == null) return false;
+            if (array1.Length != array2Count) return false;
 
             return !array1.Cast<object>().Where((t, i) => !array1.GetValue(i).Equals(array2.GetValue(i))).Any();
 
@@ -83,9 +73,7 @@ namespace LumiSoft.Net
         /// <exception cref="ArgumentNullException">Is raised when <b>array</b> is null.</exception>
         public static Array ReverseArray(Array array)
         {
-            if(array == null){
-                throw new ArgumentNullException(nameof(array));
-            }
+            if (array == null) throw new ArgumentNullException(nameof(array));
 
             Array.Reverse(array);
 
@@ -102,17 +90,14 @@ namespace LumiSoft.Net
         /// <param name="values">String values.</param>
         /// <param name="delimiter">Values delimiter.</param>
         /// <returns>Returns array elements as string.</returns>
-        public static string ArrayToString(string[] values,string delimiter)
+        public static string ArrayToString(string[] values, string delimiter)
         {
-            if(values == null){
-                return "";
-            }
+            if (values == null) return "";
 
             var retVal = new StringBuilder();
-            for(var i=0;i<values.Length;i++){
-                if(i > 0){
-                    retVal.Append(delimiter);
-                }
+            for (var i = 0; i < values.Length; i++)
+            {
+                if (i > 0) retVal.Append(delimiter);
 
                 retVal.Append(values[i]);
             }
@@ -131,28 +116,21 @@ namespace LumiSoft.Net
         /// <param name="target">Target stream. Writing starts from stream current position.</param>
         /// <param name="blockSize">Specifies transfer block size in bytes.</param>
         /// <returns>Returns number of bytes copied.</returns>
-        public static long StreamCopy(Stream source,Stream target,int blockSize)
+        public static long StreamCopy(Stream source, Stream target, int blockSize)
         {
-            if(source == null){
-                throw new ArgumentNullException(nameof(source));
-            }
-            if(target == null){
-                throw new ArgumentNullException(nameof(target));
-            }
-            if(blockSize < 1024){
-                throw new ArgumentException("Argument 'blockSize' value must be >= 1024.");
-            }
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            if (blockSize < 1024) throw new ArgumentException("Argument 'blockSize' value must be >= 1024.");
 
-            var buffer      = new byte[blockSize];
-            long   totalRead = 0;            
-            while(true){
-                var readCount = source.Read(buffer,0,buffer.Length);
+            var buffer = new byte[blockSize];
+            long totalRead = 0;
+            while (true)
+            {
+                var readCount = source.Read(buffer, 0, buffer.Length);
                 // We reached end of stream, we read all data successfully.
-                if(readCount == 0){
-                    return totalRead;
-                }
+                if (readCount == 0) return totalRead;
 
-                target.Write(buffer,0,readCount);
+                target.Write(buffer, 0, readCount);
                 totalRead += readCount;
             }
         }
@@ -173,31 +151,23 @@ namespace LumiSoft.Net
         /// returns positive value if destination IP is bigger than source IP,
         /// returns negative value if destination IP is smaller than source IP.
         /// </returns>
-        public static int CompareIp(IPAddress source,IPAddress destination)
+        public static int CompareIp(IPAddress source, IPAddress destination)
         {
-            var sourceIpBytes      = source.GetAddressBytes();
+            var sourceIpBytes = source.GetAddressBytes();
             var destinationIpBytes = destination.GetAddressBytes();
 
             // IPv4 and IPv6
-            if(sourceIpBytes.Length < destinationIpBytes.Length){
-                return 1;
-            }
+            if (sourceIpBytes.Length < destinationIpBytes.Length) return 1;
             // IPv6 and IPv4
 
-            if(sourceIpBytes.Length > destinationIpBytes.Length){
-                return -1;
-            }
+            if (sourceIpBytes.Length > destinationIpBytes.Length) return -1;
             // IPv4 and IPv4 OR IPv6 and IPv6
 
-            for(var i=0;i<sourceIpBytes.Length;i++)
+            for (var i = 0; i < sourceIpBytes.Length; i++)
             {
-                if(sourceIpBytes[i] < destinationIpBytes[i]){
-                    return 1;
-                }
+                if (sourceIpBytes[i] < destinationIpBytes[i]) return 1;
 
-                if(sourceIpBytes[i] > destinationIpBytes[i]){
-                    return -1;
-                }
+                if (sourceIpBytes[i] > destinationIpBytes[i]) return -1;
             }
 
             return 0;
@@ -215,11 +185,9 @@ namespace LumiSoft.Net
         /// <exception cref="ArgumentNullException">Is raised when <b>value</b> is null reference.</exception>
         public static bool IsIpAddress(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            return IPAddress.TryParse(value,out _);
+            return IPAddress.TryParse(value, out _);
         }
 
         #endregion
@@ -234,15 +202,11 @@ namespace LumiSoft.Net
         /// <exception cref="ArgumentNullException">Is raised when <b>ip</b> s null reference.</exception>
         public static bool IsMultiCastAddress(IPAddress ip)
         {
-            if(ip == null){
-                throw new ArgumentNullException(nameof(ip));
-            }
+            if (ip == null) throw new ArgumentNullException(nameof(ip));
 
             // IPv4 multi-cast 224.0.0.0 to 239.255.255.255
 
-            if(ip.IsIPv6Multicast){
-                return true;
-            }
+            if (ip.IsIPv6Multicast) return true;
 
             if (ip.AddressFamily != AddressFamily.InterNetwork) return false;
             var bytes = ip.GetAddressBytes();
@@ -261,9 +225,7 @@ namespace LumiSoft.Net
         /// <returns>Returns true if IP is private IP.</returns>
         public static bool IsPrivateIp(string ip)
         {
-            if(ip == null){
-                throw new ArgumentNullException(nameof(ip));
-            }
+            if (ip == null) throw new ArgumentNullException(nameof(ip));
 
             return IsPrivateIp(IPAddress.Parse(ip));
         }
@@ -276,27 +238,21 @@ namespace LumiSoft.Net
         /// <exception cref="ArgumentNullException">Is raised when <b>ip</b> is null reference.</exception>
         private static bool IsPrivateIp(IPAddress ip)
         {
-            if(ip == null){
-                throw new ArgumentNullException(nameof(ip));
-            }
+            if (ip == null) throw new ArgumentNullException(nameof(ip));
 
             if (ip.AddressFamily != AddressFamily.InterNetwork) return false;
             var ipBytes = ip.GetAddressBytes();
 
             /* Private IPs:
-					First Octet = 192 AND Second Octet = 168 (Example: 192.168.X.X) 
-					First Octet = 172 AND (Second Octet >= 16 AND Second Octet <= 31) (Example: 172.16.X.X - 172.31.X.X)
-					First Octet = 10 (Example: 10.X.X.X)
-					First Octet = 169 AND Second Octet = 254 (Example: 169.254.X.X)
+                    First Octet = 192 AND Second Octet = 168 (Example: 192.168.X.X)
+                    First Octet = 172 AND (Second Octet >= 16 AND Second Octet <= 31) (Example: 172.16.X.X - 172.31.X.X)
+                    First Octet = 10 (Example: 10.X.X.X)
+                    First Octet = 169 AND Second Octet = 254 (Example: 169.254.X.X)
 
-				*/
+                */
 
-            if(ipBytes[0] == 192 && ipBytes[1] == 168){
-                return true;
-            }
-            if(ipBytes[0] == 172 && ipBytes[1] >= 16 && ipBytes[1] <= 31){
-                return true;
-            }
+            if (ipBytes[0] == 192 && ipBytes[1] == 168) return true;
+            if (ipBytes[0] == 172 && ipBytes[1] >= 16 && ipBytes[1] <= 31) return true;
             switch (ipBytes[0])
             {
                 case 10:
@@ -320,17 +276,17 @@ namespace LumiSoft.Net
         /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
         public static IPEndPoint ParseIpEndPoint(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            try{
+            try
+            {
                 var ipPort = value.Split(':');
 
-                return new IPEndPoint(IPAddress.Parse(ipPort[0]),Convert.ToInt32(ipPort[1]));
+                return new IPEndPoint(IPAddress.Parse(ipPort[0]), Convert.ToInt32(ipPort[1]));
             }
-            catch(Exception x){
-                throw new ArgumentException("Invalid IPEndPoint value.",nameof(value),x);
+            catch (Exception x)
+            {
+                throw new ArgumentException("Invalid IPEndPoint value.", nameof(value), x);
             }
         }
 
@@ -339,22 +295,20 @@ namespace LumiSoft.Net
 
         #region static method IsInteger
 
-		/// <summary>
-		/// Checks if specified string is integer(int/long).
-		/// </summary>
-		/// <param name="value"></param>
-		/// <returns>Returns true if specified string is integer.</returns>
+        /// <summary>
+        /// Checks if specified string is integer(int/long).
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns>Returns true if specified string is integer.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>value</b> is null reference.</exception>
-		public static bool IsInteger(string value)
-		{
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+        public static bool IsInteger(string value)
+        {
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            return long.TryParse(value,out _);
-		}
+            return long.TryParse(value, out _);
+        }
 
-		#endregion
+        #endregion
 
         #region static method IsAscii
 
@@ -366,16 +320,14 @@ namespace LumiSoft.Net
         /// <exception cref="ArgumentNullException">Is raised when <b>value</b> is null reference.</exception>
         public static bool IsAscii(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             return value.All(c => c <= 127);
         }
 
         #endregion
 
-               
+
         #region static method IsSocketAsyncSupported
 
         /// <summary>
@@ -384,12 +336,14 @@ namespace LumiSoft.Net
         /// <returns>returns true if supported, otherwise false.</returns>
         public static bool IsSocketAsyncSupported()
         {
-            try{                            
-                using(var e = new SocketAsyncEventArgs()){
+            try
+            {
+                using (var e = new SocketAsyncEventArgs())
+                {
                     return true;
                 }
             }
-            catch(NotSupportedException nX)
+            catch (NotSupportedException nX)
             {
                 _ = nX.Message;
                 return false;
@@ -407,29 +361,25 @@ namespace LumiSoft.Net
         /// <param name="protocolType">Protocol type.</param>
         /// <returns>Returns newly created socket.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>localEP</b> is null reference.</exception>
-        public static Socket CreateSocket(IPEndPoint localEp,ProtocolType protocolType)
+        public static Socket CreateSocket(IPEndPoint localEp, ProtocolType protocolType)
         {
-            if(localEp == null){
-                throw new ArgumentNullException(nameof(localEp));
-            }
+            if (localEp == null) throw new ArgumentNullException(nameof(localEp));
 
             var socketType = SocketType.Stream;
-            if(protocolType == ProtocolType.Udp){
-                socketType = SocketType.Dgram;
-            }
-                        
+            if (protocolType == ProtocolType.Udp) socketType = SocketType.Dgram;
+
             switch (localEp.AddressFamily)
             {
                 case AddressFamily.InterNetwork:
                 {
-                    var socket = new Socket(AddressFamily.InterNetwork,socketType,protocolType);
+                    var socket = new Socket(AddressFamily.InterNetwork, socketType, protocolType);
                     socket.Bind(localEp);
 
                     return socket;
                 }
                 case AddressFamily.InterNetworkV6:
                 {
-                    var socket = new Socket(AddressFamily.InterNetworkV6,socketType,protocolType);
+                    var socket = new Socket(AddressFamily.InterNetworkV6, socketType, protocolType);
                     socket.Bind(localEp);
 
                     return socket;
@@ -445,119 +395,96 @@ namespace LumiSoft.Net
         #region static method ToHex
 
         /// <summary>
-		/// Converts specified data to HEX string.
-		/// </summary>
-		/// <param name="data">Data to convert.</param>
-		/// <returns>Returns hex string.</returns>
+        /// Converts specified data to HEX string.
+        /// </summary>
+        /// <param name="data">Data to convert.</param>
+        /// <returns>Returns hex string.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>data</b> is null reference.</exception>
-		public static string ToHex(byte[] data)
-		{
-            if(data == null){
-                throw new ArgumentNullException(nameof(data));
-            }
+        public static string ToHex(byte[] data)
+        {
+            if (data == null) throw new ArgumentNullException(nameof(data));
 
-			return BitConverter.ToString(data).ToLower().Replace("-","");
-		}
+            return BitConverter.ToString(data).ToLower().Replace("-", "");
+        }
 
-		/// <summary>
-		/// Converts specified string to HEX string.
-		/// </summary>
-		/// <param name="text">String to convert.</param>
-		/// <returns>Returns hex string.</returns>
+        /// <summary>
+        /// Converts specified string to HEX string.
+        /// </summary>
+        /// <param name="text">String to convert.</param>
+        /// <returns>Returns hex string.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>text</b> is null reference.</exception>
-		public static string ToHex(string text)
-		{
-            if(text == null){
-                throw new ArgumentNullException(nameof(text));
-            }
+        public static string ToHex(string text)
+        {
+            if (text == null) throw new ArgumentNullException(nameof(text));
 
-			return BitConverter.ToString(Encoding.Default.GetBytes(text)).ToLower().Replace("-","");
-		}
+            return BitConverter.ToString(Encoding.Default.GetBytes(text)).ToLower().Replace("-", "");
+        }
 
-		#endregion
+        #endregion
 
         #region static method FromHex
 
-		/// <summary>
-		/// Converts hex byte data to normal byte data. Hex data must be in two bytes pairs, for example: 0F,FF,A3,... .
-		/// </summary>
-		/// <param name="hexData">Hex data.</param>
-		/// <returns>Returns decoded data.</returns>
+        /// <summary>
+        /// Converts hex byte data to normal byte data. Hex data must be in two bytes pairs, for example: 0F,FF,A3,... .
+        /// </summary>
+        /// <param name="hexData">Hex data.</param>
+        /// <returns>Returns decoded data.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>hexData</b> is null reference.</exception>
-		public static byte[] FromHex(byte[] hexData)
-		{
-            if(hexData == null){
-                throw new ArgumentNullException(nameof(hexData));
+        public static byte[] FromHex(byte[] hexData)
+        {
+            if (hexData == null) throw new ArgumentNullException(nameof(hexData));
+
+            if (hexData.Length < 2 || hexData.Length / (double) 2 != Math.Floor(hexData.Length / (double) 2))
+                throw new Exception(
+                    "Illegal hex data, hex data must be in two bytes pairs, for example: 0F,FF,A3,... .");
+
+            var retVal = new MemoryStream(hexData.Length / 2);
+            // Loop hex value pairs
+            for (var i = 0; i < hexData.Length; i += 2)
+            {
+                var hexPairInDecimal = new byte[2];
+                // We need to convert hex char to decimal number, for example F = 15
+                for (var h = 0; h < 2; h++)
+                    if ((char) hexData[i + h] == '0')
+                        hexPairInDecimal[h] = 0;
+                    else if ((char) hexData[i + h] == '1')
+                        hexPairInDecimal[h] = 1;
+                    else if ((char) hexData[i + h] == '2')
+                        hexPairInDecimal[h] = 2;
+                    else if ((char) hexData[i + h] == '3')
+                        hexPairInDecimal[h] = 3;
+                    else if ((char) hexData[i + h] == '4')
+                        hexPairInDecimal[h] = 4;
+                    else if ((char) hexData[i + h] == '5')
+                        hexPairInDecimal[h] = 5;
+                    else if ((char) hexData[i + h] == '6')
+                        hexPairInDecimal[h] = 6;
+                    else if ((char) hexData[i + h] == '7')
+                        hexPairInDecimal[h] = 7;
+                    else if ((char) hexData[i + h] == '8')
+                        hexPairInDecimal[h] = 8;
+                    else if ((char) hexData[i + h] == '9')
+                        hexPairInDecimal[h] = 9;
+                    else if ((char) hexData[i + h] == 'A' || (char) hexData[i + h] == 'a')
+                        hexPairInDecimal[h] = 10;
+                    else if ((char) hexData[i + h] == 'B' || (char) hexData[i + h] == 'b')
+                        hexPairInDecimal[h] = 11;
+                    else if ((char) hexData[i + h] == 'C' || (char) hexData[i + h] == 'c')
+                        hexPairInDecimal[h] = 12;
+                    else if ((char) hexData[i + h] == 'D' || (char) hexData[i + h] == 'd')
+                        hexPairInDecimal[h] = 13;
+                    else if ((char) hexData[i + h] == 'E' || (char) hexData[i + h] == 'e')
+                        hexPairInDecimal[h] = 14;
+                    else if ((char) hexData[i + h] == 'F' || (char) hexData[i + h] == 'f') hexPairInDecimal[h] = 15;
+
+                // Join hex 4 bit(left hex char) + 4bit(right hex char) in bytes 8 it
+                retVal.WriteByte((byte) ((hexPairInDecimal[0] << 4) | hexPairInDecimal[1]));
             }
 
-			if(hexData.Length < 2 || hexData.Length / (double)2 != Math.Floor(hexData.Length / (double)2)){
-				throw new Exception("Illegal hex data, hex data must be in two bytes pairs, for example: 0F,FF,A3,... .");
-			}
+            return retVal.ToArray();
+        }
 
-			var retVal = new MemoryStream(hexData.Length / 2);
-			// Loop hex value pairs
-			for(var i=0;i<hexData.Length;i+=2){
-				var hexPairInDecimal = new byte[2];
-				// We need to convert hex char to decimal number, for example F = 15
-				for(var h=0;h<2;h++){
-					if((char)hexData[i + h] == '0'){
-						hexPairInDecimal[h] = 0;
-					}
-					else if((char)hexData[i + h] == '1'){
-						hexPairInDecimal[h] = 1;
-					}
-					else if((char)hexData[i + h] == '2'){
-						hexPairInDecimal[h] = 2;
-					}
-					else if((char)hexData[i + h] == '3'){
-						hexPairInDecimal[h] = 3;
-					}
-					else if((char)hexData[i + h] == '4'){
-						hexPairInDecimal[h] = 4;
-					}
-					else if((char)hexData[i + h] == '5'){
-						hexPairInDecimal[h] = 5;
-					}
-					else if((char)hexData[i + h] == '6'){
-						hexPairInDecimal[h] = 6;
-					}
-					else if((char)hexData[i + h] == '7'){
-						hexPairInDecimal[h] = 7;
-					}
-					else if((char)hexData[i + h] == '8'){
-						hexPairInDecimal[h] = 8;
-					}
-					else if((char)hexData[i + h] == '9'){
-						hexPairInDecimal[h] = 9;
-					}
-					else if((char)hexData[i + h] == 'A' || (char)hexData[i + h] == 'a'){
-						hexPairInDecimal[h] = 10;
-					}
-					else if((char)hexData[i + h] == 'B' || (char)hexData[i + h] == 'b'){
-						hexPairInDecimal[h] = 11;
-					}
-					else if((char)hexData[i + h] == 'C' || (char)hexData[i + h] == 'c'){
-						hexPairInDecimal[h] = 12;
-					}
-					else if((char)hexData[i + h] == 'D' || (char)hexData[i + h] == 'd'){
-						hexPairInDecimal[h] = 13;
-					}
-					else if((char)hexData[i + h] == 'E' || (char)hexData[i + h] == 'e'){
-						hexPairInDecimal[h] = 14;
-					}
-					else if((char)hexData[i + h] == 'F' || (char)hexData[i + h] == 'f'){
-						hexPairInDecimal[h] = 15;
-					}
-				}
-
-				// Join hex 4 bit(left hex char) + 4bit(right hex char) in bytes 8 it
-				retVal.WriteByte((byte)((hexPairInDecimal[0] << 4) | hexPairInDecimal[1]));
-			}
-
-			return retVal.ToArray();
-		}
-
-		#endregion
+        #endregion
 
 
         #region static method FromBase64
@@ -570,13 +497,11 @@ namespace LumiSoft.Net
         /// <exception cref="ArgumentNullException">Is raised when <b>data</b> is null reference.</exception>
         public static byte[] FromBase64(string data)
         {
-            if(data == null){
-                throw new ArgumentNullException(nameof(data));
-            }
+            if (data == null) throw new ArgumentNullException(nameof(data));
 
             var base64 = new Base64();
 
-            return base64.Decode(data,true);
+            return base64.Decode(data, true);
         }
 
         /// <summary>
@@ -587,13 +512,11 @@ namespace LumiSoft.Net
         /// <exception cref="ArgumentNullException">Is raised when <b>data</b> is null reference.</exception>
         public static byte[] FromBase64(byte[] data)
         {
-            if(data == null){
-                throw new ArgumentNullException(nameof(data));
-            }
+            if (data == null) throw new ArgumentNullException(nameof(data));
 
             var base64 = new Base64();
 
-            return base64.Decode(data,0,data.Length,true);
+            return base64.Decode(data, 0, data.Length, true);
         }
 
         #endregion
@@ -601,253 +524,256 @@ namespace LumiSoft.Net
         #region static method Base64Encode
 
         /// <summary>
-		/// Encodes specified data with base64 encoding.
-		/// </summary>
-		/// <param name="data">Data to encode.</param>
-		/// <returns></returns>
-		public static byte[] Base64Encode(byte[] data)
-		{
-			return Base64EncodeEx(data,null,true);
-		}
+        /// Encodes specified data with base64 encoding.
+        /// </summary>
+        /// <param name="data">Data to encode.</param>
+        /// <returns></returns>
+        public static byte[] Base64Encode(byte[] data)
+        {
+            return Base64EncodeEx(data, null, true);
+        }
 
-		/// <summary>
-		/// Encodes specified data with bas64 encoding.
-		/// </summary>
-		/// <param name="data">Data to to encode.</param>
-		/// <param name="base64Chars">Custom base64 chars (64 chars) or null if default chars used.</param>
-		/// <param name="padd">Pad missing block chars. Normal base64 must be 4 bytes blocks, if not 4 bytes in block, 
-		/// missing bytes must be padded with '='. Modified base64 just skips missing bytes.</param>
-		/// <returns></returns>
-		public static byte[] Base64EncodeEx(byte[] data,char[] base64Chars,bool padd)
-		{
-			/* RFC 2045 6.8.  Base64 Content-Transfer-Encoding
-			
-				Base64 is processed from left to right by 4 6-bit byte block, 4 6-bit byte block 
-				are converted to 3 8-bit bytes.
-				If base64 4 byte block doesn't have 3 8-bit bytes, missing bytes are marked with =. 
-				
-			
-				Value Encoding  Value Encoding  Value Encoding  Value Encoding
-					0 A            17 R            34 i            51 z
-					1 B            18 S            35 j            52 0
-					2 C            19 T            36 k            53 1
-					3 D            20 U            37 l            54 2
-					4 E            21 V            38 m            55 3
-					5 F            22 W            39 n            56 4
-					6 G            23 X            40 o            57 5
-					7 H            24 Y            41 p            58 6
-					8 I            25 Z            42 q            59 7
-					9 J            26 a            43 r            60 8
-					10 K           27 b            44 s            61 9
-					11 L           28 c            45 t            62 +
-					12 M           29 d            46 u            63 /
-					13 N           30 e            47 v
-					14 O           31 f            48 w         (pad) =
-					15 P           32 g            49 x
-					16 Q           33 h            50 y
-					
-				NOTE: 4 base64 6-bit bytes = 3 8-bit bytes				
-					// |    6-bit    |    6-bit    |    6-bit    |    6-bit    |
-					// | 1 2 3 4 5 6 | 1 2 3 4 5 6 | 1 2 3 4 5 6 | 1 2 3 4 5 6 |
-					// |    8-bit         |    8-bit        |    8-bit         |
-			*/
+        /// <summary>
+        /// Encodes specified data with bas64 encoding.
+        /// </summary>
+        /// <param name="data">Data to to encode.</param>
+        /// <param name="base64Chars">Custom base64 chars (64 chars) or null if default chars used.</param>
+        /// <param name="padd">Pad missing block chars. Normal base64 must be 4 bytes blocks, if not 4 bytes in block, 
+        /// missing bytes must be padded with '='. Modified base64 just skips missing bytes.</param>
+        /// <returns></returns>
+        public static byte[] Base64EncodeEx(byte[] data, char[] base64Chars, bool padd)
+        {
+            /* RFC 2045 6.8.  Base64 Content-Transfer-Encoding
 
-			if(base64Chars != null && base64Chars.Length != 64){
-				throw new Exception("There must be 64 chars in base64Chars char array !");
-			}
+                Base64 is processed from left to right by 4 6-bit byte block, 4 6-bit byte block
+                are converted to 3 8-bit bytes.
+                If base64 4 byte block doesn't have 3 8-bit bytes, missing bytes are marked with =.
 
-			if(base64Chars == null){
-				base64Chars = new[]{
-					'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-					'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
-					'0','1','2','3','4','5','6','7','8','9','+','/'
-				};
-			}
 
-			// Convert chars to bytes
-			var base64LoockUpTable = new byte[64];
-			for(var i=0;i<64;i++){
-				base64LoockUpTable[i] = (byte)base64Chars[i];
-			}
-						
-			var encodedDataLength = (int)Math.Ceiling(data.Length * 8 / (double)6);
-			// Return value won't be integral 4 block, but has less. Padding requested, pad missing with '='
-			if(padd && encodedDataLength / (double)4 != Math.Ceiling(encodedDataLength / (double)4)){
-				encodedDataLength += (int)(Math.Ceiling(encodedDataLength / (double)4) * 4) - encodedDataLength;
-			}
+                Value Encoding  Value Encoding  Value Encoding  Value Encoding
+                    0 A            17 R            34 i            51 z
+                    1 B            18 S            35 j            52 0
+                    2 C            19 T            36 k            53 1
+                    3 D            20 U            37 l            54 2
+                    4 E            21 V            38 m            55 3
+                    5 F            22 W            39 n            56 4
+                    6 G            23 X            40 o            57 5
+                    7 H            24 Y            41 p            58 6
+                    8 I            25 Z            42 q            59 7
+                    9 J            26 a            43 r            60 8
+                    10 K           27 b            44 s            61 9
+                    11 L           28 c            45 t            62 +
+                    12 M           29 d            46 u            63 /
+                    13 N           30 e            47 v
+                    14 O           31 f            48 w         (pad) =
+                    15 P           32 g            49 x
+                    16 Q           33 h            50 y
 
-			// See how many line brakes we need
-			var numberOfLineBreaks = 0;
-			if(encodedDataLength > 76){
-				numberOfLineBreaks = (int)Math.Ceiling(encodedDataLength / (double)76) - 1;
-			}
+                NOTE: 4 base64 6-bit bytes = 3 8-bit bytes
+                    // |    6-bit    |    6-bit    |    6-bit    |    6-bit    |
+                    // | 1 2 3 4 5 6 | 1 2 3 4 5 6 | 1 2 3 4 5 6 | 1 2 3 4 5 6 |
+                    // |    8-bit         |    8-bit        |    8-bit         |
+            */
 
-			// Construct return value buffer
-			var retVal = new byte[encodedDataLength + numberOfLineBreaks * 2];  // * 2 - CRLF
+            if (base64Chars != null && base64Chars.Length != 64)
+                throw new Exception("There must be 64 chars in base64Chars char array !");
 
-			var lineBytes = 0;
-			// Loop all 3 bye blocks
-			var position = 0; 
-			for(var i=0;i<data.Length;i+=3){
-				// Do line splitting
-				if(lineBytes >= 76){
-					retVal[position + 0] = (byte)'\r';
-					retVal[position + 1] = (byte)'\n';					
-					position += 2;
-					lineBytes = 0;
-				}
-
-				// Full 3 bytes data block
-				if(data.Length - i >= 3){
-					retVal[position + 0] = base64LoockUpTable[data[i + 0] >> 2];
-					retVal[position + 1] = base64LoockUpTable[(data[i + 0] & 0x3) << 4 | data[i + 1] >> 4];
-					retVal[position + 2] = base64LoockUpTable[(data[i + 1] & 0xF) << 2 | data[i + 2] >> 6];
-					retVal[position + 3] = base64LoockUpTable[data[i + 2] & 0x3F];
-					position += 4;
-					lineBytes += 4;
-				}
-                else switch (data.Length - i)
+            if (base64Chars == null)
+                base64Chars = new[]
                 {
-                    // 2 bytes data block, left (last block)
-                    case 2:
-                    {
-                        retVal[position + 0] = base64LoockUpTable[data[i + 0] >> 2];
-                        retVal[position + 1] = base64LoockUpTable[(data[i + 0] & 0x3) << 4 | data[i + 1] >> 4];
-                        retVal[position + 2] = base64LoockUpTable[(data[i + 1] & 0xF) << 2];					
-                        if(padd){
-                            retVal[position + 3] = (byte)'=';
-                        }
+                    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+                    'U', 'V', 'W', 'X', 'Y', 'Z',
+                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                    'u', 'v', 'w', 'x', 'y', 'z',
+                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
+                };
 
-                        break;
-                    }
-                    // 1 bytes data block, left (last block)
-                    case 1:
-                    {
-                        retVal[position + 0] = base64LoockUpTable[data[i + 0] >> 2];
-                        retVal[position + 1] = base64LoockUpTable[(data[i + 0] & 0x3) << 4];					
-                        if(padd){
-                            retVal[position + 2] = (byte)'=';
-                            retVal[position + 3] = (byte)'=';
-                        }
+            // Convert chars to bytes
+            var base64LoockUpTable = new byte[64];
+            for (var i = 0; i < 64; i++) base64LoockUpTable[i] = (byte) base64Chars[i];
 
-                        break;
+            var encodedDataLength = (int) Math.Ceiling(data.Length * 8 / (double) 6);
+            // Return value won't be integral 4 block, but has less. Padding requested, pad missing with '='
+            if (padd && encodedDataLength / (double) 4 != Math.Ceiling(encodedDataLength / (double) 4))
+                encodedDataLength += (int) (Math.Ceiling(encodedDataLength / (double) 4) * 4) - encodedDataLength;
+
+            // See how many line brakes we need
+            var numberOfLineBreaks = 0;
+            if (encodedDataLength > 76) numberOfLineBreaks = (int) Math.Ceiling(encodedDataLength / (double) 76) - 1;
+
+            // Construct return value buffer
+            var retVal = new byte[encodedDataLength + numberOfLineBreaks * 2]; // * 2 - CRLF
+
+            var lineBytes = 0;
+            // Loop all 3 bye blocks
+            var position = 0;
+            for (var i = 0; i < data.Length; i += 3)
+            {
+                // Do line splitting
+                if (lineBytes >= 76)
+                {
+                    retVal[position + 0] = (byte) '\r';
+                    retVal[position + 1] = (byte) '\n';
+                    position += 2;
+                    lineBytes = 0;
+                }
+
+                // Full 3 bytes data block
+                if (data.Length - i >= 3)
+                {
+                    retVal[position + 0] = base64LoockUpTable[data[i + 0] >> 2];
+                    retVal[position + 1] = base64LoockUpTable[((data[i + 0] & 0x3) << 4) | (data[i + 1] >> 4)];
+                    retVal[position + 2] = base64LoockUpTable[((data[i + 1] & 0xF) << 2) | (data[i + 2] >> 6)];
+                    retVal[position + 3] = base64LoockUpTable[data[i + 2] & 0x3F];
+                    position += 4;
+                    lineBytes += 4;
+                }
+                else
+                {
+                    switch (data.Length - i)
+                    {
+                        // 2 bytes data block, left (last block)
+                        case 2:
+                        {
+                            retVal[position + 0] = base64LoockUpTable[data[i + 0] >> 2];
+                            retVal[position + 1] = base64LoockUpTable[((data[i + 0] & 0x3) << 4) | (data[i + 1] >> 4)];
+                            retVal[position + 2] = base64LoockUpTable[(data[i + 1] & 0xF) << 2];
+                            if (padd) retVal[position + 3] = (byte) '=';
+
+                            break;
+                        }
+                        // 1 bytes data block, left (last block)
+                        case 1:
+                        {
+                            retVal[position + 0] = base64LoockUpTable[data[i + 0] >> 2];
+                            retVal[position + 1] = base64LoockUpTable[(data[i + 0] & 0x3) << 4];
+                            if (padd)
+                            {
+                                retVal[position + 2] = (byte) '=';
+                                retVal[position + 3] = (byte) '=';
+                            }
+
+                            break;
+                        }
                     }
                 }
-			}
+            }
 
-			return retVal;
-		}
+            return retVal;
+        }
 
-		#endregion
+        #endregion
 
-		#region static method Base64Decode
-        
-		/// <summary>
-		/// Decodes base64 data. Defined in RFC 2045 6.8.  Base64 Content-Transfer-Encoding.
-		/// </summary>
-		/// <param name="base64Data">Base64 decoded data.</param>
-		/// <param name="base64Chars">Custom base64 chars (64 chars) or null if default chars used.</param>
-		/// <returns></returns>
-		public static byte[] Base64DecodeEx(byte[] base64Data,char[] base64Chars)
-		{
-			/* RFC 2045 6.8.  Base64 Content-Transfer-Encoding
-			
-				Base64 is processed from left to right by 4 6-bit byte block, 4 6-bit byte block 
-				are converted to 3 8-bit bytes.
-				If base64 4 byte block doesn't have 3 8-bit bytes, missing bytes are marked with =. 
-				
-			
-				Value Encoding  Value Encoding  Value Encoding  Value Encoding
-					0 A            17 R            34 i            51 z
-					1 B            18 S            35 j            52 0
-					2 C            19 T            36 k            53 1
-					3 D            20 U            37 l            54 2
-					4 E            21 V            38 m            55 3
-					5 F            22 W            39 n            56 4
-					6 G            23 X            40 o            57 5
-					7 H            24 Y            41 p            58 6
-					8 I            25 Z            42 q            59 7
-					9 J            26 a            43 r            60 8
-					10 K           27 b            44 s            61 9
-					11 L           28 c            45 t            62 +
-					12 M           29 d            46 u            63 /
-					13 N           30 e            47 v
-					14 O           31 f            48 w         (pad) =
-					15 P           32 g            49 x
-					16 Q           33 h            50 y
-					
-				NOTE: 4 base64 6-bit bytes = 3 8-bit bytes				
-					// |    6-bit    |    6-bit    |    6-bit    |    6-bit    |
-					// | 1 2 3 4 5 6 | 1 2 3 4 5 6 | 1 2 3 4 5 6 | 1 2 3 4 5 6 |
-					// |    8-bit         |    8-bit        |    8-bit         |
-			*/
-			
-			if(base64Chars != null && base64Chars.Length != 64){
-				throw new Exception("There must be 64 chars in base64Chars char array !");
-			}
+        #region static method Base64Decode
 
-			if(base64Chars == null){
-				base64Chars = new[]{
-					'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-					'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
-					'0','1','2','3','4','5','6','7','8','9','+','/'
-				};
-			}
+        /// <summary>
+        /// Decodes base64 data. Defined in RFC 2045 6.8.  Base64 Content-Transfer-Encoding.
+        /// </summary>
+        /// <param name="base64Data">Base64 decoded data.</param>
+        /// <param name="base64Chars">Custom base64 chars (64 chars) or null if default chars used.</param>
+        /// <returns></returns>
+        public static byte[] Base64DecodeEx(byte[] base64Data, char[] base64Chars)
+        {
+            /* RFC 2045 6.8.  Base64 Content-Transfer-Encoding
 
-			//--- Create decode table ---------------------//
-			var decodeTable = new byte[128];
-			for(var i=0;i<128;i++){
-				var mappingIndex = -1;
-				for(var bc=0;bc<base64Chars.Length;bc++)
+                Base64 is processed from left to right by 4 6-bit byte block, 4 6-bit byte block
+                are converted to 3 8-bit bytes.
+                If base64 4 byte block doesn't have 3 8-bit bytes, missing bytes are marked with =.
+
+
+                Value Encoding  Value Encoding  Value Encoding  Value Encoding
+                    0 A            17 R            34 i            51 z
+                    1 B            18 S            35 j            52 0
+                    2 C            19 T            36 k            53 1
+                    3 D            20 U            37 l            54 2
+                    4 E            21 V            38 m            55 3
+                    5 F            22 W            39 n            56 4
+                    6 G            23 X            40 o            57 5
+                    7 H            24 Y            41 p            58 6
+                    8 I            25 Z            42 q            59 7
+                    9 J            26 a            43 r            60 8
+                    10 K           27 b            44 s            61 9
+                    11 L           28 c            45 t            62 +
+                    12 M           29 d            46 u            63 /
+                    13 N           30 e            47 v
+                    14 O           31 f            48 w         (pad) =
+                    15 P           32 g            49 x
+                    16 Q           33 h            50 y
+
+                NOTE: 4 base64 6-bit bytes = 3 8-bit bytes
+                    // |    6-bit    |    6-bit    |    6-bit    |    6-bit    |
+                    // | 1 2 3 4 5 6 | 1 2 3 4 5 6 | 1 2 3 4 5 6 | 1 2 3 4 5 6 |
+                    // |    8-bit         |    8-bit        |    8-bit         |
+            */
+
+            if (base64Chars != null && base64Chars.Length != 64)
+                throw new Exception("There must be 64 chars in base64Chars char array !");
+
+            if (base64Chars == null)
+                base64Chars = new[]
+                {
+                    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+                    'U', 'V', 'W', 'X', 'Y', 'Z',
+                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
+                    'u', 'v', 'w', 'x', 'y', 'z',
+                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'
+                };
+
+            //--- Create decode table ---------------------//
+            var decodeTable = new byte[128];
+            for (var i = 0; i < 128; i++)
+            {
+                var mappingIndex = -1;
+                for (var bc = 0; bc < base64Chars.Length; bc++)
                 {
                     if (i != base64Chars[bc]) continue;
                     mappingIndex = bc;
                     break;
                 }
 
-				if(mappingIndex > -1){
-					decodeTable[i] = (byte)mappingIndex;
-				}
-				else{
-					decodeTable[i] = 0xFF;
-				}
-			}
-			//---------------------------------------------//
+                if (mappingIndex > -1)
+                    decodeTable[i] = (byte) mappingIndex;
+                else
+                    decodeTable[i] = 0xFF;
+            }
+            //---------------------------------------------//
 
-			var decodedDataBuffer  = new byte[base64Data.Length * 6 / 8 + 4];
-			var    decodedBytesCount  = 0;
-			var    nByteInBase64Block = 0;
-            var base64Block        = new byte[4];
+            var decodedDataBuffer = new byte[base64Data.Length * 6 / 8 + 4];
+            var decodedBytesCount = 0;
+            var nByteInBase64Block = 0;
+            var base64Block = new byte[4];
 
-			for(var i=0;i<base64Data.Length;i++){
-				var b = base64Data[i];
+            for (var i = 0; i < base64Data.Length; i++)
+            {
+                var b = base64Data[i];
 
-				// Read 4 byte base64 block and process it 			
-				// Any characters outside of the base64 alphabet are to be ignored in base64-encoded data.
+                // Read 4 byte base64 block and process it 			
+                // Any characters outside of the base64 alphabet are to be ignored in base64-encoded data.
 
-				// Padding char
-				if(b == '='){
-					base64Block[nByteInBase64Block] = 0xFF;
-				}
-				else{
-					var decodeByte = decodeTable[b & 0x7F];
-					if(decodeByte != 0xFF){
-						base64Block[nByteInBase64Block] = decodeByte;
-						nByteInBase64Block++;
-					}
-				}
+                // Padding char
+                if (b == '=')
+                {
+                    base64Block[nByteInBase64Block] = 0xFF;
+                }
+                else
+                {
+                    var decodeByte = decodeTable[b & 0x7F];
+                    if (decodeByte != 0xFF)
+                    {
+                        base64Block[nByteInBase64Block] = decodeByte;
+                        nByteInBase64Block++;
+                    }
+                }
 
-                /* Check if we can decode some bytes. 
+                /* Check if we can decode some bytes.
                  * We must have full 4 byte base64 block or reached at the end of data.
                  */
                 var encodedBytesCount = -1;
                 // We have full 4 byte base64 block
-                if(nByteInBase64Block == 4){
+                if (nByteInBase64Block == 4)
                     encodedBytesCount = 3;
-                }
                 // We have reached at the end of base64 data, there may be some bytes left
-                else if(i == base64Data.Length - 1)
-                {
+                else if (i == base64Data.Length - 1)
                     switch (nByteInBase64Block)
                     {
                         // Invalid value, we can't have only 6 bit, just skip 
@@ -863,13 +789,14 @@ namespace LumiSoft.Net
                             encodedBytesCount = 2;
                             break;
                     }
-                }
 
                 // We have some bytes available to decode, decode them
                 if (encodedBytesCount <= -1) continue;
-                decodedDataBuffer[decodedBytesCount + 0] = (byte)(base64Block[0] << 2         | base64Block[1] >> 4);
-                decodedDataBuffer[decodedBytesCount + 1] = (byte)((base64Block[1] & 0xF) << 4 | base64Block[2] >> 2);
-                decodedDataBuffer[decodedBytesCount + 2] = (byte)((base64Block[2] & 0x3) << 6 | base64Block[3] >> 0);
+                decodedDataBuffer[decodedBytesCount + 0] = (byte) ((base64Block[0] << 2) | (base64Block[1] >> 4));
+                decodedDataBuffer[decodedBytesCount + 1] =
+                    (byte) (((base64Block[1] & 0xF) << 4) | (base64Block[2] >> 2));
+                decodedDataBuffer[decodedBytesCount + 2] =
+                    (byte) (((base64Block[2] & 0x3) << 6) | (base64Block[3] >> 0));
 
                 // Increase decoded bytes count
                 decodedBytesCount += encodedBytesCount;
@@ -878,16 +805,15 @@ namespace LumiSoft.Net
                 nByteInBase64Block = 0;
             }
 
-			// There is some decoded bytes, construct return value
+            // There is some decoded bytes, construct return value
             // There is no decoded bytes
             if (decodedBytesCount <= -1) return Array.Empty<byte>();
             var retVal = new byte[decodedBytesCount];
-            Array.Copy(decodedDataBuffer,0,retVal,0,decodedBytesCount);
+            Array.Copy(decodedDataBuffer, 0, retVal, 0, decodedBytesCount);
             return retVal;
-
         }
 
-		#endregion
+        #endregion
 
 
         #region static method ComputeMd5
@@ -899,14 +825,12 @@ namespace LumiSoft.Net
         /// <param name="hex">Specifies if md5 value is returned as hex string.</param>
         /// <returns>Returns md5 value or md5 hex value.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>text</b> is null reference.</exception>
-        public static string ComputeMd5(string text,bool hex)
+        public static string ComputeMd5(string text, bool hex)
         {
-            if(text == null){
-                throw new ArgumentNullException(nameof(text));
-            }
+            if (text == null) throw new ArgumentNullException(nameof(text));
 
-            System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();			
-			var hash = md5.ComputeHash(Encoding.Default.GetBytes(text));
+            System.Security.Cryptography.MD5 md5 = new System.Security.Cryptography.MD5CryptoServiceProvider();
+            var hash = md5.ComputeHash(Encoding.Default.GetBytes(text));
 
             return hex ? ToHex(hash).ToLower() : Encoding.Default.GetString(hash);
         }

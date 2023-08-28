@@ -1,25 +1,15 @@
 ﻿using System;
 using System.Linq;
-
 using System.Web.UI.WebControls;
-
 using Microsoft.AspNet.Membership.OpenAuth;
 
 namespace BugNET.Account
 {
     public partial class Manage : System.Web.UI.Page
     {
-        protected string SuccessMessage
-        {
-            get;
-            private set;
-        }
+        protected string SuccessMessage { get; private set; }
 
-        protected bool CanRemoveExternalLogins
-        {
-            get;
-            private set;
-        }
+        protected bool CanRemoveExternalLogins { get; private set; }
 
         protected void Page_Load()
         {
@@ -43,8 +33,8 @@ namespace BugNET.Account
                         message == "ChangePwdSuccess" ? "Your password has been changed."
                         : message == "SetPwdSuccess" ? "Your password has been set."
                         : message == "RemoveLoginSuccess" ? "The external login was removed."
-                        : String.Empty;
-                    successMessage.Visible = !String.IsNullOrEmpty(SuccessMessage);
+                        : string.Empty;
+                    successMessage.Visible = !string.IsNullOrEmpty(SuccessMessage);
                 }
             }
 
@@ -54,7 +44,6 @@ namespace BugNET.Account
             CanRemoveExternalLogins = CanRemoveExternalLogins || accounts.Count() > 1;
             externalLoginsList.DataSource = accounts;
             externalLoginsList.DataBind();
-
         }
 
         protected void setPassword_Click(object sender, EventArgs e)
@@ -63,26 +52,20 @@ namespace BugNET.Account
             {
                 var result = OpenAuth.AddLocalPassword(User.Identity.Name, password.Text);
                 if (result.IsSuccessful)
-                {
                     Response.Redirect("~/Account/Manage?m=SetPwdSuccess");
-                }
                 else
-                {
-
                     newPasswordMessage.Text = result.ErrorMessage;
-
-                }
             }
         }
 
 
         protected void externalLoginsList_ItemDeleting(object sender, ListViewDeleteEventArgs e)
         {
-            var providerName = (string)e.Keys["ProviderName"];
-            var providerUserId = (string)e.Keys["ProviderUserId"];
+            var providerName = (string) e.Keys["ProviderName"];
+            var providerUserId = (string) e.Keys["ProviderUserId"];
             var m = OpenAuth.DeleteAccount(User.Identity.Name, providerName, providerUserId)
                 ? "?m=RemoveLoginSuccess"
-                : String.Empty;
+                : string.Empty;
             Response.Redirect("~/Account/Manage" + m);
         }
 

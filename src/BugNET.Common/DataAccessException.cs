@@ -19,12 +19,12 @@ namespace BugNET.Common
         public int StatusCode
         {
             get =>
-                Data.Contains("BNStatusCode") ? 
-                    int.Parse(Data["BNStatusCode"].ToString()) 
+                Data.Contains("BNStatusCode")
+                    ? int.Parse(Data["BNStatusCode"].ToString())
                     : 0;
             set
             {
-                if(!Data.Contains("BNStatusCode"))
+                if (!Data.Contains("BNStatusCode"))
                     Data.Add("BNStatusCode", value);
                 else
                     Data["BNStatusCode"] = value;

@@ -6,6 +6,7 @@
         /// Stored Procedure Constants
         /// </summary>
         private const string SP_PROJECT_CREATE = "BugNet_Project_CreateNewProject";
+
         private const string SP_PROJECT_DELETE = "BugNet_Project_DeleteProject";
         private const string SP_PROJECT_GETALLPROJECTS = "BugNet_Project_GetAllProjects";
         private const string SP_PROJECT_GETPUBLICPROJECTS = "BugNet_Project_GetPublicProjects";
@@ -52,16 +53,27 @@
         //User - CustomFields & Selection Procs
         private const string SP_USERCUSTOMFIELD_GETCUSTOMFIELDBYID = "BugNet_UserCustomField_GetCustomFieldById";
         private const string SP_USERCUSTOMFIELD_GETCUSTOMFIELDS = "BugNet_UserCustomField_GetCustomFields";
-        private const string SP_USERCUSTOMFIELD_GETUSERCUSTOMFIELDSBYUSERID = "BugNet_UserCustomField_GetCustomFieldsByUserId";
+
+        private const string SP_USERCUSTOMFIELD_GETUSERCUSTOMFIELDSBYUSERID =
+            "BugNet_UserCustomField_GetCustomFieldsByUserId";
+
         private const string SP_USERCUSTOMFIELD_CREATE = "BugNet_UserCustomField_CreateNewCustomField";
         private const string SP_USERCUSTOMFIELD_UPDATE = "BugNet_UserCustomField_UpdateCustomField";
         private const string SP_USERCUSTOMFIELD_DELETE = "BugNet_UserCustomField_DeleteCustomField";
         private const string SP_USERCUSTOMFIELD_SAVECUSTOMFIELDVALUE = "BugNet_UserCustomField_SaveCustomFieldValue";
 
-        private const string SP_USERCUSTOMFIELDSELECTION_CREATE = "BugNet_UserCustomFieldSelection_CreateNewCustomFieldSelection";
-        private const string SP_USERCUSTOMFIELDSELECTION_DELETE = "BugNet_UserCustomFieldSelection_DeleteCustomFieldSelection";
-        private const string SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONSBYCUSTOMFIELDID = "BugNet_UserCustomFieldSelection_GetCustomFieldSelectionsByCustomFieldId";
-        private const string SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONBYID = "BugNet_UserCustomFieldSelection_GetCustomFieldSelectionById";
+        private const string SP_USERCUSTOMFIELDSELECTION_CREATE =
+            "BugNet_UserCustomFieldSelection_CreateNewCustomFieldSelection";
+
+        private const string SP_USERCUSTOMFIELDSELECTION_DELETE =
+            "BugNet_UserCustomFieldSelection_DeleteCustomFieldSelection";
+
+        private const string SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONSBYCUSTOMFIELDID =
+            "BugNet_UserCustomFieldSelection_GetCustomFieldSelectionsByCustomFieldId";
+
+        private const string SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONBYID =
+            "BugNet_UserCustomFieldSelection_GetCustomFieldSelectionById";
+
         private const string SP_USERCUSTOMFIELDSELECTION_UPDATE = "BugNet_UserCustomFieldSelection_Update";
         //private const string SP_USERCUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTION = "BugNet_UserCustomFieldSelection_GetCustomFieldSelection";
 
@@ -83,8 +95,13 @@
         private const string SP_ISSUE_GETISSUESTATUSCOUNTBYPROJECT = "BugNet_Issue_GetIssueStatusCountByProject";
         private const string SP_ISSUE_GETISSUEPRIORITYCOUNTBYPROJECT = "BugNet_Issue_GetIssuePriorityCountByProject";
         private const string SP_ISSUE_GETISSUEUSERCOUNTBYPROJECT = "BugNet_Issue_GetIssueUserCountByProject";
-        private const string SP_ISSUE_GETISSUEUNASSIGNEDCOUNTBYPROJECT = "BugNet_Issue_GetIssueUnassignedCountByProject";
-        private const string SP_ISSUE_GETISSUEUNSCHEDULEDMILESTONECOUNTBYPROJECT = "BugNet_Issue_GetIssueUnscheduledMilestoneCountByProject";
+
+        private const string SP_ISSUE_GETISSUEUNASSIGNEDCOUNTBYPROJECT =
+            "BugNet_Issue_GetIssueUnassignedCountByProject";
+
+        private const string SP_ISSUE_GETISSUEUNSCHEDULEDMILESTONECOUNTBYPROJECT =
+            "BugNet_Issue_GetIssueUnscheduledMilestoneCountByProject";
+
         private const string SP_ISSUE_GETISSUETYPECOUNTBYPROJECT = "BugNet_Issue_GetIssueTypeCountByProject";
         private const string SP_ISSUE_GETISSUECATEGORYCOUNTBYPROJECT = "BugNet_Issue_GetIssueCategoryCountByProject";
         private const string SP_ISSUE_GETOPENISSUES = "BugNet_Issue_GetOpenIssues";
@@ -114,20 +131,29 @@
         //Attachment Stored Procs
         private const string SP_ISSUEATTACHMENT_CREATE = "BugNet_IssueAttachment_CreateNewIssueAttachment";
         private const string SP_ISSUEATTACHMENT_GETATTACHMENTBYID = "BugNet_IssueAttachment_GetIssueAttachmentById";
-        private const string SP_ISSUEATTACHMENT_GETATTACHMENTSBYISSUEID = "BugNet_IssueAttachment_GetIssueAttachmentsByIssueId";
+
+        private const string SP_ISSUEATTACHMENT_GETATTACHMENTSBYISSUEID =
+            "BugNet_IssueAttachment_GetIssueAttachmentsByIssueId";
+
         private const string SP_ISSUEATTACHMENT_DELETEATTACHMENT = "BugNet_IssueAttachment_DeleteIssueAttachment";
         private const string SP_ISSUEATTACHMENT_VALIDATEDOWNLOAD = "BugNet_IssueAttachment_ValidateDownload";
 
         //Comment Stored Procs
         private const string SP_ISSUECOMMENT_CREATE = "BugNet_IssueComment_CreateNewIssueComment";
         private const string SP_ISSUECOMMENT_GETISSUECOMMENTBYID = "BugNet_IssueComment_GetIssueCommentById";
-        private const string SP_ISSUECOMMENT_GETISSUECOMMENTSBYISSUEID = "BugNet_IssueComment_GetIssueCommentsByIssueId";
+
+        private const string SP_ISSUECOMMENT_GETISSUECOMMENTSBYISSUEID =
+            "BugNet_IssueComment_GetIssueCommentsByIssueId";
+
         private const string SP_ISSUECOMMENT_DELETE = "BugNet_IssueComment_DeleteIssueComment";
         private const string SP_ISSUECOMMENT_UPDATE = "BugNet_IssueComment_UpdateIssueComment";
 
         //Issue Revisions
         private const string SP_ISSUEREVISION_CREATE = "BugNet_IssueRevision_CreateNewIssueRevision";
-        private const string SP_ISSUEREVISION_GETISSUEREVISIONSBYISSUEID = "BugNet_IssueRevision_GetIssueRevisionsByIssueId";
+
+        private const string SP_ISSUEREVISION_GETISSUEREVISIONSBYISSUEID =
+            "BugNet_IssueRevision_GetIssueRevisionsByIssueId";
+
         private const string SP_ISSUEREVISION_DELETE = "BugNet_IssueRevision_DeleteIssueRevision";
 
         //Issue Votes
@@ -152,8 +178,12 @@
         private const string SP_CATEGORY_DELETE = "BugNet_ProjectCategories_DeleteCategory";
         private const string SP_CATEGORY_GETCATEGORIESBYPROJECTID = "BugNet_ProjectCategories_GetCategoriesByProjectId";
         private const string SP_CATEGORY_GETCATEGORYBYID = "BugNet_ProjectCategories_GetCategoryById";
-        private const string SP_CATEGORY_GETROOTCATEGORIESBYPROJECTID = "BugNet_ProjectCategories_GetRootCategoriesByProjectId";
-        private const string SP_CATEGORY_GETCHILDCATEGORIESBYCATEGORYID = "BugNet_ProjectCategories_GetChildCategoriesByCategoryId";
+
+        private const string SP_CATEGORY_GETROOTCATEGORIESBYPROJECTID =
+            "BugNet_ProjectCategories_GetRootCategoriesByProjectId";
+
+        private const string SP_CATEGORY_GETCHILDCATEGORIESBYCATEGORYID =
+            "BugNet_ProjectCategories_GetChildCategoriesByCategoryId";
 
         //Status
         private const string SP_STATUS_GETSTATUSBYPROJECTID = "BugNet_ProjectStatus_GetStatusByProjectId";
@@ -165,7 +195,10 @@
 
         //Issue Type Stored Procs
         private const string SP_ISSUETYPE_GETISSUETYPEBYID = "BugNet_ProjectIssueTypes_GetIssueTypeById";
-        private const string SP_ISSUETYPE_GETISSUETYPESBYPROJECTID = "BugNet_ProjectIssueTypes_GetIssueTypesByProjectId";
+
+        private const string SP_ISSUETYPE_GETISSUETYPESBYPROJECTID =
+            "BugNet_ProjectIssueTypes_GetIssueTypesByProjectId";
+
         private const string SP_ISSUETYPE_CREATE = "BugNet_ProjectIssueTypes_CreateNewIssueType";
         private const string SP_ISSUETYPE_DELETE = "BugNet_ProjectIssueTypes_DeleteIssueType";
         private const string SP_ISSUETYPE_UPDATE = "BugNet_ProjectIssueTypes_UpdateIssueType";
@@ -173,7 +206,10 @@
 
         //Resolution Stored Procs
         private const string SP_RESOLUTION_GETRESOLUTIONBYID = "BugNet_ProjectResolutions_GetResolutionById";
-        private const string SP_RESOLUTION_GETRESOLUTIONSBYPROJECTID = "BugNet_ProjectResolutions_GetResolutionsByProjectId";
+
+        private const string SP_RESOLUTION_GETRESOLUTIONSBYPROJECTID =
+            "BugNet_ProjectResolutions_GetResolutionsByProjectId";
+
         private const string SP_RESOLUTION_CREATE = "BugNet_ProjectResolutions_CreateNewResolution";
         private const string SP_RESOLUTION_DELETE = "BugNet_ProjectResolutions_DeleteResolution";
         private const string SP_RESOLUTION_UPDATE = "BugNet_ProjectResolutions_UpdateResolution";
@@ -190,38 +226,63 @@
         //Notification Stored Procs
         private const string SP_ISSUENOTIFICATION_CREATE = "BugNet_IssueNotification_CreateNewIssueNotification";
         private const string SP_ISSUENOTIFICATION_DELETE = "BugNet_IssueNotification_DeleteIssueNotification";
-        private const string SP_ISSUENOTIFICATION_GETISSUENOTIFICATIONSBYISSUEID = "BugNet_IssueNotification_GetIssueNotificationsByIssueId";
+
+        private const string SP_ISSUENOTIFICATION_GETISSUENOTIFICATIONSBYISSUEID =
+            "BugNet_IssueNotification_GetIssueNotificationsByIssueId";
 
         //Project Notification
         private const string SP_PROJECTNOTIFICATION_CREATE = "BugNet_ProjectNotification_CreateNewProjectNotification";
         private const string SP_PROJECTNOTIFICATION_DELETE = "BugNet_ProjectNotification_DeleteProjectNotification";
-        private const string SP_PROJECTNOTIFICATION_GETPROJECTNOTIFICATIONSBYPROJECTID = "BugNet_ProjectNotification_GetProjectNotificationsByProjectId";
-        private const string SP_PROJECTNOTIFICATION_GETPROJECTNOTIFICATIONSBYUSERNAME = "BugNet_ProjectNotification_GetProjectNotificationsByUsername";
+
+        private const string SP_PROJECTNOTIFICATION_GETPROJECTNOTIFICATIONSBYPROJECTID =
+            "BugNet_ProjectNotification_GetProjectNotificationsByProjectId";
+
+        private const string SP_PROJECTNOTIFICATION_GETPROJECTNOTIFICATIONSBYUSERNAME =
+            "BugNet_ProjectNotification_GetProjectNotificationsByUsername";
 
         private const string SP_HOSTSETTING_GETHOSTSETTINGS = "BugNet_HostSetting_GetHostSettings";
         private const string SP_HOSTSETTING_UPDATEHOSTSETTING = "BugNet_HostSetting_UpdateHostSetting";
 
         private const string SP_ISSUEWORKREPORT_CREATE = "BugNet_IssueWorkReport_CreateNewIssueWorkReport";
         private const string SP_ISSUEWORKREPORT_DELETE = "BugNet_IssueWorkReport_DeleteIssueWorkReport";
-        private const string SP_ISSUEWORKREPORT_GETBYISSUEWORKREPORTSBYISSUEID = "BugNet_IssueWorkReport_GetIssueWorkReportsByIssueId";
-        private const string SP_ISSUEWORKREPORT_GETISSUEWORKREPORTBYPROJECTID = "BugNet_IssueWorkReport_GetIssueWorkReportByProjectId";
-        private const string SP_ISSUEWORKREPORT_GETISSUEWORKREPORTBYPROJECTMEMBER = "BugNet_TimeEntry_GetProjectWorkerWorkReport";
+
+        private const string SP_ISSUEWORKREPORT_GETBYISSUEWORKREPORTSBYISSUEID =
+            "BugNet_IssueWorkReport_GetIssueWorkReportsByIssueId";
+
+        private const string SP_ISSUEWORKREPORT_GETISSUEWORKREPORTBYPROJECTID =
+            "BugNet_IssueWorkReport_GetIssueWorkReportByProjectId";
+
+        private const string SP_ISSUEWORKREPORT_GETISSUEWORKREPORTBYPROJECTMEMBER =
+            "BugNet_TimeEntry_GetProjectWorkerWorkReport";
 
         private const string SP_APPLICATIONLOG_GETLOG = "BugNet_ApplicationLog_GetLog";
         private const string SP_APPLICATIONLOG_CLEARLOG = "BugNet_ApplicationLog_ClearLog";
 
         private const string SP_CUSTOMFIELD_GETCUSTOMFIELDBYID = "BugNet_ProjectCustomField_GetCustomFieldById";
-        private const string SP_CUSTOMFIELD_GETCUSTOMFIELDSBYPROJECTID = "BugNet_ProjectCustomField_GetCustomFieldsByProjectId";
-        private const string SP_CUSTOMFIELD_GETCUSTOMFIELDSBYISSUEID = "BugNet_ProjectCustomField_GetCustomFieldsByIssueId";
+
+        private const string SP_CUSTOMFIELD_GETCUSTOMFIELDSBYPROJECTID =
+            "BugNet_ProjectCustomField_GetCustomFieldsByProjectId";
+
+        private const string SP_CUSTOMFIELD_GETCUSTOMFIELDSBYISSUEID =
+            "BugNet_ProjectCustomField_GetCustomFieldsByIssueId";
+
         private const string SP_CUSTOMFIELD_CREATE = "BugNet_ProjectCustomField_CreateNewCustomField";
         private const string SP_CUSTOMFIELD_UPDATE = "BugNet_ProjectCustomField_UpdateCustomField";
         private const string SP_CUSTOMFIELD_DELETE = "BugNet_ProjectCustomField_DeleteCustomField";
         private const string SP_CUSTOMFIELD_SAVECUSTOMFIELDVALUE = "BugNet_ProjectCustomField_SaveCustomFieldValue";
 
-        private const string SP_CUSTOMFIELDSELECTION_CREATE = "BugNet_ProjectCustomFieldSelection_CreateNewCustomFieldSelection";
-        private const string SP_CUSTOMFIELDSELECTION_DELETE = "BugNet_ProjectCustomFieldSelection_DeleteCustomFieldSelection";
-        private const string SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONSBYCUSTOMFIELDID = "BugNet_ProjectCustomFieldSelection_GetCustomFieldSelectionsByCustomFieldId";
-        private const string SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONBYID = "BugNet_ProjectCustomFieldSelection_GetCustomFieldSelectionById";
+        private const string SP_CUSTOMFIELDSELECTION_CREATE =
+            "BugNet_ProjectCustomFieldSelection_CreateNewCustomFieldSelection";
+
+        private const string SP_CUSTOMFIELDSELECTION_DELETE =
+            "BugNet_ProjectCustomFieldSelection_DeleteCustomFieldSelection";
+
+        private const string SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONSBYCUSTOMFIELDID =
+            "BugNet_ProjectCustomFieldSelection_GetCustomFieldSelectionsByCustomFieldId";
+
+        private const string SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTIONBYID =
+            "BugNet_ProjectCustomFieldSelection_GetCustomFieldSelectionById";
+
         private const string SP_CUSTOMFIELDSELECTION_UPDATE = "BugNet_ProjectCustomFieldSelection_Update";
         //private const string SP_CUSTOMFIELDSELECTION_GETCUSTOMFIELDSELECTION = "BugNet_ProjectCustomFieldSelection_GetCustomFieldSelection";
 

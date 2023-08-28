@@ -1,7 +1,7 @@
 ﻿using System;
 using BugNET.Common;
 
-namespace BugNET.UserInterfaceLayer
+namespace BugNET.UI
 {
     public interface IEditUserControl
     {
@@ -11,11 +11,7 @@ namespace BugNET.UserInterfaceLayer
         /// Gets or sets the user id.
         /// </summary>
         /// <value>The user id.</value>
-        Guid UserId
-        {
-            get;
-            set;
-        }
+        Guid UserId { get; set; }
 
         /// <summary>
         /// Initializes this instance.

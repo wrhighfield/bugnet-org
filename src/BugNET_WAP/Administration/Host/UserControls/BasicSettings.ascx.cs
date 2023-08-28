@@ -1,7 +1,7 @@
 ﻿using System;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
@@ -14,7 +14,6 @@ namespace BugNET.Administration.Host.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         #region IEditHostSettingControl Members
@@ -25,12 +24,12 @@ namespace BugNET.Administration.Host.UserControls
         /// <returns></returns>
         public bool Update()
         {
-           
-                HostSettingManager.UpdateHostSetting(HostSettingNames.WelcomeMessage, WelcomeMessageHtmlEditor.Text.Trim());
-                HostSettingManager.UpdateHostSetting(HostSettingNames.ApplicationTitle, ApplicationTitle.Text.Trim());
-                HostSettingManager.UpdateHostSetting(HostSettingNames.DefaultUrl, DefaultUrl.Text.EndsWith("/") ? DefaultUrl.Text : DefaultUrl.Text = DefaultUrl.Text + "/");
-                HostSettingManager.UpdateHostSetting(HostSettingNames.EnableGravatar, EnableGravatar.Checked.ToString());
-                return true;
+            HostSettingManager.UpdateHostSetting(HostSettingNames.WelcomeMessage, WelcomeMessageHtmlEditor.Text.Trim());
+            HostSettingManager.UpdateHostSetting(HostSettingNames.ApplicationTitle, ApplicationTitle.Text.Trim());
+            HostSettingManager.UpdateHostSetting(HostSettingNames.DefaultUrl,
+                DefaultUrl.Text.EndsWith("/") ? DefaultUrl.Text : DefaultUrl.Text = DefaultUrl.Text + "/");
+            HostSettingManager.UpdateHostSetting(HostSettingNames.EnableGravatar, EnableGravatar.Checked.ToString());
+            return true;
         }
 
         /// <summary>
@@ -42,13 +41,10 @@ namespace BugNET.Administration.Host.UserControls
             ApplicationTitle.Text = HostSettingManager.Get(HostSettingNames.ApplicationTitle);
             WelcomeMessageHtmlEditor.Text = HostSettingManager.Get(HostSettingNames.WelcomeMessage);
             DefaultUrl.Text = HostSettingManager.Get(HostSettingNames.DefaultUrl);
-            EnableGravatar.Checked = HostSettingManager.Get(HostSettingNames.EnableGravatar,true);
+            EnableGravatar.Checked = HostSettingManager.Get(HostSettingNames.EnableGravatar, true);
         }
 
-        public bool ShowSaveButton
-        {
-            get { return true; }
-        }
+        public bool ShowSaveButton => true;
 
         #endregion
     }

@@ -10,17 +10,21 @@ namespace LumiSoft.Net.MIME
     public class MIME_Reader
     {
         private string m_Source = "";
-        private int    m_Offset;
+        private int m_Offset;
 
         #region constants
 
-        private static readonly char[] atextChars = new char[]{'!','#','$','%','&','\'','*','+','-','/','=','?','^','_','`','{','|','}','~'};
+        private static readonly char[] atextChars = new char[]
+            {'!', '#', '$', '%', '&', '\'', '*', '+', '-', '/', '=', '?', '^', '_', '`', '{', '|', '}', '~'};
 
-        private static readonly char[] specials = new char[]{'(',')','<','>','[',']',':',';','@','\\',',','.','"'};
+        private static readonly char[] specials = new char[]
+            {'(', ')', '<', '>', '[', ']', ':', ';', '@', '\\', ',', '.', '"'};
 
-        private static readonly char[] tspecials = new char[]{'(',')','<','>','@',',',';',':','\\','"','/','[',']','?','='};
+        private static readonly char[] tspecials = new char[]
+            {'(', ')', '<', '>', '@', ',', ';', ':', '\\', '"', '/', '[', ']', '?', '='};
 
-        private static readonly Regex encodedword_regex = new Regex(@"=\?(?<charset>.*?)\?(?<encoding>[qQbB])\?(?<value>.*?)\?=",RegexOptions.IgnoreCase);
+        private static readonly Regex encodedword_regex =
+            new Regex(@"=\?(?<charset>.*?)\?(?<encoding>[qQbB])\?(?<value>.*?)\?=", RegexOptions.IgnoreCase);
 
         #endregion
 
@@ -31,9 +35,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>value</b> is null.</exception>
         public MIME_Reader(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             m_Source = value;
         }
@@ -49,31 +51,26 @@ namespace LumiSoft.Net.MIME
         {
             /* RFC 2822 3.2.4.
              *  atom  = [CFWS] 1*atext [CFWS]
-            */
+             */
 
             ToFirstChar();
 
             var retVal = new StringBuilder();
-            while(true){
+            while (true)
+            {
                 var peekChar = Peek(false);
                 // We reached end of string.
-                if(peekChar == -1){
-                    break;
-                }
+                if (peekChar == -1) break;
 
-                var c = (char)peekChar;
-                if(IsAText(c)){
-                    retVal.Append((char)Char(false));
-                }
+                var c = (char) peekChar;
+                if (IsAText(c))
+                    retVal.Append((char) Char(false));
                 // Char is not part of 'atom', break.
-                else{
+                else
                     break;
-                }
             }
 
-            if(retVal.Length > 0){
-                return retVal.ToString();
-            }
+            if (retVal.Length > 0) return retVal.ToString();
 
             return null;
         }
@@ -91,32 +88,27 @@ namespace LumiSoft.Net.MIME
             /* RFC 2822 3.2.4.
              *  dot-atom      = [CFWS] dot-atom-text [CFWS]
              *  dot-atom-text = 1*atext *("." 1*atext)
-            */
+             */
 
             ToFirstChar();
 
             var retVal = new StringBuilder();
-            while(true){
+            while (true)
+            {
                 var atom = Atom();
                 // We reached end of string.
-                if(atom == null){
-                    break;
-                }
+                if (atom == null) break;
 
                 retVal.Append(atom);
-                                      
+
                 // dot-atom-text continues.                    
-                if(Peek(false) == '.'){
-                    retVal.Append((char)Char(false));
-                }
-                else{
+                if (Peek(false) == '.')
+                    retVal.Append((char) Char(false));
+                else
                     break;
-                }
             }
 
-            if(retVal.Length > 0){
-                return retVal.ToString();
-            }
+            if (retVal.Length > 0) return retVal.ToString();
 
             return null;
         }
@@ -133,31 +125,26 @@ namespace LumiSoft.Net.MIME
         {
             /* RFC 2045 5.
              *  token := 1*<any (US-ASCII) CHAR except SPACE, CTLs, or tspecials>
-            */
+             */
 
             ToFirstChar();
 
             var retVal = new StringBuilder();
-            while(true){
+            while (true)
+            {
                 var peekChar = Peek(false);
                 // We reached end of string.
-                if(peekChar == -1){
-                    break;
-                }
+                if (peekChar == -1) break;
 
-                var c = (char)peekChar;
-                if(IsToken(c)){
-                    retVal.Append((char)Char(false));
-                }
+                var c = (char) peekChar;
+                if (IsToken(c))
+                    retVal.Append((char) Char(false));
                 // Char is not part of 'token', break.
-                else{
+                else
                     break;
-                }
             }
 
-            if(retVal.Length > 0){
-                return retVal.ToString();
-            }
+            if (retVal.Length > 0) return retVal.ToString();
 
             return null;
         }
@@ -175,14 +162,12 @@ namespace LumiSoft.Net.MIME
             /* RFC 822 3.3.
              *  comment     = "(" *(ctext / quoted-pair / comment) ")"
              *  ctext       = <any CHAR excluding "(", ")", "\" & CR, & including linear-white-space>
-             *  quoted-pair = "\" CHAR  
+             *  quoted-pair = "\" CHAR
              */
 
             ToFirstChar();
 
-            if(Peek(false) != '('){
-                throw new InvalidOperationException("No 'comment' value available.");
-            }
+            if (Peek(false) != '(') throw new InvalidOperationException("No 'comment' value available.");
 
             var retVal = new StringBuilder();
 
@@ -190,27 +175,26 @@ namespace LumiSoft.Net.MIME
             Char(false);
 
             var nestedParenthesis = 0;
-            while(true){
+            while (true)
+            {
                 var intC = Char(false);
                 // End of stream reached, invalid 'comment' value.
-                if(intC == -1){
-                    throw new ArgumentException("Invalid 'comment' value, no closing ')'.");
-                }
+                if (intC == -1) throw new ArgumentException("Invalid 'comment' value, no closing ')'.");
 
-                if(intC == '('){
+                if (intC == '(')
+                {
                     nestedParenthesis++;
                 }
-                else if(intC == ')')
+                else if (intC == ')')
                 {
                     // We readed whole 'comment' ok.
-                    if(nestedParenthesis == 0){
-                        break;
-                    }
+                    if (nestedParenthesis == 0) break;
 
                     nestedParenthesis--;
                 }
-                else{
-                    retVal.Append((char)intC);
+                else
+                {
+                    retVal.Append((char) intC);
                 }
             }
 
@@ -229,13 +213,11 @@ namespace LumiSoft.Net.MIME
         {
             /* RFC 2822 3.2.6.
                 word = atom / quoted-string
-            
+
                 Consider dot-atom as word too.
             */
 
-            if(Peek(true) == '"'){
-                return QuotedString();
-            }
+            if (Peek(true) == '"') return QuotedString();
 
             return DotAtom();
         }
@@ -253,11 +235,11 @@ namespace LumiSoft.Net.MIME
         {
             /* RFC 2047 2.
                 encoded-word = "=?" charset "?" encoding "?" encoded-text "?="
-             
+
                 encoded-text = 1*<Any printable ASCII character other than "?" or SPACE>
                                ; (but see "Use of encoded-words in message
                                ; headers", section 5)
-            
+
                 An 'encoded-word' may not be more than 75 characters long, including
                 'charset', 'encoding', 'encoded-text', and delimiters.  If it is
                 desirable to encode more text than will fit in an 'encoded-word' of
@@ -267,55 +249,58 @@ namespace LumiSoft.Net.MIME
 
             ToFirstChar();
 
-            if(Peek(false) != '='){
-                throw new InvalidOperationException("No encoded-word available.");
-            }
+            if (Peek(false) != '=') throw new InvalidOperationException("No encoded-word available.");
 
             var retVal = new StringBuilder();
-            while(true){
-                var match = encodedword_regex.Match(m_Source,m_Offset);
-                if(match.Success && match.Index == m_Offset){
-                    var encodedWord = m_Source.Substring(m_Offset,match.Length);
+            while (true)
+            {
+                var match = encodedword_regex.Match(m_Source, m_Offset);
+                if (match.Success && match.Index == m_Offset)
+                {
+                    var encodedWord = m_Source.Substring(m_Offset, match.Length);
                     // Move index over encoded-word.
                     m_Offset += match.Length;
 
-                    try{
-                        if(string.Equals(match.Groups["encoding"].Value,"Q",StringComparison.InvariantCultureIgnoreCase)){
-                            retVal.Append(MIME_Utils.QDecode(Encoding.GetEncoding(match.Groups["charset"].Value),match.Groups["value"].Value));
-                        }
-                        else if(string.Equals(match.Groups["encoding"].Value,"B",StringComparison.InvariantCultureIgnoreCase)){
-                            retVal.Append(Encoding.GetEncoding(match.Groups["charset"].Value).GetString(NetUtils.FromBase64(Encoding.Default.GetBytes(match.Groups["value"].Value))));
-                        }
+                    try
+                    {
+                        if (string.Equals(match.Groups["encoding"].Value, "Q",
+                                StringComparison.InvariantCultureIgnoreCase))
+                            retVal.Append(MIME_Utils.QDecode(Encoding.GetEncoding(match.Groups["charset"].Value),
+                                match.Groups["value"].Value));
+                        else if (string.Equals(match.Groups["encoding"].Value, "B",
+                                     StringComparison.InvariantCultureIgnoreCase))
+                            retVal.Append(Encoding.GetEncoding(match.Groups["charset"].Value)
+                                .GetString(NetUtils.FromBase64(
+                                    Encoding.Default.GetBytes(match.Groups["value"].Value))));
                         // Failed to parse encoded-word, leave it as is. RFC 2047 6.3.
-                        else{
+                        else
                             retVal.Append(encodedWord);
-                        }
                     }
-                    catch{
+                    catch
+                    {
                         // Failed to parse encoded-word, leave it as is. RFC 2047 6.3.
                         retVal.Append(encodedWord);
                     }
                 }
-                else{
+                else
+                {
                     retVal.Append(Atom());
                 }
 
                 // We have continuos encoded-word.
-                match = encodedword_regex.Match(m_Source,m_Offset);
-                if(match.Success && match.Index == m_Offset){
+                match = encodedword_regex.Match(m_Source, m_Offset);
+                if (match.Success && match.Index == m_Offset)
                     ToFirstChar();
-                }
                 // encoded-word does not continue.
-                else{
+                else
                     break;
-                }
             }
 
             return retVal.ToString();
         }
 
         #endregion
-                
+
         #region method QuotedString
 
         /// <summary>
@@ -337,42 +322,44 @@ namespace LumiSoft.Net.MIME
 
             ToFirstChar();
 
-            if(Peek(false) != '"'){
-                throw new InvalidOperationException("No quoted-string available.");
-            }
+            if (Peek(false) != '"') throw new InvalidOperationException("No quoted-string available.");
 
             // Read start DQUOTE.
             Char(false);
 
             var retVal = new StringBuilder();
             var escape = false;
-            while(true){
+            while (true)
+            {
                 var intC = Char(false);
                 // We reached end of stream, invalid quoted string, end quote is missing.
-                if(intC == -1){
-                    throw new ArgumentException("Invalid quoted-string, end quote is missing.");
-                }
+                if (intC == -1) throw new ArgumentException("Invalid quoted-string, end quote is missing.");
                 // This char is escaped.
 
-                if(escape){
+                if (escape)
+                {
                     escape = false;
 
-                    retVal.Append((char)intC);
+                    retVal.Append((char) intC);
                 }
                 // Closing DQUOTE.
-                else if(intC == '"'){
+                else if (intC == '"')
+                {
                     break;
                 }
                 // Next char is escaped.
-                else if(intC == '\\'){
+                else if (intC == '\\')
+                {
                     escape = true;
                 }
                 // Skip folding chars.
-                else if(intC == '\r' || intC == '\n'){
-                }                   
+                else if (intC == '\r' || intC == '\n')
+                {
+                }
                 // Normal char in quoted-string.
-                else{
-                    retVal.Append((char)intC);
+                else
+                {
+                    retVal.Append((char) intC);
                 }
             }
 
@@ -391,9 +378,7 @@ namespace LumiSoft.Net.MIME
         {
             // value := token / quoted-string
 
-            if(Peek(true) == '"'){
-                return QuotedString();
-            }
+            if (Peek(true) == '"') return QuotedString();
 
             return Token();
         }
@@ -409,46 +394,40 @@ namespace LumiSoft.Net.MIME
         public string Phrase()
         {
             /* RFC 2047 5.
-             *  phrase = 1*( encoded-word / word )        
+             *  phrase = 1*( encoded-word / word )
              *  word   = atom / quoted-string
-            */
-                        
-            var peek = Peek(true);
-            if(peek == -1){
-                return null;
-            }
+             */
 
-            if(peek == '"'){
-                return "\"" + QuotedString() + "\"";
-            }
-            if(peek == '='){
-                return EncodedWord();
-            }
+            var peek = Peek(true);
+            if (peek == -1) return null;
+
+            if (peek == '"') return "\"" + QuotedString() + "\"";
+            if (peek == '=') return EncodedWord();
             var word = Atom();
-            if(word == null){
-                return null;
-            }
-                
+            if (word == null) return null;
+
             // Try to encode invalid encoded-words if any mixed in text.
-            word = encodedword_regex.Replace(word,delegate(Match m){
+            word = encodedword_regex.Replace(word, delegate(Match m)
+            {
                 var encodedWord = m.Value;
                 try
                 {
-                    if(string.Equals(m.Groups["encoding"].Value,"Q",StringComparison.InvariantCultureIgnoreCase)){
-                        return MIME_Utils.QDecode(Encoding.GetEncoding(m.Groups["charset"].Value),m.Groups["value"].Value);
-                    }
+                    if (string.Equals(m.Groups["encoding"].Value, "Q", StringComparison.InvariantCultureIgnoreCase))
+                        return MIME_Utils.QDecode(Encoding.GetEncoding(m.Groups["charset"].Value),
+                            m.Groups["value"].Value);
 
-                    if(string.Equals(m.Groups["encoding"].Value,"B",StringComparison.InvariantCultureIgnoreCase)){
-                        return Encoding.GetEncoding(m.Groups["charset"].Value).GetString(NetUtils.FromBase64(Encoding.Default.GetBytes(m.Groups["value"].Value)));
-                    }
+                    if (string.Equals(m.Groups["encoding"].Value, "B", StringComparison.InvariantCultureIgnoreCase))
+                        return Encoding.GetEncoding(m.Groups["charset"].Value)
+                            .GetString(NetUtils.FromBase64(Encoding.Default.GetBytes(m.Groups["value"].Value)));
                     // Failed to parse encoded-word, leave it as is. RFC 2047 6.3.
                     return encodedWord;
                 }
-                catch{
+                catch
+                {
                     // Failed to parse encoded-word, leave it as is. RFC 2047 6.3.
                     return encodedWord;
                 }
-            });        
+            });
 
             return word;
         }
@@ -479,25 +458,20 @@ namespace LumiSoft.Net.MIME
             // NOTE: Never call Peek or Char method here or stack overflow !
 
             var retVal = new StringBuilder();
-            while(true){
+            while (true)
+            {
                 var peekChar = -1;
-                if(m_Offset > m_Source.Length - 1){
+                if (m_Offset > m_Source.Length - 1)
                     peekChar = -1;
-                }
-                else{
+                else
                     peekChar = m_Source[m_Offset];
-                }
                 // We reached end of string.
-                if(peekChar == -1){
-                    break;
-                }
+                if (peekChar == -1) break;
 
-                if(peekChar == ' ' || peekChar == '\t' || peekChar == '\r' || peekChar == '\n'){
+                if (peekChar == ' ' || peekChar == '\t' || peekChar == '\r' || peekChar == '\n')
                     retVal.Append(m_Source[m_Offset++]);
-                }
-                else{
+                else
                     break;
-                }
             }
 
             return retVal.ToString();
@@ -514,13 +488,9 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns readed char or -1 if end of stream reached.</returns>
         public int Char(bool readToFirstChar)
         {
-            if(readToFirstChar){
-                ToFirstChar();
-            }
+            if (readToFirstChar) ToFirstChar();
 
-            if(m_Offset > m_Source.Length - 1){
-                return -1;
-            }
+            if (m_Offset > m_Source.Length - 1) return -1;
 
             return m_Source[m_Offset++];
         }
@@ -536,13 +506,9 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns next char in source stream, returns -1 if end of stream.</returns>
         public int Peek(bool readToFirstChar)
         {
-            if(readToFirstChar){
-                ToFirstChar();
-            }
+            if (readToFirstChar) ToFirstChar();
 
-            if(m_Offset > m_Source.Length - 1){
-                return -1;
-            }
+            if (m_Offset > m_Source.Length - 1) return -1;
 
             return m_Source[m_Offset];
         }
@@ -559,11 +525,9 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>value</b> is null.</exception>
         public bool StartsWith(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
-            return m_Source.Substring(m_Offset).StartsWith(value,StringComparison.InvariantCultureIgnoreCase);
+            return m_Source.Substring(m_Offset).StartsWith(value, StringComparison.InvariantCultureIgnoreCase);
         }
 
         #endregion
@@ -576,9 +540,7 @@ namespace LumiSoft.Net.MIME
         /// <returns>Retruns readed data. Returns null if end of string is reached.</returns>
         public string ToEnd()
         {
-            if(m_Offset >= m_Source.Length){
-                return null;
-            }
+            if (m_Offset >= m_Source.Length) return null;
 
             var retVal = m_Source.Substring(m_Offset);
             m_Offset = m_Source.Length;
@@ -602,9 +564,7 @@ namespace LumiSoft.Net.MIME
                 ALPHA = <any ASCII alphabetic character>; (65.- 90.); (97.-122.)
             */
 
-            if((c >= 65 && c <= 90) || (c >= 97 && c <= 122)){
-                return true;
-            }
+            if ((c >= 65 && c <= 90) || (c >= 97 && c <= 122)) return true;
 
             return false;
         }
@@ -621,21 +581,17 @@ namespace LumiSoft.Net.MIME
         public static bool IsAText(char c)
         {
             /* RFC 2822 3.2.4.
-             *  atext = ALPHA / DIGIT / 
+             *  atext = ALPHA / DIGIT /
              *          "!" / "#" / "$" / "%" / "&" / "'" / "*" / "+" /
              *          "-" / "/" / "=" / "?" / "^" / "_" / "`" / "{" /
              *          "|" / "}" / "~"
-            */
-                        
-            if(IsAlpha(c) || char.IsDigit(c)){
-                return true;
-            }
+             */
 
-            foreach(var aC in atextChars){
-                if(c == aC){
+            if (IsAlpha(c) || char.IsDigit(c)) return true;
+
+            foreach (var aC in atextChars)
+                if (c == aC)
                     return true;
-                }
-            }
 
             return false;
         }
@@ -651,20 +607,16 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns true if the specified value can be represented as "dot-atom".</returns>
         public static bool IsDotAtom(string value)
         {
-            if(value == null){
-                throw new ArgumentNullException(nameof(value));
-            }
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             /* RFC 2822 3.2.4.
              *  dot-atom      = [CFWS] dot-atom-text [CFWS]
              *  dot-atom-text = 1*atext *("." 1*atext)
-            */
+             */
 
-            foreach(var c in value){
-                if(c != '.' && !IsAText(c)){
+            foreach (var c in value)
+                if (c != '.' && !IsAText(c))
                     return false;
-                }
-            }
 
             return true;
         }
@@ -681,19 +633,13 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>text</b> is null.</exception>
         public static bool IsToken(string text)
         {
-            if(text == null){
-                throw new ArgumentNullException(nameof(text));
-            }
+            if (text == null) throw new ArgumentNullException(nameof(text));
 
-            if(text == ""){
-                return false;
-            }
+            if (text == "") return false;
 
-            foreach(var c in text){
-                if(!IsToken(c)){
+            foreach (var c in text)
+                if (!IsToken(c))
                     return false;
-                }
-            }
 
             return true;
         }
@@ -707,23 +653,17 @@ namespace LumiSoft.Net.MIME
         {
             /* RFC 2045 5.
              *  token := 1*<any (US-ASCII) CHAR except SPACE, CTLs, or tspecials>
-             * 
+             *
              * RFC 822 3.3.
              *  CTL =  <any ASCII control; (0.- 31.); (127.)
-            */
-            
-            if(c <= 31 || c == 127){
-                return false;
-            }
+             */
 
-            if(c == ' '){
-                return false;
-            }
-            foreach(var tsC in tspecials){
-                if(tsC == c){
+            if (c <= 31 || c == 127) return false;
+
+            if (c == ' ') return false;
+            foreach (var tsC in tspecials)
+                if (tsC == c)
                     return false;
-                }
-            }
 
             return true;
         }
@@ -731,7 +671,7 @@ namespace LumiSoft.Net.MIME
         #endregion
 
         #region static method IsAttributeChar
-                
+
         /// <summary>
         /// Gets if the specified char is RFC 2231 (section 7) 'attribute-char'.
         /// </summary>
@@ -741,23 +681,17 @@ namespace LumiSoft.Net.MIME
         {
             /* RFC 2231 7.
              * attribute-char := <any (US-ASCII) CHAR except SPACE, CTLs, "*", "'", "%", or tspecials>
-             * 
+             *
              * RFC 822 3.3.
              *  CTL =  <any ASCII control; (0.- 31.); (127.)
-            */
+             */
 
-            if(c <= 31 || c > 127){
-                return false;
-            }
+            if (c <= 31 || c > 127) return false;
 
-            if(c == ' ' || c == '*' || c == '\'' || c == '%'){
-                return false;
-            }
-            foreach(var cS in tspecials){
-                if(c == cS){
+            if (c == ' ' || c == '*' || c == '\'' || c == '%') return false;
+            foreach (var cS in tspecials)
+                if (c == cS)
                     return false;
-                }
-            }
 
             return true;
         }
@@ -767,134 +701,140 @@ namespace LumiSoft.Net.MIME
 
         #region method ReadParenthesized
 
-		/// <summary>
-		/// Reads parenthesized value. Supports {},(),[],&lt;&gt; parenthesis. 
-		/// Throws exception if there isn't parenthesized value or closing parenthesize is missing.
-		/// </summary>
-		/// <returns>Returns value between parenthesized.</returns>
-		public string ReadParenthesized()
-		{
+        /// <summary>
+        /// Reads parenthesized value. Supports {},(),[],&lt;&gt; parenthesis. 
+        /// Throws exception if there isn't parenthesized value or closing parenthesize is missing.
+        /// </summary>
+        /// <returns>Returns value between parenthesized.</returns>
+        public string ReadParenthesized()
+        {
             ToFirstChar();
 
-			var startingChar = ' ';
-			var closingChar  = ' ';
+            var startingChar = ' ';
+            var closingChar = ' ';
 
-			if(m_Source[m_Offset] == '{'){
-				startingChar = '{';
-				closingChar = '}';
-			}
-			else if(m_Source[m_Offset] == '('){
-				startingChar = '(';
-				closingChar = ')';
-			}			
-			else if(m_Source[m_Offset] == '['){
-				startingChar = '[';
-				closingChar = ']';
-			}						
-			else if(m_Source[m_Offset] == '<'){
-				startingChar = '<';
-				closingChar = '>';
-			}
-			else{
-				throw new Exception("No parenthesized value '" + m_Source.Substring(m_Offset) + "' !");
-			}
+            if (m_Source[m_Offset] == '{')
+            {
+                startingChar = '{';
+                closingChar = '}';
+            }
+            else if (m_Source[m_Offset] == '(')
+            {
+                startingChar = '(';
+                closingChar = ')';
+            }
+            else if (m_Source[m_Offset] == '[')
+            {
+                startingChar = '[';
+                closingChar = ']';
+            }
+            else if (m_Source[m_Offset] == '<')
+            {
+                startingChar = '<';
+                closingChar = '>';
+            }
+            else
+            {
+                throw new Exception("No parenthesized value '" + m_Source.Substring(m_Offset) + "' !");
+            }
+
             m_Offset++;
 
-			var inQuotedString            = false; // Holds flag if position is quoted string or not
-			var lastChar                  = (char)0;
-			var  nestedStartingCharCounter = 0;
-			for(var i=m_Offset;i<m_Source.Length;i++){
-				// Skip escaped(\) "
-				if(lastChar != '\\' && m_Source[i] == '\"'){
-					// Start/end quoted string area
-					inQuotedString = !inQuotedString;
-				}
-				// We need to skip parenthesis in quoted string
-				else if(!inQuotedString){
-					// There is nested parenthesis
-					if(m_Source[i] == startingChar){
-						nestedStartingCharCounter++;
-					}
-					// Closing char
-					else if(m_Source[i] == closingChar)
+            var inQuotedString = false; // Holds flag if position is quoted string or not
+            var lastChar = (char) 0;
+            var nestedStartingCharCounter = 0;
+            for (var i = m_Offset; i < m_Source.Length; i++)
+            {
+                // Skip escaped(\) "
+                if (lastChar != '\\' && m_Source[i] == '\"')
+                {
+                    // Start/end quoted string area
+                    inQuotedString = !inQuotedString;
+                }
+                // We need to skip parenthesis in quoted string
+                else if (!inQuotedString)
+                {
+                    // There is nested parenthesis
+                    if (m_Source[i] == startingChar)
+                    {
+                        nestedStartingCharCounter++;
+                    }
+                    // Closing char
+                    else if (m_Source[i] == closingChar)
                     {
                         // There isn't nested parenthesis closing chars left, this is closing char what we want.
-						if(nestedStartingCharCounter == 0){
-                            var retVal = m_Source.Substring(m_Offset,i - m_Offset);
+                        if (nestedStartingCharCounter == 0)
+                        {
+                            var retVal = m_Source.Substring(m_Offset, i - m_Offset);
                             m_Offset = i + 1;
 
-				            return retVal;
-						}
-						// This is nested parenthesis closing char
+                            return retVal;
+                        }
+                        // This is nested parenthesis closing char
 
                         nestedStartingCharCounter--;
                     }
-				}
+                }
 
-				lastChar = m_Source[i];
-			}
+                lastChar = m_Source[i];
+            }
 
-			throw new ArgumentException("There is no closing parenthesize for '" + m_Source.Substring(m_Offset) + "' !");
-		}
+            throw new ArgumentException("There is no closing parenthesize for '" + m_Source.Substring(m_Offset) +
+                                        "' !");
+        }
 
-		#endregion
+        #endregion
 
         #region method QuotedReadToDelimiter
 
         /// <summary>
-		/// Reads string to specified delimiter or to end of underlying string. Notes: Delimiters in quoted string is skipped. 
-		/// For example: delimiter = ',', text = '"aaaa,eee",qqqq' - then result is '"aaaa,eee"'.
-		/// </summary>
-		/// <param name="delimiters">Data delimiters.</param>
-		/// <returns>Returns readed string or null if end of string reached.</returns>
+        /// Reads string to specified delimiter or to end of underlying string. Notes: Delimiters in quoted string is skipped. 
+        /// For example: delimiter = ',', text = '"aaaa,eee",qqqq' - then result is '"aaaa,eee"'.
+        /// </summary>
+        /// <param name="delimiters">Data delimiters.</param>
+        /// <returns>Returns readed string or null if end of string reached.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>delimiters</b> is null reference.</exception>
-		public string QuotedReadToDelimiter(char[] delimiters)
-		{
-            if(delimiters == null){
-                throw new ArgumentNullException(nameof(delimiters));
-            }
+        public string QuotedReadToDelimiter(char[] delimiters)
+        {
+            if (delimiters == null) throw new ArgumentNullException(nameof(delimiters));
 
-            if(Available == 0){
-                return null;
-            }
+            if (Available == 0) return null;
 
             ToFirstChar();
 
-			var currentSplitBuffer = new StringBuilder(); // Holds active
-			var          inQuotedString     = false;               // Holds flag if position is quoted string or not
-			var          lastChar           = (char)0;
+            var currentSplitBuffer = new StringBuilder(); // Holds active
+            var inQuotedString = false; // Holds flag if position is quoted string or not
+            var lastChar = (char) 0;
 
-			for(var i=m_Offset;i<m_Source.Length;i++){
-				var c = (char)Peek(false);
+            for (var i = m_Offset; i < m_Source.Length; i++)
+            {
+                var c = (char) Peek(false);
 
-				// Skip escaped(\) "
-				if(lastChar != '\\' && c == '\"'){
-					// Start/end quoted string area
-					inQuotedString = !inQuotedString;
-				}
-			
+                // Skip escaped(\) "
+                if (lastChar != '\\' && c == '\"')
+                    // Start/end quoted string area
+                    inQuotedString = !inQuotedString;
+
                 // See if char is delimiter
                 var isDelimiter = false;
-                foreach(var delimiter in delimiters){
-                    if(c == delimiter){
+                foreach (var delimiter in delimiters)
+                    if (c == delimiter)
+                    {
                         isDelimiter = true;
                         break;
                     }
-                }
 
-				// Current char is split char and it isn't in quoted string, do split
-				if(!inQuotedString && isDelimiter){
-					return currentSplitBuffer.ToString();
-				}
+                // Current char is split char and it isn't in quoted string, do split
+                if (!inQuotedString && isDelimiter) return currentSplitBuffer.ToString();
 
                 currentSplitBuffer.Append(c);
                 m_Offset++;
 
                 lastChar = c;
-			}
-            
-			// If we reached so far then we are end of string, return it.
-			return currentSplitBuffer.ToString();
+            }
+
+            // If we reached so far then we are end of string, return it.
+            return currentSplitBuffer.ToString();
         }
 
         #endregion
@@ -913,6 +853,5 @@ namespace LumiSoft.Net.MIME
         public int Position => m_Offset;
 
         #endregion
-
     }
 }

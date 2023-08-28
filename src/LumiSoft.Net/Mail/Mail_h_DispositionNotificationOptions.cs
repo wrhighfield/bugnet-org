@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-
 using LumiSoft.Net.MIME;
 
 namespace LumiSoft.Net.Mail
@@ -25,7 +24,7 @@ namespace LumiSoft.Net.Mail
             importance = "required" / "optional"
         */
 
-        
+
         #region override method ToString
 
         /// <summary>
@@ -35,7 +34,7 @@ namespace LumiSoft.Net.Mail
         /// <param name="parmetersCharset">Charset to use to encode 8-bit characters. Value null means parameters not encoded.</param>
         /// <param name="reEncode">If true always specified encoding is used. If false and header field value not modified, original encoding is kept.</param>
         /// <returns>Returns header field as string.</returns>
-        public override string ToString(MIME_Encoding_EncodedWord wordEncoder,Encoding parmetersCharset,bool reEncode)
+        public override string ToString(MIME_Encoding_EncodedWord wordEncoder, Encoding parmetersCharset, bool reEncode)
         {
             return "TODO:";
         }

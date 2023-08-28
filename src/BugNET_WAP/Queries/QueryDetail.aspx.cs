@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Web;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
+using BugNET.UI;
 using BugNET.UserControls;
-using BugNET.UserInterfaceLayer;
 
 namespace BugNET.Queries
 {
@@ -14,22 +15,21 @@ namespace BugNET.Queries
     /// This page displays the interface for building a query against the
     /// issues database.
     /// </summary>
-    public partial class QueryDetail : BasePage
+    public partial class QueryDetail : BugNetBasePage
     {
+        protected DisplayIssues DisplayIssuesControl;
 
-        protected DisplayIssues ctlDisplayIssues;
-
-        int _queryId;
+        private int queryId;
 
         /// <summary>
         ///  The number of query clauses is stored in view state so that the
         /// interface can be recreated on each page request.
         /// </summary>
         /// <value>The clause count.</value>
-        int ClauseCount
+        private int ClauseCount
         {
-            get { return ViewState.Get("ClauseCount", 0); }
-            set { ViewState.Set("ClauseCount", value); }
+            get => ViewState.Get("ClauseCount", 0);
+            set => ViewState.Set("ClauseCount", value);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace BugNET.Queries
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void Page_Unload(object sender, System.EventArgs e)
+        protected void Page_Unload(object sender, EventArgs e)
         {
             //remove the event handler
             SiteMap.SiteMapResolve -= ExpandIssuePaths;
@@ -53,21 +53,19 @@ namespace BugNET.Queries
         {
             Message1.Visible = false;
 
-            _queryId = Request.Get("id", Globals.NewId);
+            queryId = Request.Get("id", Globals.NewId);
             ProjectId = Request.Get("pid", Globals.NewId);
 
             // If no project id or query id then redirect away
-            if (ProjectId == 0)
-            { 
-                ErrorRedirector.TransferToSomethingMissingPage(Page);
-            }
+            if (ProjectId == 0) ErrorRedirector.TransferToSomethingMissingPage(Page);
 
-            if (!Page.User.Identity.IsAuthenticated || (_queryId != 0 && !UserManager.HasPermission(ProjectId, Common.Permission.EditQuery.ToString())) )
-            {
+            if (!Page.User.Identity.IsAuthenticated || (queryId != 0 &&
+                                                        !UserManager.HasPermission(ProjectId,
+                                                            Common.Permission.EditQuery.ToString())))
                 Response.Redirect("~/Errors/AccessDenied");
-            }
 
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.AddQuery.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.AddQuery.ToString()))
             {
                 SaveQueryForm.Visible = false;
                 pnlSaveQuery.Visible = false;
@@ -77,16 +75,15 @@ namespace BugNET.Queries
 
             if (!Page.IsPostBack)
             {
-
                 lblProjectName.Text = ProjectManager.GetById(ProjectId).Name;
 
                 Results.Visible = false;
 
-                if (_queryId != 0)
+                if (queryId != 0)
                 {
                     //edit query.
                     plhClauses.Controls.Clear();
-                    var query = QueryManager.GetById(_queryId);
+                    var query = QueryManager.GetById(queryId);
                     txtQueryName.Text = query.Name;
                     chkGlobalQuery.Checked = query.IsPublic;
                     //ClauseCount = 0;
@@ -96,7 +93,6 @@ namespace BugNET.Queries
                         ClauseCount++;
                         AddClause(true, qc);
                     }
-
                 }
                 else
                 {
@@ -119,30 +115,20 @@ namespace BugNET.Queries
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="System.Web.SiteMapResolveEventArgs"/> instance containing the event data.</param>
         /// <returns></returns>
-        private SiteMapNode ExpandIssuePaths(Object sender, SiteMapResolveEventArgs e)
+        private SiteMapNode ExpandIssuePaths(object sender, SiteMapResolveEventArgs e)
         {
-            if (SiteMap.CurrentNode != null)
-            {
-                var currentNode = SiteMap.CurrentNode.Clone(true);
-                var tempNode = currentNode;
+            if (SiteMap.CurrentNode == null) return null;
+            var currentNode = SiteMap.CurrentNode.Clone(true);
+            var tempNode = currentNode;
 
-                // The current node, and its parents, can be modified to include
-                // dynamic query string information relevant to the currently
-                // executing request.
-                if (ProjectId != 0)
-                {
-                    tempNode.Url = string.Format("{0}?id={1}", tempNode.Url, ProjectId);
-                }
+            // The current node, and its parents, can be modified to include
+            // dynamic query string information relevant to the currently
+            // executing request.
+            if (ProjectId != 0) tempNode.Url = $"{tempNode.Url}?id={ProjectId}";
 
-                if ((null != (tempNode = tempNode.ParentNode)))
-                {
-                    tempNode.Url = string.Format("~/Queries/QueryList.aspx?pid={0}", ProjectId);
-                }
+            if (null != (tempNode = tempNode.ParentNode)) tempNode.Url = $"~/Queries/QueryList.aspx?pid={ProjectId}";
 
-                return currentNode;
-            }
-
-            return null;
+            return currentNode;
         }
 
         /// <summary>
@@ -152,7 +138,7 @@ namespace BugNET.Queries
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        public void IssuesRebind(Object s, EventArgs e)
+        public void IssuesRebind(object s, EventArgs e)
         {
             ExecuteQuery();
         }
@@ -160,7 +146,7 @@ namespace BugNET.Queries
         /// <summary>
         /// This method adds the number of clauses stored in the ClauseCount property.
         /// </summary>
-        void DisplayClauses()
+        private void DisplayClauses()
         {
             for (var i = 0; i < ClauseCount; i++)
                 AddClause();
@@ -171,12 +157,9 @@ namespace BugNET.Queries
         /// the clause to the proper data.
         ///
         /// </summary>
-        void BindQueryFieldTypes()
+        private void BindQueryFieldTypes()
         {
-            foreach (PickQueryField ctlPickQueryField in plhClauses.Controls)
-            {
-                ctlPickQueryField.ProjectId = ProjectId;
-            }
+            foreach (PickQueryField ctlPickQueryField in plhClauses.Controls) ctlPickQueryField.ProjectId = ProjectId;
         }
 
         /// <summary>
@@ -184,9 +167,9 @@ namespace BugNET.Queries
         /// </summary>
         /// <param name="bindData">if set to <c>true</c> [bind data].</param>
         /// <param name="queryClause"></param>
-        void AddClause(bool bindData = false, QueryClause queryClause = null)
+        private void AddClause(bool bindData = false, QueryClause queryClause = null)
         {
-            var ctlPickQueryField = (PickQueryField)Page.LoadControl("~/UserControls/PickQueryField.ascx");
+            var ctlPickQueryField = (PickQueryField) Page.LoadControl("~/UserControls/PickQueryField.ascx");
 
             plhClauses.Controls.Add(ctlPickQueryField);
             ctlPickQueryField.ProjectId = ProjectId;
@@ -197,7 +180,7 @@ namespace BugNET.Queries
         /// <summary>
         ///This method is called when a user clicks the Add Clause button.
         /// </summary>
-        void AddClauseClick()
+        private void AddClauseClick()
         {
             ClauseCount++;
             AddClause(true);
@@ -207,7 +190,7 @@ namespace BugNET.Queries
         /// <summary>
         /// This method is called when a user clicks the Remove Clause button.
         /// </summary>
-        void RemoveClause()
+        private void RemoveClause()
         {
             if (ClauseCount > 1)
             {
@@ -222,9 +205,9 @@ namespace BugNET.Queries
         /// <summary>
         /// This method is called when a user clicks the Remove Clause button.
         /// </summary>
-        void PerformQuery()
+        private void PerformQuery()
         {
-            ctlDisplayIssues.CurrentPageIndex = 0;
+            DisplayIssuesControl.CurrentPageIndex = 0;
             ExecuteQuery();
         }
 
@@ -232,106 +215,90 @@ namespace BugNET.Queries
         /// This method is called when a user clicks the Save Query button.
         /// The method saves the query to a database table.
         /// </summary>
-        void SaveQuery()
+        private void SaveQuery()
         {
             if (!Page.IsValid) return;
 
             var queryName = txtQueryName.Text.Trim();
             var userName = Security.GetUserName();
 
-            if (queryName == String.Empty) return;
+            if (queryName == string.Empty) return;
 
             var queryClauses = BuildQuery();
 
             if (queryClauses.Count == 0) return;
 
             var query = new Query
-                            {
-                                Id = _queryId,
-                                Name = queryName,
-                                IsPublic = chkGlobalQuery.Checked,
-                                Clauses = queryClauses
-                            };
+            {
+                Id = queryId,
+                Name = queryName,
+                IsPublic = chkGlobalQuery.Checked,
+                Clauses = queryClauses
+            };
 
             var success = QueryManager.SaveOrUpdate(userName, ProjectId, query);
 
             if (success)
-                Response.Redirect(string.Format("QueryList.aspx?pid={0}", ProjectId));
+                Response.Redirect($"QueryList.aspx?pid={ProjectId}");
             else
-                Message1.ShowErrorMessage(GetLocalResourceObject("SaveQueryError").ToString());
+                Message1.ShowErrorMessage(GetLocalString("SaveQueryError"));
         }
 
 
         /// <summary>
         /// This method executes a query and displays the results.
         /// </summary>
-        void ExecuteQuery()
+        private void ExecuteQuery()
         {
             var queryClauses = BuildQuery();
 
             if (queryClauses.Count > 0)
-            {
                 try
                 {
-                    var sortColumns = new List<KeyValuePair<string, string>>();
+                    var sorter = DisplayIssuesControl.SortString;
 
-                    var sorter = ctlDisplayIssues.SortString;
+                    if (sorter.Trim().Length.Equals(0)) sorter = "iv.[IssueId] DESC";
 
-                    if (sorter.Trim().Length.Equals(0))
-                    {
-                        sorter = "iv.[IssueId] DESC";
-                    }
-
-                    foreach (var sort in sorter.Split(','))
-                    {
-                        var args = sort.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                        if (args.Length.Equals(2))
-                            sortColumns.Add(new KeyValuePair<string, string>(args[0], args[1]));
-
-                    }
+                    var sortColumns = (
+                        from sort in sorter.Split(',')
+                        select sort.Split(new[] {" "}, StringSplitOptions.RemoveEmptyEntries)
+                        into args
+                        where args.Length.Equals(2)
+                        select new KeyValuePair<string, string>(args[0], args[1])).ToList();
 
                     // add the disabled query filter since the UI cannot add this
                     queryClauses.Insert(0, new QueryClause("AND", "iv.[Disabled]", "=", "0", SqlDbType.Int));
 
                     var colIssues = IssueManager.PerformQuery(queryClauses, sortColumns, ProjectId);
-                    ctlDisplayIssues.DataSource = colIssues;
+                    DisplayIssuesControl.DataSource = colIssues;
                     Results.Visible = true;
-                    ctlDisplayIssues.DataBind();
+                    DisplayIssuesControl.DataBind();
                 }
                 catch
                 {
-                    Message1.ShowErrorMessage(GetLocalResourceObject("RunQueryError").ToString());
+                    Message1.ShowErrorMessage(GetLocalString("RunQueryError"));
                 }
-
-            }
             else
-            {
-                Message1.ShowWarningMessage(GetLocalResourceObject("SelectOneQueryClause").ToString());
-            }
+                Message1.ShowWarningMessage(GetLocalString("SelectOneQueryClause"));
         }
 
         /// <summary>
         /// This method builds a database query by iterating through each query clause.
         /// </summary>
         /// <returns></returns>
-        List<QueryClause> BuildQuery()
+        private List<QueryClause> BuildQuery()
         {
-            var colQueryClauses = new List<QueryClause>();
-
-            foreach (PickQueryField ctlPickQuery in plhClauses.Controls)
-            {
-                var objQueryClause = ctlPickQuery.QueryClause;
-
-                if (objQueryClause != null)
-                    colQueryClauses.Add(objQueryClause);
-            }
-
-            return colQueryClauses;
+            return (
+                from PickQueryField ctlPickQuery in plhClauses.Controls
+                select ctlPickQuery.QueryClause
+                into objQueryClause
+                where objQueryClause != null
+                select objQueryClause).ToList();
         }
 
-        void CancelQuery()
+        private void CancelQuery()
         {
-            Response.Redirect(string.Format("~/Queries/QueryList.aspx?pid={0}", ProjectId), true);
+            Response.Redirect($"~/Queries/QueryList.aspx?pid={ProjectId}", true);
         }
 
         protected void btnAddClause_Click(object sender, System.Web.UI.ImageClickEventArgs e)

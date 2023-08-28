@@ -4,6 +4,7 @@ using System.Web;
 using System.Web.Security;
 using BugNET.BLL;
 using BugNET.Common;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Account
@@ -11,7 +12,7 @@ namespace BugNET.Account
     /// <summary>
     /// Password recovery page
     /// </summary>
-    public partial class ForgotPassword : System.Web.UI.Page
+    public partial class ForgotPassword : BugNetBasePage
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(ForgotPassword));
 
@@ -22,7 +23,8 @@ namespace BugNET.Account
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-            Page.Title = string.Format("{0} - {1}", GetLocalResourceObject("Page.Title"), HostSettingManager.Get(HostSettingNames.ApplicationTitle));
+            Page.Title =
+                $@"{GetLocalString("Page.Title")} - {HostSettingManager.Get(HostSettingNames.ApplicationTitle)}";
         }
 
         /// <summary>
@@ -32,35 +34,33 @@ namespace BugNET.Account
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected void SubmitButton_Click(object sender, EventArgs e)
         {
-            if(Page.IsValid)
+            if (!Page.IsValid) return;
+            var user = Membership.GetUser(UserName.Text.Trim());
+            if (user != null && user.IsApproved)
             {
-                var user = Membership.GetUser(UserName.Text.Trim());
-                if (user != null && user.IsApproved)
-                {
-                    var profile = new WebProfile().GetProfile(UserName.Text.Trim());
-                    string token = GenerateToken();
-                    profile.PasswordVerificationToken = token;
-                    profile.PasswordVerificationTokenExpirationDate = DateTime.Now.AddMinutes(1440);
-                    profile.Save();
+                var profile = new WebProfile().GetProfile(UserName.Text.Trim());
+                var token = GenerateToken();
+                profile.PasswordVerificationToken = token;
+                profile.PasswordVerificationTokenExpirationDate = DateTime.Now.AddMinutes(1440);
+                profile.Save();
 
-                    // Email the user the password reset token
-                    UserManager.SendForgotPasswordEmail(user, token);
-                }
-
-                forgotPassword.Visible = false;
-                successMessage.Visible = true;
+                // Email the user the password reset token
+                UserManager.SendForgotPasswordEmail(user, token);
             }
+
+            forgotPassword.Visible = false;
+            successMessage.Visible = true;
         }
 
         /// <summary>
         /// Generates the token.
         /// </summary>
         /// <returns></returns>
-        private string GenerateToken()
+        private static string GenerateToken()
         {
-            using (var prng = new RNGCryptoServiceProvider())
+            using (var provider = new RNGCryptoServiceProvider())
             {
-                return GenerateToken(prng);
+                return GenerateToken(provider);
             }
         }
 
@@ -69,9 +69,9 @@ namespace BugNET.Account
         /// </summary>
         /// <param name="generator">The generator.</param>
         /// <returns></returns>
-        internal static string GenerateToken(RandomNumberGenerator generator)
+        private static string GenerateToken(RandomNumberGenerator generator)
         {
-            byte[] tokenBytes = new byte[16];
+            var tokenBytes = new byte[16];
             generator.GetBytes(tokenBytes);
             return HttpServerUtility.UrlTokenEncode(tokenBytes);
         }

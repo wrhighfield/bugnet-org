@@ -4,13 +4,14 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
+using BugNET.UI;
 
 namespace BugNET.UserControls
 {
     /// <summary>
     ///	 This user control displays the query clause used in the QueryDetail.aspx page.
     /// </summary>
-    public partial class PickQueryField : System.Web.UI.UserControl
+    public partial class PickQueryField : BugNetUserControl
     {
         /// <summary>
         /// The ProjectId property is used to retrieve the proper status, milestone,
@@ -22,9 +23,9 @@ namespace BugNET.UserControls
             get
             {
                 if (ViewState["ProjectId"] == null) return 0;
-                return (int)ViewState["ProjectId"];
+                return (int) ViewState["ProjectId"];
             }
-            set { ViewState["ProjectId"] = value; }
+            set => ViewState["ProjectId"] = value;
         }
 
         /// <summary>
@@ -33,8 +34,8 @@ namespace BugNET.UserControls
         /// <returns>The id of the custom field selected, otherwise null</returns>
         public int? CustomFieldId
         {
-            get { return ViewState.Get<int?>("CustomFieldId", null); }
-            set { ViewState.Set("CustomFieldId", value); }
+            get => ViewState.Get<int?>("CustomFieldId", null);
+            set => ViewState.Set("CustomFieldId", value);
         }
 
         /// <summary>
@@ -43,14 +44,14 @@ namespace BugNET.UserControls
         /// <value><c>true</c> if [custom field query]; otherwise, <c>false</c>.</value>
         public bool CustomFieldSelected
         {
-            get { return ViewState.Get("CustomFieldSelected", false); }
-            set { ViewState.Set("CustomFieldSelected", value); }
+            get => ViewState.Get("CustomFieldSelected", false);
+            set => ViewState.Set("CustomFieldSelected", value);
         }
 
-        ValidationDataType CustomFieldDataType
+        private ValidationDataType CustomFieldDataType
         {
-            get { return ViewState.Get("CustomFieldDataType", ValidationDataType.String); }
-            set { ViewState.Set("CustomFieldDataType", value); }
+            get => ViewState.Get("CustomFieldDataType", ValidationDataType.String);
+            set => ViewState.Set("CustomFieldDataType", value);
         }
 
         /// <summary>
@@ -112,7 +113,6 @@ namespace BugNET.UserControls
         {
             get
             {
-
                 switch (dropField.SelectedValue)
                 {
                     case "IssueCategoryId":
@@ -129,23 +129,30 @@ namespace BugNET.UserControls
                     case "LastUpdateAsDate":
                     case "DateCreatedAsDate":
                     case "IssueDueDate":
-                        return DateValue.SelectedValue != null ? ((DateTime)DateValue.SelectedValue).ToString("yyyy-MM-dd") : string.Empty;
+                        return DateValue.SelectedValue != null
+                            ? ((DateTime) DateValue.SelectedValue).ToString("yyyy-MM-dd")
+                            : string.Empty;
                     default:
                         if (CustomFieldSelected)
                         {
-                            var cf = CustomFieldManager.GetByProjectId(ProjectId).Find(c => c.Name == dropField.SelectedValue);
+                            var cf = CustomFieldManager.GetByProjectId(ProjectId)
+                                .Find(c => c.Name == dropField.SelectedValue);
 
                             if (cf != null)
                             {
                                 CustomFieldId = cf.Id;
 
-                                if (cf.FieldType == CustomFieldType.DropDownList || cf.FieldType == CustomFieldType.YesNo)
+                                if (cf.FieldType == CustomFieldType.DropDownList ||
+                                    cf.FieldType == CustomFieldType.YesNo)
                                     return dropValue.SelectedValue;
 
                                 if (cf.FieldType == CustomFieldType.Date)
-                                    return DateValue.SelectedValue != null ? ((DateTime)DateValue.SelectedValue).ToString("yyyy-MM-dd") : string.Empty;  
+                                    return DateValue.SelectedValue != null
+                                        ? ((DateTime) DateValue.SelectedValue).ToString("yyyy-MM-dd")
+                                        : string.Empty;
                             }
                         }
+
                         return txtValue.Text;
                 }
             }
@@ -185,7 +192,6 @@ namespace BugNET.UserControls
                     default:
 
                         if (CustomFieldId.HasValue)
-                        {
                             switch (CustomFieldDataType)
                             {
                                 case ValidationDataType.String:
@@ -201,11 +207,9 @@ namespace BugNET.UserControls
                                 default:
                                     return SqlDbType.NVarChar;
                             }
-                        }
 
                         return SqlDbType.NVarChar;
                 }
-
             }
         }
 
@@ -222,19 +226,14 @@ namespace BugNET.UserControls
 
                 var fieldName = FieldName;
 
-                if (fieldName.ToLower().Equals("issueid"))
-                {
-                    fieldName = "iv.[IssueId]";
-                }
+                if (fieldName.ToLower().Equals("issueid")) fieldName = "iv.[IssueId]";
 
-                if (fieldName.ToLower().Equals("projectid"))
-                {
-                    fieldName = "iv.[ProjectId]";
-                }
+                if (fieldName.ToLower().Equals("projectid")) fieldName = "iv.[ProjectId]";
 
-                return dropField.SelectedValue == "0" ?
-                    null :
-                    new QueryClause(BooleanOperator, fieldName, ComparisonOperator, FieldValue, DataType, CustomFieldId);
+                return dropField.SelectedValue == "0"
+                    ? null
+                    : new QueryClause(BooleanOperator, fieldName, ComparisonOperator, FieldValue, DataType,
+                        CustomFieldId);
             }
             set
             {
@@ -248,9 +247,10 @@ namespace BugNET.UserControls
                     dropField.DataSource = CustomFieldManager.GetByProjectId(ProjectId);
                     dropField.DataTextField = "Name";
                     dropField.DataValueField = "Name";
-                    dropField.DataBind();// bind to the new data source.
-                    dropField.Items.Add(GetGlobalResourceObject("SharedResources", "DropDown_ResetFields").ToString());
-                    dropField.Items.Insert(0, new ListItem(GetGlobalResourceObject("SharedResources", "DropDown_SelectCustomField").ToString(), "0"));
+                    dropField.DataBind(); // bind to the new data source.
+                    dropField.Items.Add(GetGlobalString("SharedResources", "DropDown_ResetFields"));
+                    dropField.Items.Insert(0,
+                        new ListItem(GetGlobalString("SharedResources", "DropDown_SelectCustomField"), "0"));
                     CustomFieldSelected = true;
                 }
 
@@ -273,18 +273,15 @@ namespace BugNET.UserControls
                 {
                     dropValue.SelectedValue = value.FieldValue;
 
-                    if(value.DataType == SqlDbType.DateTime || value.CustomFieldQuery)
-                    {
+                    if (value.DataType == SqlDbType.DateTime || value.CustomFieldQuery)
                         if (value.FieldValue.Is<DateTime>())
-                        {
                             DateValue.SelectedValue = value.FieldValue.To<DateTime>();
-                        }
-                    }
                 }
-                catch (Exception) { }
+                catch (Exception)
+                {
+                }
 
                 dropFieldSelectedIndexChanged(this, new EventArgs());
-
             }
         }
 
@@ -301,7 +298,6 @@ namespace BugNET.UserControls
 
             if (CustomFieldManager.GetByProjectId(ProjectId).Count == 0)
                 dropField.Items.Remove("CustomFieldName");
-
         }
 
         /// <summary>
@@ -310,7 +306,7 @@ namespace BugNET.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void dropFieldSelectedIndexChanged(Object s, EventArgs e)
+        protected void dropFieldSelectedIndexChanged(object s, EventArgs e)
         {
             dropValue.Items.Clear();
 
@@ -409,7 +405,7 @@ namespace BugNET.UserControls
                 case "CustomFieldName":
 
                     dropValue.Visible = false;
-                    txtValue.Visible = true;  //show the text value field. Not needed.
+                    txtValue.Visible = true; //show the text value field. Not needed.
                     CustomFieldSelected = true;
 
                     if (CustomFieldManager.GetByProjectId(ProjectId).Count > 0)
@@ -417,16 +413,19 @@ namespace BugNET.UserControls
                         dropField.DataSource = CustomFieldManager.GetByProjectId(ProjectId);
                         dropField.DataTextField = "Name";
                         dropField.DataValueField = "Name";
-                        dropField.DataBind();// bind to the new data source.
-                        dropField.Items.Add(GetGlobalResourceObject("SharedResources", "DropDown_ResetFields").ToString());
-                        dropField.Items.Insert(0, new ListItem(GetGlobalResourceObject("SharedResources", "DropDown_SelectCustomField").ToString(), "0"));
+                        dropField.DataBind(); // bind to the new data source.
+                        dropField.Items.Add(GetGlobalString("SharedResources", "DropDown_ResetFields"));
+                        dropField.Items.Insert(0,
+                            new ListItem(GetGlobalString("SharedResources", "DropDown_SelectCustomField"), "0"));
                     }
+
                     break;
                 default:
-                    if (dropField.SelectedItem.Text.Equals(GetGlobalResourceObject("SharedResources", "DropDown_SelectCustomField").ToString())) return;
+                    if (dropField.SelectedItem.Text.Equals(GetGlobalString("SharedResources",
+                            "DropDown_SelectCustomField"))) return;
 
                     // The user decides to reset the fields
-                    if (dropField.SelectedItem.Text.Equals(GetGlobalResourceObject("SharedResources", "DropDown_ResetFields").ToString()))
+                    if (dropField.SelectedItem.Text.Equals(GetGlobalString("SharedResources", "DropDown_ResetFields")))
                     {
                         dropField.DataSource = null;
                         dropField.DataSource = RequiredFieldManager.GetRequiredFields();
@@ -440,7 +439,8 @@ namespace BugNET.UserControls
                     else
                     {
                         //check the type of this custom field and load the appropriate values.
-                        var cf = CustomFieldManager.GetByProjectId(ProjectId).Find(c => c.Name == dropField.SelectedValue);
+                        var cf = CustomFieldManager.GetByProjectId(ProjectId)
+                            .Find(c => c.Name == dropField.SelectedValue);
 
                         if (cf == null) return;
 
@@ -461,23 +461,29 @@ namespace BugNET.UserControls
                                 break;
                             case CustomFieldType.YesNo:
                                 dropValue.Visible = true;
-                                dropValue.Items.Add(new ListItem(GetGlobalResourceObject("SharedResources", "DropDown_SelectOne").ToString()));
-                                dropValue.Items.Add(new ListItem(GetGlobalResourceObject("SharedResources", "Yes").ToString(), Boolean.TrueString));
-                                dropValue.Items.Add(new ListItem(GetGlobalResourceObject("SharedResources", "No").ToString(), Boolean.FalseString));
+                                dropValue.Items.Add(new ListItem(GetGlobalString("SharedResources",
+                                    "DropDown_SelectOne")));
+                                dropValue.Items.Add(new ListItem(GetGlobalString("SharedResources", "Yes"),
+                                    bool.TrueString));
+                                dropValue.Items.Add(new ListItem(GetGlobalString("SharedResources", "No"),
+                                    bool.FalseString));
                                 break;
                             default:
                                 txtValue.Visible = true;
                                 break;
                         }
                     }
+
                     break;
             }
+
             try
             {
                 dropValue.DataBind();
             }
-            catch { }
+            catch
+            {
+            }
         }
-
     }
 }

@@ -4,12 +4,12 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
 using System.Linq;
+using BugNET.UI;
 
 namespace BugNET.Issues.UserControls
 {
-    public partial class Notifications : System.Web.UI.UserControl, IIssueTab
+    public partial class Notifications : BugNetUserControl, IIssueTab
     {
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -18,7 +18,6 @@ namespace BugNET.Issues.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         /// <summary>
@@ -27,8 +26,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The issue id.</value>
         public int IssueId
         {
-            get { return ViewState.Get("IssueId", 0); }
-            set { ViewState.Set("IssueId", value); }
+            get => ViewState.Get("IssueId", 0);
+            set => ViewState.Set("IssueId", value);
         }
 
         /// <summary>
@@ -37,8 +36,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", 0); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", 0);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -49,17 +48,14 @@ namespace BugNET.Issues.UserControls
             BindNotifications();
 
             //check users role permission for subscribing to an issue
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.SubscribeIssue.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.SubscribeIssue.ToString()))
                 pnlNotifications.Visible = false;
 
             if (UserManager.IsSuperUser() || UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole))
-            {
                 pnlNotificationAdmin.Visible = true;
-            }
             else
-            {
                 pnlNotificationAdmin.Visible = false;
-            }
         }
 
         /// <summary>
@@ -73,31 +69,27 @@ namespace BugNET.Issues.UserControls
             lstProjectUsers.DataSource = UserManager.GetUsersByProjectId(ProjectId);
             lstProjectUsers.DataBind();
 
-            List<ProjectNotification> projectNotifications = (List<ProjectNotification>)ProjectNotificationManager.GetByProjectId(ProjectId);
-            List<IssueNotification> CurrentUsers = IssueNotificationManager.GetByIssueId(IssueId);
+            var projectNotifications = (List<ProjectNotification>) ProjectNotificationManager.GetByProjectId(ProjectId);
+            var CurrentUsers = IssueNotificationManager.GetByIssueId(IssueId);
 
-            foreach (IssueNotification item in CurrentUsers)
-            {
+            foreach (var item in CurrentUsers)
                 if (lstProjectUsers.Items.FindByValue(item.NotificationUsername) != null)
-                { 
+                {
                     ListItem DelIndex = null;
                     DelIndex = lstProjectUsers.Items.FindByValue(item.NotificationUsername);
                     lstProjectUsers.Items.Remove(DelIndex);
                 }
-            }
-           
+
             lstNotificationUsers.DataSource = CurrentUsers;
             lstNotificationUsers.DataBind();
 
             // filter out project notifications and disable them
             foreach (ListItem item in lstNotificationUsers.Items)
-            {
                 if (projectNotifications.Any(p => p.NotificationUsername == item.Value))
                 {
                     item.Attributes.Add("disabled", "disabled");
-                    item.Text += GetLocalResourceObject("ProjectLevel").ToString();
+                    item.Text += GetLocalString("ProjectLevel");
                 }
-            }
         }
 
         /// <summary>
@@ -107,7 +99,7 @@ namespace BugNET.Issues.UserControls
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         protected void btnDontRecieveNotfictaions_Click(object sender, EventArgs e)
         {
-            var notify = new IssueNotification { IssueId = IssueId, NotificationUsername = Page.User.Identity.Name };
+            var notify = new IssueNotification {IssueId = IssueId, NotificationUsername = Page.User.Identity.Name};
             IssueNotificationManager.Delete(notify);
             BindNotifications();
         }
@@ -119,7 +111,7 @@ namespace BugNET.Issues.UserControls
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         protected void btnReceiveNotifications_Click(object sender, EventArgs e)
         {
-            var notify = new IssueNotification { IssueId = IssueId, NotificationUsername = Page.User.Identity.Name};
+            var notify = new IssueNotification {IssueId = IssueId, NotificationUsername = Page.User.Identity.Name};
             IssueNotificationManager.SaveOrUpdate(notify);
 
             BindNotifications();
@@ -134,7 +126,8 @@ namespace BugNET.Issues.UserControls
         {
             if (lstProjectUsers.SelectedItem == null) return;
 
-            var notify = new IssueNotification { IssueId = IssueId, NotificationUsername = lstProjectUsers.SelectedItem.Value};
+            var notify = new IssueNotification
+                {IssueId = IssueId, NotificationUsername = lstProjectUsers.SelectedItem.Value};
             IssueNotificationManager.SaveOrUpdate(notify);
             BindNotifications();
         }
@@ -148,7 +141,8 @@ namespace BugNET.Issues.UserControls
         {
             if (lstNotificationUsers.SelectedItem == null) return;
 
-            var notify = new IssueNotification { IssueId = IssueId, NotificationUsername = lstNotificationUsers.SelectedItem.Value };
+            var notify = new IssueNotification
+                {IssueId = IssueId, NotificationUsername = lstNotificationUsers.SelectedItem.Value};
             IssueNotificationManager.Delete(notify);
             BindNotifications();
         }

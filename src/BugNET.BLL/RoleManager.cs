@@ -10,7 +10,8 @@ namespace BugNET.BLL
 {
     public static class RoleManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves the role object
@@ -19,7 +20,8 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(Role entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save role, the project id is invalid");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save role, the project id is invalid");
             if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The role name cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
@@ -44,7 +46,7 @@ namespace BugNET.BLL
 
             foreach (var role in Globals.DefaultRoles)
             {
-                var r = new Role { ProjectId = projectId, Name = role, Description = role, AutoAssign = false};
+                var r = new Role {ProjectId = projectId, Name = role, Description = role, AutoAssign = false};
                 var newRoleId = DataProviderManager.Provider.CreateNewRole(r);
 
                 int[] permissions = null;
@@ -69,10 +71,7 @@ namespace BugNET.BLL
                 }
 
                 if (permissions == null) continue;
-                foreach (var i in permissions)
-                {
-                    AddPermission(newRoleId, i);
-                }
+                foreach (var i in permissions) AddPermission(newRoleId, i);
             }
         }
 
@@ -113,10 +112,10 @@ namespace BugNET.BLL
         public static int CreateRole(string roleName, int projectId, string description, bool autoAssign)
         {
             if (Exists(roleName, projectId)) return 0;
-            var r = new Role {ProjectId = projectId, Name = roleName, Description = description, AutoAssign = autoAssign};
+            var r = new Role
+                {ProjectId = projectId, Name = roleName, Description = description, AutoAssign = autoAssign};
             SaveOrUpdate(r);
             return r.Id;
-
         }
 
         /// <summary>
@@ -149,9 +148,9 @@ namespace BugNET.BLL
             // performance enhancement
             // WRH 2012-04-06
             // use the current loaded user roles if we are looking at the same user
-            return userName.ToLower().Equals(HttpContext.Current.User.Identity.Name.ToLower()) ?
-                CurrentUserRoles.FindAll(p => p.ProjectId == projectId) :
-                DataProviderManager.Provider.GetRolesByUserName(userName, projectId);
+            return userName.ToLower().Equals(HttpContext.Current.User.Identity.Name.ToLower())
+                ? CurrentUserRoles.FindAll(p => p.ProjectId == projectId)
+                : DataProviderManager.Provider.GetRolesByUserName(userName, projectId);
         }
 
         /// <summary>
@@ -169,9 +168,9 @@ namespace BugNET.BLL
             // performance enhancement
             // WRH 2012-04-06
             // use the current loaded user roles if we are looking at the same user
-            return userName.ToLower().Equals(HttpContext.Current.User.Identity.Name.ToLower()) ? 
-                CurrentUserRoles : 
-                DataProviderManager.Provider.GetRolesByUserName(userName);
+            return userName.ToLower().Equals(HttpContext.Current.User.Identity.Name.ToLower())
+                ? CurrentUserRoles
+                : DataProviderManager.Provider.GetRolesByUserName(userName);
         }
 
         /// <summary>
@@ -223,7 +222,6 @@ namespace BugNET.BLL
             if (!DataProviderManager.Provider.DeleteRole(roleId)) return false;
             HttpContext.Current.Cache.Remove(ROLE_PERMISSION_CACHE);
             return true;
-
         }
 
         /// <summary>
@@ -233,7 +231,7 @@ namespace BugNET.BLL
         /// <returns>Role Permissions DataView</returns>
         private static List<RolePermission> GetPermissions()
         {
-            var permissions = (List<RolePermission>)HttpContext.Current.Cache[ROLE_PERMISSION_CACHE];
+            var permissions = (List<RolePermission>) HttpContext.Current.Cache[ROLE_PERMISSION_CACHE];
 
             if (permissions != null) return permissions;
             permissions = DataProviderManager.Provider.GetRolePermissions();
@@ -300,7 +298,6 @@ namespace BugNET.BLL
             if (!DataProviderManager.Provider.AddPermission(roleId, permissionId)) return false;
             HttpContext.Current.Cache.Remove(ROLE_PERMISSION_CACHE);
             return true;
-
         }
 
         private const string CURRENT_USER_ROLES = "CURRENT_USER_ROLES";
@@ -313,8 +310,8 @@ namespace BugNET.BLL
         /// </summary>
         private static List<Role> CurrentUserRoles
         {
-            get 
-            { 
+            get
+            {
                 var ctx = HttpContext.Current;
                 if (ctx == null) return null;
 
@@ -323,7 +320,6 @@ namespace BugNET.BLL
                 var roles = DataProviderManager.Provider.GetRolesByUserName(ctx.User.Identity.Name);
                 CurrentUserRoles = roles;
                 return roles;
-
             }
             set
             {

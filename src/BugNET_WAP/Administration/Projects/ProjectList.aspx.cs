@@ -4,22 +4,23 @@ using BugNET.BLL;
 using BugNET.BLL.Comparers;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
+using Permission = BugNET.Common.Permission;
 
 namespace BugNET.Administration.Projects
 {
     /// <summary>
     /// Summary description for ProjectList.
     /// </summary>
-    public partial class ProjectList : BasePage
+    public partial class ProjectList : BugNetBasePage
     {
         /// <summary>
         /// Gets or sets the sort field.
         /// </summary>
         /// <value>The sort field.</value>
-        string SortField
+        private string SortField
         {
-            get { return ViewState.Get("SortField", "Name"); }
+            get => ViewState.Get("SortField", "Name");
             set
             {
                 if (value == SortField)
@@ -33,10 +34,10 @@ namespace BugNET.Administration.Projects
         /// Gets or sets a value indicating whether [sort ascending].
         /// </summary>
         /// <value><c>true</c> if [sort ascending]; otherwise, <c>false</c>.</value>
-        bool SortAscending
+        private bool SortAscending
         {
-            get { return ViewState.Get("SortAscending", false); }
-            set { ViewState.Set("SortAscending", value); }
+            get => ViewState.Get("SortAscending", false);
+            set => ViewState.Set("SortAscending", value);
         }
 
         /// <summary>
@@ -45,14 +46,9 @@ namespace BugNET.Administration.Projects
         private void BindData()
         {
             bool? activeOnly = null;
-            if(dropView.SelectedValue == "Active")
-            {
+            if (dropView.SelectedValue == "Active")
                 activeOnly = true;
-            }
-            else if(dropView.SelectedValue == "Inactive")
-            {
-                activeOnly = false;
-            }
+            else if (dropView.SelectedValue == "Inactive") activeOnly = false;
 
             var projects = ProjectManager.GetAllProjects(activeOnly);
             projects.Sort(new ProjectComparer(SortField, SortAscending));
@@ -60,15 +56,15 @@ namespace BugNET.Administration.Projects
             dgProjects.DataBind();
         }
 
-        void CreateProjectViews()
+        private void CreateProjectViews()
         {
             if (UpgradeManager.CreateCustomFieldViews())
             {
-                PageMessage.ShowSuccessMessage(GetLocalResourceObject("CustomFieldViewCreationSuccess").ToString());
+                PageMessage.ShowSuccessMessage(GetLocalString("CustomFieldViewCreationSuccess"));
                 return;
             }
 
-            PageMessage.ShowErrorMessage(GetLocalResourceObject("CustomFieldViewCreationError").ToString());
+            PageMessage.ShowErrorMessage(GetLocalString("CustomFieldViewCreationError"));
         }
 
         /// <summary>
@@ -81,7 +77,7 @@ namespace BugNET.Administration.Projects
             if (!UserManager.IsSuperUser())
                 Response.Redirect("~/Default.aspx");
 
-            var s = string.Format("return confirm('{0}');", GetLocalResourceObject("ConfirmCustomFieldViewCreation"));
+            var s = $"return confirm('{GetLocalString("ConfirmCustomFieldViewCreation")}');";
             btnGenerateCustomFieldViews.OnClientClick = s;
             lbGenerateCustomFieldViews.OnClientClick = s;
 
@@ -95,7 +91,7 @@ namespace BugNET.Administration.Projects
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void ViewSelectedIndexChanged(Object s, EventArgs e)
+        protected void ViewSelectedIndexChanged(object s, EventArgs e)
         {
             BindData();
         }
@@ -109,17 +105,17 @@ namespace BugNET.Administration.Projects
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var p = (Project)e.Item.DataItem;
-            var lblActive = (Label)e.Item.FindControl("lblActive");
-            var lblCreated = (Label)e.Item.FindControl("lblCreated");
+            var p = (Project) e.Item.DataItem;
+            var lblActive = (Label) e.Item.FindControl("lblActive");
+            var lblCreated = (Label) e.Item.FindControl("lblCreated");
 
             lblCreated.Text = p.DateCreated.ToShortDateString();
-            lblActive.Text = p.Disabled ?
-                GetGlobalResourceObject("SharedResources", "Yes").ToString() :
-                GetGlobalResourceObject("SharedResources", "No").ToString();
+            lblActive.Text = p.Disabled
+                ? GetGlobalString("SharedResources", "Yes")
+                : GetGlobalString("SharedResources", "No");
 
             //permission check to edit project
-            if (!UserManager.HasPermission(p.Id, Common.Permission.AdminEditProject.ToString()))
+            if (!UserManager.HasPermission(p.Id, Permission.AdminEditProject.ToString()))
                 e.Item.Visible = false;
         }
 
@@ -156,18 +152,16 @@ namespace BugNET.Administration.Projects
                 // inizialize a new image
                 var img = new Image
                 {
-                    ImageUrl = string.Format("~/images/{0}.png", (SortAscending ? "bullet_arrow_up" : "bullet_arrow_down")),
+                    ImageUrl = $"~/images/{(SortAscending ? "bullet_arrow_up" : "bullet_arrow_down")}.png",
                     CssClass = "icon"
                 };
 
                 // setting the dynamically URL of the image
                 // checking if the header link is the user's choice
                 if (SortField == lnk.CommandArgument)
-                {
                     // adding a space and the image to the header link
                     //tc.Controls.Add(new LiteralControl(" "));
                     tc.Controls.Add(img);
-                }
             }
         }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BugNET.UserInterfaceLayer
+namespace BugNET.UI
 {
     /// <summary>
     /// Class to save the state of the QueryList page. An object of this class is saved in the session
@@ -9,12 +9,12 @@ namespace BugNET.UserInterfaceLayer
     [Serializable]
     public class QueryListState
     {
-        private int _QueryId;
-        private int _ProjectId;
-        private int _IssueListPageIndex;
-        private string _SortField;
-        private bool _SortAscending;
-        private int _PageSize;
+        private int queryId;
+        private int projectId;
+        private int issueListPageIndex;
+        private string sortField;
+        private bool sortAscending;
+        private int pageSize;
 
 
         /// <summary>
@@ -23,17 +23,18 @@ namespace BugNET.UserInterfaceLayer
         /// <value>The query id.</value>
         public int QueryId
         {
-            get { return _QueryId; }
-            set { _QueryId = value; }
+            get => queryId;
+            set => queryId = value;
         }
+
         /// <summary>
         /// Gets or sets the size of the page.
         /// </summary>
         /// <value>The size of the page.</value>
         public int PageSize
         {
-            get { return _PageSize; }
-            set { _PageSize = value; }
+            get => pageSize;
+            set => pageSize = value;
         }
 
         /// <summary>
@@ -42,8 +43,8 @@ namespace BugNET.UserInterfaceLayer
         /// <value>The sort field.</value>
         public string SortField
         {
-            get { return _SortField; }
-            set { _SortField = value; }
+            get => sortField;
+            set => sortField = value;
         }
 
 
@@ -53,8 +54,8 @@ namespace BugNET.UserInterfaceLayer
         /// <value><c>true</c> if [sort ascending]; otherwise, <c>false</c>.</value>
         public bool SortAscending
         {
-            get { return _SortAscending; }
-            set { _SortAscending = value; }
+            get => sortAscending;
+            set => sortAscending = value;
         }
 
         /// <summary>
@@ -63,8 +64,8 @@ namespace BugNET.UserInterfaceLayer
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return _ProjectId; }
-            set { _ProjectId = value; }
+            get => projectId;
+            set => projectId = value;
         }
 
         /// <summary>
@@ -73,8 +74,8 @@ namespace BugNET.UserInterfaceLayer
         /// <value>The index of the issue list page.</value>
         public int IssueListPageIndex
         {
-            get { return _IssueListPageIndex; }
-            set { _IssueListPageIndex = value; }
+            get => issueListPageIndex;
+            set => issueListPageIndex = value;
         }
     }
 }

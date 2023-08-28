@@ -3,7 +3,6 @@ using BugNET.Common;
 
 namespace BugNET.Entities
 {
-
     /// <summary>
     /// Entity object for a custom issue query clause
     /// </summary>
@@ -25,14 +24,13 @@ namespace BugNET.Entities
         /// Gets the database column name of the field.
         /// </summary>
         /// <value>The name of the field.</value>
-        public string DatabaseFieldName { 
+        public string DatabaseFieldName
+        {
             get
             {
                 if (string.IsNullOrWhiteSpace(FieldName)) return "";
 
-                return CustomFieldQuery ? 
-                    string.Concat(Globals.ProjectCustomFieldsPrefix, FieldName) : 
-                    FieldName;
+                return CustomFieldQuery ? string.Concat(Globals.ProjectCustomFieldsPrefix, FieldName) : FieldName;
             }
         }
 
@@ -59,10 +57,7 @@ namespace BugNET.Entities
         /// Gets a value indicating whether [custom field query].
         /// </summary>
         /// <value><c>true</c> if [custom field query]; otherwise, <c>false</c>.</value>
-        public bool CustomFieldQuery
-        {
-            get { return CustomFieldId.HasValue; }
-        }
+        public bool CustomFieldQuery => CustomFieldId.HasValue;
 
         /// <summary>
         /// Gets or sets a value indicating what custom field is used.
@@ -79,7 +74,8 @@ namespace BugNET.Entities
         /// <param name="fieldValue">The field value.</param>
         /// <param name="dataType">Type of the data.</param>
         /// <param name="customFieldId"> </param>
-        public QueryClause(string booleanOperator, string fieldName, string comparisonOperator, string fieldValue, SqlDbType dataType, int? customFieldId = null)
+        public QueryClause(string booleanOperator, string fieldName, string comparisonOperator, string fieldValue,
+            SqlDbType dataType, int? customFieldId = null)
         {
             BooleanOperator = booleanOperator;
             FieldName = fieldName;
@@ -92,6 +88,8 @@ namespace BugNET.Entities
         /// <summary>
         /// Initializes a new instance of the <see cref="QueryClause"/> class.
         /// </summary>
-        public QueryClause() { }
+        public QueryClause()
+        {
+        }
     }
 }

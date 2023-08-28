@@ -10,9 +10,11 @@ namespace BugNET.BLL
 {
     public static class IssueCommentManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Static Methods
+
         /// <summary>
         /// Saves this instance.
         /// </summary>
@@ -20,8 +22,10 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(IssueComment entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.IssueId <= Globals.NewId) throw new ArgumentException("Cannot save issue comment, the issue id is invalid");
-            if (string.IsNullOrEmpty(entity.Comment)) throw new ArgumentException("The issue comment cannot be empty or null");
+            if (entity.IssueId <= Globals.NewId)
+                throw new ArgumentException("Cannot save issue comment, the issue id is invalid");
+            if (string.IsNullOrEmpty(entity.Comment))
+                throw new ArgumentException("The issue comment cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateIssueComment(entity);
@@ -49,9 +53,9 @@ namespace BugNET.BLL
         /// <param name="comment">The comment.</param>
         /// <param name="shortCommentLength">How long must the string be.</param>
         /// <returns></returns>
-        public static string GetShortTextComment(string comment, int shortCommentLength = Globals.DefaultShortCommentLength)
+        public static string GetShortTextComment(string comment,
+            int shortCommentLength = Globals.DefaultShortCommentLength)
         {
-
             var temporaryComment = comment.Trim();
 
             if (temporaryComment == "") return temporaryComment;
@@ -66,9 +70,7 @@ namespace BugNET.BLL
 
             // Keep replacing double-spaces until there are none left.
             while (temporaryComment.IndexOf("  ", StringComparison.Ordinal) != -1)
-            {
                 temporaryComment = temporaryComment.Replace("  ", " ");
-            }
 
             // Give it one last trim
             temporaryComment = temporaryComment.Trim();
@@ -80,10 +82,8 @@ namespace BugNET.BLL
             // and create a string "how much" chars long centered on the middle-point
             // if the string is long enough.
             if (length > shortCommentLength)
-            {
                 // Longer than the string
                 temporaryComment = temporaryComment.Substring(length - shortCommentLength / 2, shortCommentLength);
-            }
 
             return temporaryComment;
         }
@@ -104,7 +104,9 @@ namespace BugNET.BLL
         /// <param name="commentId"></param>
         /// <returns>True if successful</returns>
         public static bool Delete(int commentId)
-            => DataProviderManager.Provider.DeleteIssueCommentById(commentId);
+        {
+            return DataProviderManager.Provider.DeleteIssueCommentById(commentId);
+        }
 
         /// <summary>
         /// Gets the issue comment by id.
@@ -112,7 +114,9 @@ namespace BugNET.BLL
         /// <param name="issueCommentId">The issue comment id.</param>
         /// <returns></returns>
         public static IssueComment GetById(int issueCommentId)
-            => DataProviderManager.Provider.GetIssueCommentById(issueCommentId);
+        {
+            return DataProviderManager.Provider.GetIssueCommentById(issueCommentId);
+        }
 
         /// <summary>
         /// Stewart Moss

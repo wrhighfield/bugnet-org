@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-
 using LumiSoft.Net.MIME;
 
 namespace LumiSoft.Net.Mail
@@ -20,9 +19,7 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ArgumentNullException">Is raised when <b>reader</b> is null reference.</exception>
         internal static string SMTP_Mailbox(MIME_Reader reader)
         {
-            if(reader == null){
-                throw new ArgumentNullException(nameof(reader));
-            }
+            if (reader == null) throw new ArgumentNullException(nameof(reader));
 
             // TODO:
 
@@ -33,16 +30,12 @@ namespace LumiSoft.Net.Mail
             */
 
             var retVal = new StringBuilder();
-            if(reader.Peek(true) == '\"'){
+            if (reader.Peek(true) == '\"')
                 retVal.Append("\"" + reader.QuotedString() + "\"");
-            }
-            else{
+            else
                 retVal.Append(reader.DotAtom());
-            }
 
-            if(reader.Peek(true) != '@'){
-                return null;
-            }
+            if (reader.Peek(true) != '@') return null;
 
             // Eat "@".
             reader.Char(true);

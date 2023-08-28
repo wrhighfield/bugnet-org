@@ -1,4 +1,3 @@
-
 namespace BugNET.Common
 {
     /// <summary>
@@ -10,6 +9,7 @@ namespace BugNET.Common
         /// 
         /// </summary>
         ParentChild,
+
         /// <summary>
         /// 
         /// </summary>

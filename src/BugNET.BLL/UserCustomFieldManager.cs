@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class UserCustomFieldManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -19,7 +20,8 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(UserCustomField entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The custom field name cannot be empty or null");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The custom field name cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 if (DataProviderManager.Provider.UpdateUserCustomField(entity))
@@ -53,7 +55,6 @@ namespace BugNET.BLL
             if (!DataProviderManager.Provider.DeleteUserCustomField(entity.Id)) return false;
             UpdateCustomFieldView();
             return true;
-
         }
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace BugNET.BLL
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(LoggingManager.GetErrorMessageResource("SaveCustomFieldValuesError"), ex);
                 return false;
@@ -87,7 +88,7 @@ namespace BugNET.BLL
         {
             return DataProviderManager.Provider.GetUserCustomFields();
         }
-        
+
         /// <summary>
         /// Gets the custom field by id.
         /// </summary>

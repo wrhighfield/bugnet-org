@@ -10,7 +10,8 @@ namespace BugNET.BLL
 {
     public static class CustomFieldManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -20,8 +21,10 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(CustomField entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save custom field, the project id is invalid");
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The custom field name cannot be empty or null");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save custom field, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The custom field name cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 if (DataProviderManager.Provider.UpdateCustomField(entity))
@@ -55,7 +58,6 @@ namespace BugNET.BLL
             if (!DataProviderManager.Provider.DeleteCustomField(entity.Id)) return false;
             UpdateCustomFieldView(entity.ProjectId);
             return true;
-
         }
 
         /// <summary>
@@ -75,14 +77,11 @@ namespace BugNET.BLL
                 var issueChanges = GetCustomFieldChanges(issueId, GetByIssueId(issueId), fields);
                 DataProviderManager.Provider.SaveCustomFieldValues(issueId, fields);
 
-                if(!isNewIssue)
-                { 
-                    UpdateHistory(issueChanges);
-                }
+                if (!isNewIssue) UpdateHistory(issueChanges);
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(LoggingManager.GetErrorMessageResource("SaveCustomFieldValuesError"), ex);
                 return false;
@@ -136,18 +135,21 @@ namespace BugNET.BLL
             var sb = new StringBuilder();
             var viewName = string.Format(Globals.ProjectCustomFieldsViewName, projectId);
 
-            sb.AppendFormat("SET ANSI_NULLS ON {0}SET XACT_ABORT ON {0}SET QUOTED_IDENTIFIER ON {0}", Environment.NewLine);
-            sb.AppendFormat("IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[{0}]') AND OBJECTPROPERTY(id, N'IsView') = 1) {1}", viewName, Environment.NewLine);
+            sb.AppendFormat("SET ANSI_NULLS ON {0}SET XACT_ABORT ON {0}SET QUOTED_IDENTIFIER ON {0}",
+                Environment.NewLine);
+            sb.AppendFormat(
+                "IF EXISTS (SELECT * FROM dbo.sysobjects WHERE id = OBJECT_ID(N'[{0}]') AND OBJECTPROPERTY(id, N'IsView') = 1) {1}",
+                viewName, Environment.NewLine);
             sb.AppendFormat("DROP VIEW [{0}] {1}", viewName, Environment.NewLine);
 
-            sb.AppendFormat("EXEC dbo.sp_executesql @statement = N'CREATE VIEW [dbo].[{0}]{1} ", viewName, Environment.NewLine);
+            sb.AppendFormat("EXEC dbo.sp_executesql @statement = N'CREATE VIEW [dbo].[{0}]{1} ", viewName,
+                Environment.NewLine);
             sb.AppendFormat("AS {0} ", Environment.NewLine);
             sb.AppendFormat("SELECT i.ProjectId, i.IssueId, i.[IsClosed], i.[Disabled]{0}", Environment.NewLine);
 
             foreach (var customField in customFields)
-            {
-                sb.AppendFormat(",ISNULL(p.[{0}], '''') AS [{2}{0}]{1} ", customField.Name.Replace("'", "''"), Environment.NewLine, Globals.ProjectCustomFieldsPrefix);
-            }
+                sb.AppendFormat(",ISNULL(p.[{0}], '''') AS [{2}{0}]{1} ", customField.Name.Replace("'", "''"),
+                    Environment.NewLine, Globals.ProjectCustomFieldsPrefix);
 
             sb.AppendFormat("FROM{0} ", Environment.NewLine);
             sb.AppendFormat("BugNet_IssuesView i{0} ", Environment.NewLine);
@@ -156,9 +158,12 @@ namespace BugNET.BLL
             {
                 sb.AppendFormat("LEFT JOIN{0} ", Environment.NewLine);
                 sb.AppendFormat("({0}", Environment.NewLine);
-                sb.AppendFormat("SELECT pcf.ProjectId, pcfv.IssueId, pcf.CustomFieldName, pcfv.CustomFieldValue{0}", Environment.NewLine);
+                sb.AppendFormat("SELECT pcf.ProjectId, pcfv.IssueId, pcf.CustomFieldName, pcfv.CustomFieldValue{0}",
+                    Environment.NewLine);
                 sb.AppendFormat("FROM BugNet_ProjectCustomFields pcf {0}", Environment.NewLine);
-                sb.AppendFormat("INNER JOIN BugNet_ProjectCustomFieldValues pcfv ON pcf.CustomFieldId = pcfv.CustomFieldId{0} ", Environment.NewLine);
+                sb.AppendFormat(
+                    "INNER JOIN BugNet_ProjectCustomFieldValues pcfv ON pcf.CustomFieldId = pcfv.CustomFieldId{0} ",
+                    Environment.NewLine);
                 sb.AppendFormat("WHERE pcf.ProjectId = {0} {1}", projectId, Environment.NewLine);
                 sb.AppendFormat(") AS data{0} ", Environment.NewLine);
                 sb.AppendFormat("PIVOT{0} ", Environment.NewLine);
@@ -167,14 +172,13 @@ namespace BugNET.BLL
                 sb.AppendFormat("({0} ", Environment.NewLine);
 
                 foreach (var customField in customFields)
-                {
                     sb.AppendFormat("[{0}],", customField.Name.Replace("'", "''"));
-                }
 
                 sb.Remove(sb.Length - 1, 1);
 
                 sb.AppendFormat("){0} ", Environment.NewLine);
-                sb.AppendFormat(") AS p ON i.IssueId = p.IssueId AND i.ProjectId = p.ProjectId{0} ", Environment.NewLine);
+                sb.AppendFormat(") AS p ON i.IssueId = p.IssueId AND i.ProjectId = p.ProjectId{0} ",
+                    Environment.NewLine);
             }
 
             sb.AppendFormat("WHERE i.ProjectId = {0}{1}'", projectId, Environment.NewLine);
@@ -184,7 +188,7 @@ namespace BugNET.BLL
 #if (DEBUG)
                 System.Diagnostics.Debug.WriteLine(sb.ToString());
 #endif
-                DataProviderManager.Provider.ExecuteScript(new[] { sb.ToString() });
+                DataProviderManager.Provider.ExecuteScript(new[] {sb.ToString()});
                 return true;
             }
             catch (Exception ex)
@@ -195,29 +199,33 @@ namespace BugNET.BLL
             return false;
         }
 
-        private static IEnumerable<IssueHistory> GetCustomFieldChanges(int issueId, List<CustomField> originalFields, List<CustomField> newFields)
+        private static IEnumerable<IssueHistory> GetCustomFieldChanges(int issueId, List<CustomField> originalFields,
+            List<CustomField> newFields)
         {
             var fieldChanges = new List<IssueHistory>();
-            foreach(var cf in newFields)
+            foreach (var cf in newFields)
             {
                 var field = originalFields.Find(f => f.Id == cf.Id);
-                if(field != null && field.Value != cf.Value)
+                if (field != null && field.Value != cf.Value)
                 {
-                    var history = new IssueHistory { CreatedUserName = Security.GetUserName(), IssueId = issueId, DateChanged = DateTime.Now };
+                    var history = new IssueHistory
+                        {CreatedUserName = Security.GetUserName(), IssueId = issueId, DateChanged = DateTime.Now};
                     fieldChanges.Add(GetNewIssueHistory(history, cf.Name, field.Value, cf.Value));
                 }
-                else if(field == null)
+                else if (field == null)
                 {
                     // new field added - do we want to track history for this since a value wasn't selected
-                    var history = new IssueHistory { CreatedUserName = Security.GetUserName(), IssueId = issueId, DateChanged = DateTime.Now };
-                    fieldChanges.Add(GetNewIssueHistory(history, cf.Name, string.Empty, cf.Value));                 
+                    var history = new IssueHistory
+                        {CreatedUserName = Security.GetUserName(), IssueId = issueId, DateChanged = DateTime.Now};
+                    fieldChanges.Add(GetNewIssueHistory(history, cf.Name, string.Empty, cf.Value));
                 }
             }
 
             return fieldChanges;
         }
 
-        private static IssueHistory GetNewIssueHistory(IssueHistory history, string fieldChanged, string oldValue, string newValue)
+        private static IssueHistory GetNewIssueHistory(IssueHistory history, string fieldChanged, string oldValue,
+            string newValue)
         {
             return new IssueHistory
             {

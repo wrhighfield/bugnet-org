@@ -4,14 +4,15 @@ using System.Web.UI;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Providers.MembershipProviders;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Administration.Users.UserControls
 {
     public partial class Password : BaseUserControlUserAdmin, IEditUserControl
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public event ActionEventHandler Action;
 
@@ -19,7 +20,7 @@ namespace BugNET.Administration.Users.UserControls
         /// Raises the <see cref="E:Action" /> event.
         /// </summary>
         /// <param name="args">The <see cref="ActionEventArgs"/> instance containing the event data.</param>
-        void OnAction(ActionEventArgs args)
+        private void OnAction(ActionEventArgs args)
         {
             if (Action != null)
                 Action(this, args);
@@ -33,8 +34,8 @@ namespace BugNET.Administration.Users.UserControls
         /// </value>
         public Guid UserId
         {
-            get { return ViewState.Get("UserId", Guid.Empty); }
-            set { ViewState.Set("UserId", value); }
+            get => ViewState.Get("UserId", Guid.Empty);
+            set => ViewState.Set("UserId", value);
         }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace BugNET.Administration.Users.UserControls
             if (UserId == Guid.Empty) return;
 
             //get this user and bind the data
-            var user = (CustomMembershipUser)MembershipData;
+            var user = (CustomMembershipUser) MembershipData;
 
             if (user == null) return;
 
@@ -79,19 +80,20 @@ namespace BugNET.Administration.Users.UserControls
             try
             {
                 MembershipData.ChangePassword(MembershipData.ResetPassword(), NewPassword.Text);
-                ActionMessage.ShowSuccessMessage(GetLocalResourceObject("PasswordChangeSuccess").ToString());
+                ActionMessage.ShowSuccessMessage(GetLocalString("PasswordChangeSuccess"));
                 GetMembershipData(UserId);
                 DataBind();
             }
             catch (Exception ex)
             {
                 if (Log.IsErrorEnabled)
-                { 
+                {
                     if (HttpContext.Current.User != null && HttpContext.Current.User.Identity.IsAuthenticated)
                         MDC.Set("user", HttpContext.Current.User.Identity.Name);
 
-                    Log.Error(LoggingManager.GetErrorMessageResource("PasswordChangeError"),ex);
+                    Log.Error(LoggingManager.GetErrorMessageResource("PasswordChangeError"), ex);
                 }
+
                 ActionMessage.ShowErrorMessage(LoggingManager.GetErrorMessageResource("PasswordChangeError"));
             }
         }

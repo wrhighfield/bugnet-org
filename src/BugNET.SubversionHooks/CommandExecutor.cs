@@ -10,7 +10,6 @@ namespace BugNET.SubversionHooks
     /// </summary>
     public static class CommandExecutor
     {
-      
         private static readonly Dictionary<int, string> Errors = new Dictionary<int, string>();
 
 
@@ -21,8 +20,10 @@ namespace BugNET.SubversionHooks
         /// <param name="args">The args.</param>
         /// <param name="echoCommand">if set to <c>true</c> [echo command].</param>
         /// <returns></returns>
-        public static string RunCommand(string command, string args, bool echoCommand) =>
-            RunCommand(command, args, 300, echoCommand);
+        public static string RunCommand(string command, string args, bool echoCommand)
+        {
+            return RunCommand(command, args, 300, echoCommand);
+        }
 
 
         /// <summary>
@@ -33,24 +34,25 @@ namespace BugNET.SubversionHooks
         /// <param name="killAfterSeconds"></param>
         /// <param name="echoCommand"> </param>
         /// <returns></returns>
-        public static string RunCommand(string command, string args, int killAfterSeconds = 300, bool echoCommand = true)
+        public static string RunCommand(string command, string args, int killAfterSeconds = 300,
+            bool echoCommand = true)
         {
             Process proc = null;
             var logger = log4net.LogManager.GetLogger("CommandExecutor");
 
-            if (logger.IsDebugEnabled) logger.DebugFormat("Running Commandline: {0} {1}",command,args);
+            if (logger.IsDebugEnabled) logger.DebugFormat("Running Commandline: {0} {1}", command, args);
 
             try
             {
                 var startInfo = new ProcessStartInfo(command, args)
-                    {
-                        CreateNoWindow = true,
-                        WindowStyle = ProcessWindowStyle.Hidden,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true,
-                        StandardOutputEncoding = System.Text.Encoding.Default
-                    };
+                {
+                    CreateNoWindow = true,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    StandardOutputEncoding = System.Text.Encoding.Default
+                };
 
                 proc = new Process {StartInfo = startInfo};
                 proc.ErrorDataReceived += CommandProcessErrorDataReceived;
@@ -79,11 +81,11 @@ namespace BugNET.SubversionHooks
                 {
                     return retVal;
                 }
-
             }
             catch (Exception ex)
             {
-                logger.ErrorFormat("An error occurred running the command line: {2} {3}\n\n {0} \n\n {1}", ex.Message, ex.StackTrace, command, args);
+                logger.ErrorFormat("An error occurred running the command line: {2} {3}\n\n {0} \n\n {1}", ex.Message,
+                    ex.StackTrace, command, args);
                 return string.Empty;
             }
             finally
@@ -96,7 +98,6 @@ namespace BugNET.SubversionHooks
                     proc.Dispose();
                 }
             }
-
         }
 
         /// <summary>
@@ -115,7 +116,7 @@ namespace BugNET.SubversionHooks
 
                 if (string.IsNullOrEmpty(e.Data)) return;
 
-                var id = ((Process)sender).Id;
+                var id = ((Process) sender).Id;
 
                 if (Errors.ContainsKey(id))
                     Errors[id] += Environment.NewLine + e.Data;

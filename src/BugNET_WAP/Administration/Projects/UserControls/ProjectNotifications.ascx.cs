@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Projects.UserControls
 {
     public partial class ProjectNotifications : System.Web.UI.UserControl, IEditProjectControl
     {
-        private int _ProjectId = -1;
-
         /// <summary>
         /// Handles the Load event of the Page control.
         /// </summary>
@@ -19,7 +16,6 @@ namespace BugNET.Administration.Projects.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         #region IEditProjectControl Members
@@ -28,11 +24,7 @@ namespace BugNET.Administration.Projects.UserControls
         /// Gets or sets the project id.
         /// </summary>
         /// <value>The project id.</value>
-        public int ProjectId
-        {
-            get { return _ProjectId; }
-            set { _ProjectId = value; }
-        }
+        public int ProjectId { get; set; } = -1;
 
 
         /// <summary>
@@ -41,7 +33,6 @@ namespace BugNET.Administration.Projects.UserControls
         /// <returns></returns>
         public bool Update()
         {
-          
             return true;
         }
 
@@ -59,28 +50,23 @@ namespace BugNET.Administration.Projects.UserControls
             lstAllUsers.DataBind();
 
             // Copy selected users into Selected Users List Box
-            IEnumerable<ProjectNotification> projectNotifications = ProjectNotificationManager.GetByProjectId(ProjectId);
-            foreach (ProjectNotification currentNotification in projectNotifications)
+            var projectNotifications = ProjectNotificationManager.GetByProjectId(ProjectId);
+            foreach (var currentNotification in projectNotifications)
             {
-                ListItem matchItem = lstAllUsers.Items.FindByValue(currentNotification.NotificationUsername);
+                var matchItem = lstAllUsers.Items.FindByValue(currentNotification.NotificationUsername);
                 if (matchItem != null)
                 {
                     lstSelectedUsers.Items.Add(matchItem);
                     lstAllUsers.Items.Remove(matchItem);
                 }
             }
-
-         
         }
 
         /// <summary>
         /// Gets a value indicating whether [show save button].
         /// </summary>
         /// <value><c>true</c> if [show save button]; otherwise, <c>false</c>.</value>
-        public bool ShowSaveButton
-        {
-            get { return false; }
-        }
+        public bool ShowSaveButton => false;
 
         #endregion
 
@@ -90,7 +76,7 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void AddUser(Object s, EventArgs e)
+        protected void AddUser(object s, EventArgs e)
         {
             //The users must be added to a list first becuase the collection can not
             //be modified while we iterate through it.
@@ -99,10 +85,10 @@ namespace BugNET.Administration.Projects.UserControls
             foreach (var item in usersToAdd)
             {
                 var notification = new ProjectNotification
-                                       {
-                                           ProjectId = ProjectId,
-                                           NotificationUsername = item.Value
-                                       };
+                {
+                    ProjectId = ProjectId,
+                    NotificationUsername = item.Value
+                };
 
                 if (!ProjectNotificationManager.SaveOrUpdate(notification)) continue;
 
@@ -118,23 +104,20 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
-        protected void RemoveUser(Object s, EventArgs e)
+        protected void RemoveUser(object s, EventArgs e)
         {
             //The users must be added to a list first becuase the collection can not
             //be modified while we iterate through it.
             var usersToRemove = lstSelectedUsers.Items.Cast<ListItem>().Where(item => item.Selected).ToList();
 
             foreach (var item in usersToRemove)
-            {             
-                if (ProjectNotificationManager.Delete(ProjectId,item.Value))
+                if (ProjectNotificationManager.Delete(ProjectId, item.Value))
                 {
                     lstAllUsers.Items.Add(item);
                     lstSelectedUsers.Items.Remove(item);
                 }
-            }
 
             lstAllUsers.SelectedIndex = -1;
         }
     }
-    
 }

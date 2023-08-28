@@ -9,9 +9,11 @@ namespace BugNET.BLL
 {
     public static class IssueRevisionManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Static Methods
+
         /// <summary>
         /// Saves this instance.
         /// </summary>
@@ -19,14 +21,14 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(IssueRevision entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.IssueId <= Globals.NewId) throw new ArgumentException("The issue id for the revision is not valid");
+            if (entity.IssueId <= Globals.NewId)
+                throw new ArgumentException("The issue id for the revision is not valid");
 
             var tempId = DataProviderManager.Provider.CreateNewIssueRevision(entity);
 
             if (tempId <= Globals.NewId) return false;
             entity.Id = tempId;
             return true;
-
         }
 
         /// <summary>
@@ -35,7 +37,9 @@ namespace BugNET.BLL
         /// <param name="issueId">The issue id.</param>
         /// <returns></returns>
         public static List<IssueRevision> GetByIssueId(int issueId)
-            => DataProviderManager.Provider.GetIssueRevisionsByIssueId(issueId);
+        {
+            return DataProviderManager.Provider.GetIssueRevisionsByIssueId(issueId);
+        }
 
         /// <summary>
         /// Deletes the issue revision by id.
@@ -43,7 +47,9 @@ namespace BugNET.BLL
         /// <param name="issueRevisionId">The issue revision id.</param>
         /// <returns></returns>
         public static bool Delete(int issueRevisionId)
-            => DataProviderManager.Provider.DeleteIssueRevision(issueRevisionId);
+        {
+            return DataProviderManager.Provider.DeleteIssueRevision(issueRevisionId);
+        }
 
         #endregion
     }

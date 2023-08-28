@@ -11,7 +11,7 @@
 <%@ Register Src="TimeTracking.ascx" TagName="TimeTracking" TagPrefix="IssueTab" %>
 
 <script type="text/javascript">
-    var pleaseWaitMessage = '<%= GetLocalResourceObject("PleaseWaitMessage") %>';
+    var pleaseWaitMessage = '<%= GetLocalString("PleaseWaitMessage") %>';
     $(document).ready(function () {;
         $("ul.issue-tabs a").removeAttr('href');
     });
@@ -40,28 +40,28 @@
 <div>
     <asp:UpdatePanel ID="IssueTabsUpdatePanel" runat="server" UpdateMode="Conditional" ChildrenAsTriggers="true">
         <ContentTemplate>
-            <asp:Menu  
-                ID="IssueTabsMenu" 
-                OnMenuItemClick="IssueTabsMenu_Click" 
-                runat="server" 
-                IncludeStyleBlock="false" 
+            <asp:Menu
+                ID="IssueTabsMenu"
+                OnMenuItemClick="IssueTabsMenu_Click"
+                runat="server"
+                IncludeStyleBlock="false"
                 ViewStateMode="Enabled"
-                RenderingMode="List" 
+                RenderingMode="List"
                 CssClass="content">
-                <StaticMenuStyle CssClass="nav nav-tabs issue-tabs" />
-                <StaticSelectedStyle CssClass="active" />
+                <StaticMenuStyle CssClass="nav nav-tabs issue-tabs"/>
+                <StaticSelectedStyle CssClass="active"/>
             </asp:Menu>
 
             <div style="margin-top:1.5em;">
-                <IssueTab:Notifications ID="TabNotifications" runat="server" Visible="false" />
-                <IssueTab:History ID="TabHistory" runat="server" Visible="false" />
-                <IssueTab:Attachments ID="TabAttachments" runat="server" Visible="false" />
-                <IssueTab:Comments ID="TabComments" runat="server" Visible="false" />
-                <IssueTab:ParentIssues ID="TabParentIssues" runat="server" Visible="false" />
-                <IssueTab:RelatedIssues ID="TabRelatedIssues" runat="server" Visible="false" />
-                <IssueTab:Revisions ID="TabRevisions" runat="server" Visible="false" />
-                <IssueTab:SubIssues ID="TabSubIssues" runat="server" Visible="false" />
-                <IssueTab:TimeTracking ID="TabTimeTracking" runat="server" Visible="false" />
+                <IssueTab:Notifications ID="TabNotifications" runat="server" Visible="false"/>
+                <IssueTab:History ID="TabHistory" runat="server" Visible="false"/>
+                <IssueTab:Attachments ID="TabAttachments" runat="server" Visible="false"/>
+                <IssueTab:Comments ID="TabComments" runat="server" Visible="false"/>
+                <IssueTab:ParentIssues ID="TabParentIssues" runat="server" Visible="false"/>
+                <IssueTab:RelatedIssues ID="TabRelatedIssues" runat="server" Visible="false"/>
+                <IssueTab:Revisions ID="TabRevisions" runat="server" Visible="false"/>
+                <IssueTab:SubIssues ID="TabSubIssues" runat="server" Visible="false"/>
+                <IssueTab:TimeTracking ID="TabTimeTracking" runat="server" Visible="false"/>
             </div>
         </ContentTemplate>
     </asp:UpdatePanel>

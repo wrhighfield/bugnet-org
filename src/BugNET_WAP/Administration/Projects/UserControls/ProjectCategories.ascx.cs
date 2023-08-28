@@ -4,16 +4,15 @@ using System.Data;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Administration.Projects.UserControls
 {
-	/// <summary>
-	///		Summary description for ProjectComponents.
-	/// </summary>
-	public partial class ProjectCategories : System.Web.UI.UserControl, IEditProjectControl
-	{
-
+    /// <summary>
+    ///		Summary description for ProjectComponents.
+    /// </summary>
+    public partial class ProjectCategories : BugNetUserControl, IEditProjectControl
+    {
         #region IEditProjectControl Members
 
         /// <summary>
@@ -22,8 +21,8 @@ namespace BugNET.Administration.Projects.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ((BasePage)Page).ProjectId; }
-            set { ((BasePage)Page).ProjectId = value; }
+            get => ((BugNetBasePage) Page).ProjectId;
+            set => ((BugNetBasePage) Page).ProjectId = value;
         }
 
         /// <summary>
@@ -45,10 +44,7 @@ namespace BugNET.Administration.Projects.UserControls
             return Page.IsValid;
         }
 
-        public bool ShowSaveButton
-        {
-            get { return false; }
-        }
+        public bool ShowSaveButton => false;
 
         #endregion
 
@@ -57,11 +53,11 @@ namespace BugNET.Administration.Projects.UserControls
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-		protected void Page_Load(object sender, EventArgs e)
-		{
-			// Put user code to initialize the page here
-            OkButton.OnClientClick = String.Format("onOk('{0}','{1}')", OkButton.UniqueID, "");
-		}
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            // Put user code to initialize the page here
+            OkButton.OnClientClick = $"onOk('{OkButton.UniqueID}','{""}')";
+        }
 
         /// <summary>
         /// Handles the Validate event of the ComponentValidation control.
@@ -74,7 +70,7 @@ namespace BugNET.Administration.Projects.UserControls
             e.IsValid = CategoryManager.GetByProjectId(ProjectId).Count > 0;
         }
 
-	    /// <summary>
+        /// <summary>
         /// Handles the Click event of the OkButton control.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
@@ -83,7 +79,7 @@ namespace BugNET.Administration.Projects.UserControls
         {
             var oldCategoryId = 0;
 
-            if(!string.IsNullOrEmpty(HiddenField1.Value))
+            if (!string.IsNullOrEmpty(HiddenField1.Value))
                 oldCategoryId = Convert.ToInt32(HiddenField1.Value);
 
             if (oldCategoryId != 0)
@@ -96,23 +92,22 @@ namespace BugNET.Administration.Projects.UserControls
                 var issues = IssueManager.PerformQuery(queryClauses, null, ProjectId);
 
                 if (RadioButton1.Checked) //delete category 
-                {
                     //if (RecursiveDelete.Checked == true)
                     //Category.DeleteChildCategoriesByCategoryId(OldCategoryId);
                     //delete the category.
                     CategoryManager.Delete(oldCategoryId);
-                }
 
                 if (RadioButton2.Checked) //reassign issues to existing category.
                 {
                     if (DropCategory.SelectedValue == 0)
                     {
-                        Message1.ShowErrorMessage(GetLocalResourceObject("NoCategorySelected").ToString());
+                        Message1.ShowErrorMessage(GetLocalString("NoCategorySelected"));
                         return;
                     }
+
                     if (oldCategoryId == DropCategory.SelectedValue)
                     {
-                        Message1.ShowErrorMessage(GetLocalResourceObject("SameCategorySelected").ToString());
+                        Message1.ShowErrorMessage(GetLocalString("SameCategorySelected"));
                         return;
                     }
 
@@ -130,12 +125,14 @@ namespace BugNET.Administration.Projects.UserControls
                 //assign new category 
                 if (RadioButton3.Checked)
                 {
-                    if(string.IsNullOrEmpty(NewCategoryTextBox.Text))
+                    if (string.IsNullOrEmpty(NewCategoryTextBox.Text))
                     {
-                        Message1.ShowErrorMessage(GetLocalResourceObject("NewCategoryNotEntered").ToString());
+                        Message1.ShowErrorMessage(GetLocalString("NewCategoryNotEntered"));
                         return;
                     }
-                    var c = new Category { ProjectId = ProjectId, ParentCategoryId = 0, Name = NewCategoryTextBox.Text, ChildCount = 0 };
+
+                    var c = new Category
+                        {ProjectId = ProjectId, ParentCategoryId = 0, Name = NewCategoryTextBox.Text, ChildCount = 0};
                     CategoryManager.SaveOrUpdate(c);
                     foreach (var issue in issues)
                     {
@@ -143,14 +140,14 @@ namespace BugNET.Administration.Projects.UserControls
                         issue.CategoryId = c.Id;
                         IssueManager.SaveOrUpdate(issue);
                     }
+
                     //delete the category.
                     CategoryManager.Delete(oldCategoryId);
-
                 }
             }
             else
             {
-                Message1.ShowErrorMessage(GetLocalResourceObject("CannotDeleteRootCategory").ToString());
+                Message1.ShowErrorMessage(GetLocalString("CannotDeleteRootCategory"));
             }
         }
     }

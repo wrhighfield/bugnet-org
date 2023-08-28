@@ -12,7 +12,8 @@ namespace BugNET
     /// </summary>
     public class Global : HttpApplication
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Handles the Start event of the Application control.
@@ -33,7 +34,6 @@ namespace BugNET
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         protected void Application_End(object sender, EventArgs e)
         {
-
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace BugNET
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
-        protected void Application_Error(Object sender, EventArgs e)
+        protected void Application_Error(object sender, EventArgs e)
         {
             //set user to log4net context, so we can use %X{user} in the appenders
             if (HttpContext.Current.User != null && HttpContext.Current.User.Identity.IsAuthenticated)
@@ -55,9 +55,8 @@ namespace BugNET
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
-        protected void Session_End(Object sender, EventArgs e)
+        protected void Session_End(object sender, EventArgs e)
         {
-
         }
 
         /// <summary>
@@ -67,27 +66,24 @@ namespace BugNET
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Application_BeginRequest(object sender, EventArgs e)
         {
-            var app = (HttpApplication)sender;
+            var app = (HttpApplication) sender;
             var context = app.Context;
 
             // Attempt to perform first request initialization
             Initialization.Init(context);
 
             if (Request.Url.AbsoluteUri.ToLower().Contains("bugdetail.aspx"))
-            {
-                Response.Redirect(string.Format("~/Issues/IssueDetail.aspx{0}", Request.Url.Query));
-            }
+                Response.Redirect($"~/Issues/IssueDetail.aspx{Request.Url.Query}");
         }
-  
     }
 
     /// <summary>
     /// Initialization class for IIS7 integrated mode
     /// </summary>
-    static class Initialization
+    internal static class Initialization
     {
-        private static bool _sInitializedAlready = false;
-        private static readonly Object Locker = new Object();
+        private static bool _sInitializedAlready;
+        private static readonly object Locker = new object();
         private static readonly ILog Log = LogManager.GetLogger(typeof(Initialization));
 
         /// <summary>
@@ -96,31 +92,25 @@ namespace BugNET
         /// <param name="context">The context.</param>
         public static void Init(HttpContext context)
         {
-            if (_sInitializedAlready)
-            {
-                return;
-            }
+            if (_sInitializedAlready) return;
 
             lock (Locker)
             {
-                if (_sInitializedAlready)
-                {
-                    return;
-                }
+                if (_sInitializedAlready) return;
 
                 //First check if we are upgrading/installing
                 if (HttpContext.Current.Request.Url.LocalPath.ToLower().EndsWith("install.aspx"))
                     return;
 
-                
+
                 switch (UpgradeManager.GetUpgradeStatus())
                 {
-                    case BugNET.Common.UpgradeStatus.Install:
-                    case BugNET.Common.UpgradeStatus.Upgrade:
+                    case Common.UpgradeStatus.Install:
+                    case Common.UpgradeStatus.Upgrade:
                         HttpContext.Current.Response.Redirect("~/Install/Install.aspx", true);
                         return;
                 }
-      
+
 
                 //load the host settings into the application cache
                 HostSettingManager.GetHostSettings();
@@ -133,7 +123,6 @@ namespace BugNET
 
                 // Perform first-request initialization here ...
                 _sInitializedAlready = true;
-
             }
         }
     }

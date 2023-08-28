@@ -9,7 +9,6 @@ namespace BugNET.Entities
         {
             Name = string.Empty;
             ImageUrl = string.Empty;
-
         }
 
         /// <summary>

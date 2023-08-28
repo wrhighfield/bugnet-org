@@ -15,7 +15,8 @@ namespace BugNET.BLL
 {
     public static class UserManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Creates a new user.
@@ -23,8 +24,10 @@ namespace BugNET.BLL
         /// <param name="userName"></param>
         /// <param name="password"></param>
         /// <param name="email"></param>
-        public static void CreateUser(string userName, string password, string email) =>
+        public static void CreateUser(string userName, string password, string email)
+        {
             Membership.CreateUser(userName, password, email);
+        }
 
         /// <summary>
         /// Provides a BugNET way of checking if the user's credentials are
@@ -33,8 +36,10 @@ namespace BugNET.BLL
         /// <param name="userName"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public static bool ValidateUser(string userName, string password) =>
-            Membership.ValidateUser(userName, password);
+        public static bool ValidateUser(string userName, string password)
+        {
+            return Membership.ValidateUser(userName, password);
+        }
 
         /// <summary>
         /// Gets the user.
@@ -62,8 +67,10 @@ namespace BugNET.BLL
         /// Gets all users in the application
         /// </summary>
         /// <returns>Collection of membership users</returns>
-        public static List<CustomMembershipUser> GetAllUsers() =>
-            Membership.GetAllUsers().Cast<CustomMembershipUser>().OrderBy(cmu=> cmu.DisplayName).ToList();
+        public static List<CustomMembershipUser> GetAllUsers()
+        {
+            return Membership.GetAllUsers().Cast<CustomMembershipUser>().OrderBy(cmu => cmu.DisplayName).ToList();
+        }
 
         /// <summary>
         /// Gets all users.
@@ -97,7 +104,7 @@ namespace BugNET.BLL
             // find open id user names [http://username] pattern
             foreach (CustomMembershipUser u in Membership.FindUsersByName(string.Concat("%//", userNameToMatch)))
                 userList[u.UserName] = u;
-            
+
             return new List<CustomMembershipUser>(userList.Values);
         }
 
@@ -106,8 +113,10 @@ namespace BugNET.BLL
         /// </summary>
         /// <param name="emailToMatch">The email to match.</param>
         /// <returns></returns>
-        public static List<CustomMembershipUser> FindUsersByEmail(string emailToMatch) =>
-            Membership.FindUsersByEmail(emailToMatch).Cast<CustomMembershipUser>().ToList();
+        public static List<CustomMembershipUser> FindUsersByEmail(string emailToMatch)
+        {
+            return Membership.FindUsersByEmail(emailToMatch).Cast<CustomMembershipUser>().ToList();
+        }
 
         /// <summary>
         /// Updates the user.
@@ -154,10 +163,7 @@ namespace BugNET.BLL
         /// </returns>
         private static bool IsSuperUser(string userName)
         {
-            if (string.IsNullOrEmpty(userName))
-            {
-                return false;
-            }
+            if (string.IsNullOrEmpty(userName)) return false;
 
             var roles = RoleManager.GetForUser(userName);
             return roles.Exists(r => r.Name == Globals.SuperUserRole);
@@ -170,7 +176,8 @@ namespace BugNET.BLL
         /// <returns>
         /// 	<c>true</c> if [is in role] [the specified role name]; otherwise, <c>false</c>.
         /// </returns>
-        [Obsolete("When testing for super user use IsSuperUser() method, otherwise use IsInRole() with project id overload")]
+        [Obsolete(
+            "When testing for super user use IsSuperUser() method, otherwise use IsInRole() with project id overload")]
         public static bool IsInRole(string roleName)
         {
             throw new NotImplementedException();
@@ -251,18 +258,20 @@ namespace BugNET.BLL
         /// Gets the size of the profile page.
         /// </summary>
         /// <returns></returns>
-        public static int GetProfilePageSize() =>
-            HttpContext.Current.User.Identity.IsAuthenticated ? 
-                WebProfile.Current.IssuesPageSize : 
-                10;
+        public static int GetProfilePageSize()
+        {
+            return HttpContext.Current.User.Identity.IsAuthenticated ? WebProfile.Current.IssuesPageSize : 10;
+        }
 
         /// <summary>
         /// Gets the users by project id.
         /// </summary>
         /// <param name="projectId">The project id.</param>
         /// <returns></returns>
-        public static List<ITUser> GetUsersByProjectId(int projectId) =>
-            GetUsersByProjectId(projectId, false);
+        public static List<ITUser> GetUsersByProjectId(int projectId)
+        {
+            return GetUsersByProjectId(projectId, false);
+        }
 
         /// <summary>
         /// Gets the users by project id.
@@ -270,8 +279,10 @@ namespace BugNET.BLL
         /// <param name="projectId">The project id.</param>
         /// <param name="excludeReadOnlyUsers">if set to <c>true</c> [exclude read only users].</param>
         /// <returns></returns>
-        public static List<ITUser> GetUsersByProjectId(int projectId, bool excludeReadOnlyUsers) =>
-            DataProviderManager.Provider.GetUsersByProjectId(projectId, excludeReadOnlyUsers);
+        public static List<ITUser> GetUsersByProjectId(int projectId, bool excludeReadOnlyUsers)
+        {
+            return DataProviderManager.Provider.GetUsersByProjectId(projectId, excludeReadOnlyUsers);
+        }
 
         /// <summary>
         /// Sends the user verification notification.
@@ -295,7 +306,7 @@ namespace BugNET.BLL
 
             var notificationUser = new NotificationUser
             {
-                Id = (Guid)user.ProviderUserKey,
+                Id = (Guid) user.ProviderUserKey,
                 CreationDate = user.CreationDate,
                 Email = user.Email,
                 UserName = user.UserName,
@@ -305,7 +316,7 @@ namespace BugNET.BLL
                 IsApproved = user.IsApproved
             };
 
-            var data = new Dictionary<string, object> { { "User", notificationUser } };
+            var data = new Dictionary<string, object> {{"User", notificationUser}};
 
             var emailSubject = nc.CultureContents
                 .First(p => p.ContentKey == subjectKey)
@@ -349,7 +360,7 @@ namespace BugNET.BLL
 
             var notificationUser = new NotificationUser
             {
-                Id = (Guid)user.ProviderUserKey,
+                Id = (Guid) user.ProviderUserKey,
                 CreationDate = user.CreationDate,
                 Email = user.Email,
                 UserName = user.UserName,
@@ -359,7 +370,7 @@ namespace BugNET.BLL
                 IsApproved = user.IsApproved
             };
 
-            var data = new Dictionary<string, object> { { "User", notificationUser } };
+            var data = new Dictionary<string, object> {{"User", notificationUser}};
 
             var emailSubject = nc.CultureContents
                 .First(p => p.ContentKey == subjectKey)
@@ -405,9 +416,9 @@ namespace BugNET.BLL
             var nc = new CultureNotificationContent().LoadContent(profile.PreferredLocale, subjectKey, bodyKey);
 
             var data = new Dictionary<string, object>
-                {
-                    {"Token", token}
-                };
+            {
+                {"Token", token}
+            };
 
             var emailSubject = nc.CultureContents
                 .First(p => p.ContentKey == subjectKey)
@@ -436,8 +447,7 @@ namespace BugNET.BLL
         public static string GetSelectedIssueColumnsByUserName(string userName, int projectId)
         {
             if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentNullException(nameof(userName));
-            return  DataProviderManager.Provider.GetSelectedIssueColumnsByUserName(userName, projectId);
-
+            return DataProviderManager.Provider.GetSelectedIssueColumnsByUserName(userName, projectId);
         }
 
         /// <summary>
@@ -446,7 +456,7 @@ namespace BugNET.BLL
         /// <param name="userName">Name of the user.</param>
         /// <param name="projectId">The project id.</param>
         /// <param name="columns">The columns.</param>
-        public static void SetSelectedIssueColumnsByUserName(string userName,int projectId, string columns)
+        public static void SetSelectedIssueColumnsByUserName(string userName, int projectId, string columns)
         {
             if (string.IsNullOrWhiteSpace(userName)) throw new ArgumentNullException(nameof(userName));
             DataProviderManager.Provider.SetSelectedIssueColumnsByUserName(userName, projectId, columns);

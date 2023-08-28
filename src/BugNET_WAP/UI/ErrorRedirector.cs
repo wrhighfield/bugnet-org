@@ -1,6 +1,6 @@
 ﻿using System.Web.UI;
 
-namespace BugNET.UserInterfaceLayer
+namespace BugNET.UI
 {
     /// <summary>
     /// This class gives the programmer access to quick and easy redirects when 
@@ -13,7 +13,7 @@ namespace BugNET.UserInterfaceLayer
         /// </summary>
         public static void TransferToLoginPage(Page webPage)
         {
-            webPage.Response.Redirect(string.Format("~/Account/Login.aspx?returnurl={0}", webPage.Request.RawUrl), true);     
+            webPage.Response.Redirect($"~/Account/Login.aspx?returnurl={webPage.Request.RawUrl}", true);
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace BugNET.UserInterfaceLayer
 
         /// <summary>
         /// Transfers to Error page.
-        /// Shouldnt really need this.
+        /// Shouldn't really need this.
         /// </summary>
         public static void TransferToErrorPage(Page webPage)
         {

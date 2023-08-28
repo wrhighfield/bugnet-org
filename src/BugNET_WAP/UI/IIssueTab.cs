@@ -1,34 +1,25 @@
-namespace BugNET.UserInterfaceLayer
+namespace BugNET.UI
 {
     /// <summary>
     /// Interface for issue tabs
     /// </summary>
-	public interface IIssueTab 
-	{
-
+    public interface IIssueTab
+    {
         /// <summary>
         /// Gets or sets the issue id.
         /// </summary>
         /// <value>The issue id.</value>
-		int IssueId 
-		{
-			get;
-			set;
-		}
+        int IssueId { get; set; }
+
         /// <summary>
         /// Gets or sets the project id.
         /// </summary>
         /// <value>The project id.</value>
-		int ProjectId
-		{
-			get;
-			set;
-		}
+        int ProjectId { get; set; }
 
         /// <summary>
         /// Initializes this instance.
         /// </summary>
         void Initialize();
-
-	}
+    }
 }

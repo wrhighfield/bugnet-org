@@ -10,6 +10,7 @@ namespace BugNET.BLL.Comparers
         /// Sorting column
         /// </summary>
         private readonly string sortColumn;
+
         /// <summary>
         /// Reverse sorting
         /// </summary>
@@ -20,10 +21,10 @@ namespace BugNET.BLL.Comparers
         /// </summary>
         /// <param name="sortEx">The sort ex.</param>
         /// <param name="ascending">The ascending.</param>
-        public ApplicationLogComparer(string sortEx,bool ascending)
+        public ApplicationLogComparer(string sortEx, bool ascending)
         {
             if (string.IsNullOrEmpty(sortEx)) return;
-            reverse = ascending;      
+            reverse = ascending;
             sortColumn = sortEx;
         }
 
@@ -48,29 +49,30 @@ namespace BugNET.BLL.Comparers
         /// </returns>
         public int Compare(ApplicationLog x, ApplicationLog y)
         {
-          var retVal = 0;
-          switch (sortColumn) 
-          {
-            case "Id":
-                retVal = x.Id - y.Id;
-                break;
-            case "Logger":
-                retVal = string.Compare(x.Logger, y.Logger, StringComparison.InvariantCultureIgnoreCase);
-                break;
-            case "Message":
-              retVal = string.Compare(x.Message, y.Message, StringComparison.InvariantCultureIgnoreCase);
-              break;
-            case "User":
-              retVal = string.Compare(x.User, y.User, StringComparison.InvariantCultureIgnoreCase);
-              break;
-            case "Level":
-              retVal = string.Compare(x.Level, y.Level , StringComparison.InvariantCultureIgnoreCase);
-              break;
-            case "Date":
-              retVal = DateTime.Compare(x.Date, y.Date);
-              break;
-          }
-          return retVal * (reverse ? -1 : 1);
+            var retVal = 0;
+            switch (sortColumn)
+            {
+                case "Id":
+                    retVal = x.Id - y.Id;
+                    break;
+                case "Logger":
+                    retVal = string.Compare(x.Logger, y.Logger, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "Message":
+                    retVal = string.Compare(x.Message, y.Message, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "User":
+                    retVal = string.Compare(x.User, y.User, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "Level":
+                    retVal = string.Compare(x.Level, y.Level, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "Date":
+                    retVal = DateTime.Compare(x.Date, y.Date);
+                    break;
+            }
+
+            return retVal * (reverse ? -1 : 1);
         }
 
         /// <summary>
@@ -78,8 +80,9 @@ namespace BugNET.BLL.Comparers
         /// </summary>
         /// <param name="obj">The obj.</param>
         /// <returns></returns>
-        public int GetHashCode(Project obj) {
-          return 0;
+        public int GetHashCode(Project obj)
+        {
+            return 0;
         }
     }
 }

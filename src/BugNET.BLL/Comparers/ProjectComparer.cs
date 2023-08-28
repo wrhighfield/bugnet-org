@@ -10,6 +10,7 @@ namespace BugNET.BLL.Comparers
         /// Sorting column
         /// </summary>
         private readonly string sortColumn;
+
         /// <summary>
         /// Reverse sorting
         /// </summary>
@@ -20,10 +21,10 @@ namespace BugNET.BLL.Comparers
         /// </summary>
         /// <param name="sortEx">The sort ex.</param>
         /// <param name="ascending">The ascending.</param>
-        public ProjectComparer(string sortEx,bool ascending)
+        public ProjectComparer(string sortEx, bool ascending)
         {
             if (string.IsNullOrEmpty(sortEx)) return;
-            reverse = ascending;      
+            reverse = ascending;
             sortColumn = sortEx;
         }
 
@@ -46,33 +47,37 @@ namespace BugNET.BLL.Comparers
         /// <returns>
         /// Value Condition Less than zero<paramref name="x"/> is less than <paramref name="y"/>.Zero<paramref name="x"/> equals <paramref name="y"/>.Greater than zero<paramref name="x"/> is greater than <paramref name="y"/>.
         /// </returns>
-        public int Compare(Project x, Project y) {
-          var retVal = 0;
-          switch (sortColumn) {
+        public int Compare(Project x, Project y)
+        {
+            var retVal = 0;
+            switch (sortColumn)
+            {
+                case "Created":
+                    retVal = DateTime.Compare(x.DateCreated, y.DateCreated);
+                    break;
+                case "Description":
+                    retVal = string.Compare(x.Description, y.Description, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "Creator":
+                    retVal = string.Compare(x.CreatorUserName, y.CreatorUserName,
+                        StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "Name":
+                    retVal = string.Compare(x.Name, y.Name, StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "Manager":
+                    retVal = string.Compare(x.ManagerUserName, y.ManagerUserName,
+                        StringComparison.InvariantCultureIgnoreCase);
+                    break;
+                case "Id":
+                    retVal = x.Id - y.Id;
+                    break;
+                case "Active":
+                    retVal = x.Disabled.CompareTo(y.Disabled);
+                    break;
+            }
 
-            case "Created":
-              retVal = DateTime.Compare(x.DateCreated, y.DateCreated);
-              break;
-            case "Description":
-              retVal = string.Compare(x.Description, y.Description, StringComparison.InvariantCultureIgnoreCase);
-              break;
-            case "Creator":
-              retVal = string.Compare(x.CreatorUserName, y.CreatorUserName, StringComparison.InvariantCultureIgnoreCase);
-              break;
-            case "Name":
-              retVal = string.Compare(x.Name, y.Name, StringComparison.InvariantCultureIgnoreCase);
-              break;
-            case "Manager":
-              retVal = string.Compare(x.ManagerUserName, y.ManagerUserName , StringComparison.InvariantCultureIgnoreCase);
-              break;
-            case "Id":
-              retVal = x.Id - y.Id;
-              break;
-            case "Active":
-              retVal = x.Disabled.CompareTo(y.Disabled);
-              break;
-          }
-          return retVal * (reverse ? -1 : 1);
+            return retVal * (reverse ? -1 : 1);
         }
     }
 }

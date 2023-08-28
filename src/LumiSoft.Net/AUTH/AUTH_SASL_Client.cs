@@ -33,27 +33,18 @@ namespace LumiSoft.Net.AUTH
         /// <summary>
         /// Gets if the authentication exchange has completed.
         /// </summary>
-        public abstract bool IsCompleted
-        {
-            get;
-        }
+        public abstract bool IsCompleted { get; }
 
         /// <summary>
         /// Gets IANA-registered SASL authentication mechanism name.
         /// </summary>
         /// <remarks>The registered list is available from: http://www.iana.org/assignments/sasl-mechanisms .</remarks>
-        public abstract string Name
-        {
-            get;
-        }
+        public abstract string Name { get; }
 
         /// <summary>
         /// Gets user login name.
         /// </summary>
-        public abstract string UserName
-        {
-            get;
-        }
+        public abstract string UserName { get; }
 
         /// <summary>
         /// Gets if the authentication method supports SASL client "inital response".

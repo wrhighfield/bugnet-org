@@ -3,11 +3,11 @@
     <parameterEntry type="ProviderPath" scope="iisapp" match="BugNET" />
   </parameter>
   <parameter
-		name = "ConnectionString"
-		defaultValue = "Server=myServerAddress;Database=BugNET;User Id=myUsername;Password=myPassword;" >
+    name="ConnectionString"
+    defaultValue="Server=myServerAddress;Database=BugNET;User Id=myUsername;Password=myPassword;">
     <parameterEntry
-			type="XmlFile"
-			scope="\\web\.config$"
-			match="/configuration/connectionStrings/add[@name='BugNET']/@connectionString" />
+      type="XmlFile"
+      scope="\\web\.config$"
+      match="/configuration/connectionStrings/add[@name='BugNET']/@connectionString" />
   </parameter>
 </parameters>

@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class QueryManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves or updates the instance.
@@ -21,12 +22,15 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(string userName, int projectId, Query entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The query name cannot be empty or null");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The query name cannot be empty or null");
             if (entity.Clauses.Count == 0) throw new ArgumentException("The query must have at least one query clause");
 
-            return entity.Id > Globals.NewId ?  
-                DataProviderManager.Provider.UpdateQuery(entity.Id, userName, projectId, entity.Name, entity.IsPublic, entity.Clauses) :
-            DataProviderManager.Provider.SaveQuery(userName, projectId, entity.Name, entity.IsPublic, entity.Clauses);
+            return entity.Id > Globals.NewId
+                ? DataProviderManager.Provider.UpdateQuery(entity.Id, userName, projectId, entity.Name, entity.IsPublic,
+                    entity.Clauses)
+                : DataProviderManager.Provider.SaveQuery(userName, projectId, entity.Name, entity.IsPublic,
+                    entity.Clauses);
         }
 
         /// <summary>

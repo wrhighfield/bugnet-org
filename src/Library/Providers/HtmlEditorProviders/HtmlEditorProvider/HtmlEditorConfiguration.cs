@@ -24,13 +24,12 @@ namespace BugNET.Providers.HtmlEditorProviders
     /// </example>
     public class HtmlEditorConfiguration : ConfigurationSection
     {
-
         /// <summary>
         /// Gets the providers.
         /// </summary>
         /// <value>The providers.</value>
         [ConfigurationProperty("providers")]
-        public ProviderSettingsCollection Providers => (ProviderSettingsCollection)base["providers"];
+        public ProviderSettingsCollection Providers => (ProviderSettingsCollection) base["providers"];
 
         /// <summary>
         /// Gets or sets the default provider.
@@ -40,7 +39,7 @@ namespace BugNET.Providers.HtmlEditorProviders
         [StringValidator(MinLength = 1)]
         public string DefaultProvider
         {
-            get => (string)base["defaultProvider"];
+            get => (string) base["defaultProvider"];
             set => base["defaultProvider"] = value;
         }
     }

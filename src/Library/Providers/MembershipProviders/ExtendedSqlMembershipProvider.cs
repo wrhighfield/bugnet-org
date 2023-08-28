@@ -23,38 +23,42 @@ namespace BugNET.Providers.MembershipProviders
         /// <returns>
         /// A <see cref="T:System.Web.Security.MembershipUser"></see> object for the newly created user. If no user was created, this method returns null.
         /// </returns>
-        public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
+        public override MembershipUser CreateUser(string username, string password, string email,
+            string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey,
+            out MembershipCreateStatus status)
         {
-            MembershipUser oldUser = base.CreateUser(username, password, email, passwordQuestion, passwordAnswer, isApproved, providerUserKey, out status);
+            var oldUser = base.CreateUser(username, password, email, passwordQuestion, passwordAnswer, isApproved,
+                providerUserKey, out status);
             if (status == MembershipCreateStatus.Success)
             {
-                ProfileBase profile = ProfileBase.Create(oldUser.UserName);
-                string firstName = (string)profile.GetPropertyValue("FirstName");
-                string lastName = (string)profile.GetPropertyValue("LastName");
-                string displayName = (string)profile.GetPropertyValue("DisplayName");
+                var profile = ProfileBase.Create(oldUser.UserName);
+                var firstName = (string) profile.GetPropertyValue("FirstName");
+                var lastName = (string) profile.GetPropertyValue("LastName");
+                var displayName = (string) profile.GetPropertyValue("DisplayName");
 
-                CustomMembershipUser newUser = new CustomMembershipUser(oldUser.ProviderName,
-                                                                        oldUser.UserName,
-                                                                        oldUser.ProviderUserKey,
-                                                                        oldUser.Email,
-                                                                        oldUser.PasswordQuestion,
-                                                                        oldUser.Comment,
-                                                                        oldUser.IsApproved,
-                                                                        oldUser.IsLockedOut,
-                                                                        oldUser.CreationDate,
-                                                                        oldUser.LastLoginDate,
-                                                                        oldUser.LastActivityDate,
-                                                                        oldUser.LastPasswordChangedDate,
-                                                                        oldUser.LastLockoutDate,
-                                                                        displayName,
-                                                                        firstName,
-                                                                        lastName);
+                var newUser = new CustomMembershipUser(oldUser.ProviderName,
+                    oldUser.UserName,
+                    oldUser.ProviderUserKey,
+                    oldUser.Email,
+                    oldUser.PasswordQuestion,
+                    oldUser.Comment,
+                    oldUser.IsApproved,
+                    oldUser.IsLockedOut,
+                    oldUser.CreationDate,
+                    oldUser.LastLoginDate,
+                    oldUser.LastActivityDate,
+                    oldUser.LastPasswordChangedDate,
+                    oldUser.LastLockoutDate,
+                    displayName,
+                    firstName,
+                    lastName);
 
                 return newUser;
             }
+
             return null;
         }
-       
+
 
         /// <summary>
         /// Returns information from the SQL Server membership database for a user and provides an option to update the last activity date/time stamp for the user.
@@ -68,36 +72,34 @@ namespace BugNET.Providers.MembershipProviders
         /// <exception cref="T:System.ArgumentNullException">username is null.</exception>
         public override MembershipUser GetUser(string username, bool userIsOnline)
         {
-            MembershipUser oldUser = base.GetUser(username, userIsOnline);
-            
+            var oldUser = base.GetUser(username, userIsOnline);
+
             if (oldUser == null)
                 return null;
 
-            ProfileBase profile = ProfileBase.Create(username);
-            string firstName = (string)profile.GetPropertyValue("FirstName");
-            string lastName = (string)profile.GetPropertyValue("LastName");
-            string displayName = (string)profile.GetPropertyValue("DisplayName");
+            var profile = ProfileBase.Create(username);
+            var firstName = (string) profile.GetPropertyValue("FirstName");
+            var lastName = (string) profile.GetPropertyValue("LastName");
+            var displayName = (string) profile.GetPropertyValue("DisplayName");
 
-            CustomMembershipUser newUser = new CustomMembershipUser(oldUser.ProviderName,
-                                                                    oldUser.UserName,
-                                                                    oldUser.ProviderUserKey,
-                                                                    oldUser.Email,
-                                                                    oldUser.PasswordQuestion,
-                                                                    oldUser.Comment,
-                                                                    oldUser.IsApproved,
-                                                                    oldUser.IsLockedOut,
-                                                                    oldUser.CreationDate,
-                                                                    oldUser.LastLoginDate,
-                                                                    oldUser.LastActivityDate,
-                                                                    oldUser.LastPasswordChangedDate,
-                                                                    oldUser.LastLockoutDate,
-                                                                    displayName,
-                                                                    firstName,
-                                                                    lastName);
+            var newUser = new CustomMembershipUser(oldUser.ProviderName,
+                oldUser.UserName,
+                oldUser.ProviderUserKey,
+                oldUser.Email,
+                oldUser.PasswordQuestion,
+                oldUser.Comment,
+                oldUser.IsApproved,
+                oldUser.IsLockedOut,
+                oldUser.CreationDate,
+                oldUser.LastLoginDate,
+                oldUser.LastActivityDate,
+                oldUser.LastPasswordChangedDate,
+                oldUser.LastLockoutDate,
+                displayName,
+                firstName,
+                lastName);
 
             return newUser;
-
-
         }
 
         /// <summary>
@@ -112,33 +114,34 @@ namespace BugNET.Providers.MembershipProviders
         /// <exception cref="T:System.ArgumentException">pageIndex is less than zero.- or -pageSize is less than one.- or -pageIndex multiplied by pageSize plus pageSize minus one exceeds <see cref="F:System.Int32.MaxValue"></see>.</exception>
         public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
-            MembershipUserCollection collection = new MembershipUserCollection();
+            var collection = new MembershipUserCollection();
             CustomMembershipUser newUser;
             foreach (MembershipUser oldUser in base.GetAllUsers(pageIndex, pageSize, out totalRecords))
             {
-                ProfileBase profile = ProfileBase.Create(oldUser.UserName);
-                string firstName = (string)profile.GetPropertyValue("FirstName");
-                string lastName = (string)profile.GetPropertyValue("LastName");
-                string displayName = (string)profile.GetPropertyValue("DisplayName");
+                var profile = ProfileBase.Create(oldUser.UserName);
+                var firstName = (string) profile.GetPropertyValue("FirstName");
+                var lastName = (string) profile.GetPropertyValue("LastName");
+                var displayName = (string) profile.GetPropertyValue("DisplayName");
 
                 newUser = new CustomMembershipUser(oldUser.ProviderName,
-                                                   oldUser.UserName,
-                                                   oldUser.ProviderUserKey,
-                                                   oldUser.Email,
-                                                   oldUser.PasswordQuestion,
-                                                   oldUser.Comment,
-                                                   oldUser.IsApproved,
-                                                   oldUser.IsLockedOut,
-                                                   oldUser.CreationDate,
-                                                   oldUser.LastLoginDate,
-                                                   oldUser.LastActivityDate,
-                                                   oldUser.LastPasswordChangedDate,
-                                                   oldUser.LastLockoutDate,
-                                                   displayName,
-                                                   firstName,
-                                                   lastName);
+                    oldUser.UserName,
+                    oldUser.ProviderUserKey,
+                    oldUser.Email,
+                    oldUser.PasswordQuestion,
+                    oldUser.Comment,
+                    oldUser.IsApproved,
+                    oldUser.IsLockedOut,
+                    oldUser.CreationDate,
+                    oldUser.LastLoginDate,
+                    oldUser.LastActivityDate,
+                    oldUser.LastPasswordChangedDate,
+                    oldUser.LastLockoutDate,
+                    displayName,
+                    firstName,
+                    lastName);
                 collection.Add(newUser);
             }
+
             return collection;
         }
 
@@ -154,37 +157,39 @@ namespace BugNET.Providers.MembershipProviders
         /// </returns>
         /// <exception cref="T:System.ArgumentException">usernameToMatch is an empty string ("") or is longer than 256 characters.- or -pageIndex is less than zero.- or -pageSize is less than 1.- or -pageIndex multiplied by pageSize plus pageSize minus one exceeds <see cref="F:System.Int32.MaxValue"></see>.</exception>
         /// <exception cref="T:System.ArgumentNullException">usernameToMatch is null.</exception>
-        public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
+        public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize,
+            out int totalRecords)
         {
-            MembershipUserCollection collection = new MembershipUserCollection();
+            var collection = new MembershipUserCollection();
             CustomMembershipUser newUser;
-            foreach (MembershipUser oldUser in base.FindUsersByName(usernameToMatch, pageIndex, pageSize, out totalRecords))
+            foreach (MembershipUser oldUser in base.FindUsersByName(usernameToMatch, pageIndex, pageSize,
+                         out totalRecords))
             {
-                ProfileBase profile = ProfileBase.Create(oldUser.UserName);
-                string firstName = (string)profile.GetPropertyValue("FirstName");
-                string lastName = (string)profile.GetPropertyValue("LastName");
-                string displayName = (string)profile.GetPropertyValue("DisplayName");
+                var profile = ProfileBase.Create(oldUser.UserName);
+                var firstName = (string) profile.GetPropertyValue("FirstName");
+                var lastName = (string) profile.GetPropertyValue("LastName");
+                var displayName = (string) profile.GetPropertyValue("DisplayName");
 
                 newUser = new CustomMembershipUser(oldUser.ProviderName,
-                                                   oldUser.UserName,
-                                                   oldUser.ProviderUserKey,
-                                                   oldUser.Email,
-                                                   oldUser.PasswordQuestion,
-                                                   oldUser.Comment,
-                                                   oldUser.IsApproved,
-                                                   oldUser.IsLockedOut,
-                                                   oldUser.CreationDate,
-                                                   oldUser.LastLoginDate,
-                                                   oldUser.LastActivityDate,
-                                                   oldUser.LastPasswordChangedDate,
-                                                   oldUser.LastLockoutDate,
-                                                   displayName,
-                                                   firstName,
-                                                   lastName);
+                    oldUser.UserName,
+                    oldUser.ProviderUserKey,
+                    oldUser.Email,
+                    oldUser.PasswordQuestion,
+                    oldUser.Comment,
+                    oldUser.IsApproved,
+                    oldUser.IsLockedOut,
+                    oldUser.CreationDate,
+                    oldUser.LastLoginDate,
+                    oldUser.LastActivityDate,
+                    oldUser.LastPasswordChangedDate,
+                    oldUser.LastLockoutDate,
+                    displayName,
+                    firstName,
+                    lastName);
                 collection.Add(newUser);
             }
-            return collection;
 
+            return collection;
         }
 
         /// <summary>
@@ -198,35 +203,38 @@ namespace BugNET.Providers.MembershipProviders
         /// A <see cref="T:System.Web.Security.MembershipUserCollection"></see> that contains a page of pageSize<see cref="T:System.Web.Security.MembershipUser"></see> objects beginning at the page specified by pageIndex.
         /// </returns>
         /// <exception cref="T:System.ArgumentException">emailToMatch is longer than 256 characters.- or -pageIndex is less than zero.- or -pageSize is less than one.- or -pageIndex multiplied by pageSize plus pageSize minus one exceeds <see cref="F:System.Int32.MaxValue"></see>.</exception>
-        public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
+        public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize,
+            out int totalRecords)
         {
-            MembershipUserCollection collection = new MembershipUserCollection();
+            var collection = new MembershipUserCollection();
             CustomMembershipUser newUser;
-            foreach (MembershipUser oldUser in base.FindUsersByEmail(emailToMatch, pageIndex, pageSize, out totalRecords))
+            foreach (MembershipUser oldUser in base.FindUsersByEmail(emailToMatch, pageIndex, pageSize,
+                         out totalRecords))
             {
-                ProfileBase profile = ProfileBase.Create(oldUser.UserName);
-                string firstName = (string)profile.GetPropertyValue("FirstName");
-                string lastName = (string)profile.GetPropertyValue("LastName");
-                string displayName = (string)profile.GetPropertyValue("DisplayName");
+                var profile = ProfileBase.Create(oldUser.UserName);
+                var firstName = (string) profile.GetPropertyValue("FirstName");
+                var lastName = (string) profile.GetPropertyValue("LastName");
+                var displayName = (string) profile.GetPropertyValue("DisplayName");
 
                 newUser = new CustomMembershipUser(oldUser.ProviderName,
-                                                   oldUser.UserName,
-                                                   oldUser.ProviderUserKey,
-                                                   oldUser.Email,
-                                                   oldUser.PasswordQuestion,
-                                                   oldUser.Comment,
-                                                   oldUser.IsApproved,
-                                                   oldUser.IsLockedOut,
-                                                   oldUser.CreationDate,
-                                                   oldUser.LastLoginDate,
-                                                   oldUser.LastActivityDate,
-                                                   oldUser.LastPasswordChangedDate,
-                                                   oldUser.LastLockoutDate,
-                                                   displayName,
-                                                   firstName,
-                                                   lastName);
+                    oldUser.UserName,
+                    oldUser.ProviderUserKey,
+                    oldUser.Email,
+                    oldUser.PasswordQuestion,
+                    oldUser.Comment,
+                    oldUser.IsApproved,
+                    oldUser.IsLockedOut,
+                    oldUser.CreationDate,
+                    oldUser.LastLoginDate,
+                    oldUser.LastActivityDate,
+                    oldUser.LastPasswordChangedDate,
+                    oldUser.LastLockoutDate,
+                    displayName,
+                    firstName,
+                    lastName);
                 collection.Add(newUser);
             }
+
             return collection;
         }
 
@@ -238,11 +246,11 @@ namespace BugNET.Providers.MembershipProviders
         /// <exception cref="T:System.Configuration.Provider.ProviderException">The <see cref="P:System.Web.Security.MembershipUser.UserName"></see> property of user was not found in the database.- or -The <see cref="P:System.Web.Security.MembershipUser.Email"></see> property of user was equal to an existing e-mail address in the database and <see cref="P:System.Web.Security.SqlMembershipProvider.RequiresUniqueEmail"></see> is set to true.- or -The user update failed.</exception>
         /// <exception cref="T:System.ArgumentNullException">user is null. - or -The <see cref="P:System.Web.Security.MembershipUser.UserName"></see> property of user is null.- or -The <see cref="P:System.Web.Security.MembershipUser.Email"></see> property of user is null and <see cref="P:System.Web.Security.SqlMembershipProvider.RequiresUniqueEmail"></see> is set to true.</exception>
         public override void UpdateUser(MembershipUser user)
-        {  
+        {
             base.UpdateUser(user);
-            CustomMembershipUser newUser = (CustomMembershipUser)user;
+            var newUser = (CustomMembershipUser) user;
 
-            ProfileBase profile = ProfileBase.Create(user.UserName);
+            var profile = ProfileBase.Create(user.UserName);
             profile.SetPropertyValue("DisplayName", newUser.DisplayName);
             profile.SetPropertyValue("LastName", newUser.LastName);
             profile.SetPropertyValue("FirstName", newUser.FirstName);
@@ -261,37 +269,37 @@ namespace BugNET.Providers.MembershipProviders
         /// <exception cref="T:System.ArgumentException">providerUserKey is not of type <see cref="T:System.Guid"></see>.</exception>
         public override MembershipUser GetUser(object providerUserKey, bool userIsOnline)
         {
-            MembershipUser oldUser = base.GetUser(providerUserKey, userIsOnline);
+            var oldUser = base.GetUser(providerUserKey, userIsOnline);
             if (oldUser != null)
             {
-                ProfileBase profile = ProfileBase.Create(oldUser.UserName);
-                string firstName = (string)profile.GetPropertyValue("FirstName");
-                string lastName = (string)profile.GetPropertyValue("LastName");
-                string displayName = (string)profile.GetPropertyValue("DisplayName");
+                var profile = ProfileBase.Create(oldUser.UserName);
+                var firstName = (string) profile.GetPropertyValue("FirstName");
+                var lastName = (string) profile.GetPropertyValue("LastName");
+                var displayName = (string) profile.GetPropertyValue("DisplayName");
 
-                CustomMembershipUser newUser = new CustomMembershipUser(oldUser.ProviderName,
-                                                                        oldUser.UserName,
-                                                                        oldUser.ProviderUserKey,
-                                                                        oldUser.Email,
-                                                                        oldUser.PasswordQuestion,
-                                                                        oldUser.Comment,
-                                                                        oldUser.IsApproved,
-                                                                        oldUser.IsLockedOut,
-                                                                        oldUser.CreationDate,
-                                                                        oldUser.LastLoginDate,
-                                                                        oldUser.LastActivityDate,
-                                                                        oldUser.LastPasswordChangedDate,
-                                                                        oldUser.LastLockoutDate,
-                                                                        displayName,
-                                                                        firstName,
-                                                                        lastName);
+                var newUser = new CustomMembershipUser(oldUser.ProviderName,
+                    oldUser.UserName,
+                    oldUser.ProviderUserKey,
+                    oldUser.Email,
+                    oldUser.PasswordQuestion,
+                    oldUser.Comment,
+                    oldUser.IsApproved,
+                    oldUser.IsLockedOut,
+                    oldUser.CreationDate,
+                    oldUser.LastLoginDate,
+                    oldUser.LastActivityDate,
+                    oldUser.LastPasswordChangedDate,
+                    oldUser.LastLockoutDate,
+                    displayName,
+                    firstName,
+                    lastName);
 
                 return newUser;
             }
             else
+            {
                 return oldUser;
+            }
         }
-
-       
     }
 }

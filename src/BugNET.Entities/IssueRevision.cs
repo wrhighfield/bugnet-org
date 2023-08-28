@@ -88,7 +88,5 @@ namespace BugNET.Entities
         public string Changeset { get; set; }
 
         #endregion
-
-
     }
 }

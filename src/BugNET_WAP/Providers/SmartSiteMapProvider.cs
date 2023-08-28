@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Specialized;
 using System.Web;
 
@@ -19,7 +18,7 @@ namespace BugNET.UserInterfaceLayer
         public override void Initialize(string name, NameValueCollection attributes)
         {
             base.Initialize(name, attributes);
-            this.SiteMapResolve += new SiteMapResolveEventHandler(SmartSiteMapProvider_SiteMapResolve);
+            SiteMapResolve += SmartSiteMapProvider_SiteMapResolve;
         }
 
         /// <summary>
@@ -28,26 +27,24 @@ namespace BugNET.UserInterfaceLayer
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.Web.SiteMapResolveEventArgs"/> instance containing the event data.</param>
         /// <returns></returns>
-        SiteMapNode SmartSiteMapProvider_SiteMapResolve(object sender, SiteMapResolveEventArgs e)
+        private SiteMapNode SmartSiteMapProvider_SiteMapResolve(object sender, SiteMapResolveEventArgs e)
         {
             if (SiteMap.CurrentNode == null)
                 return null;
 
-            SiteMapNode temp;
-            temp = SiteMap.CurrentNode.Clone(true);
-            Uri u = new Uri(e.Context.Request.Url.ToString());
+            var temp = SiteMap.CurrentNode.Clone(true);
 
-            SiteMapNode tempNode = temp;
+            var tempNode = temp;
             while (tempNode != null)
             {
-                string qs = GetReliance(tempNode, e.Context);
+                var qs = GetReliance(tempNode, e.Context);
                 if (qs != null)
                     if (tempNode != null)
                         tempNode.Url += qs;
 
                 temp = tempNode.ParentNode;
             }
-          
+
             return temp;
         }
 
@@ -57,18 +54,18 @@ namespace BugNET.UserInterfaceLayer
         /// <param name="node">The node.</param>
         /// <param name="context">The context.</param>
         /// <returns></returns>
-        private string GetReliance(SiteMapNode node, HttpContext context)
+        private static string GetReliance(SiteMapNode node, HttpContext context)
         {
             //Check to see if the node supports reliance
             if (node["reliantOn"] == null)
                 return null;
 
-            NameValueCollection values = new NameValueCollection();
-            string[] vars = node["reliantOn"].Split(",".ToCharArray());
+            var values = new NameValueCollection();
+            var vars = node["reliantOn"].Split(",".ToCharArray());
 
-            foreach (string s in vars)
+            foreach (var s in vars)
             {
-                string var = s.Trim();
+                var var = s.Trim();
                 //Make sure the var exists in the querystring
                 if (context.Request.QueryString[var] == null)
                     continue;
@@ -76,10 +73,7 @@ namespace BugNET.UserInterfaceLayer
                 values.Add(var, context.Request.QueryString[var]);
             }
 
-            if (values.Count == 0)
-                return null;
-
-            return NameValueCollectionToString(values);
+            return values.Count == 0 ? null : NameValueCollectionToString(values);
         }
 
         /// <summary>
@@ -87,15 +81,15 @@ namespace BugNET.UserInterfaceLayer
         /// </summary>
         /// <param name="col">The col.</param>
         /// <returns></returns>
-        private string NameValueCollectionToString(NameValueCollection col)
+        private static string NameValueCollectionToString(NameValueCollection col)
         {
-            string[] parts = new string[col.Count];
-            string[] keys = col.AllKeys;
+            var parts = new string[col.Count];
+            var keys = col.AllKeys;
 
-            for (int i = 0; i < keys.Length; i++)
+            for (var i = 0; i < keys.Length; i++)
                 parts[i] = keys[i] + "=" + col[keys[i]];
 
-            string url = "?" + String.Join("&", parts);
+            var url = "?" + string.Join("&", parts);
             return url;
         }
     }

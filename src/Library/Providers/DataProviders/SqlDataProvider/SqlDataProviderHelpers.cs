@@ -12,7 +12,6 @@ namespace BugNET.Providers.DataProviders
 {
     public partial class SqlDataProvider
     {
-
         /// <summary>
         /// Gets a value indicating whether [supports project cloning].
         /// </summary>
@@ -63,6 +62,7 @@ namespace BugNET.Providers.DataProviders
             {
                 return "ERROR: providerPath folder value not specified in web.config for SqlDataProvider";
             }
+
             return mappedProviderPath;
         }
 
@@ -79,8 +79,9 @@ namespace BugNET.Providers.DataProviders
                 //Check For 0.7 Version
                 try
                 {
-                    SetCommandType(sqlCmd, CommandType.Text, "SELECT SettingValue FROM HostSettings WHERE SettingName='Version'");
-                    currentVersion = (string)ExecuteScalarCmd(sqlCmd);
+                    SetCommandType(sqlCmd, CommandType.Text,
+                        "SELECT SettingValue FROM HostSettings WHERE SettingName='Version'");
+                    currentVersion = (string) ExecuteScalarCmd(sqlCmd);
                 }
                 catch (SqlException)
                 {
@@ -91,8 +92,9 @@ namespace BugNET.Providers.DataProviders
                 if (currentVersion != string.Empty && currentVersion != "ERROR") return currentVersion;
                 try
                 {
-                    SetCommandType(sqlCmd, CommandType.Text, "SELECT SettingValue FROM BugNet_HostSettings WHERE SettingName='Version'");
-                    currentVersion = (string)ExecuteScalarCmd(sqlCmd);
+                    SetCommandType(sqlCmd, CommandType.Text,
+                        "SELECT SettingValue FROM BugNet_HostSettings WHERE SettingName='Version'");
+                    currentVersion = (string) ExecuteScalarCmd(sqlCmd);
                 }
                 catch (SqlException e)
                 {
@@ -142,14 +144,16 @@ namespace BugNET.Providers.DataProviders
         /// <param name="paramSize">Size of the param.</param>
         /// <param name="paramDirection">The param direction.</param>
         /// <param name="paramvalue">The paramvalue.</param>
-        private static void AddParamToSqlCmd(SqlCommand sqlCmd, string paramId, SqlDbType sqlType, int paramSize, ParameterDirection paramDirection, object paramvalue)
+        private static void AddParamToSqlCmd(SqlCommand sqlCmd, string paramId, SqlDbType sqlType, int paramSize,
+            ParameterDirection paramDirection, object paramvalue)
         {
             // Validate Parameter Properties
-            if (sqlCmd == null) throw (new ArgumentNullException(nameof(sqlCmd)));
-            if (paramId == string.Empty) throw (new ArgumentOutOfRangeException(nameof(paramId)));
+            if (sqlCmd == null) throw new ArgumentNullException(nameof(sqlCmd));
+            if (paramId == string.Empty) throw new ArgumentOutOfRangeException(nameof(paramId));
 
             // Add Parameter
-            var newSqlParam = new SqlParameter { ParameterName = paramId, SqlDbType = sqlType, Direction = paramDirection };
+            var newSqlParam = new SqlParameter
+                {ParameterName = paramId, SqlDbType = sqlType, Direction = paramDirection};
 
             if (paramSize > 0)
                 newSqlParam.Size = paramSize;
@@ -168,8 +172,10 @@ namespace BugNET.Providers.DataProviders
         private object ExecuteScalarCmd(SqlCommand sqlCmd)
         {
             // Validate Command Properties
-            if (string.IsNullOrEmpty(connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
-            if (sqlCmd == null) throw (new ArgumentNullException(nameof(sqlCmd)));
+            if (string.IsNullOrEmpty(connectionString))
+                throw new Exception(
+                    "The connection string cannot be empty, please check the web.config for the proper settings");
+            if (sqlCmd == null) throw new ArgumentNullException(nameof(sqlCmd));
 
             object result;
 
@@ -191,8 +197,10 @@ namespace BugNET.Providers.DataProviders
         private void ExecuteNonQuery(SqlCommand sqlCmd)
         {
             // Validate Command Properties
-            if (string.IsNullOrEmpty(connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
-            if (sqlCmd == null) throw (new ArgumentNullException(nameof(sqlCmd)));
+            if (string.IsNullOrEmpty(connectionString))
+                throw new Exception(
+                    "The connection string cannot be empty, please check the web.config for the proper settings");
+            if (sqlCmd == null) throw new ArgumentNullException(nameof(sqlCmd));
 
             using (var cn = new SqlConnection(connectionString))
             {
@@ -211,8 +219,10 @@ namespace BugNET.Providers.DataProviders
         /// <param name="list">The list.</param>
         private void ExecuteReaderCmd<T>(SqlCommand sqlCmd, GenerateListFromReader<T> gcfr, ref List<T> list)
         {
-            if (string.IsNullOrEmpty(connectionString)) throw new Exception("The connection string cannot be empty, please check the web.config for the proper settings");
-            if (sqlCmd == null) throw (new ArgumentNullException(nameof(sqlCmd)));
+            if (string.IsNullOrEmpty(connectionString))
+                throw new Exception(
+                    "The connection string cannot be empty, please check the web.config for the proper settings");
+            if (sqlCmd == null) throw new ArgumentNullException(nameof(sqlCmd));
 
             using (var cn = new SqlConnection(connectionString))
             {
@@ -247,10 +257,7 @@ namespace BugNET.Providers.DataProviders
             {
                 conn.Open();
 
-                foreach (var command in sql.Select(stmt => new SqlCommand(stmt, conn)))
-                {
-                    command.ExecuteNonQuery();
-                }
+                foreach (var command in sql.Select(stmt => new SqlCommand(stmt, conn))) command.ExecuteNonQuery();
                 conn.Close();
             }
         }

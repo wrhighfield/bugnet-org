@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Account
@@ -15,7 +15,7 @@ namespace BugNET.Account
     /// <summary>
     /// 
     /// </summary>
-    public partial class UserProfile : BasePage
+    public partial class UserProfile : BugNetBasePage
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(UserProfile));
 
@@ -36,7 +36,9 @@ namespace BugNET.Account
             BulletedList4.Items[0].Attributes.Add("class", "active");
 
             var resources = ResourceManager.GetInstalledLanguageResources();
-            var resourceItems = (from code in resources let cultureInfo = new CultureInfo(code, false) select new ListItem(cultureInfo.DisplayName, code)).ToList();
+            var resourceItems = (from code in resources
+                let cultureInfo = new CultureInfo(code, false)
+                select new ListItem(cultureInfo.DisplayName, code)).ToList();
             ddlPreferredLocale.DataSource = resourceItems;
             ddlPreferredLocale.DataBind();
 
@@ -56,10 +58,7 @@ namespace BugNET.Account
 
             var isFromOpenIdRegistration = Request.Get("oid", false);
 
-            if(isFromOpenIdRegistration)
-            {
-                Message1.ShowInfoMessage(GetLocalResourceObject("UpdateProfileForOpenId").ToString());
-            }
+            if (isFromOpenIdRegistration) Message1.ShowInfoMessage(GetLocalString("UpdateProfileForOpenId"));
         }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace BugNET.Account
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void AddProjectNotification(Object s, EventArgs e)
+        protected void AddProjectNotification(object s, EventArgs e)
         {
             //The users must be added to a list first because the collection can not
             //be modified while we iterate through it.
@@ -76,10 +75,10 @@ namespace BugNET.Account
             foreach (var item in usersToAdd)
             {
                 var notification = new ProjectNotification
-                        {
-                            ProjectId = Convert.ToInt32(item.Value),
-                            NotificationUsername = Security.GetUserName()
-                        };
+                {
+                    ProjectId = Convert.ToInt32(item.Value),
+                    NotificationUsername = Security.GetUserName()
+                };
 
                 if (!ProjectNotificationManager.SaveOrUpdate(notification)) continue;
 
@@ -95,7 +94,7 @@ namespace BugNET.Account
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
-        protected void RemoveProjectNotification(Object s, EventArgs e)
+        protected void RemoveProjectNotification(object s, EventArgs e)
         {
             //The users must be added to a list first because the collection can not
             //be modified while we iterate through it.
@@ -113,7 +112,6 @@ namespace BugNET.Account
 
         protected void BulletedList4_Click1(object sender, BulletedListEventArgs e)
         {
-
             //Label1.Text = "The Index of Item you clicked: " + e.Index + "<br> The value of Item you clicked: " + BulletedList4.Items[e.Index].Text;
             foreach (ListItem li in BulletedList4.Items)
                 li.Attributes.Add("class", "");
@@ -144,9 +142,9 @@ namespace BugNET.Account
                         lstSelectedProjects.Items.Add(matchItem);
                         lstAllProjects.Items.Remove(matchItem);
                     }
+
                     break;
             }
-
         }
 
         /// <summary>
@@ -167,8 +165,8 @@ namespace BugNET.Account
             {
                 WebProfile.Current.Save();
                 Membership.UpdateUser(membershipUser);
-               
-                Message1.ShowSuccessMessage(GetLocalResourceObject("ProfileSaved").ToString());
+
+                Message1.ShowSuccessMessage(GetLocalString("ProfileSaved"));
 
                 if (Log.IsInfoEnabled)
                 {
@@ -186,10 +184,8 @@ namespace BugNET.Account
                     Log.Error("Profile update error", ex);
                 }
 
-                Message1.ShowErrorMessage(GetLocalResourceObject("ProfileUpdateError").ToString());
+                Message1.ShowErrorMessage(GetLocalString("ProfileUpdateError"));
             }
-
-
         }
 
         /// <summary>
@@ -220,7 +216,7 @@ namespace BugNET.Account
             try
             {
                 WebProfile.Current.Save();
-                Message3.ShowSuccessMessage(GetLocalResourceObject("CustomSettingsSaved").ToString());
+                Message3.ShowSuccessMessage(GetLocalString("CustomSettingsSaved"));
 
                 if (Log.IsInfoEnabled)
                 {
@@ -237,10 +233,9 @@ namespace BugNET.Account
                         MDC.Set("user", HttpContext.Current.User.Identity.Name);
                     Log.Error("Profile update error", ex);
                 }
-                Message3.ShowErrorMessage(GetLocalResourceObject("CustomSettingsUpdateError").ToString());
 
+                Message3.ShowErrorMessage(GetLocalString("CustomSettingsUpdateError"));
             }
-
         }
     }
 }

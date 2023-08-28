@@ -3,18 +3,19 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Administration.Users.UserControls
 {
     public partial class Roles : BaseUserControlUserAdmin, IEditUserControl
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public event ActionEventHandler Action;
 
-        void OnAction(ActionEventArgs args)
+        private void OnAction(ActionEventArgs args)
         {
             if (Action != null)
                 Action(this, args);
@@ -22,8 +23,8 @@ namespace BugNET.Administration.Users.UserControls
 
         public Guid UserId
         {
-            get { return ViewState.Get("UserId", Guid.Empty); }
-            set { ViewState.Set("UserId", value); }
+            get => ViewState.Get("UserId", Guid.Empty);
+            set => ViewState.Set("UserId", value);
         }
 
         public void Initialize()
@@ -73,11 +74,11 @@ namespace BugNET.Administration.Users.UserControls
                 {
                     if (r.ProjectId == 0) continue;
                     var roleListItem = new ListItem
-                        {
-                            Text = r.Name,
-                            Value = r.Id.ToString(),
-                            Selected = (userRoles.FindAll(p => p.ProjectId == projectId && p.Id == r.Id).Count > 0)
-                        };
+                    {
+                        Text = r.Name,
+                        Value = r.Id.ToString(),
+                        Selected = userRoles.FindAll(p => p.ProjectId == projectId && p.Id == r.Id).Count > 0
+                    };
                     RoleList.Items.Add(roleListItem);
                 }
             }
@@ -104,6 +105,7 @@ namespace BugNET.Administration.Users.UserControls
             else if (!chkSuperUsers.Checked && UserManager.IsInRole(userName, 0, Globals.SuperUserRole))
                 RoleManager.RemoveUser(userName, 1);
         }
+
         /// <summary>
         /// CMDs the update roles.
         /// </summary>
@@ -126,20 +128,16 @@ namespace BugNET.Administration.Users.UserControls
 
             foreach (ListItem roleListItem in RoleList.Items)
             {
-                var roleName = roleListItem.Text;                           
+                var roleName = roleListItem.Text;
                 var enableRole = roleListItem.Selected;
 
-                if (enableRole && !UserManager.IsInRole(userName,dropProjects.SelectedValue, roleName))
-                {
+                if (enableRole && !UserManager.IsInRole(userName, dropProjects.SelectedValue, roleName))
                     RoleManager.AddUser(userName, Convert.ToInt32(roleListItem.Value));
-                }
-                else if (!enableRole && UserManager.IsInRole(userName,dropProjects.SelectedValue, roleName))
-                {
+                else if (!enableRole && UserManager.IsInRole(userName, dropProjects.SelectedValue, roleName))
                     RoleManager.RemoveUser(userName, Convert.ToInt32(roleListItem.Value));
-                }
             }
 
-            ActionMessage.ShowSuccessMessage(GetLocalResourceObject("UserRolesUpdateSuccess").ToString());
+            ActionMessage.ShowSuccessMessage(GetLocalString("UserRolesUpdateSuccess"));
         }
 
         protected void CmdCancelClick(object sender, ImageClickEventArgs e)

@@ -4,14 +4,14 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Issues.UserControls
 {
     /// <summary>
     /// 
     /// </summary>
-    public partial class RelatedIssues : System.Web.UI.UserControl, IIssueTab
+    public partial class RelatedIssues : BugNetUserControl, IIssueTab
     {
         protected RelatedIssues()
         {
@@ -26,7 +26,6 @@ namespace BugNET.Issues.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-
         }
 
         #region IIssueTab Members
@@ -37,8 +36,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The issue id.</value>
         public int IssueId
         {
-            get { return ViewState.Get("IssueId", 0); }
-            set { ViewState.Set("IssueId", value); }
+            get => ViewState.Get("IssueId", 0);
+            set => ViewState.Set("IssueId", value);
         }
 
         /// <summary>
@@ -47,8 +46,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", 0); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", 0);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -58,11 +57,13 @@ namespace BugNET.Issues.UserControls
         {
             BindRelated();
 
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.DeleteRelated.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.DeleteRelated.ToString()))
                 grdIssueItems.Columns[4].Visible = false;
 
             //check users role permission for adding a related issue
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.AddRelated.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.AddRelated.ToString()))
                 AddRelatedIssuePanel.Visible = false;
         }
 
@@ -77,7 +78,7 @@ namespace BugNET.Issues.UserControls
 
             if (issues.Count == 0)
             {
-                NoIssuesLabel.Text = GetLocalResourceObject("NoRelatedIssues").ToString();
+                NoIssuesLabel.Text = GetLocalString("NoRelatedIssues");
                 NoIssuesLabel.Visible = true;
                 grdIssueItems.Visible = false;
             }
@@ -96,7 +97,7 @@ namespace BugNET.Issues.UserControls
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridItemEventArgs"/> instance containing the event data.</param>
-        protected void GrdIssueItemsDataBound(Object s, DataGridItemEventArgs e)
+        protected void GrdIssueItemsDataBound(object s, DataGridItemEventArgs e)
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
@@ -111,10 +112,11 @@ namespace BugNET.Issues.UserControls
 
             // allow delete if user had the permission, the project admin or a super user trying to delete the comment.
             if (!UserManager.IsInRole(ProjectId, Common.Permission.DeleteRelated.ToString()) &&
-                !UserManager.IsSuperUser() && !UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)) return;
+                !UserManager.IsSuperUser() &&
+                !UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)) return;
 
             cmdDelete.Visible = true;
-            cmdDelete.OnClientClick = string.Format("return confirm('{0}');", GetLocalResourceObject("RemoveRelatedIssue"));
+            cmdDelete.OnClientClick = $"return confirm('{GetLocalString("RemoveRelatedIssue")}');";
         }
 
         /// <summary>
@@ -124,7 +126,7 @@ namespace BugNET.Issues.UserControls
         /// <param name="e">The <see cref="T:System.EventArgs"/> instance containing the event data.</param>
         protected void CmdAddRelatedIssueClick(object sender, EventArgs e)
         {
-            if (IssueIdTextBox.Text == String.Empty)
+            if (IssueIdTextBox.Text == string.Empty)
                 return;
 
             if (!Page.IsValid) return;
@@ -137,14 +139,15 @@ namespace BugNET.Issues.UserControls
 
             RelatedIssueManager.CreateNewRelatedIssue(IssueId, issueId);
 
-            IssueIdTextBox.Text = String.Empty;
+            IssueIdTextBox.Text = string.Empty;
 
             var history = new IssueHistory
             {
                 IssueId = IssueId,
                 CreatedUserName = Security.GetUserName(),
                 DateChanged = DateTime.Now,
-                FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "RelatedIssue", "Related Issue"),
+                FieldChanged =
+                    ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "RelatedIssue", "Related Issue"),
                 OldValue = string.Empty,
                 NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Added", "Added"),
                 TriggerLastUpdateChange = true
@@ -185,7 +188,8 @@ namespace BugNET.Issues.UserControls
                     IssueId = IssueId,
                     CreatedUserName = Security.GetUserName(),
                     DateChanged = DateTime.Now,
-                    FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "RelatedIssue", "Related Issue"),
+                    FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "RelatedIssue",
+                        "Related Issue"),
                     OldValue = string.Empty,
                     NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Deleted", "Deleted"),
                     TriggerLastUpdateChange = true
@@ -193,7 +197,7 @@ namespace BugNET.Issues.UserControls
 
                 IssueHistoryManager.SaveOrUpdate(history);
 
-                var changes = new List<IssueHistory> { history };
+                var changes = new List<IssueHistory> {history};
 
                 IssueNotificationManager.SendIssueNotifications(IssueId, changes);
             }

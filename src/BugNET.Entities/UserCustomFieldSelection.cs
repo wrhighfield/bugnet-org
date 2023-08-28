@@ -1,12 +1,10 @@
 namespace BugNET.Entities
 {
-
     /// <summary>
     /// Summary description for CustomFieldSelection
     /// </summary>
     public class UserCustomFieldSelection
     {
-
         public UserCustomFieldSelection()
         {
             Name = string.Empty;

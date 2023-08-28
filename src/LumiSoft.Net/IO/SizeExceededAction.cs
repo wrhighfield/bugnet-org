@@ -14,6 +14,6 @@ namespace LumiSoft.Net.IO
         /// Junks all data what exceeds maximum allowed size and after requested operation completes,
         /// throws exception.
         /// </summary>
-        JunkAndThrowException = 2,
+        JunkAndThrowException = 2
     }
 }

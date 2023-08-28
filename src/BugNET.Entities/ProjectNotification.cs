@@ -49,6 +49,5 @@
         /// </summary>
         /// <value>The notification email.</value>
         public string NotificationEmail { get; set; }
-
     }
 }

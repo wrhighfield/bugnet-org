@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class MilestoneManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -19,8 +20,10 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(Milestone entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save milestone, the project id is invalid");
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The milestone name cannot be empty or null");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save milestone, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The milestone name cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateMilestone(entity);
@@ -53,8 +56,10 @@ namespace BugNET.BLL
             if (canBeDeleted)
                 return DataProviderManager.Provider.DeleteMilestone(milestone.Id);
 
-            cannotDeleteMessage = ResourceStrings.GetGlobalResource(GlobalResources.Exceptions, "DeleteItemAssignedToIssueError");
-            cannotDeleteMessage = string.Format(cannotDeleteMessage, milestone.Name, ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Milestone", "milestone").ToLower());
+            cannotDeleteMessage =
+                ResourceStrings.GetGlobalResource(GlobalResources.Exceptions, "DeleteItemAssignedToIssueError");
+            cannotDeleteMessage = string.Format(cannotDeleteMessage, milestone.Name,
+                ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Milestone", "milestone").ToLower());
 
             return false;
         }
@@ -65,9 +70,12 @@ namespace BugNET.BLL
         /// <param name="projectId">The project id.</param>
         /// <param name="milestoneCompleted">if set to <c>true</c> [milestone completed].</param>
         /// <returns></returns>
-        public static List<Milestone> GetByProjectId(int projectId, bool milestoneCompleted = true) =>
-            projectId <= Globals.NewId ? new List<Milestone>() : 
-                DataProviderManager.Provider.GetMilestonesByProjectId(projectId, milestoneCompleted);
+        public static List<Milestone> GetByProjectId(int projectId, bool milestoneCompleted = true)
+        {
+            return projectId <= Globals.NewId
+                ? new List<Milestone>()
+                : DataProviderManager.Provider.GetMilestonesByProjectId(projectId, milestoneCompleted);
+        }
 
         /// <summary>
         /// Gets the Milestone by id.

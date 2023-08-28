@@ -17,22 +17,23 @@ namespace LumiSoft.Net.Mail
         /// </summary>
         public Mail_Message()
         {
-            Header.FieldsProvider.HeaderFields.Add("From",typeof(Mail_h_MailboxList));
-            Header.FieldsProvider.HeaderFields.Add("Sender",typeof(Mail_h_Mailbox));
-            Header.FieldsProvider.HeaderFields.Add("Reply-To",typeof(Mail_h_AddressList));
-            Header.FieldsProvider.HeaderFields.Add("To",typeof(Mail_h_AddressList));
-            Header.FieldsProvider.HeaderFields.Add("Cc",typeof(Mail_h_AddressList));
-            Header.FieldsProvider.HeaderFields.Add("Bcc",typeof(Mail_h_AddressList));
-            Header.FieldsProvider.HeaderFields.Add("Resent-From",typeof(Mail_h_MailboxList));
-            Header.FieldsProvider.HeaderFields.Add("Resent-Sender",typeof(Mail_h_Mailbox));
-            Header.FieldsProvider.HeaderFields.Add("Resent-To",typeof(Mail_h_AddressList));
-            Header.FieldsProvider.HeaderFields.Add("Resent-Cc",typeof(Mail_h_AddressList));
-            Header.FieldsProvider.HeaderFields.Add("Resent-Bcc",typeof(Mail_h_AddressList));
-            Header.FieldsProvider.HeaderFields.Add("Resent-Reply-To",typeof(Mail_h_AddressList));
-            Header.FieldsProvider.HeaderFields.Add("Return-Path",typeof(Mail_h_ReturnPath));
-            Header.FieldsProvider.HeaderFields.Add("Received",typeof(Mail_h_Received));
-            Header.FieldsProvider.HeaderFields.Add("Disposition-Notification-To",typeof(Mail_h_MailboxList));
-            Header.FieldsProvider.HeaderFields.Add("Disposition-Notification-Options",typeof(Mail_h_DispositionNotificationOptions));
+            Header.FieldsProvider.HeaderFields.Add("From", typeof(Mail_h_MailboxList));
+            Header.FieldsProvider.HeaderFields.Add("Sender", typeof(Mail_h_Mailbox));
+            Header.FieldsProvider.HeaderFields.Add("Reply-To", typeof(Mail_h_AddressList));
+            Header.FieldsProvider.HeaderFields.Add("To", typeof(Mail_h_AddressList));
+            Header.FieldsProvider.HeaderFields.Add("Cc", typeof(Mail_h_AddressList));
+            Header.FieldsProvider.HeaderFields.Add("Bcc", typeof(Mail_h_AddressList));
+            Header.FieldsProvider.HeaderFields.Add("Resent-From", typeof(Mail_h_MailboxList));
+            Header.FieldsProvider.HeaderFields.Add("Resent-Sender", typeof(Mail_h_Mailbox));
+            Header.FieldsProvider.HeaderFields.Add("Resent-To", typeof(Mail_h_AddressList));
+            Header.FieldsProvider.HeaderFields.Add("Resent-Cc", typeof(Mail_h_AddressList));
+            Header.FieldsProvider.HeaderFields.Add("Resent-Bcc", typeof(Mail_h_AddressList));
+            Header.FieldsProvider.HeaderFields.Add("Resent-Reply-To", typeof(Mail_h_AddressList));
+            Header.FieldsProvider.HeaderFields.Add("Return-Path", typeof(Mail_h_ReturnPath));
+            Header.FieldsProvider.HeaderFields.Add("Received", typeof(Mail_h_Received));
+            Header.FieldsProvider.HeaderFields.Add("Disposition-Notification-To", typeof(Mail_h_MailboxList));
+            Header.FieldsProvider.HeaderFields.Add("Disposition-Notification-Options",
+                typeof(Mail_h_DispositionNotificationOptions));
         }
 
 
@@ -46,9 +47,7 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ArgumentNullException">Is raised when <b>data</b> is null reference.</exception>
         public static Mail_Message ParseFromByte(byte[] data)
         {
-            if(data == null){
-                throw new ArgumentNullException(nameof(data));
-            }
+            if (data == null) throw new ArgumentNullException(nameof(data));
 
             return ParseFromStream(new MemoryStream(data));
         }
@@ -60,16 +59,12 @@ namespace LumiSoft.Net.Mail
         /// <param name="headerEncoding">Header reading encoding. If not sure UTF-8 is recommended.</param>
         /// <returns>Returns parsed mail message.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>data</b> or <b>headerEncoding</b> is null reference.</exception>
-        public static Mail_Message ParseFromByte(byte[] data,Encoding headerEncoding)
+        public static Mail_Message ParseFromByte(byte[] data, Encoding headerEncoding)
         {
-            if(data == null){
-                throw new ArgumentNullException(nameof(data));
-            }
-            if(headerEncoding == null){
-                throw new ArgumentNullException(nameof(headerEncoding));
-            }
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            if (headerEncoding == null) throw new ArgumentNullException(nameof(headerEncoding));
 
-            return ParseFromStream(new MemoryStream(data),headerEncoding);
+            return ParseFromStream(new MemoryStream(data), headerEncoding);
         }
 
         #endregion
@@ -85,14 +80,11 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
         public new static Mail_Message ParseFromFile(string file)
         {
-            if(file == null){
-                throw new ArgumentNullException(nameof(file));
-            }
-            if(file == ""){
-                throw new ArgumentException("Argument 'file' value must be specified.");
-            }
+            if (file == null) throw new ArgumentNullException(nameof(file));
+            if (file == "") throw new ArgumentException("Argument 'file' value must be specified.");
 
-            using(var fs = File.OpenRead(file)){
+            using (var fs = File.OpenRead(file))
+            {
                 return ParseFromStream(fs);
             }
         }
@@ -105,20 +97,15 @@ namespace LumiSoft.Net.Mail
         /// <returns>Returns parsed mail message.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>file</b> or <b>headerEncoding</b> is null.</exception>
         /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
-        public new static Mail_Message ParseFromFile(string file,Encoding headerEncoding)
+        public new static Mail_Message ParseFromFile(string file, Encoding headerEncoding)
         {
-            if(file == null){
-                throw new ArgumentNullException(nameof(file));
-            }
-            if(file == ""){
-                throw new ArgumentException("Argument 'file' value must be specified.");
-            }
-            if(headerEncoding == null){
-                throw new ArgumentNullException(nameof(headerEncoding));
-            }
+            if (file == null) throw new ArgumentNullException(nameof(file));
+            if (file == "") throw new ArgumentException("Argument 'file' value must be specified.");
+            if (headerEncoding == null) throw new ArgumentNullException(nameof(headerEncoding));
 
-            using(var fs = File.OpenRead(file)){
-                return ParseFromStream(fs,headerEncoding);
+            using (var fs = File.OpenRead(file))
+            {
+                return ParseFromStream(fs, headerEncoding);
             }
         }
 
@@ -134,13 +121,11 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null.</exception>
         public new static Mail_Message ParseFromStream(Stream stream)
         {
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
-            return ParseFromStream(stream,Encoding.UTF8);
+            return ParseFromStream(stream, Encoding.UTF8);
         }
-        
+
         /// <summary>
         /// Parses mail message from the specified stream.
         /// </summary>
@@ -148,17 +133,13 @@ namespace LumiSoft.Net.Mail
         /// <param name="headerEncoding">Header reading encoding. If not sure UTF-8 is recommended.</param>
         /// <returns>Returns parsed mail message.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> or <b>headerEncoding</b> is null.</exception>
-        public new static Mail_Message ParseFromStream(Stream stream,Encoding headerEncoding)
+        public new static Mail_Message ParseFromStream(Stream stream, Encoding headerEncoding)
         {
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
-            if(headerEncoding == null){
-                throw new ArgumentNullException(nameof(headerEncoding));
-            }
-                        
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
+            if (headerEncoding == null) throw new ArgumentNullException(nameof(headerEncoding));
+
             var retVal = new Mail_Message();
-            retVal.Parse(new SmartStream(stream,false),headerEncoding,new MIME_h_ContentType("text/plain"));
+            retVal.Parse(new SmartStream(stream, false), headerEncoding, new MIME_h_ContentType("text/plain"));
 
             return retVal;
         }
@@ -175,14 +156,12 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this method is accessed.</exception>
         public Mail_Message Clone()
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
             var ms = new MemoryStreamEx(64000);
-            ToStream(ms,null,null);
+            ToStream(ms, null, null);
             ms.Position = 0;
-            
+
             return ParseFromStream(ms);
         }
 
@@ -197,49 +176,61 @@ namespace LumiSoft.Net.Mail
         /// <param name="includeEmbbedMessage">Specifies if embed RFC822 message child entities are included.</param>
         /// <returns>Returns this message attachments.</returns>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this method is accessed.</exception>
-        public MIME_Entity[] GetAttachments(bool includeInline,bool includeEmbbedMessage = true)
+        public MIME_Entity[] GetAttachments(bool includeInline, bool includeEmbbedMessage = true)
         {
-            if(IsDisposed){
-                throw new ObjectDisposedException(GetType().Name);
-            }
+            if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
             var retVal = new List<MIME_Entity>();
             foreach (var entity in GetAllEntities(includeEmbbedMessage))
             {
-                MIME_h_ContentType contentType= null;
+                MIME_h_ContentType contentType = null;
 
-                try{
+                try
+                {
                     contentType = entity.ContentType;
                 }
-                catch{
+                catch
+                {
                     // ContentType parsing failed.
                 }
+
                 MIME_h_ContentDisposition disposition = null;
-                try{
+                try
+                {
                     disposition = entity.ContentDisposition;
                 }
-                catch{
+                catch
+                {
                     // ContentDisposition parsing failed.
                 }
 
-                if(disposition != null && string.Equals(disposition.DispositionType,"attachment",StringComparison.InvariantCultureIgnoreCase)){
+                if (disposition != null && string.Equals(disposition.DispositionType, "attachment",
+                        StringComparison.InvariantCultureIgnoreCase))
+                {
                     retVal.Add(entity);
                 }
-                else if(!includeInline && disposition != null && string.Equals(disposition.DispositionType,"inline",StringComparison.InvariantCultureIgnoreCase)){
+                else if (!includeInline && disposition != null && string.Equals(disposition.DispositionType, "inline",
+                             StringComparison.InvariantCultureIgnoreCase))
+                {
                 }
-                else if(contentType != null && contentType.Type.ToLower() == "application"){
+                else if (contentType != null && contentType.Type.ToLower() == "application")
+                {
                     retVal.Add(entity);
                 }
-                else if(contentType != null && contentType.Type.ToLower() == "image"){
+                else if (contentType != null && contentType.Type.ToLower() == "image")
+                {
                     retVal.Add(entity);
                 }
-                else if(contentType != null && contentType.Type.ToLower() == "video"){
+                else if (contentType != null && contentType.Type.ToLower() == "video")
+                {
                     retVal.Add(entity);
                 }
-                else if(contentType != null && contentType.Type.ToLower() == "audio"){
+                else if (contentType != null && contentType.Type.ToLower() == "audio")
+                {
                     retVal.Add(entity);
                 }
-                else if(contentType != null && contentType.Type.ToLower() == "message"){
+                else if (contentType != null && contentType.Type.ToLower() == "message")
+                {
                     retVal.Add(entity);
                 }
             }
@@ -263,40 +254,39 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public DateTime Date
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Date");
-                if(h != null){
-                    try{
-                        return MIME_Utils.ParseRfc2822DateTime(((MIME_h_Unstructured)h).Value);
+                if (h != null)
+                    try
+                    {
+                        return MIME_Utils.ParseRfc2822DateTime(((MIME_h_Unstructured) h).Value);
                     }
-                    catch{
+                    catch
+                    {
                         throw new ParseException("Header field 'Date' parsing failed.");
                     }
-                }
 
                 return DateTime.MinValue;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == DateTime.MinValue){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == DateTime.MinValue)
+                {
                     Header.RemoveAll("Date");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Date");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Date",MIME_Utils.DateTimeToRfc2822(value)));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Date",MIME_Utils.DateTimeToRfc2822(value)));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Date", MIME_Utils.DateTimeToRfc2822(value)));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Date", MIME_Utils.DateTimeToRfc2822(value)));
                 }
             }
         }
@@ -310,39 +300,36 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_MailboxList From
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("From");
-                if(h != null){
-                    if(!(h is Mail_h_MailboxList)){
-                        throw new ParseException("Header field 'From' parsing failed.");
-                    }
+                if (h != null)
+                {
+                    if (!(h is Mail_h_MailboxList)) throw new ParseException("Header field 'From' parsing failed.");
 
-                    return ((Mail_h_MailboxList)h).Addresses;
+                    return ((Mail_h_MailboxList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("From");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("From");
-                    if(h == null){
-                        Header.Add(new Mail_h_MailboxList("From",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_MailboxList("From",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_MailboxList("From", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_MailboxList("From", value));
                 }
             }
         }
@@ -355,39 +342,36 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_Mailbox Sender
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Sender");
-                if(h != null){
-                    if(!(h is Mail_h_Mailbox)){
-                        throw new ParseException("Header field 'Sender' parsing failed.");
-                    }
+                if (h != null)
+                {
+                    if (!(h is Mail_h_Mailbox)) throw new ParseException("Header field 'Sender' parsing failed.");
 
-                    return ((Mail_h_Mailbox)h).Address;
+                    return ((Mail_h_Mailbox) h).Address;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Sender");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Sender");
-                    if(h == null){
-                        Header.Add(new Mail_h_Mailbox("Sender",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_Mailbox("Sender",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_Mailbox("Sender", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_Mailbox("Sender", value));
                 }
             }
         }
@@ -401,39 +385,36 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_AddressList ReplyTo
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Reply-To");
-                if(h != null){
-                    if(!(h is Mail_h_AddressList)){
-                        throw new ParseException("Header field 'Reply-To' parsing failed.");
-                    }
+                if (h != null)
+                {
+                    if (!(h is Mail_h_AddressList)) throw new ParseException("Header field 'Reply-To' parsing failed.");
 
-                    return ((Mail_h_AddressList)h).Addresses;
+                    return ((Mail_h_AddressList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Reply-To");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Reply-To");
-                    if(h == null){
-                        Header.Add(new Mail_h_AddressList("Reply-To",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_AddressList("Reply-To",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_AddressList("Reply-To", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_AddressList("Reply-To", value));
                 }
             }
         }
@@ -446,39 +427,36 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_AddressList To
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("To");
-                if(h != null){
-                    if(!(h is Mail_h_AddressList)){
-                        throw new ParseException("Header field 'To' parsing failed.");
-                    }
+                if (h != null)
+                {
+                    if (!(h is Mail_h_AddressList)) throw new ParseException("Header field 'To' parsing failed.");
 
-                    return ((Mail_h_AddressList)h).Addresses;
+                    return ((Mail_h_AddressList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("To");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("To");
-                    if(h == null){
-                        Header.Add(new Mail_h_AddressList("To",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_AddressList("To",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_AddressList("To", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_AddressList("To", value));
                 }
             }
         }
@@ -491,39 +469,36 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_AddressList Cc
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Cc");
-                if(h != null){
-                    if(!(h is Mail_h_AddressList)){
-                        throw new ParseException("Header field 'Cc' parsing failed.");
-                    }
+                if (h != null)
+                {
+                    if (!(h is Mail_h_AddressList)) throw new ParseException("Header field 'Cc' parsing failed.");
 
-                    return ((Mail_h_AddressList)h).Addresses;
+                    return ((Mail_h_AddressList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Cc");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Cc");
-                    if(h == null){
-                        Header.Add(new Mail_h_AddressList("Cc",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_AddressList("Cc",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_AddressList("Cc", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_AddressList("Cc", value));
                 }
             }
         }
@@ -536,39 +511,36 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_AddressList Bcc
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Bcc");
-                if(h != null){
-                    if(!(h is Mail_h_AddressList)){
-                        throw new ParseException("Header field 'Bcc' parsing failed.");
-                    }
+                if (h != null)
+                {
+                    if (!(h is Mail_h_AddressList)) throw new ParseException("Header field 'Bcc' parsing failed.");
 
-                    return ((Mail_h_AddressList)h).Addresses;
+                    return ((Mail_h_AddressList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Bcc");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Bcc");
-                    if(h == null){
-                        Header.Add(new Mail_h_AddressList("Bcc",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_AddressList("Bcc",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_AddressList("Bcc", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_AddressList("Bcc", value));
                 }
             }
         }
@@ -579,37 +551,33 @@ namespace LumiSoft.Net.Mail
         /// <remarks>Contains a single unique message identifier that refers to a particular version of a particular message. 
         /// If the message is resent without changes, the original Message-ID is retained.</remarks>
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
-        public string MessageID 
+        public string MessageID
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Message-ID");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Message-ID");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Message-ID");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Message-ID",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Message-ID",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Message-ID", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Message-ID", value));
                 }
             }
         }
@@ -621,35 +589,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string InReplyTo
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("In-Reply-To");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("In-Reply-To");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("In-Reply-To");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("In-Reply-To",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("In-Reply-To",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("In-Reply-To", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("In-Reply-To", value));
                 }
             }
         }
@@ -663,35 +627,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string References
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("References");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("References");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("References");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("References",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("References",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("References", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("References", value));
                 }
             }
         }
@@ -703,35 +663,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string Subject
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Subject");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Subject");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Subject");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Subject",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Subject",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Subject", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Subject", value));
                 }
             }
         }
@@ -744,35 +700,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string Comments
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Comments");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Comments");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Comments");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Comments",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Comments",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Comments", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Comments", value));
                 }
             }
         }
@@ -784,35 +736,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string Keywords
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Keywords");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Keywords");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Keywords");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Keywords",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Keywords",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Keywords", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Keywords", value));
                 }
             }
         }
@@ -825,40 +773,40 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public DateTime ResentDate
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Resent-Date");
-                if(h != null){
-                    try{
-                        return MIME_Utils.ParseRfc2822DateTime(((MIME_h_Unstructured)h).Value);
+                if (h != null)
+                    try
+                    {
+                        return MIME_Utils.ParseRfc2822DateTime(((MIME_h_Unstructured) h).Value);
                     }
-                    catch{
+                    catch
+                    {
                         throw new ParseException("Header field 'Resent-Date' parsing failed.");
                     }
-                }
 
                 return DateTime.MinValue;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == DateTime.MinValue){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == DateTime.MinValue)
+                {
                     Header.RemoveAll("Resent-Date");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Resent-Date");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Resent-Date",MIME_Utils.DateTimeToRfc2822(value)));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Resent-Date",MIME_Utils.DateTimeToRfc2822(value)));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Resent-Date", MIME_Utils.DateTimeToRfc2822(value)));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Resent-Date",
+                            MIME_Utils.DateTimeToRfc2822(value)));
                 }
             }
         }
@@ -872,39 +820,37 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_MailboxList ResentFrom
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Resent-From");
-                if(h != null){
-                    if(!(h is Mail_h_MailboxList)){
+                if (h != null)
+                {
+                    if (!(h is Mail_h_MailboxList))
                         throw new ParseException("Header field 'Resent-From' parsing failed.");
-                    }
 
-                    return ((Mail_h_MailboxList)h).Addresses;
+                    return ((Mail_h_MailboxList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Resent-From");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Resent-From");
-                    if(h == null){
-                        Header.Add(new Mail_h_MailboxList("Resent-From",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_MailboxList("Resent-From",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_MailboxList("Resent-From", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_MailboxList("Resent-From", value));
                 }
             }
         }
@@ -918,39 +864,37 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_Mailbox ResentSender
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Resent-Sender");
-                if(h != null){
-                    if(!(h is Mail_h_Mailbox)){
+                if (h != null)
+                {
+                    if (!(h is Mail_h_Mailbox))
                         throw new ParseException("Header field 'Resent-Sender' parsing failed.");
-                    }
 
-                    return ((Mail_h_Mailbox)h).Address;
+                    return ((Mail_h_Mailbox) h).Address;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Resent-Sender");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Resent-Sender");
-                    if(h == null){
-                        Header.Add(new Mail_h_Mailbox("Resent-Sender",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_Mailbox("Resent-Sender",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_Mailbox("Resent-Sender", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_Mailbox("Resent-Sender", value));
                 }
             }
         }
@@ -963,39 +907,37 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_AddressList ResentTo
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Resent-To");
-                if(h != null){
-                    if(!(h is Mail_h_AddressList)){
+                if (h != null)
+                {
+                    if (!(h is Mail_h_AddressList))
                         throw new ParseException("Header field 'Resent-To' parsing failed.");
-                    }
 
-                    return ((Mail_h_AddressList)h).Addresses;
+                    return ((Mail_h_AddressList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Resent-To");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Resent-To");
-                    if(h == null){
-                        Header.Add(new Mail_h_AddressList("Resent-To",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_AddressList("Resent-To",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_AddressList("Resent-To", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_AddressList("Resent-To", value));
                 }
             }
         }
@@ -1008,39 +950,37 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_AddressList ResentCc
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Resent-Cc");
-                if(h != null){
-                    if(!(h is Mail_h_AddressList)){
+                if (h != null)
+                {
+                    if (!(h is Mail_h_AddressList))
                         throw new ParseException("Header field 'Resent-Cc' parsing failed.");
-                    }
 
-                    return ((Mail_h_AddressList)h).Addresses;
+                    return ((Mail_h_AddressList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Resent-Cc");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Resent-Cc");
-                    if(h == null){
-                        Header.Add(new Mail_h_AddressList("Resent-Cc",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_AddressList("Resent-Cc",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_AddressList("Resent-Cc", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_AddressList("Resent-Cc", value));
                 }
             }
         }
@@ -1053,39 +993,37 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_AddressList ResentBcc
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Resent-Bcc");
-                if(h != null){
-                    if(!(h is Mail_h_AddressList)){
+                if (h != null)
+                {
+                    if (!(h is Mail_h_AddressList))
                         throw new ParseException("Header field 'Resent-Bcc' parsing failed.");
-                    }
 
-                    return ((Mail_h_AddressList)h).Addresses;
+                    return ((Mail_h_AddressList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Resent-Bcc");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Resent-Bcc");
-                    if(h == null){
-                        Header.Add(new Mail_h_AddressList("Resent-Bcc",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_AddressList("Resent-Bcc",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_AddressList("Resent-Bcc", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_AddressList("Resent-Bcc", value));
                 }
             }
         }
@@ -1097,39 +1035,37 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_t_AddressList ResentReplyTo
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Resent-Reply-To");
-                if(h != null){
-                    if(!(h is Mail_h_AddressList)){
+                if (h != null)
+                {
+                    if (!(h is Mail_h_AddressList))
                         throw new ParseException("Header field 'Resent-Reply-To' parsing failed.");
-                    }
 
-                    return ((Mail_h_AddressList)h).Addresses;
+                    return ((Mail_h_AddressList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Resent-Reply-To");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Resent-Reply-To");
-                    if(h == null){
-                        Header.Add(new Mail_h_AddressList("Resent-Reply-To",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_AddressList("Resent-Reply-To",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_AddressList("Resent-Reply-To", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_AddressList("Resent-Reply-To", value));
                 }
             }
         }
@@ -1140,35 +1076,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string ResentMessageID
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Resent-Message-ID");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Resent-Message-ID");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Resent-Message-ID");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Resent-Message-ID",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Resent-Message-ID",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Resent-Message-ID", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Resent-Message-ID", value));
                 }
             }
         }
@@ -1180,39 +1112,37 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_h_ReturnPath ReturnPath
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Return-Path");
-                if(h != null){
-                    if(!(h is Mail_h_ReturnPath)){
+                if (h != null)
+                {
+                    if (!(h is Mail_h_ReturnPath))
                         throw new ParseException("Header field 'Return-Path' parsing failed.");
-                    }
 
-                    return (Mail_h_ReturnPath)h;
+                    return (Mail_h_ReturnPath) h;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Return-Path");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Return-Path");
-                    if(h == null){
+                    if (h == null)
                         Header.Add(value);
-                    }
-                    else{
+                    else
                         Header.ReplaceFirst(value);
-                    }
                 }
             }
         }
@@ -1225,20 +1155,20 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_h_Received[] Received
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header["Received"];
-                if(h != null){
+                if (h != null)
+                {
                     var retVal = new List<Mail_h_Received>();
-                    for(var i=0;i<h.Length;i++){
-                        if(!(h[i] is Mail_h_Received)){
+                    for (var i = 0; i < h.Length; i++)
+                    {
+                        if (!(h[i] is Mail_h_Received))
                             throw new ParseException("Header field 'Received' parsing failed.");
-                        }
 
-                        retVal.Add((Mail_h_Received)h[i]);
+                        retVal.Add((Mail_h_Received) h[i]);
                     }
 
                     return retVal.ToArray();
@@ -1262,39 +1192,36 @@ namespace LumiSoft.Net.Mail
         {
             // Defined RFC 3798 2.1.
 
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Disposition-Notification-To");
-                if(h != null){
-                    if(!(h is Mail_h_MailboxList)){
-                        throw new ParseException("Header field 'From' parsing failed.");
-                    }
+                if (h != null)
+                {
+                    if (!(h is Mail_h_MailboxList)) throw new ParseException("Header field 'From' parsing failed.");
 
-                    return ((Mail_h_MailboxList)h).Addresses;
+                    return ((Mail_h_MailboxList) h).Addresses;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Disposition-Notification-To");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Disposition-Notification-To");
-                    if(h == null){
-                        Header.Add(new Mail_h_MailboxList("Disposition-Notification-To",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new Mail_h_MailboxList("Disposition-Notification-To",value));
-                    }
+                    if (h == null)
+                        Header.Add(new Mail_h_MailboxList("Disposition-Notification-To", value));
+                    else
+                        Header.ReplaceFirst(new Mail_h_MailboxList("Disposition-Notification-To", value));
                 }
             }
         }
@@ -1306,39 +1233,37 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ParseException">Is raised when header field parsing errors.</exception>
         public Mail_h_DispositionNotificationOptions DispositionNotificationOptions
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Disposition-Notification-Options");
-                if(h != null){
-                    if(!(h is Mail_h_DispositionNotificationOptions)){
+                if (h != null)
+                {
+                    if (!(h is Mail_h_DispositionNotificationOptions))
                         throw new ParseException("Header field 'Disposition-Notification-Options' parsing failed.");
-                    }
 
-                    return (Mail_h_DispositionNotificationOptions)h;
+                    return (Mail_h_DispositionNotificationOptions) h;
                 }
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Disposition-Notification-Options");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Disposition-Notification-Options");
-                    if(h == null){
+                    if (h == null)
                         Header.Add(value);
-                    }
-                    else{
+                    else
                         Header.ReplaceFirst(value);
-                    }
                 }
             }
         }
@@ -1352,35 +1277,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string AcceptLanguage
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Accept-Language");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Accept-Language");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Accept-Language");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Accept-Language",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Accept-Language",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Accept-Language", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Accept-Language", value));
                 }
             }
         }
@@ -1393,35 +1314,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string OriginalMessageID
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Original-Message-ID");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Original-Message-ID");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Original-Message-ID");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Original-Message-ID",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Original-Message-ID",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Original-Message-ID", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Original-Message-ID", value));
                 }
             }
         }
@@ -1433,40 +1350,36 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string PICSLabel
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("PICS-Label");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("PICS-LabelD");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("PICS-Label");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("PICS-Label",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("PICS-Label",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("PICS-Label", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("PICS-Label", value));
                 }
             }
         }
 
-        
+
         // Not widely used
         // public string Encoding
 
@@ -1477,35 +1390,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string ListArchive
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("List-Archive");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("List-Archive");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("List-Archive");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("List-Archive",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Archive",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("List-Archive", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Archive", value));
                 }
             }
         }
@@ -1517,35 +1426,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string ListHelp
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("List-Help");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("List-Help");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("List-Help");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("List-Help",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Help",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("List-Help", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Help", value));
                 }
             }
         }
@@ -1557,35 +1462,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string ListID
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("List-ID");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("List-ID");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("List-ID");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("List-ID",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("List-ID",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("List-ID", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("List-ID", value));
                 }
             }
         }
@@ -1597,35 +1498,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string ListOwner
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("List-Owner");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("List-Owner");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("List-Owner");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("List-Owner",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Owner",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("List-Owner", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Owner", value));
                 }
             }
         }
@@ -1637,35 +1534,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string ListPost
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("List-Post");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("List-Post");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("List-Post");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("List-Post",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Post",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("List-Post", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Post", value));
                 }
             }
         }
@@ -1677,35 +1570,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string ListSubscribe
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("List-Subscribe");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("List-Subscribe");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("List-Subscribe");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("List-Subscribe",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Subscribe",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("List-Subscribe", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Subscribe", value));
                 }
             }
         }
@@ -1717,35 +1606,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string ListUnsubscribe
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("List-Unsubscribe");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("List-Unsubscribe");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("List-Unsubscribe");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("List-Unsubscribe",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Unsubscribe",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("List-Unsubscribe", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("List-Unsubscribe", value));
                 }
             }
         }
@@ -1758,35 +1643,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string MessageContext
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Message-Context");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Message-Context");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Message-Context");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Message-Context",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Message-Context",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Message-Context", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Message-Context", value));
                 }
             }
         }
@@ -1826,35 +1707,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string Importance
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Importance");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Importance");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Importance");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Importance",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Importance",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Importance", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Importance", value));
                 }
             }
         }
@@ -1866,35 +1743,31 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string Priority
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 var h = Header.GetFirst("Priority");
-                if(h != null){
-                    return ((MIME_h_Unstructured)h).Value;
-                }
+                if (h != null) return ((MIME_h_Unstructured) h).Value;
 
                 return null;
             }
 
-            set{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
-                
-                if(value == null){
+            set
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
+
+                if (value == null)
+                {
                     Header.RemoveAll("Priority");
                 }
-                else{
+                else
+                {
                     var h = Header.GetFirst("Priority");
-                    if(h == null){
-                        Header.Add(new MIME_h_Unstructured("Priority",value));
-                    }
-                    else{
-                        Header.ReplaceFirst(new MIME_h_Unstructured("Priority",value));
-                    }
+                    if (h == null)
+                        Header.Add(new MIME_h_Unstructured("Priority", value));
+                    else
+                        Header.ReplaceFirst(new MIME_h_Unstructured("Priority", value));
                 }
             }
         }
@@ -1933,10 +1806,9 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public MIME_Entity[] Attachments
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
                 return GetAttachments(false);
             }
@@ -1948,18 +1820,15 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string BodyText
         {
-            get{
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
-                foreach(var e in GetAllEntities(false)){
-                    if(e.Body.MediaType.ToLower() == MIME_MediaTypes.Text.plain){
-                        return ((MIME_b_Text)e.Body).Text;
-                    }
-                }
+                foreach (var e in GetAllEntities(false))
+                    if (e.Body.MediaType.ToLower() == MIME_MediaTypes.Text.plain)
+                        return ((MIME_b_Text) e.Body).Text;
 
-                return null; 
+                return null;
             }
         }
 
@@ -1969,22 +1838,18 @@ namespace LumiSoft.Net.Mail
         /// <exception cref="ObjectDisposedException">Is raised when this object is disposed and this property is accessed.</exception>
         public string BodyHtmlText
         {
-            get{ 
-                if(IsDisposed){
-                    throw new ObjectDisposedException(GetType().Name);
-                }
+            get
+            {
+                if (IsDisposed) throw new ObjectDisposedException(GetType().Name);
 
-                foreach(var e in GetAllEntities(false)){
-                    if(e.Body.MediaType.ToLower() == MIME_MediaTypes.Text.html){
-                        return ((MIME_b_Text)e.Body).Text;
-                    }
-                }
+                foreach (var e in GetAllEntities(false))
+                    if (e.Body.MediaType.ToLower() == MIME_MediaTypes.Text.html)
+                        return ((MIME_b_Text) e.Body).Text;
 
-                return null; 
+                return null;
             }
         }
 
         #endregion
-
     }
 }

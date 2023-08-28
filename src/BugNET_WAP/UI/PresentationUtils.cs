@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using BugNET.Common;
-using System.Diagnostics;
-using System.Security.Cryptography;
-using System.Text;
 
-namespace BugNET.UserInterfaceLayer
+namespace BugNET.UI
 {
     public static class PresentationUtils
     {
@@ -18,28 +19,24 @@ namespace BugNET.UserInterfaceLayer
         /// <param name="page">The page.</param>
         public static void SetPagerButtonStates(GridView gridView, GridViewRow gvPagerRow, Page page)
         {
+            var pageIndex = gridView.PageIndex;
+            var pageCount = gridView.PageCount;
 
-            int pageIndex = gridView.PageIndex;
-            int pageCount = gridView.PageCount;
+            var btnFirst = (ImageButton) gvPagerRow.FindControl("btnFirst");
+            var btnPrevious = (ImageButton) gvPagerRow.FindControl("btnPrevious");
+            var btnNext = (ImageButton) gvPagerRow.FindControl("btnNext");
+            var btnLast = (ImageButton) gvPagerRow.FindControl("btnLast");
 
-            ImageButton btnFirst = (ImageButton)gvPagerRow.FindControl("btnFirst");
-            ImageButton btnPrevious = (ImageButton)gvPagerRow.FindControl("btnPrevious");
-            ImageButton btnNext = (ImageButton)gvPagerRow.FindControl("btnNext");
-            ImageButton btnLast = (ImageButton)gvPagerRow.FindControl("btnLast");
+            btnFirst.Enabled = btnPrevious.Enabled = pageIndex != 0;
+            btnNext.Enabled = btnLast.Enabled = pageIndex < pageCount - 1;
 
-            btnFirst.Enabled = btnPrevious.Enabled = (pageIndex != 0);
-            btnNext.Enabled = btnLast.Enabled = (pageIndex < (pageCount - 1));
-
-            DropDownList ddlPageSelector = (DropDownList)gvPagerRow.FindControl("ddlPages");
+            var ddlPageSelector = (DropDownList) gvPagerRow.FindControl("ddlPages");
             ddlPageSelector.Items.Clear();
-            for (int i = 1; i <= gridView.PageCount; i++)
-            {
-                ddlPageSelector.Items.Add(i.ToString());
-            }
+            for (var i = 1; i <= gridView.PageCount; i++) ddlPageSelector.Items.Add(i.ToString());
 
             ddlPageSelector.SelectedIndex = pageIndex;
 
-            Label lblPageCount = (Label)gvPagerRow.FindControl("lblPageCount");
+            var lblPageCount = (Label) gvPagerRow.FindControl("lblPageCount");
             lblPageCount.Text = pageCount.ToString();
 
             //ddlPageSelector.SelectedIndexChanged += delegate
@@ -47,7 +44,6 @@ namespace BugNET.UserInterfaceLayer
             //    gridView.PageIndex = ddlPageSelector.SelectedIndex;
             //    gridView.DataBind();
             //};
-
         }
 
         /// <summary>
@@ -58,7 +54,8 @@ namespace BugNET.UserInterfaceLayer
         /// <param name="columnStartIndex"> </param>
         /// <param name="sortField">The sort field.</param>
         /// <param name="sortAscending">if set to <c>true</c> [sort ascending].</param>
-        public static void SetSortImageStates(GridView gridView, GridViewRow row,int columnStartIndex, string sortField, bool sortAscending)
+        public static void SetSortImageStates(GridView gridView, GridViewRow row, int columnStartIndex,
+            string sortField, bool sortAscending)
         {
             for (var i = columnStartIndex; i < row.Cells.Count; i++)
             {
@@ -72,18 +69,16 @@ namespace BugNET.UserInterfaceLayer
                 // initialize a new image
                 var img = new Image
                 {
-                    ImageUrl = string.Format("~/images/{0}.png", (sortAscending ? "bullet_arrow_up" : "bullet_arrow_down")),
+                    ImageUrl = $"~/images/{(sortAscending ? "bullet_arrow_up" : "bullet_arrow_down")}.png",
                     CssClass = "icon"
                 };
 
                 // setting the dynamically URL of the image
                 // checking if the header link is the user's choice
                 if (sortField == lnk.CommandArgument)
-                {
                     // adding a space and the image to the header link
                     //tc.Controls.Add(new LiteralControl(" "));
                     tc.Controls.Add(img);
-                }
             }
         }
 
@@ -93,18 +88,13 @@ namespace BugNET.UserInterfaceLayer
         /// <param name="listBox">The list box.</param>
         /// <param name="returnAll">Returns all the items regardless if selected or not</param>
         /// <returns></returns>
-        public static List<int> GetSelectedItemsIntegerList(ListControl listBox, bool returnAll = false)
+        public static IEnumerable<int> GetSelectedItemsIntegerList(ListControl listBox, bool returnAll = false)
         {
-            var items = new List<int>();
-
-            foreach (ListItem item in listBox.Items)
-            {
-                if (!item.Value.Is<int>()) continue;
-
-                if (returnAll || item.Selected)
-                    items.Add(int.Parse(item.Value));
-            }
-            return items;
+            return (
+                from ListItem item in listBox.Items
+                where item.Value.Is<int>()
+                where returnAll || item.Selected
+                select int.Parse(item.Value)).ToList();
         }
 
         /// <summary>
@@ -124,13 +114,10 @@ namespace BugNET.UserInterfaceLayer
             Debug.Assert(hashBytes.Length == 16);
 
             var hash = new StringBuilder();
-            foreach (var b in hashBytes)
-            {
-                hash.Append(b.ToString("x2"));
-            }
+            foreach (var b in hashBytes) hash.Append(b.ToString("x2"));
 
             // build Gravatar Image URL
-            var imageUrl = string.Format("https://www.gravatar.com/avatar/{0}?s={1}&d=identicon&r=g", hash, imgSize);
+            var imageUrl = $"https://www.gravatar.com/avatar/{hash}?s={imgSize}&d=identicon&r=g";
 
             return imageUrl;
         }

@@ -33,17 +33,11 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>defaultContentType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner, MIME_h_ContentType defaultContentType, SmartStream stream)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
-            if(defaultContentType == null){
-                throw new ArgumentNullException(nameof(defaultContentType));
-            }
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (defaultContentType == null) throw new ArgumentNullException(nameof(defaultContentType));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             var retVal = new MIME_b_MessageRfc822();
             retVal.m_pMessage = Mail_Message.ParseFromStream(stream);
@@ -65,20 +59,19 @@ namespace LumiSoft.Net.MIME
         /// <param name="headerReencode">If true always specified encoding is used for header. If false and header field value not modified, 
         /// original encoding is kept.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b> is null reference.</exception>
-        protected internal override void ToStream(Stream stream,MIME_Encoding_EncodedWord headerWordEncoder,Encoding headerParmetersCharset,bool headerReencode)
+        protected internal override void ToStream(Stream stream, MIME_Encoding_EncodedWord headerWordEncoder,
+            Encoding headerParmetersCharset, bool headerReencode)
         {
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
-            m_pMessage.ToStream(stream,headerWordEncoder,headerParmetersCharset,headerReencode);
+            m_pMessage.ToStream(stream, headerWordEncoder, headerParmetersCharset, headerReencode);
         }
 
         #endregion
 
 
         #region Properties implementation
-        
+
         /// <summary>
         /// Gets if body has modified.
         /// </summary>
@@ -93,18 +86,15 @@ namespace LumiSoft.Net.MIME
         {
             get => m_pMessage;
 
-            set{
-                if(value == null){
-                    throw new ArgumentNullException(nameof(value));
-                }
-                if(Entity == null){
-                    throw new InvalidOperationException("Body must be bounded to some entity first.");
-                }
+            set
+            {
+                if (value == null) throw new ArgumentNullException(nameof(value));
+                if (Entity == null) throw new InvalidOperationException("Body must be bounded to some entity first.");
 
                 // Owner entity has no content-type or has different content-type, just add/overwrite it.
-                if(Entity.ContentType == null || !string.Equals(Entity.ContentType.TypeWithSubtype,MediaType,StringComparison.InvariantCultureIgnoreCase)){
+                if (Entity.ContentType == null || !string.Equals(Entity.ContentType.TypeWithSubtype, MediaType,
+                        StringComparison.InvariantCultureIgnoreCase))
                     Entity.ContentType = new MIME_h_ContentType(MediaType);
-                }
 
                 m_pMessage = value;
             }

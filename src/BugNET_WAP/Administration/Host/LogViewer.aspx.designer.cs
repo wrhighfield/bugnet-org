@@ -7,11 +7,13 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BugNET.Administration.Host {
-    
-    
-    public partial class LogViewer {
-        
+namespace BugNET.Administration.Host
+{
+
+
+    public partial class LogViewer
+    {
+
         /// <summary>
         /// LogViewerTitle control.
         /// </summary>
@@ -20,7 +22,7 @@ namespace BugNET.Administration.Host {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal LogViewerTitle;
-        
+
         /// <summary>
         /// Label1 control.
         /// </summary>
@@ -29,7 +31,7 @@ namespace BugNET.Administration.Host {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label Label1;
-        
+
         /// <summary>
         /// FilterDropDown control.
         /// </summary>
@@ -38,7 +40,7 @@ namespace BugNET.Administration.Host {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList FilterDropDown;
-        
+
         /// <summary>
         /// UpdatePanel2 control.
         /// </summary>
@@ -47,7 +49,7 @@ namespace BugNET.Administration.Host {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.UpdatePanel UpdatePanel2;
-        
+
         /// <summary>
         /// gvLog control.
         /// </summary>
@@ -55,8 +57,62 @@ namespace BugNET.Administration.Host {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::BugNET.UserInterfaceLayer.WebControls.GridView gvLog;
-        
+        protected global::BugNET.UI.WebControls.GridView gvLog;
+
+        /// <summary>
+        /// imgLevel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Image imgLevel;
+
+        /// <summary>
+        /// LevelLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label LevelLabel;
+
+        /// <summary>
+        /// LoggerLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label LoggerLabel;
+
+        /// <summary>
+        /// MessageLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label MessageLabel;
+
+        /// <summary>
+        /// ExceptionLabel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label ExceptionLabel;
+
+        /// <summary>
+        /// NoEntries control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal NoEntries;
+
         /// <summary>
         /// pager control.
         /// </summary>
@@ -65,7 +121,7 @@ namespace BugNET.Administration.Host {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DataPager pager;
-        
+
         /// <summary>
         /// save control.
         /// </summary>
@@ -74,7 +130,7 @@ namespace BugNET.Administration.Host {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.ImageButton save;
-        
+
         /// <summary>
         /// cmdClearLog control.
         /// </summary>

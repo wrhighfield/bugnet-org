@@ -22,17 +22,19 @@ namespace BugNET.SubversionHooks
         /// <param name="revision">The revision.</param>
         public void UpdateIssueTrackerFromRevision(string repository, string revision)
         {
-            var svnExe = string.IsNullOrEmpty(Settings.Default.SubversionBinDirectory) ? 
-                "svnlook" : Path.Combine(Settings.Default.SubversionBinDirectory, "svnlook.exe");
+            var svnExe = string.IsNullOrEmpty(Settings.Default.SubversionBinDirectory)
+                ? "svnlook"
+                : Path.Combine(Settings.Default.SubversionBinDirectory, "svnlook.exe");
 
             var issueIds = new List<int>();
             logger.Info("Running svnlook...");
             var infoOutput = CommandExecutor.RunCommand(svnExe, $"info -r {revision} \"{repository}\"");
-            
-            logger.DebugFormat("svnlook output: {0}", infoOutput);        
-            logger.DebugFormat("Looking for search pattern in revision:{0} and repository:{1}...", revision, repository);
 
-            var lines = infoOutput.Split(new[] { '\n' }, 5);
+            logger.DebugFormat("svnlook output: {0}", infoOutput);
+            logger.DebugFormat("Looking for search pattern in revision:{0} and repository:{1}...", revision,
+                repository);
+
+            var lines = infoOutput.Split(new[] {'\n'}, 5);
             var author = lines[1];
             var dateTime = lines[2];
             var logMessage = lines[4];
@@ -41,23 +43,23 @@ namespace BugNET.SubversionHooks
             var regexObj = new Regex(Settings.Default.IssueIdRegEx);
             var match = regexObj.Match(logMessage);
 
-            logger.InfoFormat("Found {0} matches...",match.Groups.Count);
+            logger.InfoFormat("Found {0} matches...", match.Groups.Count);
 
             while (match.Success)
-            {
                 try
                 {
-                    issueIds.Add(int.Parse(match.Groups[1].Value.Substring(match.Groups[1].Value.IndexOf("-", StringComparison.Ordinal) + 1)));
+                    issueIds.Add(int.Parse(match.Groups[1].Value
+                        .Substring(match.Groups[1].Value.IndexOf("-", StringComparison.Ordinal) + 1)));
                 }
                 catch (Exception ex)
                 {
-                    logger.ErrorFormat("An error occurred parsing the issue id: {0} \n\n {1}", ex.Message, ex.StackTrace);
+                    logger.ErrorFormat("An error occurred parsing the issue id: {0} \n\n {1}", ex.Message,
+                        ex.StackTrace);
                 }
                 finally
                 {
                     match = match.NextMatch();
                 }
-            }
 
             if (issueIds.Count <= 0) return;
             {
@@ -96,29 +98,30 @@ namespace BugNET.SubversionHooks
                         logger.Info("Logging in to BugNET webservices...");
                         var result = services.LogIn(Settings.Default.BugNetUsername, Settings.Default.BugNetPassword);
                         if (result)
-                        {
                             logger.Info("Login successful...");
-                        }
                         else
-                        {
-                            throw new UnauthorizedAccessException("Unauthorized access exception, please check the user name and password settings.");
-                        }
+                            throw new UnauthorizedAccessException(
+                                "Unauthorized access exception, please check the user name and password settings.");
                     }
 
                     foreach (var id in issueIds)
-                    {
                         try
                         {
                             logger.Info("Creating new issue revision...");
-                            logger.DebugFormat("\n Revision:{0} Id:{1} Repository:{2} Author:{3} DateTime:{4} LogMessage:{5}", revision, id, GetRepositoryName(repository), author, dateTime, Regex.Replace(logMessage, Settings.Default.IssueIdRegEx, "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>"));
+                            logger.DebugFormat(
+                                "\n Revision:{0} Id:{1} Repository:{2} Author:{3} DateTime:{4} LogMessage:{5}",
+                                revision, id, GetRepositoryName(repository), author, dateTime,
+                                Regex.Replace(logMessage, Settings.Default.IssueIdRegEx,
+                                    "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>"));
 
                             var success = services.CreateNewIssueRevision(
-                                int.Parse(revision), 
-                                id, 
-                                GetRepositoryName(repository), 
-                                author, 
-                                dateTime, 
-                                Regex.Replace(logMessage, Settings.Default.IssueIdRegEx, "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>"),
+                                int.Parse(revision),
+                                id,
+                                GetRepositoryName(repository),
+                                author,
+                                dateTime,
+                                Regex.Replace(logMessage, Settings.Default.IssueIdRegEx,
+                                    "<a href=\"IssueDetail.aspx?id=$2#top\"><b>$1</b></a>"),
                                 revision,
                                 "");
 
@@ -127,20 +130,20 @@ namespace BugNET.SubversionHooks
                             else
                                 logger.Warn("Adding new issue revision failed!");
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
-                            logger.ErrorFormat("An error occurred adding a new issue revision to BugNET: {0} \n\n {1}", ex.Message, ex.StackTrace);
+                            logger.ErrorFormat("An error occurred adding a new issue revision to BugNET: {0} \n\n {1}",
+                                ex.Message, ex.StackTrace);
                         }
-
-                    }
                 }
-                catch(UnauthorizedAccessException ex)
+                catch (UnauthorizedAccessException ex)
                 {
                     logger.ErrorFormat("{0} \n\n {1}", ex.Message, ex.StackTrace);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    logger.FatalFormat("An error occurred contacting the BugNET web services: {0} \n\n {1}", ex.Message, ex.StackTrace);
+                    logger.FatalFormat("An error occurred contacting the BugNET web services: {0} \n\n {1}", ex.Message,
+                        ex.StackTrace);
                     Environment.Exit(1);
                 }
             }

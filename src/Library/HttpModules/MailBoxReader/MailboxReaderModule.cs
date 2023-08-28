@@ -9,55 +9,52 @@ using BugNET.MailboxReader;
 using log4net;
 
 namespace BugNET.HttpModules
-{    
+{
     /// <summary>
     /// 
     /// </summary>
     public class MailboxReaderModule : IHttpModule
     {
-        static readonly object _locker = new object();
+        private static readonly object _locker = new object();
 
-        static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        
-        static Timer _timer;
+        private static readonly ILog Log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
+        private static Timer _timer;
 
         /// <summary>
         /// The smallest interval which is reasonable and will not cause
         /// system problems.
         /// Value is 10 seconds
         /// </summary>
-        const int MIN_INTERVAL = 10000;
+        private const int MIN_INTERVAL = 10000;
 
-        const int CNST_DEFAULT_INTERVAL = 120000;
+        private const int CNST_DEFAULT_INTERVAL = 120000;
 
-        static int _interval;
+        private static int _interval;
 
         // the reader is polling the POP3 mailbox
-        static bool _isMailboxReaderProcessing;
+        private static bool _isMailboxReaderProcessing;
 
         // the timer is created and active
-        static bool _timerIsActive;
+        private static bool _timerIsActive;
 
         // the number of concurrent errors thrown
-        static int _readerErrors;
+        private static int _readerErrors;
 
         // has the number of concurrent errors hit the max and we have disabled the timer
-        static bool _timerIsDisabled;
+        private static bool _timerIsDisabled;
 
         /// <summary>
         /// The amount of consecutive reader errors in a give time frame
         /// before the reader is disabled.        
         /// </summary>
-        const int CNST_MAX_READER_ERRORS = 10;
+        private const int CNST_MAX_READER_ERRORS = 10;
 
         /// <summary>
         /// Gets the name of the module.
         /// </summary>
         /// <value>The name of the module.</value>
-        public String ModuleName
-        {
-            get { return "MailboxReaderModule"; }
-        }
+        public string ModuleName => "MailboxReaderModule";
 
         #region IHttpModule Members
 
@@ -115,7 +112,9 @@ namespace BugNET.HttpModules
             if (_interval < MIN_INTERVAL)
             {
                 _interval = MIN_INTERVAL;
-                Log.Warn(string.Format("MailboxReaderModule: [Pop3Interval] was too small. Using minimum threshold of {0} milliseconds", MIN_INTERVAL));
+                Log.Warn(string.Format(
+                    "MailboxReaderModule: [Pop3Interval] was too small. Using minimum threshold of {0} milliseconds",
+                    MIN_INTERVAL));
             }
             else
             {
@@ -124,17 +123,17 @@ namespace BugNET.HttpModules
 
             // Clear the number of consecutive errors we may have only when
             // creating the timer.
-            lock (_locker) _readerErrors = 0;
+            lock (_locker)
+            {
+                _readerErrors = 0;
+            }
 
             var uploadPath = HostSettingManager.Get(HostSettingNames.AttachmentUploadPath);
-            if(uploadPath.StartsWith("~"))
-            {
-                uploadPath = application.Context.Server.MapPath(uploadPath);
-            }
+            if (uploadPath.StartsWith("~")) uploadPath = application.Context.Server.MapPath(uploadPath);
 
             var state = new MailboxReaderThreadState
             {
-                UploadsFolderPath = uploadPath,
+                UploadsFolderPath = uploadPath
             };
 
             // create the timer instance
@@ -144,7 +143,10 @@ namespace BugNET.HttpModules
             _timer = new Timer(ScheduledWorkCallback, state, 15, _interval);
 
             // set the timer to active
-            lock (_locker) _timerIsActive = true;
+            lock (_locker)
+            {
+                _timerIsActive = true;
+            }
         }
 
         /// <summary>
@@ -156,38 +158,50 @@ namespace BugNET.HttpModules
             var state = sender as MailboxReaderThreadState;
 
             // if the timer is disabled the exit out
-            lock (_locker) if (_timerIsDisabled) return;
+            lock (_locker)
+            {
+                if (_timerIsDisabled) return;
+            }
 
             // are we currently processing the mailbox?
             // this is here to stop the mailbox processing when the callback is called again and we have not finished
             // processing the previous poll
-            lock (_locker) if (_isMailboxReaderProcessing) return; 
+            lock (_locker)
+            {
+                if (_isMailboxReaderProcessing) return;
+            }
 
             try
             {
                 if (_timer == null)
                 {
                     if (_readerErrors.Equals(0))
-                    {
                         Log.Error("MailboxReaderModule: First instance of mailbox reader timer is null");
-                    }
 
                     throw new Exception("MailboxReaderModule: Mailbox reader timer is null");
                 }
 
                 // set the flag we are processing
-                lock (_locker) _isMailboxReaderProcessing = true;
+                lock (_locker)
+                {
+                    _isMailboxReaderProcessing = true;
+                }
 
                 //stop the timer
-                lock (_locker) _timer.Change(Timeout.Infinite, Timeout.Infinite);
+                lock (_locker)
+                {
+                    _timer.Change(Timeout.Infinite, Timeout.Infinite);
+                }
 
                 var assemblyUri = new Uri(Assembly.GetExecutingAssembly().CodeBase);
                 var path = Path.GetDirectoryName(assemblyUri.LocalPath).Replace("\\bin", "");
 
                 var hostSettings = HostSettingManager.LoadHostSettings();
 
-                var emailFormat = HostSettingManager.Get(hostSettings, HostSettingNames.SMTPEMailFormat, EmailFormatType.Text);
-                var pop3TemplatePath = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3BodyTemplate, "templates/NewMailboxIssue.xslt");
+                var emailFormat =
+                    HostSettingManager.Get(hostSettings, HostSettingNames.SMTPEMailFormat, EmailFormatType.Text);
+                var pop3TemplatePath = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3BodyTemplate,
+                    "templates/NewMailboxIssue.xslt");
 
                 var mailBoxConfig = new MailboxReaderConfig
                 {
@@ -196,20 +210,25 @@ namespace BugNET.HttpModules
                     UseSsl = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3UseSSL, false),
                     Username = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3Username, string.Empty),
                     Password = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3Password, string.Empty),
-                    ProcessInlineAttachedPictures = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3InlineAttachedPictures, false),
-                    DeleteAllMessages = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3DeleteAllMessages, true),
-                    ReportingUserName = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3ReportingUsername, string.Empty),
-                    ProcessAttachments = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3ProcessAttachments, true),
-                    UploadsFolderPath = (state == null) ? Path.Combine(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath), path) : state.UploadsFolderPath,
-                    AllowedFileExtensions = HostSettingManager.Get(hostSettings, HostSettingNames.AllowedFileExtensions, "."),
+                    ProcessInlineAttachedPictures = HostSettingManager.Get(hostSettings,
+                        HostSettingNames.Pop3InlineAttachedPictures, false),
+                    DeleteAllMessages =
+                        HostSettingManager.Get(hostSettings, HostSettingNames.Pop3DeleteAllMessages, true),
+                    ReportingUserName = HostSettingManager.Get(hostSettings, HostSettingNames.Pop3ReportingUsername,
+                        string.Empty),
+                    ProcessAttachments =
+                        HostSettingManager.Get(hostSettings, HostSettingNames.Pop3ProcessAttachments, true),
+                    UploadsFolderPath = state == null
+                        ? Path.Combine(HostSettingManager.Get(HostSettingNames.AttachmentUploadPath), path)
+                        : state.UploadsFolderPath,
+                    AllowedFileExtensions =
+                        HostSettingManager.Get(hostSettings, HostSettingNames.AllowedFileExtensions, "."),
                     FileSizeLimit = HostSettingManager.Get(hostSettings, HostSettingNames.FileSizeLimit, 0),
                     EmailFormatType = emailFormat
                 };
 
                 if (File.Exists(Path.Combine(path, pop3TemplatePath)))
-                {
-                    mailBoxConfig.BodyTemplate = File.ReadAllText(Path.Combine(path, pop3TemplatePath));   
-                }
+                    mailBoxConfig.BodyTemplate = File.ReadAllText(Path.Combine(path, pop3TemplatePath));
 
                 var mailboxReader = new MailboxReader.MailboxReader(mailBoxConfig);
 
@@ -223,49 +242,60 @@ namespace BugNET.HttpModules
                 {
                     case ResultStatuses.None:
                     case ResultStatuses.Success:
-                        lock (_locker) _readerErrors = 0;
+                        lock (_locker)
+                        {
+                            _readerErrors = 0;
+                        }
+
                         break;
                     case ResultStatuses.Failed:
-                        foreach (var processingMessage in result.ProcessingMessages)
-                        {
-                            Log.Warn(processingMessage);
-                        }
+                        foreach (var processingMessage in result.ProcessingMessages) Log.Warn(processingMessage);
                         break;
                     case ResultStatuses.FailedWithException:
                         Log.Error(result.LastException);
-                        lock (_locker) _readerErrors++;
+                        lock (_locker)
+                        {
+                            _readerErrors++;
+                        }
+
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(ex);
 
-                lock (_locker) 
+                lock (_locker)
+                {
                     _readerErrors++;
+                }
             }
             finally
             {
                 // set the flag back so we are not processing
-                _isMailboxReaderProcessing = false; 
+                _isMailboxReaderProcessing = false;
             }
 
             lock (_locker)
             {
                 if (_readerErrors < CNST_MAX_READER_ERRORS)
-                {
                     if (_timer != null)
                     {
                         // start the timer up again
-                        lock (_locker) _timer.Change(_interval, _interval);
-                        return;   
+                        lock (_locker)
+                        {
+                            _timer.Change(_interval, _interval);
+                        }
+
+                        return;
                     }
-                }                
             }
 
-            Log.Error(string.Format("MailboxReaderModule: The Mailbox reader has thrown [{0}] consecutive errors and will be disabled", _readerErrors));
+            Log.Error(string.Format(
+                "MailboxReaderModule: The Mailbox reader has thrown [{0}] consecutive errors and will be disabled",
+                _readerErrors));
 
             _timerIsDisabled = true;
 

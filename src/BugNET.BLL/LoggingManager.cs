@@ -37,7 +37,7 @@ namespace BugNET.BLL
             if (!(LogManager.GetRepository() is Hierarchy hierarchy)) return;
             //get ADONetAppender
             var adoAppender =
-                (AdoNetAppender)hierarchy.Root.GetAppender("AdoNetAppender");
+                (AdoNetAppender) hierarchy.Root.GetAppender("AdoNetAppender");
 
             if (adoAppender == null) return;
             adoAppender.ConnectionString = ConfigurationManager.ConnectionStrings["BugNET"].ConnectionString;
@@ -50,11 +50,11 @@ namespace BugNET.BLL
         public static void ConfigureEmailLoggingAppender()
         {
             var hierarchy =
-            (Hierarchy)LogManager.GetRepository();
+                (Hierarchy) LogManager.GetRepository();
 
             if (hierarchy == null) return;
 
-            var appender = (SmtpAppender)hierarchy.Root.GetAppender("SmtpAppender") ?? new SmtpAppender();
+            var appender = (SmtpAppender) hierarchy.Root.GetAppender("SmtpAppender") ?? new SmtpAppender();
 
             appender.Name = "SmtpAppender";
             appender.From = HostSettingManager.Get(HostSettingNames.HostEmailAddress, string.Empty);
@@ -81,7 +81,8 @@ namespace BugNET.BLL
 
             //create pattern layout
             var patternLayout = new
-                log4net.Layout.PatternLayout("%newline%date [%thread] %-5level %logger [%property{NDC}] - %message%newline%newline%newline");
+                log4net.Layout.PatternLayout(
+                    "%newline%date [%thread] %-5level %logger [%property{NDC}] - %message%newline%newline%newline");
 
             patternLayout.ActivateOptions();
             appender.Layout = patternLayout;
@@ -99,7 +100,7 @@ namespace BugNET.BLL
             if (!(LogManager.GetRepository() is Hierarchy hierarchy)) return;
 
             var appender =
-                (SmtpAppender)hierarchy.Root.GetAppender("SmtpAppender");
+                (SmtpAppender) hierarchy.Root.GetAppender("SmtpAppender");
 
             if (appender != null)
                 hierarchy.Root.RemoveAppender("SmtpAppender");
@@ -111,6 +112,8 @@ namespace BugNET.BLL
         /// <param name="key">The key.</param>
         /// <returns></returns>
         public static string GetErrorMessageResource(string key)
-            => HttpContext.GetGlobalResourceObject("Exceptions", key) as string;
+        {
+            return HttpContext.GetGlobalResourceObject("Exceptions", key) as string;
+        }
     }
 }

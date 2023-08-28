@@ -34,11 +34,13 @@ namespace BugNET.BLL.Notifications
             {
                 var at = HostSettingManager.HostEmailAddress.IndexOf("@", StringComparison.Ordinal);
                 var issueCode = $"+iid-{relatedIssueId.Value}";
-                message.From = new MailAddress(HostSettingManager.HostEmailAddress.Insert(at, issueCode), HostSettingManager.ApplicationTitle);
+                message.From = new MailAddress(HostSettingManager.HostEmailAddress.Insert(at, issueCode),
+                    HostSettingManager.ApplicationTitle);
             }
             else
             {
-                message.From = new MailAddress(HostSettingManager.HostEmailAddress, HostSettingManager.ApplicationTitle);
+                message.From = new MailAddress(HostSettingManager.HostEmailAddress,
+                    HostSettingManager.ApplicationTitle);
             }
 
 
@@ -59,7 +61,7 @@ namespace BugNET.BLL.Notifications
                 smtpDomain = HostSettingManager.Get(HostSettingNames.SMTPDomain, string.Empty);
             }
 
-            var client = new SmtpClient { Host = smtpServer, Port = smtpPort, EnableSsl = smtpUseSsl };
+            var client = new SmtpClient {Host = smtpServer, Port = smtpPort, EnableSsl = smtpUseSsl};
 
             if (smtpAuthentication)
             {
@@ -70,10 +72,8 @@ namespace BugNET.BLL.Notifications
             client.SendCompleted += (s, e) =>
             {
                 if (e.Error != null)
-                {
                     // log the error message
                     Log.Error(e.Error);
-                }
 
                 client.Dispose();
                 message.Dispose();
@@ -85,12 +85,11 @@ namespace BugNET.BLL.Notifications
                 {
                     client.SendAsync(message, null);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Log.Error(e);
                 }
             });
-
         }
     }
 }

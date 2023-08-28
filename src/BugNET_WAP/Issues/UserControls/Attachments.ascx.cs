@@ -7,16 +7,16 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
 using log4net;
 using System.Web.Configuration;
+using BugNET.UI;
 
 namespace BugNET.Issues.UserControls
 {
     /// <summary>
     /// 
     /// </summary>
-    public partial class Attachments : UserControl, IIssueTab
+    public partial class Attachments : BugNetUserControl, IIssueTab
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(Attachments));
 
@@ -27,8 +27,8 @@ namespace BugNET.Issues.UserControls
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
         protected void Page_Load(object sender, EventArgs e)
         {
-            var sman = ScriptManager.GetCurrent(Page);
-            if (sman != null) sman.RegisterPostBackControl(UploadButton);
+            var scriptManager = ScriptManager.GetCurrent(Page);
+            scriptManager?.RegisterPostBackControl(UploadButton);
         }
 
         #region IIssueTab Members
@@ -39,8 +39,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The issue id.</value>
         public int IssueId
         {
-            get { return ViewState.Get("IssueId", 0); }
-            set { ViewState.Set("IssueId", value); }
+            get => ViewState.Get("IssueId", 0);
+            set => ViewState.Set("IssueId", value);
         }
 
         /// <summary>
@@ -49,8 +49,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", 0); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", 0);
+            set => ViewState.Set("ProjectId", value);
         }
 
         /// <summary>
@@ -58,22 +58,24 @@ namespace BugNET.Issues.UserControls
         /// </summary>
         public void Initialize()
         {
-            AttachmentsDataGrid.Columns[0].HeaderText = GetLocalResourceObject("AttachmentsGrid.FileNameHeader.Text").ToString();
-            AttachmentsDataGrid.Columns[1].HeaderText = GetLocalResourceObject("AttachmentsGrid.SizeHeader.Text").ToString();
-            AttachmentsDataGrid.Columns[2].HeaderText = GetLocalResourceObject("AttachmentsGrid.Description.Text").ToString();
+            AttachmentsDataGrid.Columns[0].HeaderText = GetLocalString("AttachmentsGrid.FileNameHeader.Text");
+            AttachmentsDataGrid.Columns[1].HeaderText = GetLocalString("AttachmentsGrid.SizeHeader.Text");
+            AttachmentsDataGrid.Columns[2].HeaderText = GetLocalString("AttachmentsGrid.Description.Text");
 
             BindAttachments();
 
-            System.Configuration.Configuration config = WebConfigurationManager.OpenWebConfiguration("~");
-            HttpRuntimeSection section = config.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
-            double maxFileSize = Math.Round(section.MaxRequestLength / 1024.0, 1);
-            FileSizeLimit.Text = string.Format("Make sure your file is under {0:0.#} MB.", maxFileSize);
+            var config = WebConfigurationManager.OpenWebConfiguration("~");
+            var section = config.GetSection("system.web/httpRuntime") as HttpRuntimeSection;
+            var maxFileSize = Math.Round(section.MaxRequestLength / 1024.0, 1);
+            FileSizeLimit.Text = $"Make sure your file is under {maxFileSize:0.#} MB.";
 
             //check users role permission for adding an attachment
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.AddAttachment.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.AddAttachment.ToString()))
                 pnlAddAttachment.Visible = false;
 
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.DeleteAttachment.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.DeleteAttachment.ToString()))
                 AttachmentsDataGrid.Columns[5].Visible = false;
         }
 
@@ -85,15 +87,15 @@ namespace BugNET.Issues.UserControls
         private void BindAttachments()
         {
             //Fix tab names after adding or deleting a record.
-           //IssueTabs tabs = this.Parent as Issues.UserControls.IssueTabs;
-           //tabs.RefreshTabNames();
-            List<IssueAttachment> attachments = IssueAttachmentManager.GetByIssueId(IssueId);
+            //IssueTabs tabs = this.Parent as Issues.UserControls.IssueTabs;
+            //tabs.RefreshTabNames();
+            var attachments = IssueAttachmentManager.GetByIssueId(IssueId);
 
             AttachmentDescription.Text = string.Empty;
 
             if (attachments.Count == 0)
             {
-                lblAttachments.Text = GetLocalResourceObject("NoAttachments").ToString();
+                lblAttachments.Text = GetLocalString("NoAttachments");
                 lblAttachments.Visible = true;
                 AttachmentsDataGrid.Visible = false;
             }
@@ -149,8 +151,11 @@ namespace BugNET.Issues.UserControls
 
                     if (!IssueAttachmentManager.SaveOrUpdate(attachment))
                     {
-                        AttachmentsMessage.ShowErrorMessage(string.Format(GetGlobalResourceObject("Exceptions", "SaveAttachmentError").ToString(), uploadFile.FileName));
-                        if (Log.IsWarnEnabled) Log.Warn(string.Format(GetGlobalResourceObject("Exceptions", "SaveAttachmentError").ToString(), uploadFile.FileName));
+                        AttachmentsMessage.ShowErrorMessage(
+                            string.Format(GetGlobalString("Exceptions", "SaveAttachmentError"), uploadFile.FileName));
+                        if (Log.IsWarnEnabled)
+                            Log.Warn(string.Format(GetGlobalString("Exceptions", "SaveAttachmentError"),
+                                uploadFile.FileName));
                         return;
                     }
 
@@ -160,7 +165,8 @@ namespace BugNET.Issues.UserControls
                         IssueId = IssueId,
                         CreatedUserName = Security.GetUserName(),
                         DateChanged = DateTime.Now,
-                        FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Attachment", "Attachment"),
+                        FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Attachment",
+                            "Attachment"),
                         OldValue = fileName,
                         NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Added", "Added"),
                         TriggerLastUpdateChange = true
@@ -168,14 +174,16 @@ namespace BugNET.Issues.UserControls
 
                     IssueHistoryManager.SaveOrUpdate(history);
 
-                    var changes = new List<IssueHistory> { history };
+                    var changes = new List<IssueHistory> {history};
 
                     IssueNotificationManager.SendIssueNotifications(IssueId, changes);
 
                     BindAttachments();
                 }
                 else
-                    AttachmentsMessage.ShowErrorMessage(inValidReason); 
+                {
+                    AttachmentsMessage.ShowErrorMessage(inValidReason);
+                }
             }
         }
 
@@ -188,19 +196,16 @@ namespace BugNET.Issues.UserControls
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var currentAttachment = (IssueAttachment)e.Item.DataItem;
+            var currentAttachment = (IssueAttachment) e.Item.DataItem;
             var lnkAttachment = e.Item.FindControl("lnkAttachment") as HtmlAnchor;
 
             if (lnkAttachment != null)
             {
-                if (HostSettingManager.Get(HostSettingNames.AttachmentStorageType, 0) == (int)IssueAttachmentStorageTypes.FileSystem)
-                {
+                if (HostSettingManager.Get(HostSettingNames.AttachmentStorageType, 0) ==
+                    (int) IssueAttachmentStorageTypes.FileSystem)
                     lnkAttachment.InnerText = IssueAttachmentManager.StripGuidFromFileName(currentAttachment.FileName);
-                }
                 else
-                {
                     lnkAttachment.InnerText = currentAttachment.FileName;
-                }
                 lnkAttachment.HRef = string.Concat("DownloadAttachment.axd?id=", currentAttachment.Id.ToString());
             }
 
@@ -214,12 +219,12 @@ namespace BugNET.Issues.UserControls
             if (currentAttachment.Size > 1000)
             {
                 size = currentAttachment.Size / 1000f;
-                label = string.Format("{0} kb", size.ToString("##,##"));
+                label = $"{size.ToString("##,##")} kb";
             }
             else
             {
                 size = currentAttachment.Size;
-                label = string.Format("{0} b", size.ToString("##,##"));
+                label = $"{size.ToString("##,##")} b";
             }
 
             lblSize.Text = label;
@@ -227,18 +232,19 @@ namespace BugNET.Issues.UserControls
             var cmdDelete = e.Item.FindControl("cmdDelete") as ImageButton;
 
             // Check if the current user is Authenticated and has the permission to delete a comment			
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.DeleteAttachment.ToString())) return;
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.DeleteAttachment.ToString())) return;
 
             if (cmdDelete == null) return;
 
-            cmdDelete.Attributes.Add("onclick", string.Format("return confirm('{0}');", GetLocalResourceObject("DeleteAttachment").ToString().Trim().JsEncode()));
+            cmdDelete.Attributes.Add("onclick",
+                $"return confirm('{GetLocalString("DeleteAttachment").Trim().JsEncode()}');");
             cmdDelete.Visible = false;
 
             // Check if it is the original user, the project admin or a super user trying to delete the comment.
-            if (currentAttachment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() || UserManager.IsSuperUser() || UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole))
-            {
-                cmdDelete.Visible = true;
-            }
+            if (currentAttachment.CreatorUserName.ToLower() == Context.User.Identity.Name.ToLower() ||
+                UserManager.IsSuperUser() ||
+                UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)) cmdDelete.Visible = true;
         }
 
         /// <summary>
@@ -254,6 +260,7 @@ namespace BugNET.Issues.UserControls
                     IssueAttachmentManager.Delete(Convert.ToInt32(e.CommandArgument));
                     break;
             }
+
             BindAttachments();
         }
     }

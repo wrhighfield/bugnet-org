@@ -3,18 +3,19 @@ using System.Web.UI;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Providers.MembershipProviders;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Administration.Users.UserControls
 {
     public partial class Membership : BaseUserControlUserAdmin, IEditUserControl
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public event ActionEventHandler Action;
 
-        void OnAction(ActionEventArgs args)
+        private void OnAction(ActionEventArgs args)
         {
             if (Action != null)
                 Action(this, args);
@@ -22,8 +23,8 @@ namespace BugNET.Administration.Users.UserControls
 
         public Guid UserId
         {
-            get { return ViewState.Get("UserId", Guid.Empty); }
-            set { ViewState.Set("UserId", value); }
+            get => ViewState.Get("UserId", Guid.Empty);
+            set => ViewState.Set("UserId", value);
         }
 
         public void Initialize()
@@ -34,14 +35,14 @@ namespace BugNET.Administration.Users.UserControls
         /// <summary>
         /// Binds the data.
         /// </summary>
-        void BindData()
+        private void BindData()
         {
             if (UserId == Guid.Empty) return;
 
             GetMembershipData(UserId);
 
             //get this user and bind the data
-            var user = (CustomMembershipUser)MembershipData;
+            var user = (CustomMembershipUser) MembershipData;
 
             if (user == null) return;
 
@@ -56,14 +57,14 @@ namespace BugNET.Administration.Users.UserControls
             LockedOut.Checked = user.IsLockedOut;
             Authorized.Checked = user.IsApproved;
             Online.Checked = user.IsOnline;
-            FirstName.Text = user.FirstName; 
+            FirstName.Text = user.FirstName;
             LastName.Text = user.LastName;
             DisplayName.Text = user.DisplayName;
             cmdAuthorize.Visible = !user.IsApproved;
             cmdUnAuthorize.Visible = user.IsApproved;
             cmdUnLock.Visible = user.IsLockedOut;
         }
-        
+
         /// <summary>
         /// Handles the Load event of the Page control.
         /// </summary>
@@ -86,7 +87,7 @@ namespace BugNET.Administration.Users.UserControls
             {
                 GetMembershipData(UserId);
 
-                var user = (CustomMembershipUser)MembershipData;
+                var user = (CustomMembershipUser) MembershipData;
 
                 if (user != null)
                 {
@@ -94,13 +95,14 @@ namespace BugNET.Administration.Users.UserControls
                     user.Email = Email.Text;
                     user.DisplayName = DisplayName.Text;
                     user.FirstName = FirstName.Text;
-                    user.LastName =  LastName.Text;
+                    user.LastName = LastName.Text;
                     UserManager.UpdateUser(user);
-                    OnAction(new ActionEventArgs { Trigger = ActionTriggers.Save });
+                    OnAction(new ActionEventArgs {Trigger = ActionTriggers.Save});
 
                     UserCustomFieldManager.SaveCustomFieldValues(UserId, ctlUserCustomFields.Values);
                 }
-                ActionMessage.ShowSuccessMessage(GetLocalResourceObject("UpdateUserMessage").ToString());
+
+                ActionMessage.ShowSuccessMessage(GetLocalString("UpdateUserMessage"));
             }
             catch
             {
@@ -118,11 +120,11 @@ namespace BugNET.Administration.Users.UserControls
             try
             {
                 AuthorizeUser(true);
-                ActionMessage.ShowSuccessMessage(GetLocalResourceObject("UserAuthorizedMessage").ToString());
+                ActionMessage.ShowSuccessMessage(GetLocalString("UserAuthorizedMessage"));
             }
             catch
             {
-                ActionMessage.ShowErrorMessage(GetLocalResourceObject("UserAuthorizedError").ToString());
+                ActionMessage.ShowErrorMessage(GetLocalString("UserAuthorizedError"));
             }
         }
 
@@ -136,18 +138,16 @@ namespace BugNET.Administration.Users.UserControls
             GetMembershipData(UserId);
 
             if (MembershipData != null)
-            {
                 try
                 {
                     MembershipData.UnlockUser();
-                    ActionMessage.ShowSuccessMessage(GetLocalResourceObject("UpdateUserMessage").ToString());
+                    ActionMessage.ShowSuccessMessage(GetLocalString("UpdateUserMessage"));
                     BindData();
                 }
                 catch
                 {
                     ActionMessage.ShowErrorMessage(LoggingManager.GetErrorMessageResource("UpdateUserError"));
                 }
-            }
         }
 
         /// <summary>
@@ -160,11 +160,11 @@ namespace BugNET.Administration.Users.UserControls
             try
             {
                 AuthorizeUser(false);
-                ActionMessage.ShowSuccessMessage(GetLocalResourceObject("UserUnAuthorizedMessage").ToString());
+                ActionMessage.ShowSuccessMessage(GetLocalString("UserUnAuthorizedMessage"));
             }
             catch
             {
-                ActionMessage.ShowErrorMessage(GetLocalResourceObject("UserUnAuthorizedError").ToString());
+                ActionMessage.ShowErrorMessage(GetLocalString("UserUnAuthorizedError"));
             }
         }
 
@@ -173,7 +173,7 @@ namespace BugNET.Administration.Users.UserControls
         /// Authorizes the user.
         /// </summary>
         /// <param name="isAuthorized">if set to <c>true</c> [is authorized].</param>
-        void AuthorizeUser(bool isAuthorized)
+        private void AuthorizeUser(bool isAuthorized)
         {
             GetMembershipData(UserId);
 

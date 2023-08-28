@@ -1,7 +1,7 @@
 ﻿namespace BugNET.Entities
 {
-   public class DefaultValue
-   {
+    public class DefaultValue
+    {
         public bool StatusVisibility { get; set; }
 
         public bool OwnedByVisibility { get; set; }
@@ -17,11 +17,11 @@
         public bool DueDateVisibility { get; set; }
 
         public bool TypeVisibility { get; set; }
-  
+
         public bool PercentCompleteVisibility { get; set; }
 
         public bool MilestoneVisibility { get; set; }
-   
+
         public bool EstimationVisibility { get; set; }
 
         public bool ResolutionVisibility { get; set; }
@@ -53,18 +53,18 @@
         public bool ResolutionEditVisibility { get; set; }
 
         public bool AffectedMilestoneEditVisibility { get; set; }
-     
+
         public bool AssignedToNotify { get; set; }
-       
+
         public bool OwnedByNotify { get; set; }
-       
+
         public int IssueVisibility { get; set; }
 
         /// <summary>
         /// Category Id
         /// </summary>
         public int CategoryId { get; set; }
-        
+
         /// <summary>
         /// Gets the owner username.
         /// </summary>
@@ -72,25 +72,25 @@
         public string OwnerUserName { get; set; }
 
         public string AssignedUserName { get; set; }
-      
+
         /// <summary>
         /// Gets or sets the version id.
         /// </summary>
         /// <value>The version id.</value>
         public int MilestoneId { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the affected milestone id.
         /// </summary>
         /// <value>The affected milestone id.</value>
         public int AffectedMilestoneId { get; set; }
-       
+
         /// <summary>
         /// Gets or sets the type id.
         /// </summary>
         /// <value>The type id.</value>
         public int IssueTypeId { get; set; }
-       
+
         /// <summary>
         /// Gets or sets the resolution id.
         /// </summary>
@@ -101,20 +101,20 @@
         /// Gets or sets the priority id.
         /// </summary>
         /// <value>The priority id.</value>
-        public int PriorityId { get; set; } 
+        public int PriorityId { get; set; }
 
         /// <summary>
         /// Gets the project id.
         /// </summary>
         /// <value>The project id.</value>
-        public int ProjectId { get; set; }     
+        public int ProjectId { get; set; }
 
         /// <summary>
         /// Gets or sets the status id.
         /// </summary>
         /// <value>The status id.</value>
         public int StatusId { get; set; }
-        
+
 
         /// <summary>
         /// Gets or sets the due date.
@@ -139,6 +139,5 @@
         /// The progress.
         /// </value>
         public int Progress { get; set; }
-
     }
 }

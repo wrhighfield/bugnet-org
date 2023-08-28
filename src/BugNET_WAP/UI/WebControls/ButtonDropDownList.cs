@@ -1,7 +1,7 @@
 ﻿using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace BugNET.UserInterfaceLayer.WebControls
+namespace BugNET.UI.WebControls
 {
     /// <summary>
     /// Summary description for ButtonDropDownList
@@ -26,17 +26,10 @@ namespace BugNET.UserInterfaceLayer.WebControls
         {
             get
             {
-                string str = (string)this.ViewState["CommandArgument"];
-                if (str != null)
-                {
-                    return str;
-                }
-                return string.Empty;
+                var str = (string) ViewState["CommandArgument"];
+                return str ?? string.Empty;
             }
-            set
-            {
-                this.ViewState["CommandArgument"] = value;
-            }
+            set => ViewState["CommandArgument"] = value;
         }
 
         /// <summary>
@@ -47,33 +40,28 @@ namespace BugNET.UserInterfaceLayer.WebControls
         {
             get
             {
-                string str = (string)this.ViewState["CommandName"];
-                if (str != null)
-                {
-                    return str;
-                }
-                return string.Empty;
+                var str = (string) ViewState["CommandName"];
+                return str ?? string.Empty;
             }
-            set
-            {
-                this.ViewState["CommandName"] = value;
-            }
+            set => ViewState["CommandName"] = value;
         }
 
         #region IPostBackEventHandler implementation
+
         /// <summary>
         /// When implemented by a class, enables a server control to process an event raised when a form is posted to the server.
         /// </summary>
         /// <param name="eventArgument">A <see cref="T:System.String"/> that represents an optional event argument to be passed to the event handler.</param>
         void IPostBackEventHandler.RaisePostBackEvent(string eventArgument)
         {
-            this.CommandArgument = "0";
+            CommandArgument = "0";
 
             if (base.SelectedItem != null)
-                this.CommandArgument = this.SelectedItem.Value;
+                CommandArgument = SelectedItem.Value;
 
-            this.RaisePostBackEvent(eventArgument);
+            RaisePostBackEvent();
         }
+
         #endregion
 
         /// <summary>
@@ -82,26 +70,19 @@ namespace BugNET.UserInterfaceLayer.WebControls
         /// <param name="e">The <see cref="System.Web.UI.WebControls.CommandEventArgs"/> instance containing the event data.</param>
         protected virtual void OnCommand(CommandEventArgs e)
         {
-            CommandEventHandler handler = (CommandEventHandler)base.Events[EventCommand];
-            if (handler != null)
-            {
-                handler(this, e);
-            }
+            var handler = (CommandEventHandler) Events[EventCommand];
+            handler?.Invoke(this, e);
             //It bubbles the event to the HandleEvent method of the GooglePagerField class.
-            base.RaiseBubbleEvent(this, e);
+            RaiseBubbleEvent(this, e);
         }
 
         /// <summary>
         /// When implemented by a class, enables a server control to process an event raised when a form is posted to the server.
         /// </summary>
-        /// <param name="eventArgument">A <see cref="T:System.String"/> that represents an optional event argument to be passed to the event handler.</param>
-        protected virtual void RaisePostBackEvent(string eventArgument)
+        protected virtual void RaisePostBackEvent()
         {
-            if (this.CausesValidation)
-            {
-                this.Page.Validate(this.ValidationGroup);
-            }
-            this.OnCommand(new CommandEventArgs(this.CommandName, this.CommandArgument));
+            if (CausesValidation) Page.Validate(ValidationGroup);
+            OnCommand(new CommandEventArgs(CommandName, CommandArgument));
         }
     }
 }

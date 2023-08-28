@@ -5,16 +5,17 @@ using System.Xml.Serialization;
 
 namespace BugNET.Entities
 {
-	/// <summary>
-	/// Summary description for Entry.
-	/// </summary>
-	public class MailboxEntry
-	{
+    /// <summary>
+    /// Summary description for Entry.
+    /// </summary>
+    public class MailboxEntry
+    {
         /// <summary>
         /// Initializes a new instance of the <see cref="MailboxEntry"/> class.
         /// </summary>
-		public MailboxEntry()
-		{}
+        public MailboxEntry()
+        {
+        }
 
         /// <summary>
         /// 
@@ -51,8 +52,7 @@ namespace BugNET.Entities
         /// <summary>
         /// 
         /// </summary>
-        [XmlIgnore]
-        public ArrayList MailAttachments = new ArrayList();
+        [XmlIgnore] public ArrayList MailAttachments = new ArrayList();
 
         /// <summary>
         /// The number of attachments that were processed and saved

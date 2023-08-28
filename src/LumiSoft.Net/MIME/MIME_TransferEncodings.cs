@@ -4,7 +4,7 @@ namespace LumiSoft.Net.MIME
     /// This class holds MIME content transfer encodings. Defined in RFC 2045 6.
     /// </summary>
     public class MIME_TransferEncodings
-    {        
+    {
         /// <summary>
         /// Up to 998 octets per line of the code range 1..127 with CR and LF (codes 13 and 10 respectively) only allowed to 
         /// appear as part of a CRLF line ending. This is the default value.

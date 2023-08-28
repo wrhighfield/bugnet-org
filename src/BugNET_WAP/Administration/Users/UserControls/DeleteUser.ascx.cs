@@ -2,34 +2,36 @@
 using System.Web.UI;
 using BugNET.BLL;
 using BugNET.Common;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 using log4net;
 
 namespace BugNET.Administration.Users.UserControls
 {
     public partial class DeleteUser : BaseUserControlUserAdmin, IEditUserControl
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public event ActionEventHandler Action;
 
-        void OnAction(ActionEventArgs args)
+        private void OnAction(ActionEventArgs args)
         {
-            if (Action != null)
-                Action(this, args);
+            Action?.Invoke(this, args);
         }
 
         public Guid UserId
         {
-            get { return ViewState.Get("UserId", Guid.Empty); }
-            set { ViewState.Set("UserId", value); }
+            get => ViewState.Get("UserId", Guid.Empty);
+            set => ViewState.Set("UserId", value);
         }
 
         public void Initialize()
         {
             GetMembershipData(UserId);
-            cmdDeleteUser.Attributes.Add("onclick", string.Format("return confirm('{0}');", GetLocalResourceObject("ConfirmDeleteUser").ToString().Trim().JsEncode()));
-            cmdUnauthorizeAccount.Attributes.Add("onclick", string.Format("return confirm('{0}');", GetLocalResourceObject("ConfirmUnauthorizeUser").ToString().Trim().JsEncode()));
+            cmdDeleteUser.Attributes.Add("onclick",
+                $"return confirm('{GetLocalString("ConfirmDeleteUser").Trim().JsEncode()}');");
+            cmdUnauthorizeAccount.Attributes.Add("onclick",
+                $"return confirm('{GetLocalString("ConfirmUnauthorizeUser").Trim().JsEncode()}');");
         }
 
         /// <summary>
@@ -41,7 +43,7 @@ namespace BugNET.Administration.Users.UserControls
         {
             try
             {
-                GetMembershipData(UserId); 
+                GetMembershipData(UserId);
                 MembershipData.IsApproved = false;
                 UserManager.UpdateUser(MembershipData);
                 Response.Redirect("~/Administration/Users/UserList.aspx");

@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class IssueWorkReportManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         #region Static Methods
 
@@ -21,7 +22,8 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(IssueWorkReport entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.IssueId <= Globals.NewId) throw new ArgumentException("Cannot save issue work report, the issue id is invalid");
+            if (entity.IssueId <= Globals.NewId)
+                throw new ArgumentException("Cannot save issue work report, the issue id is invalid");
 
             if (!string.IsNullOrEmpty(entity.CommentText))
                 entity.CommentId = DataProviderManager.Provider.CreateNewIssueComment(
@@ -38,7 +40,6 @@ namespace BugNET.BLL
             if (tempId <= Globals.NewId) return false;
             entity.Id = tempId;
             return true;
-
         }
 
         /// <summary>
@@ -64,6 +65,7 @@ namespace BugNET.BLL
 
             return DataProviderManager.Provider.DeleteIssueWorkReport(issueWorkReportId);
         }
+
         #endregion
     }
 }

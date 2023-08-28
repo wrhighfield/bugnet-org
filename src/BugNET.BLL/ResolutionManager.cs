@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class ResolutionManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -18,8 +19,10 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(Resolution entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save resolution, the project id is invalid");
-            if (string.IsNullOrEmpty(entity.Name)) throw new ArgumentException("The resolution name cannot be empty or null");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save resolution, the project id is invalid");
+            if (string.IsNullOrEmpty(entity.Name))
+                throw new ArgumentException("The resolution name cannot be empty or null");
 
             if (entity.Id > Globals.NewId)
                 return DataProviderManager.Provider.UpdateResolution(entity);
@@ -63,8 +66,11 @@ namespace BugNET.BLL
             if (canBeDeleted)
                 return DataProviderManager.Provider.DeleteResolution(entity.Id);
 
-            cannotDeleteMessage = ResourceStrings.GetGlobalResource(GlobalResources.Exceptions, "DeleteItemAssignedToIssueError");
-            cannotDeleteMessage = string.Format(cannotDeleteMessage, entity.Name, ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Resolution", "resolution").ToLower());
+            cannotDeleteMessage =
+                ResourceStrings.GetGlobalResource(GlobalResources.Exceptions, "DeleteItemAssignedToIssueError");
+            cannotDeleteMessage = string.Format(cannotDeleteMessage, entity.Name,
+                ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Resolution", "resolution")
+                    .ToLower());
 
             return false;
         }

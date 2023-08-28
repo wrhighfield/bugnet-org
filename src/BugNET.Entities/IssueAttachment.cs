@@ -7,7 +7,6 @@ namespace BugNET.Entities
     /// </summary>
     public class IssueAttachment
     {
-
         #region Constructors
 
         /// <summary>

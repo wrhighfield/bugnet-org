@@ -6,13 +6,16 @@ namespace BugNET.BLL
 {
     public static class ResourceManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Gets the installed language resources.
         /// </summary>
         /// <returns></returns>
         public static IEnumerable<string> GetInstalledLanguageResources()
-            => DataProviderManager.Provider.GetInstalledLanguageResources();
+        {
+            return DataProviderManager.Provider.GetInstalledLanguageResources();
+        }
     }
 }

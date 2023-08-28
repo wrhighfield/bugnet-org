@@ -7,7 +7,6 @@ namespace BugNET.Entities
     /// </summary>
     public class IssueWorkReport
     {
-
         #region Constructors
 
         /// <summary>

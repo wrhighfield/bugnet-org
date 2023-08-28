@@ -20,7 +20,7 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>mediaSubType</b> is null reference.</exception>
         /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
         public MIME_b_Text(string mediaType) : base(new MIME_h_ContentType(mediaType))
-        {            
+        {
         }
 
         #region static method Parse
@@ -34,27 +34,19 @@ namespace LumiSoft.Net.MIME
         /// <returns>Returns parsed body.</returns>
         /// <exception cref="ArgumentNullException">Is raised when <b>stream</b>, <b>mediaType</b> or <b>stream</b> is null reference.</exception>
         /// <exception cref="ParseException">Is raised when any parsing errors.</exception>
-        protected new static MIME_b Parse(MIME_Entity owner,MIME_h_ContentType defaultContentType,SmartStream stream)
+        protected new static MIME_b Parse(MIME_Entity owner, MIME_h_ContentType defaultContentType, SmartStream stream)
         {
-            if(owner == null){
-                throw new ArgumentNullException(nameof(owner));
-            }
-            if(defaultContentType == null){
-                throw new ArgumentNullException(nameof(defaultContentType));
-            }
-            if(stream == null){
-                throw new ArgumentNullException(nameof(stream));
-            }
+            if (owner == null) throw new ArgumentNullException(nameof(owner));
+            if (defaultContentType == null) throw new ArgumentNullException(nameof(defaultContentType));
+            if (stream == null) throw new ArgumentNullException(nameof(stream));
 
             MIME_b_Text retVal = null;
-            if(owner.ContentType != null){
+            if (owner.ContentType != null)
                 retVal = new MIME_b_Text(owner.ContentType.TypeWithSubtype);
-            }
-            else{
+            else
                 retVal = new MIME_b_Text(defaultContentType.TypeWithSubtype);
-            }
 
-            NetUtils.StreamCopy(stream,retVal.EncodedStream,32000);
+            NetUtils.StreamCopy(stream, retVal.EncodedStream, 32000);
             retVal.SetModified(false);
 
             return retVal;
@@ -74,23 +66,15 @@ namespace LumiSoft.Net.MIME
         /// <exception cref="ArgumentNullException">Is raised when <b>transferEncoding</b>, <b>charset</b> or <b>text</b> is null reference.</exception>
         /// <exception cref="InvalidOperationException">Is raised when this method is accessed and this body is not bounded to any entity.</exception>
         /// <exception cref="NotSupportedException">Is raised when body contains not supported Content-Transfer-Encoding.</exception>
-        public void SetText(string transferEncoding,Encoding charset,string text)
+        public void SetText(string transferEncoding, Encoding charset, string text)
         {
-            if(transferEncoding == null){
-                throw new ArgumentNullException(nameof(transferEncoding));
-            }
-            if(charset == null){
-                throw new ArgumentNullException(nameof(charset));
-            }
-            if(text == null){
-                throw new ArgumentNullException(nameof(text));
-            }
-            if(Entity == null){
-                throw new InvalidOperationException("Body must be bounded to some entity first.");
-            }
+            if (transferEncoding == null) throw new ArgumentNullException(nameof(transferEncoding));
+            if (charset == null) throw new ArgumentNullException(nameof(charset));
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            if (Entity == null) throw new InvalidOperationException("Body must be bounded to some entity first.");
 
-            SetData(new MemoryStream(charset.GetBytes(text)),transferEncoding);
-            Entity.ContentType.Param_Charset = charset.WebName;            
+            SetData(new MemoryStream(charset.GetBytes(text)), transferEncoding);
+            Entity.ContentType.Param_Charset = charset.WebName;
         }
 
         #endregion
@@ -106,28 +90,25 @@ namespace LumiSoft.Net.MIME
         private Encoding GetCharset()
         {
             // RFC 2046 4.1.2. The default character set, US-ASCII.
-            
-            if(Entity.ContentType == null || string.IsNullOrEmpty(Entity.ContentType.Param_Charset)){
+
+            if (Entity.ContentType == null || string.IsNullOrEmpty(Entity.ContentType.Param_Charset))
                 return Encoding.ASCII;
-            }
 
             // Handle custome/extended charsets, just remove "x-" from start.
-            if(Entity.ContentType.Param_Charset.ToLower().StartsWith("x-")){
+            if (Entity.ContentType.Param_Charset.ToLower().StartsWith("x-"))
                 return Encoding.GetEncoding(Entity.ContentType.Param_Charset.Substring(2));
-            }
             // Cp1252 is not IANA reggistered, some mail clients send it, it equal to windows-1252.
 
-            if(string.Equals(Entity.ContentType.Param_Charset,"cp1252",StringComparison.InvariantCultureIgnoreCase)){
+            if (string.Equals(Entity.ContentType.Param_Charset, "cp1252", StringComparison.InvariantCultureIgnoreCase))
                 return Encoding.GetEncoding("windows-1252");
-            }
             return Encoding.GetEncoding(Entity.ContentType.Param_Charset);
         }
 
         #endregion
-                
+
 
         #region Properties implementation
-                
+
         /// <summary>
         /// Gets body decoded text.
         /// </summary>

@@ -12,34 +12,31 @@ namespace BugNET.Account
     {
         protected string ProviderName
         {
-            get { return (string)ViewState["ProviderName"] ?? String.Empty; }
-            private set { ViewState["ProviderName"] = value; }
+            get => (string) ViewState["ProviderName"] ?? string.Empty;
+            private set => ViewState["ProviderName"] = value;
         }
 
         protected string ProviderDisplayName
         {
-            get { return (string)ViewState["ProviderDisplayName"] ?? String.Empty; }
-            private set { ViewState["ProviderDisplayName"] = value; }
+            get => (string) ViewState["ProviderDisplayName"] ?? string.Empty;
+            private set => ViewState["ProviderDisplayName"] = value;
         }
 
         protected string ProviderUserId
         {
-            get { return (string)ViewState["ProviderUserId"] ?? String.Empty; }
-            private set { ViewState["ProviderUserId"] = value; }
+            get => (string) ViewState["ProviderUserId"] ?? string.Empty;
+            private set => ViewState["ProviderUserId"] = value;
         }
 
         protected string ProviderUserName
         {
-            get { return (string)ViewState["ProviderUserName"] ?? String.Empty; }
-            private set { ViewState["ProviderUserName"] = value; }
+            get => (string) ViewState["ProviderUserName"] ?? string.Empty;
+            private set => ViewState["ProviderUserName"] = value;
         }
 
         protected void Page_Load()
         {
-            if (!IsPostBack)
-            {
-                ProcessProviderResult();
-            }
+            if (!IsPostBack) ProcessProviderResult();
         }
 
         protected void LogIn_Click(object sender, EventArgs e)
@@ -57,24 +54,15 @@ namespace BugNET.Account
             // Process the result from an auth provider in the request
             ProviderName = OpenAuth.GetProviderNameFromCurrentRequest();
 
-            if (String.IsNullOrEmpty(ProviderName))
-            {
-                Response.Redirect(FormsAuthentication.LoginUrl);
-            }
+            if (string.IsNullOrEmpty(ProviderName)) Response.Redirect(FormsAuthentication.LoginUrl);
 
             // Build the redirect url for OpenAuth verification
             var redirectUrl = "~/Account/RegisterExternalLogin";
             var returnUrl = Request.QueryString["ReturnUrl"];
-            if (!String.IsNullOrEmpty(returnUrl))
-            {
-                redirectUrl += "?ReturnUrl=" + HttpUtility.UrlEncode(returnUrl);
-            }
+            if (!string.IsNullOrEmpty(returnUrl)) redirectUrl += "?ReturnUrl=" + HttpUtility.UrlEncode(returnUrl);
 
-           
-            if(ProviderName == "Google")
-            {
-                GoogleOAuth2Client.RewriteRequest();
-            }
+
+            if (ProviderName == "Google") GoogleOAuth2Client.RewriteRequest();
 
             // Verify the OpenAuth payload
             var authResult = OpenAuth.VerifyAuthentication(redirectUrl);
@@ -84,19 +72,17 @@ namespace BugNET.Account
                 Title = "External login failed";
                 userNameForm.Visible = false;
 
-                providerMessage.Text = String.Format("External login {0} failed,", ProviderDisplayName);
+                providerMessage.Text = $"External login {ProviderDisplayName} failed,";
 
                 // To view this error, enable page tracing in web.config (<system.web><trace enabled="true"/></system.web>) and visit ~/Trace.axd
-                Trace.Warn("OpenAuth", String.Format("There was an error verifying authentication with {0})", ProviderDisplayName), authResult.Error);
+                Trace.Warn("OpenAuth", $"There was an error verifying authentication with {ProviderDisplayName})",
+                    authResult.Error);
                 return;
             }
 
             // User has logged in with provider successfully
             // Check if user is already registered locally
-            if (OpenAuth.Login(authResult.Provider, authResult.ProviderUserId, createPersistentCookie: false))
-            {
-                RedirectToReturnUrl();
-            }
+            if (OpenAuth.Login(authResult.Provider, authResult.ProviderUserId, false)) RedirectToReturnUrl();
 
             // Store the provider details in ViewState
             ProviderName = authResult.Provider;
@@ -115,10 +101,8 @@ namespace BugNET.Account
             else
             {
                 // Check if user registration is enabled
-                if (Convert.ToInt32(HostSettingManager.Get(HostSettingNames.UserRegistration)) == (int)UserRegistration.None)
-                {
-                    Response.Redirect("~/AccessDenied.aspx", true);
-                }
+                if (Convert.ToInt32(HostSettingManager.Get(HostSettingNames.UserRegistration)) ==
+                    (int) UserRegistration.None) Response.Redirect("~/AccessDenied.aspx", true);
 
                 // Try to get the email from the provider
                 string emailResult = null;
@@ -132,13 +116,10 @@ namespace BugNET.Account
 
         private void CreateAndLoginUser()
         {
-            if (!IsValid)
-            {
-                return;
-            }
+            if (!IsValid) return;
 
             var createResult = OpenAuth.CreateUser(ProviderName, ProviderUserId, ProviderUserName, userName.Text);
-           
+
             if (!createResult.IsSuccessful)
             {
                 userNameMessage.Text = createResult.ErrorMessage;
@@ -150,24 +131,17 @@ namespace BugNET.Account
                 Membership.UpdateUser(user);
 
                 // User created & associated OK
-                if (OpenAuth.Login(ProviderName, ProviderUserId, createPersistentCookie: false))
-                {
-                    RedirectToReturnUrl();
-                }
+                if (OpenAuth.Login(ProviderName, ProviderUserId, false)) RedirectToReturnUrl();
             }
         }
 
         private void RedirectToReturnUrl()
         {
             var returnUrl = Request.QueryString["ReturnUrl"];
-            if (!String.IsNullOrEmpty(returnUrl) && OpenAuth.IsLocalUrl(returnUrl))
-            {
+            if (!string.IsNullOrEmpty(returnUrl) && OpenAuth.IsLocalUrl(returnUrl))
                 Response.Redirect(returnUrl);
-            }
             else
-            {
                 Response.Redirect("~/");
-            }
         }
     }
 }

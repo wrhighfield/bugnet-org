@@ -22,18 +22,12 @@
         /// <summary>
         /// Gets if asynchronous operation has completed.
         /// </summary>
-        public abstract bool IsCompleted
-        {
-            get;
-        }
+        public abstract bool IsCompleted { get; }
 
         /// <summary>
         /// Gets if operation completed synchronously.
         /// </summary>
-        public abstract bool IsCompletedSynchronously
-        {
-            get;
-        }
+        public abstract bool IsCompletedSynchronously { get; }
 
         #endregion
     }

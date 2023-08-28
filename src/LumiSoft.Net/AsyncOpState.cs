@@ -23,6 +23,6 @@
         /// <summary>
         /// Operation is disposed.
         /// </summary>
-        Disposed,
+        Disposed
     }
 }

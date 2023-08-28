@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class ProjectNotificationManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves this instance.
@@ -18,7 +19,8 @@ namespace BugNET.BLL
         public static bool SaveOrUpdate(ProjectNotification entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            if (entity.ProjectId <= Globals.NewId) throw new ArgumentException("Cannot save notification, the project id is invalid");
+            if (entity.ProjectId <= Globals.NewId)
+                throw new ArgumentException("Cannot save notification, the project id is invalid");
 
             var tempId = DataProviderManager.Provider.CreateNewProjectNotification(entity);
 

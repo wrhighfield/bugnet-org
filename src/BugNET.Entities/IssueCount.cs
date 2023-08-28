@@ -17,7 +17,6 @@
             Count = count;
             ImageUrl = imageUrl;
             Percentage = percentage;
-
         }
 
         /// <summary>

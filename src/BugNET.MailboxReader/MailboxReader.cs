@@ -22,7 +22,8 @@ namespace BugNET.MailboxReader
     /// </summary>
     public class MailboxReader
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private MailboxReaderConfig Config { get; set; }
 
@@ -70,26 +71,18 @@ namespace BugNET.MailboxReader
                         var recipients = mailHeader.To.Mailboxes.Select(mailbox => mailbox.Address).ToList();
 
                         if (mailHeader.Cc != null)
-                        {
                             recipients.AddRange(mailHeader.Cc.Mailboxes.Select(mailbox => mailbox.Address));
-                        }
 
                         if (mailHeader.Bcc != null)
-                        {
                             recipients.AddRange(mailHeader.Bcc.Mailboxes.Select(mailbox => mailbox.Address));
-                        }
 
                         // first check if this is a comment (comments are implemented using plus addressing)
                         // a comment will have a reply-to address like [email]+iid-[number]@domain.com
                         var isProcessed = false;
                         if (HostSettingManager.Get<bool>(HostSettingNames.Pop3AllowReplyToEmail, false))
-                        {
                             isProcessed = ProcessNewComment(recipients, message, mailHeader, result);
-                        }
                         if (!isProcessed)
-                        {
                             isProcessed = ProcessNewIssue(recipients, message, mailHeader, projects, result);
-                        }
 
                         if (isProcessed)
                         {
@@ -99,10 +92,7 @@ namespace BugNET.MailboxReader
                             try
                             {
                                 // delete the message?.
-                                if (Config.DeleteAllMessages)
-                                {
-                                    message.MarkForDeletion();
-                                }
+                                if (Config.DeleteAllMessages) message.MarkForDeletion();
                             }
                             catch (Exception)
                             {
@@ -128,13 +118,12 @@ namespace BugNET.MailboxReader
             return result;
         }
 
-        private bool ProcessNewIssue(List<string> recipients, POP3_ClientMessage message, Mail_Message mailHeader, IList<Project> projects, MailboxReaderResult result)
+        private bool ProcessNewIssue(List<string> recipients, POP3_ClientMessage message, Mail_Message mailHeader,
+            IList<Project> projects, MailboxReaderResult result)
         {
             var messageFrom = string.Empty;
             if (mailHeader.From.Count > 0)
-            {
                 messageFrom = string.Join("; ", mailHeader.From.ToList().Select(p => p.Address).ToArray()).Trim();
-            }
 
             var processed = false;
 
@@ -183,10 +172,7 @@ namespace BugNET.MailboxReader
 
                 entry.Content = messageContent;
                 entry.IsHtml = isHtml;
-                foreach (var attachment in attachments)
-                {
-                    entry.MailAttachments.Add(attachment);
-                }
+                foreach (var attachment in attachments) entry.MailAttachments.Add(attachment);
 
                 //save this message
                 var issue = SaveMailboxEntry(entry);
@@ -203,21 +189,21 @@ namespace BugNET.MailboxReader
             return processed;
         }
 
-        private bool ProcessNewComment(IEnumerable<string> recipients, POP3_ClientMessage message, Mail_Message mailHeader, MailboxReaderResult result)
+        private bool ProcessNewComment(IEnumerable<string> recipients, POP3_ClientMessage message,
+            Mail_Message mailHeader, MailboxReaderResult result)
         {
             var messageFrom = string.Empty;
             if (mailHeader.From.Count > 0)
-            {
                 messageFrom = string.Join("; ", mailHeader.From.ToList().Select(p => p.Address).ToArray()).Trim();
-            }
 
             var processed = false;
 
             foreach (
-                var commentMatch in from address in recipients 
-                let isReply = new Regex(@"(.*)(\+iid-)(\d+)@(.*)") 
-                select isReply.Match(address) into commentMatch 
-                where commentMatch.Success && commentMatch.Groups.Count >= 4 
+                var commentMatch in from address in recipients
+                let isReply = new Regex(@"(.*)(\+iid-)(\d+)@(.*)")
+                select isReply.Match(address)
+                into commentMatch
+                where commentMatch.Success && commentMatch.Groups.Count >= 4
                 select commentMatch)
             {
                 // we are in a reply and group 4 must contain the id of the original issue1`
@@ -244,14 +230,10 @@ namespace BugNET.MailboxReader
                 var emails = messageFrom.Split(';').Select(e => e.Trim().ToLower());
                 var user = users.Find(x => emails.Contains(x.Email.ToLower()));
                 if (user != null)
-                {
                     comment.CreatorUserName = user.UserName;
-                }
                 else
-                {
                     // user not found
                     continue;
-                }
 
                 var saved = IssueCommentManager.SaveOrUpdate(comment);
                 if (!saved) continue;
@@ -262,7 +244,8 @@ namespace BugNET.MailboxReader
                     IssueId = issueId,
                     CreatedUserName = comment.CreatorUserName,
                     DateChanged = comment.DateCreated,
-                    FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Comment", "Comment"),
+                    FieldChanged =
+                        ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Comment", "Comment"),
                     OldValue = string.Empty,
                     NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Added", "Added"),
                     TriggerLastUpdateChange = true
@@ -288,7 +271,7 @@ namespace BugNET.MailboxReader
                         CreatorUserName = user.UserName,
                         IssueId = issueId,
                         ProjectFolderPath = projectFolderPath,
-                        Attachment = ((MIME_b_SinglepartBase)mimeEntity.Body).Data
+                        Attachment = ((MIME_b_SinglepartBase) mimeEntity.Body).Data
                     };
 
                     switch (contentType)
@@ -302,9 +285,9 @@ namespace BugNET.MailboxReader
                             fileName = $"Attached_Message_{attachmentsSavedCount}.eml";
                             break;
                         default:
-                            fileName = string.IsNullOrWhiteSpace(mimeEntity.ContentType.Param_Name) ? $"untitled.{mimeEntity.ContentType.SubType}"
-                                :
-                                mimeEntity.ContentType.Param_Name;
+                            fileName = string.IsNullOrWhiteSpace(mimeEntity.ContentType.Param_Name)
+                                ? $"untitled.{mimeEntity.ContentType.SubType}"
+                                : mimeEntity.ContentType.Param_Name;
                             break;
                     }
 
@@ -317,13 +300,9 @@ namespace BugNET.MailboxReader
                     var fileSaved = IssueAttachmentManager.SaveOrUpdate(attachment);
 
                     if (fileSaved)
-                    {
                         attachmentsSavedCount++;
-                    }
                     else
-                    {
                         LogWarning("MailboxReader: Attachment could not be saved, please see previous logs");
-                    }
                 }
 
                 processed = true;
@@ -331,10 +310,12 @@ namespace BugNET.MailboxReader
                 // add the entry if the save did not throw any exceptions
                 result.MailboxEntries.Add(new MailboxEntry());
             }
+
             return processed;
         }
 
-        private (string Message, bool IsHtml, IEnumerable<MIME_Entity> Attachments) GetMessageContent(Mail_Message mailBody, Project project)
+        private (string Message, bool IsHtml, IEnumerable<MIME_Entity> Attachments) GetMessageContent(
+            Mail_Message mailBody, Project project)
         {
             string content;
             var isContentHtml = false;
@@ -353,7 +334,8 @@ namespace BugNET.MailboxReader
                 //TODO: Enhancements could include regular expressions / string matching or not matching 
                 // for particular strings values in the subject or body.
                 // strip the <body> out of the message (using code from below)
-                var bodyExtractor = new Regex("<body.*?>(?<content>.*)</body>", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+                var bodyExtractor = new Regex("<body.*?>(?<content>.*)</body>",
+                    RegexOptions.IgnoreCase | RegexOptions.Singleline);
                 var match = bodyExtractor.Match(mailBody.BodyHtmlText);
 
                 var emailContent = match.Success && match.Groups["content"] != null
@@ -365,8 +347,10 @@ namespace BugNET.MailboxReader
 
                 content = Regex.Replace(content, "</?o:p>", string.Empty); // Clean MSWord stuff
 
-                var replyToStart = content.IndexOf("<p>-- WRITE ABOVE THIS LINE TO REPLY --</p>", StringComparison.Ordinal);
-                var replyToEnd = content.IndexOf("<p>-- WRITE BELOW THIS LINE TO REPLY --</p>", StringComparison.Ordinal);
+                var replyToStart = content.IndexOf("<p>-- WRITE ABOVE THIS LINE TO REPLY --</p>",
+                    StringComparison.Ordinal);
+                var replyToEnd = content.IndexOf("<p>-- WRITE BELOW THIS LINE TO REPLY --</p>",
+                    StringComparison.Ordinal);
                 if (replyToStart != -1 && replyToEnd != -1)
                     content = content.Substring(0, replyToStart) +
                               content.Substring(replyToEnd + 43);
@@ -375,28 +359,23 @@ namespace BugNET.MailboxReader
             // parse attachments
             if (!Config.ProcessAttachments || !project.AllowAttachments) return (content, isContentHtml, attachments);
 
-            var allAttachments = mailBody.GetAttachments(Config.ProcessInlineAttachedPictures).Where(p => p.ContentType != null).ToList();
+            var allAttachments = mailBody.GetAttachments(Config.ProcessInlineAttachedPictures)
+                .Where(p => p.ContentType != null).ToList();
 
             // parse inline images
             foreach (var attachment in allAttachments)
-            {
                 if (attachment.Body is MIME_b_Image && !string.IsNullOrEmpty(attachment.ContentID))
                 {
                     var inlineKey = "cid:" + attachment.ContentID.Replace("<", "").Replace(">", "");
                     if (content.Contains(inlineKey))
-                    {
                         content = content.Replace(inlineKey, ConvertImageToBase64(attachment));
-                    }
                     else
-                    {
                         attachments.Add(attachment);
-                    }
                 }
                 else
                 {
                     attachments.Add(attachment);
                 }
-            }
 
             return (content, isContentHtml, attachments);
         }
@@ -447,11 +426,12 @@ namespace BugNET.MailboxReader
             try
             {
                 //load template 
-                var body = string.Format("<div >Sent by:{1} on: {2}<br/>{0}</div>", entry.Content.Trim(), entry.From, entry.Date);
+                var body = string.Format("<div >Sent by:{1} on: {2}<br/>{0}</div>", entry.Content.Trim(), entry.From,
+                    entry.Date);
 
                 if (Config.BodyTemplate.Trim().Length > 0)
                 {
-                    var data = new Dictionary<string, object> { { "MailboxEntry", entry } };
+                    var data = new Dictionary<string, object> {{"MailboxEntry", entry}};
                     body = NotificationManager.GenerateNotificationContent(Config.BodyTemplate, data);
                 }
 
@@ -475,10 +455,8 @@ namespace BugNET.MailboxReader
                     creator);
 
                 if (entry.ProjectMailbox.CategoryId != 0)
-                {
                     // overwrite default category with mailbox category
                     mailIssue.CategoryId = entry.ProjectMailbox.CategoryId;
-                }
 
                 if (!IssueManager.SaveOrUpdate(mailIssue)) return null;
 
@@ -490,7 +468,8 @@ namespace BugNET.MailboxReader
                 var projectFolderPath = Path.Combine(Config.UploadsFolderPath, project.UploadPath);
 
                 var doc = new HtmlDocument();
-                doc.LoadHtml(mailIssue.Description); // load the issue body to we can process it for inline images (if exist)
+                doc.LoadHtml(mailIssue
+                    .Description); // load the issue body to we can process it for inline images (if exist)
 
                 //If there is an attached file present then add it to the database 
                 //and copy it to the directory specified in the web.config file
@@ -501,38 +480,35 @@ namespace BugNET.MailboxReader
                     var contentType = mimeEntity.ContentType.Type.ToLower();
 
                     var attachment = new IssueAttachment
-                        {
-                            Id = 0,
-                            Description = "File attached by mailbox reader",
-                            DateCreated = DateTime.Now,
-                            ContentType = mimeEntity.ContentType.TypeWithSubtype,
-                            CreatorDisplayName = Config.ReportingUserName,
-                            CreatorUserName = Config.ReportingUserName,
-                            IssueId = mailIssue.Id,
-                            ProjectFolderPath = projectFolderPath
-                        };
+                    {
+                        Id = 0,
+                        Description = "File attached by mailbox reader",
+                        DateCreated = DateTime.Now,
+                        ContentType = mimeEntity.ContentType.TypeWithSubtype,
+                        CreatorDisplayName = Config.ReportingUserName,
+                        CreatorUserName = Config.ReportingUserName,
+                        IssueId = mailIssue.Id,
+                        ProjectFolderPath = projectFolderPath
+                    };
 
                     switch (contentType)
                     {
                         case "application":
-                            attachment.Attachment = ((MIME_b_SinglepartBase)mimeEntity.Body).Data;
+                            attachment.Attachment = ((MIME_b_SinglepartBase) mimeEntity.Body).Data;
                             break;
                         case "attachment":
                         case "image":
                         case "video":
                         case "audio":
 
-                            attachment.Attachment = ((MIME_b_SinglepartBase)mimeEntity.Body).Data;
+                            attachment.Attachment = ((MIME_b_SinglepartBase) mimeEntity.Body).Data;
                             break;
                         case "message":
 
                             // we need to pull the actual email message out of the entity, and strip the "content type" out so that
                             // email programs will read the file properly
                             var messageBody = mimeEntity.ToString().Replace(mimeEntity.Header.ToString(), "");
-                            if (messageBody.StartsWith("\r\n"))
-                            {
-                                messageBody = messageBody.Substring(2);
-                            }
+                            if (messageBody.StartsWith("\r\n")) messageBody = messageBody.Substring(2);
 
                             attachment.Attachment = Encoding.UTF8.GetBytes(messageBody);
 
@@ -555,9 +531,9 @@ namespace BugNET.MailboxReader
                             break;
                         default:
                             isInline = true;
-                            fileName = string.IsNullOrWhiteSpace(mimeEntity.ContentType.Param_Name) ? $"untitled.{mimeEntity.ContentType.SubType}"
-                                :
-                                mimeEntity.ContentType.Param_Name;
+                            fileName = string.IsNullOrWhiteSpace(mimeEntity.ContentType.Param_Name)
+                                ? $"untitled.{mimeEntity.ContentType.SubType}"
+                                : mimeEntity.ContentType.Param_Name;
                             break;
                     }
 
@@ -572,26 +548,24 @@ namespace BugNET.MailboxReader
                         fileSaved = IssueAttachmentManager.SaveOrUpdate(attachment);
 
                         if (fileSaved)
-                        {
                             entry.AttachmentsSavedCount++;
-                        }
                         else
-                        {
                             LogWarning("MailboxReader: Attachment could not be saved, please see previous logs");
-                        }
                     }
 
                     if (!entry.IsHtml || !isInline) continue;
 
                     if (string.IsNullOrWhiteSpace(mimeEntity.ContentID)) continue;
 
-                    var contentId = mimeEntity.ContentID.Replace("<", "").Replace(">", "").Replace("[", "").Replace("]", "");
+                    var contentId = mimeEntity.ContentID.Replace("<", "").Replace(">", "").Replace("[", "")
+                        .Replace("]", "");
 
                     // this is pretty greedy but since people might be sending screenshots I doubt they will send in dozens of images
                     // embedded in the email.  one would hope
                     foreach (var node in doc.DocumentNode.SelectNodes(XpathElementCaseInsensitive("img")).ToList())
                     {
-                        var attr = node.Attributes.FirstOrDefault(p => p.Name.ToLowerInvariant() == "src");// get the src attribute
+                        var attr = node.Attributes.FirstOrDefault(p =>
+                            p.Name.ToLowerInvariant() == "src"); // get the src attribute
 
                         if (attr == null) continue; // image has no src attribute
                         if (!attr.Value.Contains(contentId)) continue; // is the attribute value the content id?
@@ -627,10 +601,7 @@ namespace BugNET.MailboxReader
         /// <param name="issue">The issue generated from the email</param>
         private static void SendNotifications(Issue issue)
         {
-            if (issue == null)
-            {
-                return;
-            }
+            if (issue == null) return;
 
             var defValues = IssueManager.GetDefaultIssueTypeByProjectId(issue.ProjectId);
             var selectedValue = defValues.FirstOrDefault();
@@ -642,7 +613,7 @@ namespace BugNET.MailboxReader
                     var oUser = UserManager.GetUser(issue.OwnerUserName);
                     if (oUser != null)
                     {
-                        var notify = new IssueNotification { IssueId = issue.Id, NotificationUsername = oUser.UserName };
+                        var notify = new IssueNotification {IssueId = issue.Id, NotificationUsername = oUser.UserName};
                         IssueNotificationManager.SaveOrUpdate(notify);
                     }
                 }
@@ -652,7 +623,7 @@ namespace BugNET.MailboxReader
                     var oUser = UserManager.GetUser(issue.AssignedUserName);
                     if (oUser != null)
                     {
-                        var notify = new IssueNotification { IssueId = issue.Id, NotificationUsername = oUser.UserName };
+                        var notify = new IssueNotification {IssueId = issue.Id, NotificationUsername = oUser.UserName};
                         IssueNotificationManager.SaveOrUpdate(notify);
                     }
                 }
@@ -674,20 +645,19 @@ namespace BugNET.MailboxReader
 
             if (allowedExtensions.Length.Equals(0)) return false; // nothing saved so allow nothing
 
-            var allowedFileTypes = allowedExtensions.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            var allowedFileTypes = allowedExtensions.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
 
             // allow all types
             if (allowedFileTypes.FirstOrDefault(p => p == "*.*") != null) return true;
             if (allowedFileTypes.FirstOrDefault(p => p == ".") != null) return true;
 
             // match extension in allowed extensions list
-            var allowed = allowedFileTypes.Select(allowedFileType => allowedFileType.Replace("*", "")).Any(fileType => fileName.EndsWith(fileType));
+            var allowed = allowedFileTypes.Select(allowedFileType => allowedFileType.Replace("*", ""))
+                .Any(fileType => fileName.EndsWith(fileType));
 
             if (!allowed)
-            {
                 LogWarning(
                     $"MailboxReader: Attachment {fileName} was not one of the allowed attachment extensions {Config.AllowedFileExtensions.ToLower()} skipping.");
-            }
 
             return allowed;
         }
@@ -700,7 +670,8 @@ namespace BugNET.MailboxReader
         private static string XpathElementCaseInsensitive(string elementName)
         {
             //*[translate(name(), 'abc','ABC')='ABC']"
-            return string.Format("//*[translate(name(), '{0}', '{1}') = '{1}']", elementName.ToLower(), elementName.ToUpper());
+            return string.Format("//*[translate(name(), '{0}', '{1}') = '{1}']", elementName.ToLower(),
+                elementName.ToUpper());
         }
 
         /// <summary>
@@ -744,10 +715,15 @@ namespace BugNET.MailboxReader
         /// </summary>
         /// <param name="o">Object.</param>
         /// <returns>Returns obj.ToSting() if o is not null, otherwise returns "".</returns>
-        private static string ObjectToString(object o) =>
-            o == null ? "" : o.ToString();
+        private static string ObjectToString(object o)
+        {
+            return o == null ? "" : o.ToString();
+        }
 
-        private static string ConvertImageToBase64(MIME_Entity image) =>
-            $"data:{image.ContentType.TypeWithSubtype};base64,{Convert.ToBase64String(((MIME_b_Image) image.Body).Data)}";
+        private static string ConvertImageToBase64(MIME_Entity image)
+        {
+            return
+                $"data:{image.ContentType.TypeWithSubtype};base64,{Convert.ToBase64String(((MIME_b_Image) image.Body).Data)}";
+        }
     }
 }

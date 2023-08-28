@@ -4,17 +4,17 @@ using System.Web;
 using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
 using System.Data;
 using System.Linq;
 using BugNET.BLL.Comparers;
+using BugNET.UI;
 
 namespace BugNET.Issues
 {
     /// <summary>
     /// 
     /// </summary>
-    public partial class SearchResults : BasePage
+    public partial class SearchResults : BugNetBasePage
     {
         /// <summary>
         /// Handles the Load event of the Page control.
@@ -30,7 +30,7 @@ namespace BugNET.Issues
 
                 if (Request.QueryString["q"] != null)
                 {
-                    txtSearch.Text = Request.QueryString["q"].ToString();
+                    txtSearch.Text = Request.QueryString["q"];
                     BindIssues();
                 }
             }
@@ -52,17 +52,14 @@ namespace BugNET.Issues
             SiteMap.SiteMapResolve -= ExpandIssuePaths;
         }
 
-        private static SiteMapNode ExpandIssuePaths(Object sender, SiteMapResolveEventArgs e)
+        private static SiteMapNode ExpandIssuePaths(object sender, SiteMapResolveEventArgs e)
         {
             if (SiteMap.CurrentNode == null) return null;
 
             var currentNode = SiteMap.CurrentNode.Clone(true);
             var tempNode = currentNode;
 
-            if ((null != (tempNode = tempNode.ParentNode)))
-            {
-                tempNode.Url = string.Empty;
-            }
+            if (null != (tempNode = tempNode.ParentNode)) tempNode.Url = string.Empty;
 
             return currentNode;
         }
@@ -89,8 +86,8 @@ namespace BugNET.Issues
             //Session[ISSUELISTSTATE] = state;
         }
 
-        List<Issue> _mainIssues;
-        List<IssueComment> _mainComments;
+        private List<Issue> _mainIssues;
+        private List<IssueComment> _mainComments;
 
         /// <summary>
         /// Handles the Click event of the Button1 control.
@@ -111,7 +108,7 @@ namespace BugNET.Issues
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-        protected void IssuesRebind(Object s, EventArgs e)
+        protected void IssuesRebind(object s, EventArgs e)
         {
             BindIssues();
         }
@@ -134,9 +131,9 @@ namespace BugNET.Issues
             // ---------------------------------------------------------------
 
             // are we logged in ?
-            var searchProjects = String.IsNullOrEmpty(Context.User.Identity.Name) ?
-                ProjectManager.GetPublicProjects() :
-                ProjectManager.GetByMemberUserName(Context.User.Identity.Name);
+            var searchProjects = string.IsNullOrEmpty(Context.User.Identity.Name)
+                ? ProjectManager.GetPublicProjects()
+                : ProjectManager.GetByMemberUserName(Context.User.Identity.Name);
 
             searchProjects.Sort(new ProjectComparer("Name", false));
 
@@ -161,7 +158,7 @@ namespace BugNET.Issues
             {
                 pnlResultsMessage.Visible = true;
                 pnlSearchResults.Visible = false;
-                litResultsMessage.Text = GetLocalResourceObject("SearchNoResults").ToString();
+                litResultsMessage.Text = GetLocalString("SearchNoResults");
             }
             else
             {
@@ -170,9 +167,10 @@ namespace BugNET.Issues
             }
 
             if (_mainComments.Count > 0)
-                lblSearchSummary.Text = string.Format(GetLocalResourceObject("IssuesAndCommentsFound").ToString(), _mainIssues.Count, _mainComments.Count);
+                lblSearchSummary.Text = string.Format(GetLocalString("IssuesAndCommentsFound"), _mainIssues.Count,
+                    _mainComments.Count);
             else
-                lblSearchSummary.Text = string.Format(GetLocalResourceObject("IssuesFound").ToString(), _mainIssues.Count);
+                lblSearchSummary.Text = string.Format(GetLocalString("IssuesFound"), _mainIssues.Count);
         }
 
         /// <summary>
@@ -221,9 +219,7 @@ namespace BugNET.Issues
 
                 // if the user wants to exclude closed issues then filter the closed flag otherwise don't bother
                 if (chkExcludeClosedIssues.Checked)
-                {
                     queryClauses.Add(new QueryClause("AND", "iv.[IsClosed]", "=", "0", SqlDbType.Int));
-                }
 
                 queryClauses.Add(new QueryClause("AND (", "1", "=", "2", SqlDbType.NVarChar));
                 queryClauses.Add(new QueryClause("OR", "iv.[IssueId]", "LIKE", strLike, SqlDbType.NVarChar));
@@ -234,21 +230,18 @@ namespace BugNET.Issues
                     {
                         queryClauses.Add(new QueryClause("OR", "iv.[IssueTitle]", "LIKE", strLike, SqlDbType.NVarChar));
                         if (srchHtmlcode)
-                        {
-                            queryClauses.Add(new QueryClause("OR", "iv.[IssueTitle]", "LIKE", strHtmlLike, SqlDbType.NVarChar));
-                        }
+                            queryClauses.Add(new QueryClause("OR", "iv.[IssueTitle]", "LIKE", strHtmlLike,
+                                SqlDbType.NVarChar));
                     }
 
                     if (chkSearchDesc.Checked)
                     {
-                        queryClauses.Add(new QueryClause("OR", "iv.[IssueDescription]", "LIKE", strLike, SqlDbType.NVarChar));
+                        queryClauses.Add(new QueryClause("OR", "iv.[IssueDescription]", "LIKE", strLike,
+                            SqlDbType.NVarChar));
                         if (srchHtmlcode)
-                        {
-                            queryClauses.Add(new QueryClause("OR", "iv.[IssueDescription]", "LIKE", strHtmlLike, SqlDbType.NVarChar));
-                        }
+                            queryClauses.Add(new QueryClause("OR", "iv.[IssueDescription]", "LIKE", strHtmlLike,
+                                SqlDbType.NVarChar));
                     }
-
-                   
                 }
 
                 queryClauses.Add(new QueryClause(")", "", "", "", SqlDbType.NVarChar));
@@ -289,13 +282,11 @@ namespace BugNET.Issues
                     // New Way
                     // Using the Generic Interface
                     var qryComment = new List<QueryClause>
-                                         {
-                                             new QueryClause("AND (", "Comment", "LIKE", strLike, SqlDbType.NVarChar)
-                                         };
-                    if (srchHtmlcode)
                     {
+                        new QueryClause("AND (", "Comment", "LIKE", strLike, SqlDbType.NVarChar)
+                    };
+                    if (srchHtmlcode)
                         qryComment.Add(new QueryClause("OR", "Comment", "LIKE", strHtmlLike, SqlDbType.NVarChar));
-                    }
 
                     // close parenthesis 
                     qryComment.Add(new QueryClause(")", "", "", "", SqlDbType.NVarChar));
@@ -321,8 +312,8 @@ namespace BugNET.Issues
 
 
             var tmpIss = (from iss1 in _mainIssues
-                          orderby iss1.ProjectId, iss1.Id descending
-                          select iss1).Distinct(new DistinctIssueComparer());
+                orderby iss1.ProjectId, iss1.Id descending
+                select iss1).Distinct(new DistinctIssueComparer());
 
 
             var tmpIssues1 = new List<Issue>();
@@ -335,9 +326,9 @@ namespace BugNET.Issues
 
             // mainIssues list should be pure now
             var tmpComm = (from comm in _mainComments
-                           orderby comm.IssueId, comm.Id
-                           select comm)
-                           .Distinct();
+                    orderby comm.IssueId, comm.Id
+                    select comm)
+                .Distinct();
 
             var tmpComm1 = new List<IssueComment>();
             tmpComm1.AddRange(tmpComm);
@@ -351,7 +342,6 @@ namespace BugNET.Issues
 
         protected void chkCommentUsername_CheckedChanged(object sender, EventArgs e)
         {
-
         }
 
         /// <summary>
@@ -363,7 +353,7 @@ namespace BugNET.Issues
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var p = (Project)e.Item.DataItem;
+            var p = (Project) e.Item.DataItem;
             var rptr = e.Item.FindControl("IssuesList") as Repeater;
 
             if (rptr == null)
@@ -372,21 +362,24 @@ namespace BugNET.Issues
                 return;
             }
 
-            ((HyperLink)e.Item.FindControl("ProjectLink")).Text = string.Format("{0} ({1})", p.Name, p.Code);
+            ((HyperLink) e.Item.FindControl("ProjectLink")).Text = $"{p.Name} ({p.Code})";
 
             // Chop description at 50 chars
-            ((Label)e.Item.FindControl("ProjectDescription")).Text = (p.Description.Length > 100 ? p.Description.Substring(0, 100) + "..." : p.Description);
+            ((Label) e.Item.FindControl("ProjectDescription")).Text = p.Description.Length > 100
+                ? p.Description.Substring(0, 100) + "..."
+                : p.Description;
 
 
             // Only get this projects issues using LINQ
             var filteredIssues = new List<Issue>(from iss in _mainIssues
-                                                 where p.Id == iss.ProjectId
-                                                 select iss);
+                where p.Id == iss.ProjectId
+                select iss);
 
             // Are there any results
             if (filteredIssues.Count > 0)
             {
-                ((HyperLink)e.Item.FindControl("IssuesCount")).Text = string.Format(GetLocalResourceObject("IssuesFound").ToString(), filteredIssues.Count);
+                ((HyperLink) e.Item.FindControl("IssuesCount")).Text =
+                    string.Format(GetLocalString("IssuesFound"), filteredIssues.Count);
 
                 rptr.DataSource = filteredIssues;
                 rptr.DataBind();
@@ -406,8 +399,8 @@ namespace BugNET.Issues
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
-            var lblcomm = ((Label)e.Item.FindControl("lblComment"));
-            var ic = (IssueComment)e.Item.DataItem;
+            var lblcomm = (Label) e.Item.FindControl("lblComment");
+            var ic = (IssueComment) e.Item.DataItem;
 
             // Prevent XSS
             lblcomm.Text = Server.HtmlEncode(IssueCommentManager.GetShortTextComment(ic.Comment));
@@ -422,24 +415,24 @@ namespace BugNET.Issues
         protected void IssuesListRepeater_ItemDataBound(object sender, RepeaterItemEventArgs e)
         {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
-            var i = (Issue)e.Item.DataItem;
+            var i = (Issue) e.Item.DataItem;
             // Only get this projects issues using LINQ
             var filteredComm = new List<IssueComment>(from comm in _mainComments
-                                                      where i.Id == comm.IssueId
-                                                      select comm);
+                where i.Id == comm.IssueId
+                select comm);
 
-            var pnl1 = (Panel)(e.Item.FindControl("pnlIssueComments"));
+            var pnl1 = (Panel) e.Item.FindControl("pnlIssueComments");
             var row = e.Item.FindControl("CommentsRow");
 
             // Are there any results
             if (filteredComm.Count > 0)
             {
-                var rptr = ((Repeater)e.Item.FindControl("IssuesCommentList"));
+                var rptr = (Repeater) e.Item.FindControl("IssuesCommentList");
 
-                var lbl1 = (Label)pnl1.FindControl("lblCommentCount");
-                var linkText = string.Format("<a href='../Issues/IssueDetail.aspx?id={0}'>{1}</a>", i.Id, i.FullId);
-                var fullText = string.Format(GetLocalResourceObject("MatchingCommentsFound").ToString(), filteredComm.Count, linkText);
-                lbl1.Text = string.Format("<em>{0}.</em>", fullText);
+                var lbl1 = (Label) pnl1.FindControl("lblCommentCount");
+                var linkText = $"<a href='../Issues/IssueDetail.aspx?id={i.Id}'>{i.FullId}</a>";
+                var fullText = string.Format(GetLocalString("MatchingCommentsFound"), filteredComm.Count, linkText);
+                lbl1.Text = $"<em>{fullText}.</em>";
 
                 rptr.DataSource = filteredComm;
                 rptr.DataBind();

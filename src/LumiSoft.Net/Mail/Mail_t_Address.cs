@@ -26,6 +26,5 @@ namespace LumiSoft.Net.Mail
         public abstract string ToString(MIME_Encoding_EncodedWord wordEncoder);
 
         #endregion
-
     }
 }

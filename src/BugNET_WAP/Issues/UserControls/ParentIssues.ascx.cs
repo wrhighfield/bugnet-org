@@ -4,15 +4,15 @@ using System.Web.UI.WebControls;
 using BugNET.BLL;
 using BugNET.Common;
 using BugNET.Entities;
-using BugNET.UserInterfaceLayer;
+using BugNET.UI;
 
 namespace BugNET.Issues.UserControls
 {
     /// <summary>
-	///		Summary description for ParentBugs.
-	/// </summary>
-	public partial class ParentIssues : System.Web.UI.UserControl, IIssueTab
-	{
+    ///		Summary description for ParentBugs.
+    /// </summary>
+    public partial class ParentIssues : BugNetUserControl, IIssueTab
+    {
         protected ParentIssues()
         {
             ProjectId = 0;
@@ -22,13 +22,13 @@ namespace BugNET.Issues.UserControls
         /// <summary>
         /// Binds the related.
         /// </summary>
-        private void BindRelated() 
-		{
+        private void BindRelated()
+        {
             var issues = RelatedIssueManager.GetParentIssues(IssueId);
 
             if (issues.Count == 0)
             {
-                NoIssuesLabel.Text = GetLocalResourceObject("NoParentIssues").ToString();
+                NoIssuesLabel.Text = GetLocalString("NoParentIssues");
                 NoIssuesLabel.Visible = true;
                 IssuesDataGrid.Visible = false;
             }
@@ -40,15 +40,15 @@ namespace BugNET.Issues.UserControls
                 NoIssuesLabel.Visible = false;
                 IssuesDataGrid.Visible = true;
             }
-		}
+        }
 
         /// <summary>
         /// GRDs the bugs item data bound.
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridItemEventArgs"/> instance containing the event data.</param>
-		protected void GrdIssueItemDataBound(Object s, DataGridItemEventArgs e) 
-		{
+        protected void GrdIssueItemDataBound(object s, DataGridItemEventArgs e)
+        {
             if (e.Item.ItemType != ListItemType.Item && e.Item.ItemType != ListItemType.AlternatingItem) return;
 
             var cmdDelete = e.Item.FindControl("cmdDelete") as ImageButton;
@@ -62,19 +62,20 @@ namespace BugNET.Issues.UserControls
 
             // allow delete if user had the permission, the project admin or a super user trying to delete the comment.
             if (!UserManager.IsInRole(ProjectId, Common.Permission.DeleteParentIssue.ToString()) &&
-                !UserManager.IsSuperUser() && !UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)) return;
+                !UserManager.IsSuperUser() &&
+                !UserManager.IsInRole(ProjectId, Globals.ProjectAdministratorRole)) return;
 
             cmdDelete.Visible = true;
-            cmdDelete.OnClientClick = string.Format("return confirm('{0}');", GetLocalResourceObject("RemoveParentIssue"));
-		}
+            cmdDelete.OnClientClick = $"return confirm('{GetLocalString("RemoveParentIssue")}');";
+        }
 
         /// <summary>
         /// GRDs the bugs item command.
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.Web.UI.WebControls.DataGridCommandEventArgs"/> instance containing the event data.</param>
-		protected void GrdBugsItemCommand(Object s, DataGridCommandEventArgs e) 
-		{
+        protected void GrdBugsItemCommand(object s, DataGridCommandEventArgs e)
+        {
             var commandArgument = e.CommandArgument.ToString();
             var commandName = e.CommandName.ToLower().Trim();
             var currentIssueId = Globals.NewId;
@@ -94,7 +95,8 @@ namespace BugNET.Issues.UserControls
                     IssueId = IssueId,
                     CreatedUserName = Security.GetUserName(),
                     DateChanged = DateTime.Now,
-                    FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "ParentIssue", "Parent Issue"),
+                    FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "ParentIssue",
+                        "Parent Issue"),
                     OldValue = string.Empty,
                     NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Deleted", "Deleted"),
                     TriggerLastUpdateChange = true
@@ -102,23 +104,23 @@ namespace BugNET.Issues.UserControls
 
                 IssueHistoryManager.SaveOrUpdate(history);
 
-                var changes = new List<IssueHistory> { history };
+                var changes = new List<IssueHistory> {history};
 
                 IssueNotificationManager.SendIssueNotifications(IssueId, changes);
             }
 
             BindRelated();
-		}
+        }
 
         /// <summary>
         /// Adds the related issue.
         /// </summary>
         /// <param name="s">The s.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
-		protected void AddRelatedIssue(Object s, EventArgs e) 
-		{
-			if (IssueIdTextBox.Text == String.Empty)
-				return;
+        protected void AddRelatedIssue(object s, EventArgs e)
+        {
+            if (IssueIdTextBox.Text == string.Empty)
+                return;
 
             if (!Page.IsValid) return;
 
@@ -135,7 +137,8 @@ namespace BugNET.Issues.UserControls
                 IssueId = IssueId,
                 CreatedUserName = Security.GetUserName(),
                 DateChanged = DateTime.Now,
-                FieldChanged = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "ParentIssue", "Parent Issue"),
+                FieldChanged =
+                    ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "ParentIssue", "Parent Issue"),
                 OldValue = string.Empty,
                 NewValue = ResourceStrings.GetGlobalResource(GlobalResources.SharedResources, "Added", "Added"),
                 TriggerLastUpdateChange = true
@@ -143,13 +146,13 @@ namespace BugNET.Issues.UserControls
 
             IssueHistoryManager.SaveOrUpdate(history);
 
-            var changes = new List<IssueHistory> { history };
+            var changes = new List<IssueHistory> {history};
 
             IssueNotificationManager.SendIssueNotifications(IssueId, changes);
 
-            IssueIdTextBox.Text = String.Empty;
+            IssueIdTextBox.Text = string.Empty;
             BindRelated();
-		}
+        }
 
         #region IIssueTab Members
 
@@ -159,8 +162,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The issue id.</value>
         public int IssueId
         {
-            get { return ViewState.Get("IssueId", 0); }
-            set { ViewState.Set("IssueId", value); }
+            get => ViewState.Get("IssueId", 0);
+            set => ViewState.Set("IssueId", value);
         }
 
         /// <summary>
@@ -169,8 +172,8 @@ namespace BugNET.Issues.UserControls
         /// <value>The project id.</value>
         public int ProjectId
         {
-            get { return ViewState.Get("ProjectId", 0); }
-            set { ViewState.Set("ProjectId", value); }
+            get => ViewState.Get("ProjectId", 0);
+            set => ViewState.Set("ProjectId", value);
         }
 
 
@@ -181,14 +184,15 @@ namespace BugNET.Issues.UserControls
         {
             BindRelated();
 
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.DeleteParentIssue.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.DeleteParentIssue.ToString()))
                 IssuesDataGrid.Columns[4].Visible = false;
 
             //check users role permission for adding a related issue
-            if (!Page.User.Identity.IsAuthenticated || !UserManager.HasPermission(ProjectId, Common.Permission.AddParentIssue.ToString()))
+            if (!Page.User.Identity.IsAuthenticated ||
+                !UserManager.HasPermission(ProjectId, Common.Permission.AddParentIssue.ToString()))
                 AddParentIssuePanel.Visible = false;
         }
-
 
         #endregion
     }

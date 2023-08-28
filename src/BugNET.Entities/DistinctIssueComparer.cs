@@ -4,7 +4,6 @@ namespace BugNET.Entities
 {
     public class DistinctIssueComparer : IEqualityComparer<Issue>
     {
-
         #region IEqualityComparer<Issue> Members
 
         /// <summary>
@@ -17,7 +16,7 @@ namespace BugNET.Entities
         {
             if (ReferenceEquals(x, y)) return true;
 
-            if (ReferenceEquals(x, null) || ReferenceEquals(y, null)) 
+            if (ReferenceEquals(x, null) || ReferenceEquals(y, null))
                 return false;
 
             return x.Id == y.Id;

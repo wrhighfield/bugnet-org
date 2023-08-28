@@ -9,7 +9,8 @@ namespace BugNET.BLL
 {
     public static class IssueHistoryManager
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Saves the issue history.
@@ -27,7 +28,8 @@ namespace BugNET.BLL
             issueHistoryToSave.Id = tempId;
 
             if (issueHistoryToSave.TriggerLastUpdateChange)
-                DataProviderManager.Provider.UpdateIssueLastUpdated(issueHistoryToSave.IssueId, issueHistoryToSave.CreatedUserName);
+                DataProviderManager.Provider.UpdateIssueLastUpdated(issueHistoryToSave.IssueId,
+                    issueHistoryToSave.CreatedUserName);
 
             return true;
         }

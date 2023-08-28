@@ -9,7 +9,8 @@ namespace BugNET.MercurialChangeGroupHook
 {
     public static class Program
     {
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog Log =
+            LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
         /// Executed by the external hook
@@ -40,7 +41,7 @@ namespace BugNET.MercurialChangeGroupHook
                 // get all the change sets for the revision from the log
                 var changeSets =
                     hook.Repository.Log(new LogCommand()
-                        .WithRevision(RevSpec.From(hook.FirstRevision)))
+                            .WithRevision(RevSpec.From(hook.FirstRevision)))
                         .ToArray();
 
                 Log.InfoFormat("MercurialChangeGroupHook: Found [{0}] change sets", changeSets.Length);
@@ -67,7 +68,8 @@ namespace BugNET.MercurialChangeGroupHook
                     }
                     else
                     {
-                        Log.Error("MercurialChangeGroupHook: Unauthorized access, please check the user name and password settings");
+                        Log.Error(
+                            "MercurialChangeGroupHook: Unauthorized access, please check the user name and password settings");
                         Environment.Exit(1);
                     }
                 }
@@ -86,12 +88,13 @@ namespace BugNET.MercurialChangeGroupHook
             }
             catch (Exception ex)
             {
-                Log.FatalFormat("MercurialChangeGroupHook: An error occurred while processing: {0} \n\n {1}", ex.Message, ex.StackTrace);
+                Log.FatalFormat("MercurialChangeGroupHook: An error occurred while processing: {0} \n\n {1}",
+                    ex.Message, ex.StackTrace);
                 Environment.Exit(1);
-            } 
+            }
         }
 
-        static void ConfigureLogger()
+        private static void ConfigureLogger()
         {
             if (ConfigureAdoNetAppender()) return;
 
