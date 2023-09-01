@@ -53,7 +53,9 @@ public static class Program
                 endpoints.MapRazorPages();
             });
 
-        app.MigrateDatabase(app.Services.GetRequiredService<Logger>());
-        app.Run();
+        app
+            .ApplyIdentitySchema(app.Services.GetRequiredService<Logger>())
+            .ApplyBugnetSchema(app.Services.GetRequiredService<Logger>())
+            .Run();
     }
 }

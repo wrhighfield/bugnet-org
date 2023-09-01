@@ -6,6 +6,8 @@
         /// Connection string name found in the settings.json files, must match
         /// </summary>
         public const string BugNetConnectionStringName = "BugNetConnection";
+
+        public const string IdentityConnectionStringName = BugNetConnectionStringName;
         public const string BugNetSchema = "BugNet";
         public const string LogsTableName = "Logs";
     }

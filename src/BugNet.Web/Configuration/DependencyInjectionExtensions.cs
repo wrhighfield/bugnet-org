@@ -12,26 +12,37 @@ internal static class DependencyInjectionExtensions
 {
     public static WebApplicationBuilder RegisterSqlServer(this WebApplicationBuilder builder)
     {
-        var connectionString =
+        var bugNetConnectionString =
             builder
                 .Configuration
                 .GetConnectionString(DataConstants.BugNetConnectionStringName) ??
             throw new InvalidOperationException($"Connection string '{DataConstants.BugNetConnectionStringName}' not found.");
 
+        var identityConnectionString =
+            builder
+                .Configuration
+                .GetConnectionString(DataConstants.IdentityConnectionStringName) ??
+            throw new InvalidOperationException($"Connection string '{DataConstants.IdentityConnectionStringName}' not found.");
+
+        builder
+            .Services
+            .AddDbContext<IdentityDbContext>(options =>
+                options.UseSqlServer(identityConnectionString));
+
+        builder
+            .Services
+            .AddIdentity<ApplicationUser, ApplicationRole>(options => options.SignIn.RequireConfirmedAccount = true)
+            .AddDefaultUI()
+            .AddEntityFrameworkStores<IdentityDbContext>();
+
         builder
             .Services
             .AddDbContext<BugNetDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlServer(bugNetConnectionString));
 
         builder
             .Services
             .AddDatabaseDeveloperPageExceptionFilter();
-
-        builder
-            .Services
-            .AddIdentity<BugNetUser, BugNetRole>(options => options.SignIn.RequireConfirmedAccount = true)
-            .AddDefaultUI()
-            .AddEntityFrameworkStores<BugNetDbContext>();
 
         return builder;
     }

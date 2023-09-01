@@ -15,7 +15,7 @@
         public string DisplayName { get; set; }
 
         [ForeignKey("AspNetUser")]
+        [Required]
         public Guid UserId { get; set; }
-        public virtual BugNetUser User { get; set; }
     }
 }

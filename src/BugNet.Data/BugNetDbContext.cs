@@ -2,7 +2,7 @@
 
 namespace BugNet.Data
 {
-    public class BugNetDbContext : IdentityDbContext<BugNetUser, BugNetRole, Guid>
+    public class BugNetDbContext : DbContext
     {
         public BugNetDbContext(DbContextOptions<BugNetDbContext> options)
             : base(options)
@@ -10,12 +10,18 @@ namespace BugNet.Data
         }
 
         public DbSet<Log> Logs { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+        public DbSet<Role> Roles { get; set; }
         public DbSet<UserProfile> UserProfiles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            //modelBuilder.Ignore<Log>();
+
+            modelBuilder.Entity<Role>()
+                .HasMany(e => e.Permissions)
+                .WithMany(e => e.Roles)
+                .UsingEntity("RolePermissions");
         }
 
         // design support for everything in a different assembly
