@@ -15,8 +15,8 @@ internal static class DependencyInjectionExtensions
         var connectionString =
             builder
                 .Configuration
-                .GetConnectionString("BugNetConnection") ??
-            throw new InvalidOperationException("Connection string 'BugNetConnection' not found.");
+                .GetConnectionString(DataConstants.BugNetConnectionStringName) ??
+            throw new InvalidOperationException($"Connection string '{DataConstants.BugNetConnectionStringName}' not found.");
 
         builder
             .Services
@@ -40,8 +40,8 @@ internal static class DependencyInjectionExtensions
         var connectionString =
             builder
                 .Configuration
-                .GetConnectionString("BugNetConnection") ??
-            throw new InvalidOperationException("Connection string 'BugNetConnection' not found.");
+                .GetConnectionString(DataConstants.BugNetConnectionStringName) ??
+            throw new InvalidOperationException($"Connection string '{DataConstants.BugNetConnectionStringName}' not found.");
 
         var switchLogger = new LoggingLevelSwitch(LogEventLevel.Warning);
 
@@ -53,17 +53,17 @@ internal static class DependencyInjectionExtensions
                 connectionString: connectionString,
                 sinkOptions: new MSSqlServerSinkOptions
                 {
-                    TableName = "Logs",
-                    SchemaName = "BugNet",
+                    TableName = DataConstants.LogsTableName,
+                    SchemaName = DataConstants.BugNetSchema,
                     AutoCreateSqlTable = false
                 },
                 columnOptions: new ColumnOptions
                 {
                     AdditionalColumns = new Collection<SqlColumn>
                     {
-                        new() { DataType = SqlDbType.NVarChar, ColumnName = "IpAddress", AllowNull = true, DataLength = 55 },
-                        new() { DataType = SqlDbType.NVarChar, ColumnName = "UserName", AllowNull = true , DataLength = 255 },
-                        new() { DataType = SqlDbType.NVarChar, ColumnName = "Resource", AllowNull = true, DataLength = 1000 }
+                        new() { DataType = SqlDbType.NVarChar, ColumnName = nameof(Data.Entities.Log.IpAddress), AllowNull = true, DataLength = 55 },
+                        new() { DataType = SqlDbType.NVarChar, ColumnName = nameof(Data.Entities.Log.UserName), AllowNull = true , DataLength = 255 },
+                        new() { DataType = SqlDbType.NVarChar, ColumnName = nameof(Data.Entities.Log.Resource), AllowNull = true, DataLength = 1000 }
                     }
                 })
             .CreateLogger();

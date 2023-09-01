@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace BugNet.Data.Entities
+﻿namespace BugNet.Data.Entities
 {
-    [Table("UserProfiles", Schema = "BugNet")]
+    [Table("UserProfiles", Schema = DataConstants.BugNetSchema)]
     public class UserProfile
     {
         [Key]

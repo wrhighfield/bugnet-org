@@ -30,7 +30,11 @@ namespace BugNet.Data
                         .Build();
 
                 var builder = new DbContextOptionsBuilder<BugNetDbContext>();
-                var connectionString = configuration.GetConnectionString("BugNetConnection");
+                var connectionString = configuration.GetConnectionString(DataConstants.BugNetConnectionStringName);
+                if (string.IsNullOrWhiteSpace(connectionString))
+                {
+                    throw new InvalidOperationException($"Connection string '{DataConstants.BugNetConnectionStringName}' not found.");
+                }
                 builder.UseSqlServer(connectionString);
                 return new BugNetDbContext(builder.Options);
             }

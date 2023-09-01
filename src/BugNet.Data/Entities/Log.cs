@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿namespace BugNet.Data.Entities;
 
-namespace BugNet.Data.Entities;
-
-[Table("Logs", Schema = "BugNet")]
+[Table(DataConstants.LogsTableName, Schema = DataConstants.BugNetSchema)]
 public class Log
 {
     [Key]
