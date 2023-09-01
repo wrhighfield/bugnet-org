@@ -38,7 +38,7 @@ namespace BugNET.Tests.Helpers
                     var issue = new Issue
                     {
                         ProjectId = p.Id,
-                        Id = Globals.NEW_ID,
+                        Id = Globals.NewId,
                         Title = preTitle + RandomStrings.RandomString(30),
                         CreatorUserName = createdby,
                         DateCreated = DateTime.Now,

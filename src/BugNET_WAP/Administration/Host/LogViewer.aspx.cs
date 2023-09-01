@@ -24,8 +24,8 @@ namespace BugNET.Administration.Host
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!UserManager.IsSuperUser())
-                ErrorRedirector.TransferToLoginPage(this);
-
+                ErrorRedirectHelper.TransferToLoginPage(Context);
+            
             if (Page.IsPostBack) return;
 
             SortField = "Date";

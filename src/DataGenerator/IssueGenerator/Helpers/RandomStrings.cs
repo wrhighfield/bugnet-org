@@ -11,10 +11,10 @@ namespace IssueGenerator.Helpers
         {
             // These symbols are setup to give a decent-ish sort of test data.
             // no HTML XSS injection as "<" and ">" and """ are not here
-            string symbols = @" ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJ" +
-                @"KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmn" + 
-                @"opqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR" + 
-            @"STUVWXYZabcdefghijklmnopqrstuvwxyz0192837465 ! =-+_ @#$ %^&*( )?, ./: ;'{}] [|\~`";
+            var symbols = @" ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJ" +
+                          @"KLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmn" + 
+                          @"opqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR" + 
+                          @"STUVWXYZabcdefghijklmnopqrstuvwxyz0192837465 ! =-+_ @#$ %^&*( )?, ./: ;'{}] [|\~`";
             
             var pass = new StringBuilder();
 

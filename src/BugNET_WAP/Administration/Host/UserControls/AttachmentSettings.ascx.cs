@@ -6,7 +6,7 @@ using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
-    public partial class AttachmentSettings : System.Web.UI.UserControl, IEditHostSettingControl
+    public partial class AttachmentSettings : BugNetUserControl, IEditHostSettingControl
     {
         /// <summary>
         /// Handles the Load event of the Page control.

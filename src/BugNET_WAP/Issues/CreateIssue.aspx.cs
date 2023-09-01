@@ -34,7 +34,7 @@ namespace BugNET.Issues
 
                 // If don't know project or issue then redirect to something missing page
                 if (ProjectId == 0)
-                    ErrorRedirector.TransferToSomethingMissingPage(Page);
+                    ErrorRedirectHelper.TransferToSomethingMissingPage(Context);
 
                 CurrentProject = ProjectManager.GetById(ProjectId);
                 litProject.Text = CurrentProject.Name;
@@ -42,13 +42,13 @@ namespace BugNET.Issues
 
                 if (CurrentProject == null)
                 {
-                    ErrorRedirector.TransferToNotFoundPage(Page);
+                    ErrorRedirectHelper.TransferToNotFoundPage(Context);
                     return;
                 }
 
                 //security check: add issue
                 if (!UserManager.HasPermission(ProjectId, Common.Permission.AddIssue.ToString()))
-                    ErrorRedirector.TransferToLoginPage(Page);
+                    ErrorRedirectHelper.TransferToLoginPage(Context);
 
                 BindOptions();
                 BindDefaultValues();

@@ -78,7 +78,7 @@ namespace BugNET.UI
                         if (!string.IsNullOrEmpty(sessionValue))
                             if (Session.SessionID != sessionValue)
                                 // we have session timeout condition!
-                                ErrorRedirector.TransferToSessionExpiredPage(Page);
+                                ErrorRedirectHelper.TransferToSessionExpiredPage(Context);
                     }
                 }
 
@@ -89,7 +89,7 @@ namespace BugNET.UI
             if (!HostSettingManager.Get(HostSettingNames.AnonymousAccess, false) &&
                 !User.Identity.IsAuthenticated &&
                 !Request.Url.LocalPath.EndsWith("Default.aspx"))
-                ErrorRedirector.TransferToLoginPage(Page);
+                ErrorRedirectHelper.TransferToLoginPage(Context);
 
             int projectId;
             try
@@ -117,7 +117,7 @@ namespace BugNET.UI
                 //
                 // If this page is used consistently it will fool a hacker into thinking an actual 
                 // DB QUERY executed using the supplied attack. ;)
-                ErrorRedirector.TransferToNotFoundPage(Page);
+                ErrorRedirectHelper.TransferToNotFoundPage(Context);
                 return;
             }
 
@@ -130,7 +130,7 @@ namespace BugNET.UI
                 // 1. Anonymous user
                 // 2. The project type is private
                 case false when project.AccessType == ProjectAccessType.Private:
-                    ErrorRedirector.TransferToLoginPage(Page);
+                    ErrorRedirectHelper.TransferToLoginPage(Context);
                     return;
                 // Security check using the following rules:
                 // 1. Not Super user
@@ -140,7 +140,7 @@ namespace BugNET.UI
                 case true when !UserManager.IsSuperUser() &&
                                project.AccessType == ProjectAccessType.Private &&
                                !ProjectManager.IsUserProjectMember(User.Identity.Name, projectId):
-                    ErrorRedirector.TransferToLoginPage(Page);
+                    ErrorRedirectHelper.TransferToLoginPage(Context);
                     break;
             }
         }

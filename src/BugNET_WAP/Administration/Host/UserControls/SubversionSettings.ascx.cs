@@ -6,7 +6,7 @@ using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
-    public partial class SubversionSettings : System.Web.UI.UserControl, IEditHostSettingControl
+    public partial class SubversionSettings : BugNetUserControl, IEditHostSettingControl
     {
         /// <summary>
         /// Handles the Load event of the Page control.

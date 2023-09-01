@@ -2,109 +2,54 @@
 using BugNET.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace IssueGenerator.Helpers
 {
     /// <summary>
     /// Returns random data about supplied Project parameters
     /// </summary>
-    class RandomProjectData
+    internal class RandomProjectData
     {
-        private Random rng;
-        private Project p;
+        private IEnumerable<ITUser> users;
+        private IEnumerable<Category> categories;
+        private IEnumerable<Milestone> milestones;
+        private IEnumerable<Priority> priorities;
+        private IEnumerable<IssueType> issueTypes;
+        private IEnumerable<Resolution> resolutions;
+        private IEnumerable<Status> statuses;
 
-        public RandomProjectData(Project proj)
+        public RandomProjectData SetProject(Project project)
         {
-            rng = new Random();
-            setProject(proj);
+            users = UserManager.GetUsersByProjectId(project.Id);
+            categories = CategoryManager.GetByProjectId(project.Id);
+            milestones = MilestoneManager.GetByProjectId(project.Id);
+            priorities = PriorityManager.GetByProjectId(project.Id);
+            issueTypes = IssueTypeManager.GetByProjectId(project.Id);
+            resolutions = ResolutionManager.GetByProjectId(project.Id);
+            statuses = StatusManager.GetByProjectId(project.Id);
+            return this;
         }
 
-        public void setProject(Project proj)
-        {
-            p = proj;
-        }
+        public string GetUserName() =>
+            users.OrderBy(_ => Guid.NewGuid()).FirstOrDefault()?.UserName;
 
-        /// <summary>
-        /// Returns a valid random username.
-        /// </summary>
-        /// <param name="projectid"></param>
-        /// <returns>username</returns>
-        public string GetUsername()
-        {
-            List<ITUser> usrs = UserManager.GetUsersByProjectId(p.Id);
-            return usrs[rng.Next(0, usrs.Count)].UserName;          
-        }
+        public Category GetCategory() =>
+            categories.OrderBy(_ => Guid.NewGuid()).First();
 
-             
-        /// <summary>
-        /// Returns a valid project category.
-        /// </summary>
-        /// <param name="p">A Project</param>
-        /// <returns>category</returns>
-        public Category GetCategory()
-        {
-            List<Category> cats = CategoryManager.GetByProjectId(p.Id);
-            return cats[rng.Next(0, cats.Count)];
-        }
+        public Milestone GetMilestone() =>
+            milestones.OrderBy(_ => Guid.NewGuid()).First();
 
-        /// <summary>
-        /// Returns a valid project Milestone.
-        /// </summary>
-        /// <param name="p">A Project</param>
-        /// <returns>Random Milestone</returns>
-        public Milestone GetMilestone()
-        {
-            List<Milestone> miles = MilestoneManager.GetByProjectId(p.Id);
-            return miles[rng.Next(0, miles.Count)];
-        }
+        public Priority GetPriority() =>
+            priorities.OrderBy(_ => Guid.NewGuid()).First();
 
-        /// <summary>
-        /// Returns a valid project Priority.
-        /// </summary>
-        /// <param name="p">A Project</param>
-        /// <returns>Random Priority</returns>
-        public Priority GetPriority()
-        {
-            List<Priority> prs = PriorityManager.GetByProjectId(p.Id);
-            return prs[rng.Next(0, prs.Count)];
-        }
+        public IssueType GetIssueType() =>
+            issueTypes.OrderBy(_ => Guid.NewGuid()).First();
 
-        /// <summary>
-        /// Returns a valid project IssueType.
-        /// </summary>
-        /// <param name="p">A Project</param>
-        /// <returns>Random IssueType</returns>
-        public IssueType GetIssueType()
-        {
-            List<IssueType> IssueTypes = IssueTypeManager.GetByProjectId(p.Id);
-            return IssueTypes[rng.Next(0, IssueTypes.Count)];
-        }
+        public Resolution GetResolution() =>
+            resolutions.OrderBy(_ => Guid.NewGuid()).First();
 
-
-        /// <summary>
-        /// Returns a valid project Resolution.
-        /// </summary>
-        /// <param name="p">A Project</param>
-        /// <returns>Random Resolution</returns>
-        public Resolution GetResolution()
-        {
-            List<Resolution> Resolutions = ResolutionManager.GetByProjectId(p.Id);
-            return Resolutions[rng.Next(0, Resolutions.Count)];
-        }
-
-
-        /// <summary>
-        /// Returns a valid project Status.
-        /// </summary>
-        /// <param name="p">A Project</param>
-        /// <returns>Random Status</returns>
-        public Status GetStatus()
-        {
-            List<Status> Statuses = StatusManager.GetByProjectId(p.Id);
-            return Statuses[rng.Next(0, Statuses.Count)];
-        }
-
-
-
+        public Status GetStatus() =>
+            statuses.OrderBy(_ => Guid.NewGuid()).First();
     }
 }

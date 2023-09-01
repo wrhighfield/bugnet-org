@@ -37,7 +37,7 @@ namespace BugNET.Projects
 
             // BGN-1379
             if (ProjectId.Equals(0))
-                ErrorRedirector.TransferToNotFoundPage(Page);
+                ErrorRedirectHelper.TransferToNotFoundPage(Context);
 
             BindProjectSummary();
 

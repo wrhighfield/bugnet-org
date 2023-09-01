@@ -107,10 +107,10 @@ meta:resourcekey="Page" Title="Change Log" CodeBehind="ChangeLog.aspx.cs" %>
                             <ItemTemplate>
                                 <tr>
                                     <td>
-                                        <asp:HyperLink runat="server" NavigateUrl='<%# $"~/Issues/IssueDetail.aspx?id={DataBinder.Eval(Container.DataItem, "Id")}" %>'><%#DataBinder.Eval(Container.DataItem, "FullId") %></asp:HyperLink>
+                                        <asp:HyperLink runat="server" NavigateUrl='<%# string.Format("~/Issues/IssueDetail.aspx?id={0}", DataBinder.Eval(Container.DataItem, "Id")) %>'><%#DataBinder.Eval(Container.DataItem, "FullId") %></asp:HyperLink>
                                     </td>
                                     <td>
-                                        <asp:HyperLink runat="server" NavigateUrl='<%# $"~/Issues/IssueDetail.aspx?id={DataBinder.Eval(Container.DataItem, "Id")}" %>'><%#DataBinder.Eval(Container.DataItem, "Title") %></asp:HyperLink>
+                                        <asp:HyperLink runat="server" NavigateUrl='<%# string.Format("~/Issues/IssueDetail.aspx?id={0}", DataBinder.Eval(Container.DataItem, "Id")) %>'><%#DataBinder.Eval(Container.DataItem, "Title") %></asp:HyperLink>
                                     </td>
                                     <td>
                                         <asp:Label ID="lblComponent" Text='<%# DataBinder.Eval(Container.DataItem, "CategoryName") %>'

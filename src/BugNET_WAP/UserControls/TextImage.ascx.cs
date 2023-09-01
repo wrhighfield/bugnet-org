@@ -2,6 +2,7 @@ using BugNET.Common;
 
 namespace BugNET.UserControls
 {
+    using UI;
     using System;
 
     /// <summary>
@@ -10,7 +11,7 @@ namespace BugNET.UserControls
     /// is used in the DisplayIssues.ascx control to display priorities, status
     /// values, and milestones.
     /// </summary>
-    public partial class TextImage : System.Web.UI.UserControl
+    public partial class TextImage : BugNetUserControl
     {
         /// <summary>
         /// Gets or sets the text.

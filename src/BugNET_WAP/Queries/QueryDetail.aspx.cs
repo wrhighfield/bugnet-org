@@ -57,7 +57,7 @@ namespace BugNET.Queries
             ProjectId = Request.Get("pid", Globals.NewId);
 
             // If no project id or query id then redirect away
-            if (ProjectId == 0) ErrorRedirector.TransferToSomethingMissingPage(Page);
+            if (ProjectId == 0) ErrorRedirectHelper.TransferToSomethingMissingPage(Context);
 
             if (!Page.User.Identity.IsAuthenticated || (queryId != 0 &&
                                                         !UserManager.HasPermission(ProjectId,

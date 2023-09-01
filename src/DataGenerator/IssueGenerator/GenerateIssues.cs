@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IssueGenerator.Helpers;
 using BugNET.Entities;
@@ -13,92 +13,89 @@ namespace IssueGenerator
         /// <summary>
         /// Number of issues to create
         /// </summary>
-        const int CNST_NumIssues = 1000;
-
-        public DateTime GetRandomDate()
-        {
-            TimeSpan timeSpan = DateTime.Today - DateTime.Today.AddMonths(-2);
-            var randomTest = new Random();
-            TimeSpan newSpan = new TimeSpan(0, randomTest.Next(0, (int)timeSpan.TotalMinutes), 0);
-            DateTime newDate = DateTime.Today + newSpan;
-            return newDate;
-        }
-
-        private int RandomNumber(int min, int max)
-        {
-            Random random = new Random();
-            return random.Next(min, max);
-        }
+        private const int NumberOfIssuesToCreate = 1000;
         
         [TestMethod]
         public void CreateRandomIssues()
         {                        
+            var projects = ProjectManager.GetAllProjects();
 
-            List<Project> ps = ProjectManager.GetAllProjects();
-            if (ps.Count > 0) {
+            if (!projects.Any()) return;
 
-                Project p = ps[1];
+            var project = projects.OrderBy(_ => Guid.NewGuid()).First();
 
-                int StartIssueCount = IssueManager.GetByProjectId(p.Id).Count;
+            var startIssueCount = IssueManager.GetByProjectId(project.Id).Count;
 
-                RandomProjectData prand = new RandomProjectData(p);
+            var randomProjectData = new RandomProjectData().SetProject(project);
 
-                for (int i = 0; i < CNST_NumIssues; i++)
-                {
-                    // Get Random yet valid data for the current project
-                    Category c = prand.GetCategory();
-                    Milestone ms = prand.GetMilestone();
-                    Status st = prand.GetStatus();
-                    Priority pr = prand.GetPriority();
-                    IssueType isst = prand.GetIssueType();
-                    Resolution res = prand.GetResolution();
+            for (var i = 0; i < NumberOfIssuesToCreate; i++)
+            {
+                // Get Random yet valid data for the current project
+                var category = randomProjectData.GetCategory();
+                var milestone = randomProjectData.GetMilestone();
+                var status = randomProjectData.GetStatus();
+                var priority = randomProjectData.GetPriority();
+                var issueType = randomProjectData.GetIssueType();
+                var resolution = randomProjectData.GetResolution();
 
-                    string assigned = prand.GetUsername();
-                    // creator is also the owner
-                    string createdby = prand.GetUsername();
+                var assigned = randomProjectData.GetUserName();
+                // creator is also the owner
+                var creatorUserName = randomProjectData.GetUserName();
 
-                    DateTime date = GetRandomDate();
+                var date = GetRandomDate();
 
-                    Issue iss = new Issue(){ 
-                        Id =  0, 
-                        ProjectId = p.Id,
-                        Title = RandomStrings.RandomString(30),
-                        Description = RandomStrings.RandomString(250),
-                        CategoryId = c.Id, 
-                        PriorityId = pr.Id, 
-                        StatusId = st.Id, 
-                        IssueTypeId = isst.Id,
-                        MilestoneId = ms.Id, 
-                        AffectedMilestoneId = ms.Id, 
-                        ResolutionId = res.Id,
-                        CreatorUserName = createdby,
-                        LastUpdateUserName = createdby,
-                        OwnerUserName = assigned,
-                        AssignedUserName = assigned,
-                        DateCreated = date,
-                        LastUpdate = date,
-                        DueDate = GetRandomDate(),
-                        Disabled = false,
-                        TimeLogged = RandomNumber(1, 24),
-                        Votes = 0
+                var iss = new Issue
+                { 
+                    Id =  0, 
+                    ProjectId = project.Id,
+                    Title = RandomStrings.RandomString(30),
+                    Description = RandomStrings.RandomString(250),
+                    CategoryId = category.Id, 
+                    PriorityId = priority.Id, 
+                    StatusId = status.Id, 
+                    IssueTypeId = issueType.Id,
+                    MilestoneId = milestone.Id, 
+                    AffectedMilestoneId = milestone.Id, 
+                    ResolutionId = resolution.Id,
+                    CreatorUserName = creatorUserName,
+                    LastUpdateUserName = creatorUserName,
+                    OwnerUserName = assigned,
+                    AssignedUserName = assigned,
+                    DateCreated = date,
+                    LastUpdate = date,
+                    DueDate = GetRandomDate(),
+                    Disabled = false,
+                    TimeLogged = RandomNumber(1, 24),
+                    Votes = 0
                          
-                    };
-                    try
-                    {
-
-                        IssueManager.SaveOrUpdate(iss);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
+                };
+                try
+                {
+                    IssueManager.SaveOrUpdate(iss);
                 }
-
-                int EndIssueCount = IssueManager.GetByProjectId(p.Id).Count;
-
-                // Did we create only CNST_SmallIssues issues?
-                Assert.IsTrue(EndIssueCount == StartIssueCount + CNST_NumIssues);
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
+
+            var endIssueCount = IssueManager.GetByProjectId(project.Id).Count;
+            Assert.IsTrue(endIssueCount == startIssueCount + NumberOfIssuesToCreate);
+        }
+
+        private static DateTime GetRandomDate()
+        {
+            var timeSpan = DateTime.Today - DateTime.Today.AddMonths(-2);
+            var randomTest = new Random();
+            var newSpan = new TimeSpan(0, randomTest.Next(0, (int)timeSpan.TotalMinutes), 0);
+            var newDate = DateTime.Today + newSpan;
+            return newDate;
+        }
+
+        private static int RandomNumber(int min, int max)
+        {
+            var random = new Random();
+            return random.Next(min, max);
         }
     }
 }

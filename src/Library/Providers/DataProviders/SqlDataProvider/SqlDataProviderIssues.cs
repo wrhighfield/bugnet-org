@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using BugNET.Common;
 using BugNET.Entities;
 
@@ -407,19 +408,29 @@ namespace BugNET.Providers.DataProviders
             using (var sqlCmd = new SqlCommand())
             {
                 var sortSql = string.Empty;
-                var sql =
-                    "SELECT iv.*, bin.UserId AS NotificationUserId, uv.UserName AS NotificationUserName, uv.DisplayName AS NotificationDisplayName FROM BugNet_IssuesView iv " +
-                    "INNER JOIN BugNet_IssueNotifications bin ON iv.IssueId = bin.IssueId INNER JOIN BugNet_UserView uv ON bin.UserId = uv.UserId  WHERE bin.UserId = @NotificationUserId " +
-                    "AND iv.[Disabled] = 0 AND iv.ProjectDisabled = 0 AND ((@ExcludeClosedStatus = 0) OR (iv.IsClosed = 0)) ";
+                var sql = @"SELECT iv.*
+, notifications.NotificationUserId
+, notifications.NotificationUserName
+, notifications.NotificationDisplayName 
+FROM BugNet_IssuesView iv 
+CROSS JOIN (select TOP (1) uv.UserId AS NotificationUserId
+, uv.UserName AS NotificationUserName
+, uv.DisplayName AS NotificationDisplayName 
+FROM BugNet_UserView uv
+LEFT JOIN BugNet_IssueNotifications bin ON bin.UserId = uv.UserId 
+LEFT JOIN BugNet_ProjectNotifications pin ON pin.UserId = uv.UserId
+WHERE uv.UserId = @NotificationUserId) AS notifications
+WHERE iv.[Disabled] = 0 AND iv.ProjectDisabled = 0 
+AND ((@ExcludeClosedStatus = 0) OR (iv.IsClosed = 0)) ";
 
-                if (projects.Count > 0)
+                if (projects.Any())
                 {
                     var first = true;
 
                     foreach (var project in projects)
                     {
                         sql += first ? " AND (" : " OR ";
-                        sql += "iv.[ProjectId] = " + project.ToString();
+                        sql += "iv.[ProjectId] = " + project;
                         first = false;
                     }
 
@@ -469,7 +480,7 @@ namespace BugNET.Providers.DataProviders
 
                 sqlCmd.CommandText = sql;
                 AddParamToSqlCmd(sqlCmd, "@NotificationUserId", SqlDbType.UniqueIdentifier, 255,
-                    ParameterDirection.Input, userId);
+                    ParameterDirection.Input, Guid.Parse(userId.ToString()));
                 AddParamToSqlCmd(sqlCmd, "@ExcludeClosedStatus", SqlDbType.Bit, 0, ParameterDirection.Input,
                     excludeClosedStatus);
 

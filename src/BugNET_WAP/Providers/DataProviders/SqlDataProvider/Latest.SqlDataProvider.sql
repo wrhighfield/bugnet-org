@@ -695,3 +695,53 @@ WHERE
 ORDER BY DisplayName ASC
 GO
 
+ALTER PROCEDURE [dbo].[BugNet_Issue_GetMonitoredIssuesByUserName]
+  @UserName NVARCHAR(255),
+  @ExcludeClosedStatus BIT
+AS
+
+SET NOCOUNT ON
+
+DECLARE @NotificationUserId  UNIQUEIDENTIFIER
+
+EXEC dbo.BugNet_User_GetUserIdByUserName @UserName = @UserName, @UserId = @NotificationUserId OUTPUT
+
+SELECT 
+	iv.*
+	, notifications.NotificationUserId
+	, notifications.NotificationUserName
+	, notifications.NotificationDisplayName 
+FROM BugNet_IssuesView iv 
+CROSS JOIN (select TOP (1) uv.UserId AS NotificationUserId
+, uv.UserName AS NotificationUserName
+, uv.DisplayName AS NotificationDisplayName 
+FROM BugNet_UserView uv
+LEFT JOIN BugNet_IssueNotifications bin ON bin.UserId = uv.UserId 
+LEFT JOIN BugNet_ProjectNotifications pin ON pin.UserId = uv.UserId
+WHERE uv.UserId = @NotificationUserId) AS notifications
+WHERE iv.[Disabled] = 0 AND iv.ProjectDisabled = 0 
+AND ((@ExcludeClosedStatus = 0) OR (iv.IsClosed = 0))
+GO
+
+ALTER PROCEDURE [dbo].[BugNet_User_GetUsersByProjectId]
+	@ProjectId Int,
+	@ExcludeReadonlyUsers bit
+AS
+SELECT DISTINCT U.UserId, U.UserName, FirstName, LastName, DisplayName, Email FROM 
+	Users U
+JOIN BugNet_UserProjects
+	ON U.UserId = BugNet_UserProjects.UserId
+JOIN BugNet_UserProfiles
+	ON U.UserName = BugNet_UserProfiles.UserName
+JOIN  Memberships M 
+	ON U.UserId = M.UserId
+LEFT JOIN BugNet_UserRoles UR
+	ON U.UserId = UR.UserId 
+LEFT JOIN BugNet_Roles R
+	ON UR.RoleId = R.RoleId AND R.ProjectId = @ProjectId
+WHERE
+	BugNet_UserProjects.ProjectId = @ProjectId 
+	AND M.IsApproved = 1
+	AND (@ExcludeReadonlyUsers = 0 OR @ExcludeReadonlyUsers = 1 AND R.RoleName != 'Read Only')
+ORDER BY DisplayName ASC
+GO

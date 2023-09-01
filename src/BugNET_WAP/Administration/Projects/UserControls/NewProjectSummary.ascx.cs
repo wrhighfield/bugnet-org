@@ -7,7 +7,7 @@ namespace BugNET.Administration.Projects.UserControls
     /// <summary>
     ///		Summary description for NewProjectSummary.
     /// </summary>
-    public partial class NewProjectSummary : System.Web.UI.UserControl, IEditProjectControl
+    public partial class NewProjectSummary : BugNetUserControl, IEditProjectControl
     {
         protected void Page_Load(object sender, EventArgs e)
         {

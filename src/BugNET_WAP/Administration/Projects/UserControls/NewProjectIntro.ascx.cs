@@ -8,7 +8,7 @@ namespace BugNET.Administration.Projects.UserControls
     /// <summary>
     ///		Summary description for NewProjectIntro.
     /// </summary>
-    public partial class NewProjectIntro : System.Web.UI.UserControl, IEditProjectControl
+    public partial class NewProjectIntro : BugNetUserControl, IEditProjectControl
     {
         /// <summary>
         /// Handles the Load event of the Page control.

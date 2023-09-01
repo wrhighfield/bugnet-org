@@ -7,7 +7,7 @@ using BugNET.UI;
 
 namespace BugNET.Administration.Projects.UserControls
 {
-    public partial class ProjectNotifications : System.Web.UI.UserControl, IEditProjectControl
+    public partial class ProjectNotifications : BugNetUserControl, IEditProjectControl
     {
         /// <summary>
         /// Handles the Load event of the Page control.

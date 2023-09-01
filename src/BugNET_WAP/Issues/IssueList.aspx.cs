@@ -35,7 +35,7 @@ namespace BugNET.Issues
 
             // BGN-1379
             if (ProjectId.Equals(-1))
-                ErrorRedirector.TransferToNotFoundPage(Page);
+                ErrorRedirectHelper.TransferToNotFoundPage(Context);
 
             if (!User.Identity.IsAuthenticated)
             {

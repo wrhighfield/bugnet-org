@@ -5,7 +5,7 @@ using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
-    public partial class BasicSettings : System.Web.UI.UserControl, IEditHostSettingControl
+    public partial class BasicSettings : BugNetUserControl, IEditHostSettingControl
     {
         /// <summary>
         /// Handles the Load event of the Page control.

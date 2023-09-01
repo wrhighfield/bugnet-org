@@ -6,7 +6,7 @@ using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
-    public partial class NotificationSettings : System.Web.UI.UserControl, IEditHostSettingControl
+    public partial class NotificationSettings : BugNetUserControl, IEditHostSettingControl
     {
         protected void Page_Load(object sender, EventArgs e)
         {

@@ -36,14 +36,14 @@ namespace BugNET.Issues
 
                 // If don't know issue id then redirect to something missing page
                 if (IssueId == 0)
-                    ErrorRedirector.TransferToSomethingMissingPage(Page);
+                    ErrorRedirectHelper.TransferToSomethingMissingPage(Context);
 
                 //set up global properties
                 _currentIssue = IssueManager.GetById(IssueId);
 
                 if (_currentIssue == null || _currentIssue.Disabled)
                 {
-                    ErrorRedirector.TransferToNotFoundPage(Page);
+                    ErrorRedirectHelper.TransferToNotFoundPage(Context);
                     return;
                 }
 
@@ -51,29 +51,29 @@ namespace BugNET.Issues
                 var issueVisible = IssueManager.CanViewIssue(_currentIssue, Security.GetUserName());
 
                 //private issue check
-                if (!issueVisible) ErrorRedirector.TransferToLoginPage(Page);
+                if (!issueVisible) ErrorRedirectHelper.TransferToLoginPage(Context);
 
                 _currentProject = ProjectManager.GetById(_currentIssue.ProjectId);
 
                 if (_currentProject == null)
                 {
-                    ErrorRedirector.TransferToNotFoundPage(Page);
+                    ErrorRedirectHelper.TransferToNotFoundPage(Context);
                     return;
                 }
 
                 ProjectId = _currentProject.Id;
 
                 if (_currentProject.AccessType == ProjectAccessType.Private && !User.Identity.IsAuthenticated)
-                    ErrorRedirector.TransferToLoginPage(Page);
+                    ErrorRedirectHelper.TransferToLoginPage(Context);
                 else if (User.Identity.IsAuthenticated && _currentProject.AccessType == ProjectAccessType.Private
                                                        && !ProjectManager.IsUserProjectMember(User.Identity.Name,
                                                            ProjectId))
-                    ErrorRedirector.TransferToLoginPage(Page);
+                    ErrorRedirectHelper.TransferToLoginPage(Context);
 
                 BindValues(_currentIssue);
 
                 // Page.Title = string.Concat(_currentIssue.FullId, ": ", Server.HtmlDecode(_currentIssue.Title));
-                lblIssueNumber.Text = $"{_currentProject.Code}-{IssueId}";
+                lblIssueNumber.Text = $@"{_currentProject.Code}-{IssueId}";
                 ctlIssueTabs.Visible = true;
 
                 SetFieldSecurity();

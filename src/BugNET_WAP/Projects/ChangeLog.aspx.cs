@@ -41,7 +41,7 @@ namespace BugNET.Projects
             // If don't know project or issue then redirect to something missing page
             if (ProjectId == 0)
             {
-                ErrorRedirector.TransferToSomethingMissingPage(Page);
+                ErrorRedirectHelper.TransferToSomethingMissingPage(Context);
                 return;
             }
 
@@ -49,7 +49,7 @@ namespace BugNET.Projects
 
             if (p == null || p.Disabled)
             {
-                ErrorRedirector.TransferToSomethingMissingPage(Page);
+                ErrorRedirectHelper.TransferToSomethingMissingPage(Context);
                 return;
             }
 

@@ -1,8 +1,9 @@
-﻿using System;
+﻿using BugNET.UI;
+using System;
 
 namespace BugNET.UserControls
 {
-    public partial class PickDate : System.Web.UI.UserControl
+    public partial class PickDate : BugNetUserControl
     {
         /// <summary>
         /// Handles the Load event of the Page control.

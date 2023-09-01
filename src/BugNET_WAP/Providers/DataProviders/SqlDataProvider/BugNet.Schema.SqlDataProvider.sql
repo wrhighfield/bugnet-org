@@ -2489,18 +2489,21 @@ DECLARE @NotificationUserId  UNIQUEIDENTIFIER
 
 EXEC dbo.BugNet_User_GetUserIdByUserName @UserName = @UserName, @UserId = @NotificationUserId OUTPUT
 
-SELECT
-	iv.*,
-	bin.UserId AS NotificationUserId, 
-	uv.UserName AS NotificationUserName, 
-    uv.DisplayName AS NotificationDisplayName
+SELECT 
+	iv.*
+	, notifications.NotificationUserId
+	, notifications.NotificationUserName
+	, notifications.NotificationDisplayName 
 FROM BugNet_IssuesView iv 
-INNER JOIN BugNet_IssueNotifications bin ON iv.IssueId = bin.IssueId 
-INNER JOIN BugNet_UserView uv ON bin.UserId = uv.UserId
-WHERE bin.UserId = @NotificationUserId
-AND iv.[Disabled] = 0
-AND iv.ProjectDisabled = 0
-AND ((@ExcludeClosedStatus = 0) OR (iv.IsClosed = 0))
+CROSS JOIN (select TOP (1) uv.UserId AS NotificationUserId
+, uv.UserName AS NotificationUserName
+, uv.DisplayName AS NotificationDisplayName 
+FROM BugNet_UserView uv
+LEFT JOIN BugNet_IssueNotifications bin ON bin.UserId = uv.UserId 
+LEFT JOIN BugNet_ProjectNotifications pin ON pin.UserId = uv.UserId
+WHERE uv.UserId = @NotificationUserId) AS notifications
+WHERE iv.[Disabled] = 0 AND iv.ProjectDisabled = 0 
+AND ((@ExcludeClosedStatus = 0) OR (iv.IsClosed = 0)) 
 
 
 

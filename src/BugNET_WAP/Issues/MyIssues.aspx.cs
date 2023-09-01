@@ -331,7 +331,7 @@ namespace BugNET.Issues
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!User.Identity.IsAuthenticated)
-                ErrorRedirector.TransferToLoginPage(this);
+                ErrorRedirectHelper.TransferToLoginPage(Context);
 
             if (Page.IsPostBack) return;
 

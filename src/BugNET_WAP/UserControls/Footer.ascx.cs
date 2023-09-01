@@ -1,3 +1,4 @@
+using BugNET.UI;
 using System;
 
 namespace BugNET.UserControls
@@ -5,7 +6,7 @@ namespace BugNET.UserControls
     /// <summary>
     /// Footer user control
     /// </summary>
-    public partial class Footer : System.Web.UI.UserControl
+    public partial class Footer : BugNetUserControl
     {
         /// <summary>
         /// Handles the Load event of the Page control.

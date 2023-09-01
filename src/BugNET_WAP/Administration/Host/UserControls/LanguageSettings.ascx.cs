@@ -8,7 +8,7 @@ using BugNET.UI;
 
 namespace BugNET.Administration.Host.UserControls
 {
-    public partial class LanguageSettings : System.Web.UI.UserControl, IEditHostSettingControl
+    public partial class LanguageSettings : BugNetUserControl, IEditHostSettingControl
     {
         /// <summary>
         /// Handles the Load event of the Page control.

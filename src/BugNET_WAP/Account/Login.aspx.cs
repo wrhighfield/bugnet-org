@@ -8,6 +8,11 @@ namespace BugNET.Account
 {
     public partial class Login : BugNetBasePage
     {
+        protected override void OnInit(EventArgs e)
+        {
+
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             Register_Localize.Text = GetLocalizedText(ResolveUrl("~/Account/Register.aspx"));

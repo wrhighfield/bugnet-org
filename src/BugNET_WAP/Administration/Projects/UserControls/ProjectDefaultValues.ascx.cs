@@ -11,7 +11,7 @@ namespace BugNET.Administration.Projects.UserControls
     /// <summary>
     /// 
     /// </summary>
-    public partial class ProjectDefaultValues : System.Web.UI.UserControl, IEditProjectControl
+    public partial class ProjectDefaultValues : BugNetUserControl, IEditProjectControl
     {
         /// <summary>
         /// Binds the options.

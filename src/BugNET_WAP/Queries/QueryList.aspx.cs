@@ -153,7 +153,7 @@ namespace BugNET.Queries
 
             // If don't know project or issue then redirect to something missing page
             if (ProjectId == 0)
-                ErrorRedirector.TransferToSomethingMissingPage(Page);
+                ErrorRedirectHelper.TransferToSomethingMissingPage(Context);
 
             ConfirmDeleteText.Value = GetLocalString("ConfirmDelete").JsEncode();
             var p = ProjectManager.GetById(ProjectId);

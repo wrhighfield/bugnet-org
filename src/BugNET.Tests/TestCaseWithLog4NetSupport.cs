@@ -5,7 +5,7 @@ namespace BugNET.Tests
 {
     public class TestCaseWithLog4NetSupport
     {
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void ConfigureLog4Net()
         {
             XmlConfigurator.Configure();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using BugNET.BLL;
 using BugNET.Entities;
 using NUnit.Framework;
@@ -158,7 +159,7 @@ namespace BugNET.Tests
         [Test]
         public void TestGetOpenIssues()
         {
-            Assert.IsTrue(IssueManager.GetOpenIssues(ProjectId).Count > 0);
+            Assert.IsTrue(IssueManager.GetOpenIssues(ProjectId).Any());
         }
 
         /// <summary>
