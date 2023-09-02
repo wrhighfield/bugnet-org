@@ -79,11 +79,11 @@ namespace BugNet.Web.Resources.Areas.Identity.Pages.Account {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Forget.Password?.
+        ///   Looks up a localized string similar to Forgot password?.
         /// </summary>
-        public static string Forget_Password {
+        public static string Forgot_Password {
             get {
-                return ResourceManager.GetString("Forget.Password", resourceCulture);
+                return ResourceManager.GetString("Forgot.Password", resourceCulture);
             }
         }
         

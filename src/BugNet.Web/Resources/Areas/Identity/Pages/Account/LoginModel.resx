@@ -123,8 +123,8 @@
   <data name="Email.Not.Confirmed" xml:space="preserve">
     <value>Email not confirmed, try re-sending confirmation</value>
   </data>
-  <data name="Forget.Password" xml:space="preserve">
-    <value>Forget.Password?</value>
+  <data name="Forgot.Password" xml:space="preserve">
+    <value>Forgot password?</value>
   </data>
   <data name="Form.Title" xml:space="preserve">
     <value>Log in using your account</value>

@@ -70,6 +70,15 @@ namespace BugNet.Web.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Email.
+        /// </summary>
+        public static string Email {
+            get {
+                return ResourceManager.GetString("Email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Home.
         /// </summary>
         public static string Home {
@@ -120,6 +129,15 @@ namespace BugNet.Web.Resources {
         public static string Placeholder_ConfirmPassword {
             get {
                 return ResourceManager.GetString("Placeholder.ConfirmPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enter Email.
+        /// </summary>
+        public static string Placeholder_Email {
+            get {
+                return ResourceManager.GetString("Placeholder.Email", resourceCulture);
             }
         }
         

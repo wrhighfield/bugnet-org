@@ -27,6 +27,7 @@ internal static class WebApplicationBuilderExtensions
 			{
 				options.SignIn.RequireConfirmedAccount = true;
 				options.SignIn.RequireConfirmedEmail = true;
+
 				options.Tokens.ProviderMap.Add("ApplicationEmailConfirmationTokenProvider",
 					new TokenProviderDescriptor(
 						typeof(ApplicationEmailConfirmationTokenProvider<ApplicationUser>)));
