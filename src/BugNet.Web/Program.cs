@@ -1,8 +1,5 @@
-using Serilog;
-using Serilog.Core;
 using BugNet.Web.Configuration.Middleware;
 using BugNet.Web.Configuration;
-using Serilog.Events;
 
 namespace BugNet.Web;
 
@@ -12,14 +9,23 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
+        builder
+	        .RegisterIdentity()
+	        .RegisterBugNetDbContext()
+	        .RegisterSerilog()
+	        .Services.AddControllersWithViews()
+	        .Services.AddLocalization(options =>
+	        {
+		        options.ResourcesPath = "Resources";
+	        })
+	        .ConfigureApplicationCookie(o => {
+		        o.ExpireTimeSpan = TimeSpan.FromDays(5);
+		        o.SlidingExpiration = true;
+	        });
 
-        builder.RegisterSqlServer();
-        builder.Services.AddControllersWithViews();
-        builder.Services.AddRazorPages();
-        builder.RegisterSerilog();
+		ConfigureLocalizationServices(builder.Services);
 
-        var app = builder.Build();
+		var app = builder.Build();
 
         // Configure the HTTP request pipeline.
         if (!app.Environment.IsDevelopment())
@@ -44,7 +50,8 @@ public static class Program
             .UseCookiePolicy()
             .UseAuthentication()
             .UseAuthorization()
-            .UseEndpoints(endpoints =>
+            .UseRequestLocalization()
+			.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
@@ -57,5 +64,33 @@ public static class Program
             .ApplyIdentitySchema(app.Services.GetRequiredService<Logger>())
             .ApplyBugnetSchema(app.Services.GetRequiredService<Logger>())
             .Run();
+    }
+
+    private static void ConfigureLocalizationServices(IServiceCollection services)
+    {
+	    services.AddLocalization(options =>
+	    {
+		    options.ResourcesPath = "Resources";
+	    }).AddSingleton<CommonLocalizationService>();
+
+	    services.Configure<RequestLocalizationOptions>(options =>
+	    {
+		    options.SetDefaultCulture("en-Us");
+		    options.FallBackToParentUICultures = true;
+
+		    options
+			    .RequestCultureProviders
+			    .Remove(new AcceptLanguageHeaderRequestCultureProvider());
+
+            //todo: need to create a custom provider to load the languages from the database
+            options
+	            .RequestCultureProviders
+	            .Insert(0, new CustomRequestCultureProvider(_ => Task.FromResult(new ProviderCultureResult("en")))); ;
+        });
+
+	    services
+		    .AddRazorPages()
+		    .AddViewLocalization(LanguageViewLocationExpanderFormat.Suffix)
+			.AddDataAnnotationsLocalization();
     }
 }

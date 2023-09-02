@@ -1,0 +1,23 @@
+﻿@{
+	Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="accounts-box">
+	<div class="container">
+		<div class="row mt-5">
+			<div class="col-lg-10 offset-lg-1">
+				<div class="bg-white shadow rounded">
+					<div class="row">
+						<div class="col-md-6 ps-0 d-none d-md-block">
+							<div class="text-white text-center pt-5 accounts-box-bg h-100"></div>
+						</div>
+						<div class="col-md-6 pe-0">
+							@RenderBody()
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+@await RenderSectionAsync("Scripts", required: false)

@@ -1,5 +1,37 @@
 {
   "version": "1.0",
   "defaultProvider": "cdnjs",
-  "libraries": []
+    "libraries": [
+        {
+            "provider": "cdnjs",
+            "library": "font-awesome@6.4.2",
+            "destination": "wwwroot/lib/font-awesome/",
+            "files": [
+                "css/all.min.css",
+                "webfonts/fa-brands-400.ttf",
+                "webfonts/fa-brands-400.woff2",
+                "webfonts/fa-regular-400.ttf",
+                "webfonts/fa-regular-400.woff2",
+                "webfonts/fa-solid-900.ttf",
+                "webfonts/fa-solid-900.woff2",
+                "webfonts/fa-v4compatibility.ttf",
+                "webfonts/fa-v4compatibility.woff2",
+                "sprites/brands.svg",
+                "sprites/regular.svg",
+                "sprites/solid.svg",
+                "js/all.min.js"
+            ]
+        }
+    ,
+{
+  "provider": "unpkg",
+  "library": "aspnet-client-validation@0.8.15",
+  "destination": "wwwroot/lib/aspnet-client-validation/",
+  "files": [
+    "dist/aspnet-validation.css",
+    "dist/aspnet-validation.min.js",
+    "dist/aspnet-validation.min.js.map"
+  ]
+}
+]
 }

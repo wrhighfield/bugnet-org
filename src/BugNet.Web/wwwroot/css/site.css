@@ -1,18 +1,71 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
+
+a {
+    color: rgb(39, 79, 22);
+}
+
+a:hover {
+    color: rgb(13, 28, 7);
+}
+
+.font-size-sm {
+    font-size: .875rem;
+}
+
+.nav-bar-gradient {
+    /* fallback for old browsers */
+    background: #dbf0ca;
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: -webkit-linear-gradient(to bottom, rgba(243, 251, 240, 0.5), rgba(157, 223, 123, .5));
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: linear-gradient(to bottom, rgba(243, 251, 240, 0.5), rgba(157, 223, 123, .5));
+}
+
+.nav-bar-logo {
+    object-fit: scale-down;
+    height: 30px;
+    width: 30px;
+}
+
+.accounts-box {
+    width: 100%;
+    display: inline-block;
+    display: flex;
+}
+
+.accounts-box-bg {
+    background-image: url("../images/accounts-box-bg.png");
+}
+
+span.field-validation-error {
+    font-size: .875rem;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: rgb(78, 167, 41);
+    border-color: rgb(78, 167, 41);
+}
+
+    .btn-primary:hover {
+        color: #fff;
+        background-color: rgb(54, 116, 28);
+        border-color: rgb(54, 116, 28);
+    }

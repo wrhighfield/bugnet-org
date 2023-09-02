@@ -1,8 +1,20 @@
 ﻿@page
+@inject IStringLocalizer<ConfirmEmailModel> PageStrings
 @model ConfirmEmailModel
+
 @{
-    ViewData["Title"] = "Confirm email";
+	ViewData["Title"] = PageStrings["Page.Title"];
+	Layout = "_Accounts-Box";
+	var className = !Model.Message.Contains("Success") ? "text-danger" : "text-success";
 }
 
-<h1>@ViewData["Title"]</h1>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+<div>
+	<div class="form-left pt-5 px-5 fs-5">@PageStrings["Form.Title"]</div>
+	<div class="form-left h-100 pt-5 pb-5 px-5">
+		<div class="row g-4">
+			<div class="col-sm-12 @className">
+				@PageStrings[Model.Message]
+			</div>
+		</div>
+	</div>
+</div>

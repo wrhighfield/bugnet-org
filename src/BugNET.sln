@@ -84,9 +84,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BugNET.GitHooks", "BugNET.G
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5EDC3709-266E-4264-B55D-E8ACF158D0F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BugNet.Web", "BugNet.Web\BugNet.Web.csproj", "{38D6C061-F1F2-46F4-AC97-4B8DC19CCCBA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BugNet.Web", "BugNet.Web\BugNet.Web.csproj", "{38D6C061-F1F2-46F4-AC97-4B8DC19CCCBA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BugNet.Data", "BugNet.Data\BugNet.Data.csproj", "{E5069B97-8369-48E8-82A6-89AC3DE86B9C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BugNet.Data", "BugNet.Data\BugNet.Data.csproj", "{E5069B97-8369-48E8-82A6-89AC3DE86B9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

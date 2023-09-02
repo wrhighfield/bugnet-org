@@ -1,5 +1,4 @@
 ﻿using BugNet.Data;
-using Serilog.Core;
 
 namespace BugNet.Web.Configuration;
 

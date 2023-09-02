@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
 
 using BugNet.Data;
 
@@ -10,11 +9,19 @@ namespace BugNet.Web.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly ILogger<LoginModel> logger;
+        private readonly IStringLocalizer<LoginModel> pageStrings;
+        private readonly UserManager<ApplicationUser> userManager;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+		public LoginModel(
+			SignInManager<ApplicationUser> signInManager,
+			ILogger<LoginModel> logger,
+			IStringLocalizer<LoginModel> pageStrings,
+			UserManager<ApplicationUser> userManager)
         {
             this.signInManager = signInManager;
             this.logger = logger;
+            this.pageStrings = pageStrings;
+            this.userManager = userManager;
         }
 
         /// <summary>
@@ -69,7 +76,6 @@ namespace BugNet.Web.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Display(Name = "Remember me?")]
             public bool RememberMe { get; set; }
         }
 
@@ -93,36 +99,47 @@ namespace BugNet.Web.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+            ErrorMessage = string.Empty;
 
-            ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-
-            if (ModelState.IsValid)
+            if (User.Identity?.IsAuthenticated ?? false)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
-                {
-                    logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
+	            RedirectToPage("~/Home/Index");
             }
 
-            // If we got this far, something failed, redisplay form
+			ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            if (!ModelState.IsValid) return Page();
+
+            // This doesn't count login failures towards account lockout
+            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+            var result = await signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+			if (result.Succeeded)
+            {
+	            logger.LogInformation("User logged in.");
+	            return LocalRedirect(returnUrl);
+            }
+
+            if (result.RequiresTwoFactor)
+            {
+	            return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, Input.RememberMe });
+            }
+
+            if (result.IsLockedOut)
+            {
+	            logger.LogWarning("User account locked out.");
+	            return RedirectToPage("./Lockout");
+            }
+
+            var user = await userManager.FindByEmailAsync(Input.Email);
+
+            ErrorMessage = pageStrings["Invalid.Login.Attempt"];
+
+			if (user is {EmailConfirmed: false} && signInManager.Options.SignIn.RequireConfirmedEmail)
+            {
+				ErrorMessage = pageStrings["Email.Not.Confirmed"];
+			}
+
             return Page();
         }
     }

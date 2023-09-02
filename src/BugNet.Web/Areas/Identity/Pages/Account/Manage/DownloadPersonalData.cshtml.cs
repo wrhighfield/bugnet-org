@@ -1,59 +1,53 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
 
 using System.Text.Json;
 using BugNet.Data;
 
-namespace BugNet.Web.Areas.Identity.Pages.Account.Manage
+namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
+
+public class DownloadPersonalDataModel : PageModel
 {
-    public class DownloadPersonalDataModel : PageModel
+    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ILogger<DownloadPersonalDataModel> logger;
+
+    public DownloadPersonalDataModel(
+        UserManager<ApplicationUser> userManager,
+        ILogger<DownloadPersonalDataModel> logger)
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        private readonly ILogger<DownloadPersonalDataModel> logger;
+        this.userManager = userManager;
+        this.logger = logger;
+    }
 
-        public DownloadPersonalDataModel(
-            UserManager<ApplicationUser> userManager,
-            ILogger<DownloadPersonalDataModel> logger)
+    public IActionResult OnGet()
+    {
+        return NotFound();
+    }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user == null)
         {
-            this.userManager = userManager;
-            this.logger = logger;
+            return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
         }
 
-        public IActionResult OnGet()
+        logger.LogInformation("User with ID '{UserId}' asked for their personal data.", userManager.GetUserId(User));
+
+        // Only include personal data for download
+        var personalDataProps = typeof(ApplicationUser).GetProperties().Where(
+            prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
+        var personalData = personalDataProps.ToDictionary(p => p.Name, p => p.GetValue(user)?.ToString() ?? "null");
+
+        var logins = await userManager.GetLoginsAsync(user);
+        foreach (var l in logins)
         {
-            return NotFound();
+            personalData.Add($"{l.LoginProvider} external login provider key", l.ProviderKey);
         }
 
-        public async Task<IActionResult> OnPostAsync()
-        {
-            var user = await userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
-            }
+        personalData.Add($"Authenticator Key", await userManager.GetAuthenticatorKeyAsync(user));
 
-            logger.LogInformation("User with ID '{UserId}' asked for their personal data.", userManager.GetUserId(User));
-
-            // Only include personal data for download
-            var personalData = new Dictionary<string, string>();
-            var personalDataProps = typeof(ApplicationUser).GetProperties().Where(
-                            prop => Attribute.IsDefined(prop, typeof(PersonalDataAttribute)));
-            foreach (var p in personalDataProps)
-            {
-                personalData.Add(p.Name, p.GetValue(user)?.ToString() ?? "null");
-            }
-
-            var logins = await userManager.GetLoginsAsync(user);
-            foreach (var l in logins)
-            {
-                personalData.Add($"{l.LoginProvider} external login provider key", l.ProviderKey);
-            }
-
-            personalData.Add($"Authenticator Key", await userManager.GetAuthenticatorKeyAsync(user));
-
-            Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.json");
-            return new FileContentResult(JsonSerializer.SerializeToUtf8Bytes(personalData), "application/json");
-        }
+        Response.Headers.Add("Content-Disposition", "attachment; filename=PersonalData.json");
+        return new FileContentResult(JsonSerializer.SerializeToUtf8Bytes(personalData), "application/json");
     }
 }
