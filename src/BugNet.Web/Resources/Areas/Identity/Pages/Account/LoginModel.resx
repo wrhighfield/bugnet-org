@@ -126,14 +126,14 @@
   <data name="Forgot.Password" xml:space="preserve">
     <value>Forgot password?</value>
   </data>
+  <data name="Form.Button.Submit" xml:space="preserve">
+    <value>Log In</value>
+  </data>
   <data name="Form.Title" xml:space="preserve">
     <value>Log in using your account</value>
   </data>
   <data name="Invalid.Login.Attempt" xml:space="preserve">
     <value>Invalid login attempt</value>
-  </data>
-  <data name="Log.In" xml:space="preserve">
-    <value>Log In</value>
   </data>
   <data name="Log.In.2fa" xml:space="preserve">
     <value>Log in with 2FA</value>

@@ -61,6 +61,15 @@ namespace BugNet.Web.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authenticator code.
+        /// </summary>
+        public static string AuthenticatorCode {
+            get {
+                return ResourceManager.GetString("AuthenticatorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Confirm Password.
         /// </summary>
         public static string ConfirmPassword {
@@ -124,6 +133,15 @@ namespace BugNet.Web.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authenticator code.
+        /// </summary>
+        public static string Placeholder_AuthenticatorCode {
+            get {
+                return ResourceManager.GetString("Placeholder.AuthenticatorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Confirm Password.
         /// </summary>
         public static string Placeholder_ConfirmPassword {
@@ -151,6 +169,15 @@ namespace BugNet.Web.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Recovery Code.
+        /// </summary>
+        public static string Placeholder_RecoveryCode {
+            get {
+                return ResourceManager.GetString("Placeholder.RecoveryCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enter Username.
         /// </summary>
         public static string Placeholder_Username {
@@ -165,6 +192,15 @@ namespace BugNet.Web.Resources {
         public static string Privacy {
             get {
                 return ResourceManager.GetString("Privacy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recovery Code.
+        /// </summary>
+        public static string RecoveryCode {
+            get {
+                return ResourceManager.GetString("RecoveryCode", resourceCulture);
             }
         }
         

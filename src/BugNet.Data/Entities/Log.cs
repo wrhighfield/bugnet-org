@@ -15,6 +15,8 @@ public class Log
     public string IpAddress { get; set; }
     [MaxLength(1000)]
     public string Resource { get; set; }
-    public string Exception { get; set; }
+    [MaxLength(1000)]
+	public string SourceContext { get; set; }
+	public string Exception { get; set; }
     public string Properties { get; set; }
 }

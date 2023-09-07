@@ -2,16 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BugNet.Data;
+using BugNet.Web.Common.Bases;
 
 namespace BugNet.Web.Areas.Identity.Pages.Account;
 
-public class RegisterModel : PageModel
+public class RegisterModel : BugNetPageModeBase<RegisterModel>
 {
     private readonly SignInManager<ApplicationUser> signInManager;
     private readonly UserManager<ApplicationUser> userManager;
     private readonly IUserStore<ApplicationUser> userStore;
     private readonly IUserEmailStore<ApplicationUser> emailStore;
-    private readonly ILogger<RegisterModel> logger;
     private readonly IEmailSender emailSender;
 
     public RegisterModel(
@@ -19,13 +19,12 @@ public class RegisterModel : PageModel
         IUserStore<ApplicationUser> userStore,
         SignInManager<ApplicationUser> signInManager,
         ILogger<RegisterModel> logger,
-        IEmailSender emailSender)
+        IEmailSender emailSender): base(logger)
     {
         this.userManager = userManager;
         this.userStore = userStore;
         emailStore = GetEmailStore();
         this.signInManager = signInManager;
-        this.logger = logger;
         this.emailSender = emailSender;
     }
 
@@ -72,9 +71,13 @@ public class RegisterModel : PageModel
 
 		returnUrl ??= Url.Content("~/");
         ExternalLogins = (await signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-        if (!ModelState.IsValid) return Page();
 
-        var user = CreateUser();
+        if (!IsModelValid)
+        {
+	        return Page();
+        }
+
+		var user = CreateUser();
 
         await userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -82,13 +85,15 @@ public class RegisterModel : PageModel
 
         if (result.Succeeded)
         {
-	        logger.LogInformation("User created a new account with password.");
+	        LogUserInformation(user, "Account was created successfully");
 
 	        var userId = await userManager.GetUserIdAsync(user);
 	        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
 	        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
-	        var callbackUrl = Url.Page(
+	        LogUserInformation(user, "Attempting to send confirm registration email");
+
+			var callbackUrl = Url.Page(
 		        "/Account/ConfirmEmail",
 		        pageHandler: null,
 		        values: new { area = "Identity", userId, code, returnUrl },
@@ -97,18 +102,23 @@ public class RegisterModel : PageModel
 	        await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
 		        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>clicking here</a>.");
 
-	        if (userManager.Options.SignIn.RequireConfirmedAccount)
+	        LogUserInformation(user, "Sent email");
+
+			if (userManager.Options.SignIn.RequireConfirmedAccount)
 	        {
 		        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
 	        }
 
-	        await signInManager.SignInAsync(user, isPersistent: false);
+			LogUserInformation(user, "Require Confirmed Account not enabled signing in user");
+
+			await signInManager.SignInAsync(user, isPersistent: false);
+
 	        return LocalRedirect(returnUrl);
         }
 
-        ErrorMessage = result.Errors.FirstOrDefault()?.Description;
+        LogIdentityErrors(result.Errors);
+		ErrorMessage = result.Errors.FirstOrDefault()?.Description;
 
-		// If we got this far, something failed, redisplay form
 		return Page();
     }
 
@@ -121,7 +131,7 @@ public class RegisterModel : PageModel
         catch
         {
             throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                                                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                                                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameter-less constructor, or alternatively " +
                                                 $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
         }
     }

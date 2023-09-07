@@ -2,7 +2,9 @@
 using System.Collections.ObjectModel;
 using System.Data;
 using BugNet.Data;
+using BugNet.Web.Common;
 using BugNet.Web.Providers;
+using Serilog.Filters;
 
 namespace BugNet.Web.Configuration;
 
@@ -21,21 +23,21 @@ internal static class WebApplicationBuilderExtensions
 			.AddDbContext<IdentityDbContext>(options =>
 				options.UseSqlServer(identityConnectionString));
 
-		builder
-			.Services
-			.AddIdentity<ApplicationUser, ApplicationRole>(options =>
-			{
-				options.SignIn.RequireConfirmedAccount = true;
-				options.SignIn.RequireConfirmedEmail = true;
+        builder
+            .Services
+            .AddIdentity<ApplicationUser, ApplicationRole>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedEmail = true;
 
-				options.Tokens.ProviderMap.Add("ApplicationEmailConfirmationTokenProvider",
-					new TokenProviderDescriptor(
-						typeof(ApplicationEmailConfirmationTokenProvider<ApplicationUser>)));
-				options.Tokens.EmailConfirmationTokenProvider = "ApplicationEmailConfirmationTokenProvider";
-			})
-			.AddDefaultUI()
-			.AddEntityFrameworkStores<IdentityDbContext>()
-			.AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>(TokenOptions.DefaultProvider);
+                options.Tokens.ProviderMap.Add("ApplicationEmailConfirmationTokenProvider",
+                    new TokenProviderDescriptor(
+                        typeof(ApplicationEmailConfirmationTokenProvider<ApplicationUser>)));
+                options.Tokens.EmailConfirmationTokenProvider = "ApplicationEmailConfirmationTokenProvider";
+            })
+            .AddDefaultUI()
+            .AddEntityFrameworkStores<IdentityDbContext>()
+            .AddDefaultTokenProviders();
 
 		builder.Services.Configure<DataProtectionTokenProviderOptions>(o =>
 			o.TokenLifespan = TimeSpan.FromHours(3));
@@ -65,9 +67,10 @@ internal static class WebApplicationBuilderExtensions
 
         return builder;
     }
+
     public static WebApplicationBuilder RegisterSerilog(this WebApplicationBuilder builder)
     {
-        var connectionString =
+		var connectionString =
             builder
                 .Configuration
                 .GetConnectionString(DataConstants.BugNetConnectionStringName) ??
@@ -75,8 +78,9 @@ internal static class WebApplicationBuilderExtensions
 
         var switchLogger = new LoggingLevelSwitch(LogEventLevel.Warning);
 
-        var logger = new LoggerConfiguration()
-            .MinimumLevel.ControlledBy(switchLogger)
+        var loggerConfiguration = new LoggerConfiguration()
+	        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+			.MinimumLevel.ControlledBy(switchLogger)
             .Enrich.FromLogContext()
             .WriteTo.Console()
             .WriteTo.MSSqlServer(
@@ -93,13 +97,15 @@ internal static class WebApplicationBuilderExtensions
                     {
                         new() { DataType = SqlDbType.NVarChar, ColumnName = nameof(Data.Entities.Log.IpAddress), AllowNull = true, DataLength = 55 },
                         new() { DataType = SqlDbType.NVarChar, ColumnName = nameof(Data.Entities.Log.UserName), AllowNull = true , DataLength = 255 },
-                        new() { DataType = SqlDbType.NVarChar, ColumnName = nameof(Data.Entities.Log.Resource), AllowNull = true, DataLength = 1000 }
-                    }
-                })
-            .CreateLogger();
+                        new() { DataType = SqlDbType.NVarChar, ColumnName = nameof(Data.Entities.Log.Resource), AllowNull = true, DataLength = 1000 },
+                        new() { DataType = SqlDbType.NVarChar, ColumnName = nameof(Data.Entities.Log.SourceContext), AllowNull = true, DataLength = 1000 }
+					}
+                });
 
-        builder.Host.UseSerilog(logger);
-        builder.Services.AddSingleton(logger);
+        var loggerInstance = loggerConfiguration.CreateLogger();
+
+		builder.Host.UseSerilog(loggerInstance);
+        builder.Services.AddSingleton(loggerInstance);
         builder.Services.AddSingleton(switchLogger);
 
         return builder;

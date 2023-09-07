@@ -2,40 +2,49 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BugNet.Data;
+using BugNet.Web.Common.Bases;
 
 namespace BugNet.Web.Areas.Identity.Pages.Account;
 
 [AllowAnonymous]
-public class RegisterConfirmationModel : PageModel
+public class RegisterConfirmationModel : BugNetPageModeBase<RegisterConfirmationModel>
 {
     private readonly UserManager<ApplicationUser> userManager;
 
-    public RegisterConfirmationModel(UserManager<ApplicationUser> userManager) => this.userManager = userManager;
+    public RegisterConfirmationModel(
+	    UserManager<ApplicationUser> userManager,
+	    ILogger<RegisterConfirmationModel> logger) : base(logger) => this.userManager = userManager;
 
 	public async Task<IActionResult> OnGetAsync(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
         {
-            return RedirectToPage("/Index");
+	        LogWarning("An invalid email was supplied for register confirmation");
+			return RedirectToPage("/Index");
         }
 
         var user = await userManager.FindByEmailAsync(email);
 
 		if (user == null)
         {
-            return NotFound($"Unable to load user with email '{email}'.");
+	        LogUserNotFoundByEmail(email);
+			return NotFound($"Unable to load user with email '{email}'.");
         }
 
         if (!userManager.Options.SignIn.RequireConfirmedEmail)
         {
-            return RedirectToPage("/Login");
+	        LogInformation("Require Confirmed Email not enabled, redirecting to Login");
+			return RedirectToPage("/Login");
         }
 
-        if (user.EmailConfirmed && userManager.Options.SignIn.RequireConfirmedEmail)
+        if (!user.EmailConfirmed || !userManager.Options.SignIn.RequireConfirmedEmail)
         {
-            return RedirectToPage("/Index");
-        }
+	        LogUserInformation(user, "Require Confirmed Email not enabled and AspNetUser.EmailConfirmed is false, possible mis-configuration in Identity");
+			return Page();
+		}
 
-        return Page();
+        LogUserInformation(user, "Attempt to confirm registration but has already confirmed, redirecting to Home");
+        return RedirectToPage("/Index");
+
     }
 }

@@ -88,6 +88,15 @@ namespace BugNet.Web.Resources.Areas.Identity.Pages.Account {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Log In.
+        /// </summary>
+        public static string Form_Button_Submit {
+            get {
+                return ResourceManager.GetString("Form.Button.Submit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Log in using your account.
         /// </summary>
         public static string Form_Title {
@@ -102,15 +111,6 @@ namespace BugNet.Web.Resources.Areas.Identity.Pages.Account {
         public static string Invalid_Login_Attempt {
             get {
                 return ResourceManager.GetString("Invalid.Login.Attempt", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Log In.
-        /// </summary>
-        public static string Log_In {
-            get {
-                return ResourceManager.GetString("Log.In", resourceCulture);
             }
         }
         

@@ -18,9 +18,10 @@ public static class Program
 	        {
 		        options.ResourcesPath = "Resources";
 	        })
-	        .ConfigureApplicationCookie(o => {
-		        o.ExpireTimeSpan = TimeSpan.FromDays(5);
-		        o.SlidingExpiration = true;
+	        .ConfigureApplicationCookie(options => {
+		        options.Cookie.Name = ".AspNetCore.Identity.Application";
+				options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+		        options.SlidingExpiration = true;
 	        });
 
 		ConfigureLocalizationServices(builder.Services);

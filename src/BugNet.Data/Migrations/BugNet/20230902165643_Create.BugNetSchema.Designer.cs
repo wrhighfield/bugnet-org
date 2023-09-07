@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BugNet.Data.Migrations.BugNet
 {
     [DbContext(typeof(BugNetDbContext))]
-    [Migration("20230901144518_Create.BugNetSchema")]
+    [Migration("20230902165643_Create.BugNetSchema")]
     partial class CreateBugNetSchema
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,10 @@ namespace BugNet.Data.Migrations.BugNet
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Resource")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("SourceContext")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 

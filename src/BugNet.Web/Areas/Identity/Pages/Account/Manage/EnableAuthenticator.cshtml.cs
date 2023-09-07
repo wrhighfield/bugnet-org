@@ -1,8 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using BugNet.Data;
+using QRCoder;
 
 namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
@@ -24,43 +27,21 @@ public class EnableAuthenticatorModel : PageModel
         this.urlEncoder = urlEncoder;
     }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     public string SharedKey { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     public string AuthenticatorUri { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
-    [TempData]
+    public string QrCodeImage { get; set; }
+
+	[TempData]
     public string[] RecoveryCodes { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     [TempData]
     public string StatusMessage { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     [BindProperty]
     public InputModel Input { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     public class InputModel
     {
         /// <summary>
@@ -82,7 +63,14 @@ public class EnableAuthenticatorModel : PageModel
             return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
         }
 
-        await LoadSharedKeyAndQrCodeUriAsync(user);
+        var qrCodeGenerator = new QRCodeGenerator();
+        var qrCodeData = qrCodeGenerator.CreateQrCode(await LoadSharedKeyAndQrCodeUriAsync(user), QRCodeGenerator.ECCLevel.H);
+        var qRCode = new PngByteQRCode(qrCodeData);
+		var qrCodeBytes = qRCode.GetGraphic(50);
+        var qrCodeImage = $"data:image/png;base64,{Convert.ToBase64String(qrCodeBytes)}";
+        QrCodeImage = qrCodeImage;
+
+		await LoadSharedKeyAndQrCodeUriAsync(user);
 
         return Page();
     }
@@ -132,7 +120,7 @@ public class EnableAuthenticatorModel : PageModel
         }
     }
 
-    private async Task LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user)
+    private async Task<string> LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user)
     {
         // Load the authenticator key & QR code URI to display on the form
         var unformattedKey = await userManager.GetAuthenticatorKeyAsync(user);
@@ -145,13 +133,13 @@ public class EnableAuthenticatorModel : PageModel
         SharedKey = FormatKey(unformattedKey);
 
         var email = await userManager.GetEmailAsync(user);
-        AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
+        return GenerateQrCodeUri(email, unformattedKey);
     }
 
     private string FormatKey(string unformattedKey)
     {
         var result = new StringBuilder();
-        int currentPosition = 0;
+        var currentPosition = 0;
         while (currentPosition + 4 < unformattedKey.Length)
         {
             result.Append(unformattedKey.AsSpan(currentPosition, 4)).Append(' ');
@@ -173,5 +161,12 @@ public class EnableAuthenticatorModel : PageModel
             urlEncoder.Encode("Microsoft.AspNetCore.Identity.UI"),
             urlEncoder.Encode(email),
             unformattedKey);
+    }
+
+    private static byte[] BitmapToArray(Bitmap bitmapImage)
+    {
+	    using var stream = new MemoryStream();
+	    bitmapImage.Save(stream, ImageFormat.Png);
+	    return stream.ToArray();
     }
 }

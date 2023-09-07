@@ -2,15 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BugNet.Data;
+using BugNet.Web.Common.Bases;
 
 namespace BugNet.Web.Areas.Identity.Pages.Account;
 
-public class ForgotPasswordModel : PageModel
+public class ForgotPasswordModel : BugNetPageModeBase<ForgotPasswordModel>
 {
     private readonly UserManager<ApplicationUser> userManager;
     private readonly IEmailSender emailSender;
 
-    public ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+    public ForgotPasswordModel(
+	    UserManager<ApplicationUser> userManager,
+	    IEmailSender emailSender,
+	    ILogger<ForgotPasswordModel> logger) : base(logger)
     {
         this.userManager = userManager;
         this.emailSender = emailSender;
@@ -28,13 +32,22 @@ public class ForgotPasswordModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-	    if (!ModelState.IsValid) return Page();
+	    if (!IsModelValid)
+	    {
+		    return Page();
+	    }
 
-	    var user = await userManager.FindByEmailAsync(Input.Email);
+		var user = await userManager.FindByEmailAsync(Input.Email);
 
-        if (user == null || !(await userManager.IsEmailConfirmedAsync(user)))
+	    if (user == null)
+	    {
+		    LogUserNotFoundByEmail(Input.Email);
+		    return RedirectToPage("./ForgotPasswordConfirmation");
+		}
+
+        if (!await userManager.IsEmailConfirmedAsync(user))
         {
-	        // Don't reveal that the user does not exist or is not confirmed
+			LogUserWarning(user, "Forgot password reset was attempted but user has not confirmed their email");
 	        return RedirectToPage("./ForgotPasswordConfirmation");
         }
 

@@ -2,70 +2,45 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BugNet.Data;
+using BugNet.Web.Common.Bases;
 
 namespace BugNet.Web.Areas.Identity.Pages.Account;
 
 [AllowAnonymous]
-public class ExternalLoginModel : PageModel
+public class ExternalLoginModel : BugNetPageModeBase<ExternalLoginModel>
 {
     private readonly SignInManager<ApplicationUser> signInManager;
     private readonly UserManager<ApplicationUser> userManager;
     private readonly IUserStore<ApplicationUser> userStore;
     private readonly IUserEmailStore<ApplicationUser> emailStore;
     private readonly IEmailSender emailSender;
-    private readonly ILogger<ExternalLoginModel> logger;
 
     public ExternalLoginModel(
         SignInManager<ApplicationUser> signInManager,
         UserManager<ApplicationUser> userManager,
         IUserStore<ApplicationUser> userStore,
         ILogger<ExternalLoginModel> logger,
-        IEmailSender emailSender)
+        IEmailSender emailSender) : base(logger)
     {
         this.signInManager = signInManager;
         this.userManager = userManager;
         this.userStore = userStore;
         emailStore = GetEmailStore();
-        this.logger = logger;
         this.emailSender = emailSender;
     }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     [BindProperty]
     public InputModel Input { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     public string ProviderDisplayName { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     public string ReturnUrl { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     [TempData]
     public string ErrorMessage { get; set; }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     public class InputModel
     {
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [Required]
         [EmailAddress]
         public string Email { get; init; }
@@ -83,54 +58,57 @@ public class ExternalLoginModel : PageModel
 
     public async Task<IActionResult> OnGetCallbackAsync(string returnUrl = null, string remoteError = null)
     {
-        returnUrl = returnUrl ?? Url.Content("~/");
+        returnUrl ??= Url.Content("~/");
         if (remoteError != null)
         {
-            ErrorMessage = $"Error from external provider: {remoteError}";
+	        LogError($"Error from external provider: {remoteError}");
+			ErrorMessage = $"Error from external provider: {remoteError}";
             return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
         }
         var info = await signInManager.GetExternalLoginInfoAsync();
         if (info == null)
         {
-            ErrorMessage = "Error loading external login information.";
+	        LogError($"Error loading external login information");
+			ErrorMessage = "Error loading external login information.";
             return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
         }
 
         // Sign in the user with this external login provider if the user already has a login.
         var result = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+
         if (result.Succeeded)
         {
-            logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+            Logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
             return LocalRedirect(returnUrl);
         }
         if (result.IsLockedOut)
         {
-            return RedirectToPage("./Lockout");
+	        LogWarning($"External provider {info.ProviderDisplayName} returned account locked out");
+			return RedirectToPage("./Lockout");
         }
-        else
+
+        // If the user does not have an account, then ask the user to create an account.
+        ReturnUrl = returnUrl;
+        ProviderDisplayName = info.ProviderDisplayName;
+        if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
         {
-            // If the user does not have an account, then ask the user to create an account.
-            ReturnUrl = returnUrl;
-            ProviderDisplayName = info.ProviderDisplayName;
-            if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
-            {
-                Input = new InputModel
-                {
-                    Email = info.Principal.FindFirstValue(ClaimTypes.Email)
-                };
-            }
-            return Page();
+	        Input = new InputModel
+	        {
+		        Email = info.Principal.FindFirstValue(ClaimTypes.Email)
+	        };
         }
+        return Page();
     }
 
     public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
     {
-        returnUrl = returnUrl ?? Url.Content("~/");
+        returnUrl ??= Url.Content("~/");
         // Get the information about the user from the external login provider
         var info = await signInManager.GetExternalLoginInfoAsync();
         if (info == null)
         {
-            ErrorMessage = "Error loading external login information during confirmation.";
+	        LogError($"Error loading external login information during confirmation");
+			ErrorMessage = "Error loading external login information during confirmation.";
             return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
         }
 
@@ -147,7 +125,7 @@ public class ExternalLoginModel : PageModel
                 result = await userManager.AddLoginAsync(user, info);
                 if (result.Succeeded)
                 {
-                    logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                    Logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
                     var userId = await userManager.GetUserIdAsync(user);
                     var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -155,7 +133,7 @@ public class ExternalLoginModel : PageModel
                     var callbackUrl = Url.Page(
                         "/Account/ConfirmEmail",
                         pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code },
+                        values: new { area = "Identity", userId, code },
                         protocol: Request.Scheme);
 
                     await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
@@ -164,7 +142,7 @@ public class ExternalLoginModel : PageModel
                     // If account confirmation is required, we need to show the link if we don't have a real email sender
                     if (userManager.Options.SignIn.RequireConfirmedAccount)
                     {
-                        return RedirectToPage("./RegisterConfirmation", new { Email = Input.Email });
+                        return RedirectToPage("./RegisterConfirmation", new {Input.Email });
                     }
 
                     await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);

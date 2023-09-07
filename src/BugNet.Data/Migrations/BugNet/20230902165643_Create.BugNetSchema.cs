@@ -26,6 +26,7 @@ namespace BugNet.Data.Migrations.BugNet
                     UserName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     IpAddress = table.Column<string>(type: "nvarchar(55)", maxLength: 55, nullable: true),
                     Resource = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    SourceContext = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Exception = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Properties = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },

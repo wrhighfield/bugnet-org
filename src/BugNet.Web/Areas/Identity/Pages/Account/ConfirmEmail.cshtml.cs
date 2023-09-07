@@ -8,17 +8,11 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 public class ConfirmEmailModel : PageModel
 {
     private readonly UserManager<ApplicationUser> userManager;
-    private readonly IStringLocalizer<ConfirmEmailModel> pageStrings;
 
 	public ConfirmEmailModel(
-		UserManager<ApplicationUser> userManager,
-		IStringLocalizer<ConfirmEmailModel> pageStrings)
-	{
-		this.userManager = userManager;
-		this.pageStrings = pageStrings;
-	}
+		UserManager<ApplicationUser> userManager) => this.userManager = userManager;
 
-    [TempData]
+	[TempData]
     public string Message { get; set; }
 
 	public async Task<IActionResult> OnGetAsync(string userId, string code)

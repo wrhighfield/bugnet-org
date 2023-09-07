@@ -7,12 +7,14 @@ internal class RequestMiddleware
 {
     private readonly RequestDelegate next;
 
-    public RequestMiddleware(RequestDelegate next) => this.next = next;
+	public RequestMiddleware(RequestDelegate next)
+	{
+		this.next = next;
+	}
 
-    public async Task Invoke(HttpContext context)
+	public async Task Invoke(HttpContext context)
     {
-        using (LogContext.PushProperty("IpAddress", GetValidIpAddress(context)))
-        using (LogContext.PushProperty("UserName", context.User.Identity?.Name ?? "Anonymous"))
+		using (LogContext.PushProperty("IpAddress", GetValidIpAddress(context)))
         using (LogContext.PushProperty("Resource", context.Request.Path.ToString()))
         {
             await next(context);

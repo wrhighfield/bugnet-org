@@ -11,16 +11,17 @@ internal static class MigrationManager
 
         try
         {
-            logger.Information("Attempting to run migrations");
+            logger.Information("Attempting to run migrations for BugNet");
             appContext.Database.Migrate();
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to apply migrations {context}", nameof(BugNetDbContext));
+            logger.Error(ex, "Failed to apply migrations for BugNet");
             throw;
         }
 
-        return webApplication;
+        logger.Information("Migrations for BugNet completed");
+		return webApplication;
     }
 
     public static WebApplication ApplyIdentitySchema(this WebApplication webApplication, Logger logger)
@@ -30,15 +31,16 @@ internal static class MigrationManager
 
         try
         {
-            logger.Information("Attempting to run migrations");
+            logger.Information("Attempting to run migrations for Identity");
             appContext.Database.Migrate();
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "Failed to apply migrations {context}", nameof(IdentityDbContext));
-            throw;
+	        logger.Error(ex, "Failed to apply migrations for Identity");
+			throw;
         }
 
-        return webApplication;
+        logger.Information("Migrations for BugNet Identity");
+		return webApplication;
     }
 }

@@ -53,6 +53,10 @@ namespace BugNet.Data.Migrations.BugNet
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("SourceContext")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime2");
 
