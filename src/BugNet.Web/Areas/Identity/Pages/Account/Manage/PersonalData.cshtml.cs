@@ -7,11 +7,11 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class PersonalDataModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly ILogger<PersonalDataModel> logger;
 
     public PersonalDataModel(
-        UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
         ILogger<PersonalDataModel> logger)
     {
         this.userManager = userManager;

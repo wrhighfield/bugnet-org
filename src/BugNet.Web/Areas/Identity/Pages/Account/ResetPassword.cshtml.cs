@@ -8,10 +8,10 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 
 public class ResetPasswordModel : BugNetPageModeBase<ResetPasswordModel>
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
 
     public ResetPasswordModel(
-	    UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
 	    ILogger<ResetPasswordModel> logger) : base(logger) => this.userManager = userManager;
 
 	[BindProperty]

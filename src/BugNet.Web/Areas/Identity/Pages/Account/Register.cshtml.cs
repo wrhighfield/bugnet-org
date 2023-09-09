@@ -9,13 +9,13 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 public class RegisterModel : BugNetPageModeBase<RegisterModel>
 {
     private readonly SignInManager<ApplicationUser> signInManager;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly IUserStore<ApplicationUser> userStore;
     private readonly IUserEmailStore<ApplicationUser> emailStore;
     private readonly IEmailSender emailSender;
 
     public RegisterModel(
-        UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
         IUserStore<ApplicationUser> userStore,
         SignInManager<ApplicationUser> signInManager,
         ILogger<RegisterModel> logger,

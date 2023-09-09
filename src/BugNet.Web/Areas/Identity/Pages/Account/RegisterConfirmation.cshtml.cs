@@ -9,10 +9,10 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 [AllowAnonymous]
 public class RegisterConfirmationModel : BugNetPageModeBase<RegisterConfirmationModel>
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
 
     public RegisterConfirmationModel(
-	    UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
 	    ILogger<RegisterConfirmationModel> logger) : base(logger) => this.userManager = userManager;
 
 	public async Task<IActionResult> OnGetAsync(string email)

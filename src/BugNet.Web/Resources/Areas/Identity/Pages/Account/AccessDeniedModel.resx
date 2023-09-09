@@ -117,44 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Email.No.Confirmed" xml:space="preserve">
-    <value>Email has not been confirmed</value>
-  </data>
-  <data name="Email.Not.Confirmed" xml:space="preserve">
-    <value>Email not confirmed, try re-sending confirmation</value>
-  </data>
-  <data name="ExternalProvider.Button" xml:space="preserve">
-    <value>Log in using your {0} account</value>
-    <comment>{0} is the provider name</comment>
-  </data>
-  <data name="ExternalProvider.Instructions" xml:space="preserve">
-    <value>Use one of the following external providers to log in.</value>
-  </data>
-  <data name="Forgot.Password" xml:space="preserve">
-    <value>Forgot password?</value>
-  </data>
-  <data name="Form.Button.Submit" xml:space="preserve">
-    <value>Log In</value>
-  </data>
   <data name="Form.Title" xml:space="preserve">
-    <value>Log in using your account</value>
+    <value>Access denied</value>
   </data>
-  <data name="Invalid.Login.Attempt" xml:space="preserve">
-    <value>Invalid login attempt</value>
-  </data>
-  <data name="Log.In.2fa" xml:space="preserve">
-    <value>Log in with 2FA</value>
+  <data name="Page.Message" xml:space="preserve">
+    <value>You do not have access to this resource.</value>
   </data>
   <data name="Page.Title" xml:space="preserve">
-    <value>Log In</value>
-  </data>
-  <data name="Register.New.User" xml:space="preserve">
-    <value>Register as a new user</value>
-  </data>
-  <data name="Remember.Me" xml:space="preserve">
-    <value>Remember me</value>
-  </data>
-  <data name="Resend.Email.Confirmation" xml:space="preserve">
-    <value>Resend email confirmation</value>
+    <value>Access denied</value>
   </data>
 </root>

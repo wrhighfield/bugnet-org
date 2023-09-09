@@ -1,8 +1,18 @@
 ﻿@page
+@inject IStringLocalizer<ConfirmEmailChangeModel> PageStrings
 @model ConfirmEmailChangeModel
 @{
-    ViewData["Title"] = "Confirm email change";
+	ViewData["Title"] = PageStrings["Page.Title"];
+	Layout = "_Accounts-Box";
 }
 
-<h1>@ViewData["Title"]</h1>
-<partial name="_StatusMessage" model="Model.StatusMessage" />
+<div>
+	<div class="form-left pt-5 px-5 fs-5">@PageStrings["Form.Title"]</div>
+	<div class="form-left h-100 pt-5 pb-5 px-5">
+		<div class="row g-4">
+			<div class="col-sm-12">
+				<partial name="_StatusMessage" model="Model.StatusMessage" />
+			</div>
+		</div>
+	</div>
+</div>

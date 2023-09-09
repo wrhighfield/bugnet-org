@@ -69,3 +69,29 @@ span.field-validation-error {
         background-color: rgb(54, 116, 28);
         border-color: rgb(54, 116, 28);
     }
+
+.hr-text {
+    overflow: hidden;
+    text-align: center;
+}
+
+    .hr-text:before,
+    .hr-text:after {
+        background-color: rgb(233, 236, 239);
+        content: "";
+        display: inline-block;
+        height: 1px;
+        position: relative;
+        vertical-align: middle;
+        width: 50%;
+    }
+
+    .hr-text:before {
+        right: 0.5em;
+        margin-left: -50%;
+    }
+
+    .hr-text:after {
+        left: 0.5em;
+        margin-right: -50%;
+    }

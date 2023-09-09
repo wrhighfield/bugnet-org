@@ -10,14 +10,14 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 public class ExternalLoginModel : BugNetPageModeBase<ExternalLoginModel>
 {
     private readonly SignInManager<ApplicationUser> signInManager;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly IUserStore<ApplicationUser> userStore;
     private readonly IUserEmailStore<ApplicationUser> emailStore;
     private readonly IEmailSender emailSender;
 
     public ExternalLoginModel(
         SignInManager<ApplicationUser> signInManager,
-        UserManager<ApplicationUser> userManager,
+        ApplicationUserManager userManager,
         IUserStore<ApplicationUser> userStore,
         ILogger<ExternalLoginModel> logger,
         IEmailSender emailSender) : base(logger)
@@ -103,8 +103,10 @@ public class ExternalLoginModel : BugNetPageModeBase<ExternalLoginModel>
     public async Task<IActionResult> OnPostConfirmationAsync(string returnUrl = null)
     {
         returnUrl ??= Url.Content("~/");
+
         // Get the information about the user from the external login provider
         var info = await signInManager.GetExternalLoginInfoAsync();
+
         if (info == null)
         {
 	        LogError($"Error loading external login information during confirmation");
@@ -112,50 +114,59 @@ public class ExternalLoginModel : BugNetPageModeBase<ExternalLoginModel>
             return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
         }
 
-        if (ModelState.IsValid)
+        if (!IsModelValid)
         {
-            var user = CreateUser();
-
-            await userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-            await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-
-            var result = await userManager.CreateAsync(user);
-            if (result.Succeeded)
-            {
-                result = await userManager.AddLoginAsync(user, info);
-                if (result.Succeeded)
-                {
-                    Logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-
-                    var userId = await userManager.GetUserIdAsync(user);
-                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId, code },
-                        protocol: Request.Scheme);
-
-                    await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
-
-                    // If account confirmation is required, we need to show the link if we don't have a real email sender
-                    if (userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return RedirectToPage("./RegisterConfirmation", new {Input.Email });
-                    }
-
-                    await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
-                    return LocalRedirect(returnUrl);
-                }
-            }
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
+	        return Page();
         }
 
-        ProviderDisplayName = info.ProviderDisplayName;
+        var user = CreateUser();
+
+        await userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+        var result = await userManager.CreateAsync(user);
+
+        if (result.Succeeded)
+        {
+	        result = await userManager.AddLoginAsync(user, info);
+
+	        if (result.Succeeded)
+	        {
+		        Logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+
+		        var userId = await userManager.GetUserIdAsync(user);
+		        var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+		        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+		        LogUserInformation(user, "Attempting to send confirm registration email for external login");
+
+				var callbackUrl = Url.Page(
+			        "/Account/ConfirmEmail",
+			        pageHandler: null,
+			        values: new { area = "Identity", userId, code },
+			        protocol: Request.Scheme);
+
+				await emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+			        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+				LogUserInformation(user, "Sent email");
+
+				// If account confirmation is required, we need to show the link if we don't have a real email sender
+				if (userManager.Options.SignIn.RequireConfirmedAccount)
+		        {
+			        return RedirectToPage("./RegisterConfirmation", new { Input.Email });
+		        }
+
+		        LogUserInformation(user, "Require Confirmed Account not enabled signing in user");
+
+				await signInManager.SignInAsync(user, isPersistent: false, info.LoginProvider);
+		        return LocalRedirect(returnUrl);
+	        }
+        }
+
+        ErrorMessage = result.Errors.FirstOrDefault()?.Description;
+
+		ProviderDisplayName = info.ProviderDisplayName;
         ReturnUrl = returnUrl;
         return Page();
     }

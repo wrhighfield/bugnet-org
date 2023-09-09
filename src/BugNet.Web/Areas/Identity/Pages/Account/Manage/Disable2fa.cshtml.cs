@@ -7,11 +7,11 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class Disable2FaModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly ILogger<Disable2FaModel> logger;
 
     public Disable2FaModel(
-        UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
         ILogger<Disable2FaModel> logger)
     {
         this.userManager = userManager;

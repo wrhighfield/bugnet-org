@@ -1,31 +1,42 @@
 ﻿@page
+@inject IStringLocalizer<ExternalLoginModel> PageStrings
+@inject CommonLocalizationService CommonStrings
 @model ExternalLoginModel
 @{
-    ViewData["Title"] = "Register";
+	ViewData["Title"] = PageStrings["Page.Title"];
+	Layout = "_Accounts-Box";
 }
 
-<h1>@ViewData["Title"]</h1>
-<h2 id="external-login-title">Associate your @Model.ProviderDisplayName account.</h2>
-<hr />
+<div>
+	<div class="form-left pt-5 px-5 fs-5">@string.Format(PageStrings["Form.Title"], Model.ProviderDisplayName)</div>
+	<div class="form-left h-100 pt-5 pb-5 px-5">
+		<form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="row g-4">
 
-<p id="external-login-description" class="text-info">
-    You've successfully authenticated with <strong>@Model.ProviderDisplayName</strong>.
-    Please enter an email address for this site below and click the Register button to finish
-    logging in.
-</p>
+			<div class="col-sm-12">
+				@Html.Raw(string.Format(PageStrings["Instructions"], Model.ProviderDisplayName))
+			</div>
 
-<div class="row">
-    <div class="col-md-4">
-        <form asp-page-handler="Confirmation" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-floating">
-                <input asp-for="Input.Email" class="form-control" autocomplete="email" />
-                <label asp-for="Input.Email" class="form-label"></label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
-        </form>
-    </div>
+			<div class="col-12">
+				<label asp-for="Input.Email">@CommonStrings.Get("Email")<span class="ps-1 text-danger">*</span></label>
+				<div class="input-group">
+					<div class="input-group-text"><i class="fa-solid fa-user"></i></div>
+					<input asp-for="Input.Email" type="text" class="form-control" placeholder="@CommonStrings.Get("Placeholder.Email")">
+				</div>
+				<span asp-validation-for="Input.Email" class="text-danger"></span>
+			</div>
+
+			<div class="col-sm-12">
+				<button id="register-submit" type="submit" class="btn btn-primary px-4 float-end mt-4">@PageStrings["Form.Button.Submit"]</button>
+			</div>
+			
+			<div class="col-sm-12 d-flex align-items-end">
+				@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+				{
+					<div class="text-danger font-size-sm">@Model.ErrorMessage</div>
+				}
+			</div>
+		</form>
+	</div>
 </div>
 
 @section Scripts {

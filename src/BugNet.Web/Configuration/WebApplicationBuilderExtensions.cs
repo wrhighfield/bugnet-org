@@ -2,9 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Data;
 using BugNet.Data;
-using BugNet.Web.Common;
 using BugNet.Web.Providers;
-using Serilog.Filters;
+using Ardalis.GuardClauses;
 
 namespace BugNet.Web.Configuration;
 
@@ -12,6 +11,8 @@ internal static class WebApplicationBuilderExtensions
 {
 	public static WebApplicationBuilder RegisterIdentity(this WebApplicationBuilder builder)
 	{
+		Guard.Against.Null(builder, nameof(builder));
+
 		var identityConnectionString =
 			builder
 				.Configuration
@@ -37,7 +38,8 @@ internal static class WebApplicationBuilderExtensions
             })
             .AddDefaultUI()
             .AddEntityFrameworkStores<IdentityDbContext>()
-            .AddDefaultTokenProviders();
+            .AddUserManager<ApplicationUserManager>()
+			.AddDefaultTokenProviders();
 
 		builder.Services.Configure<DataProtectionTokenProviderOptions>(o =>
 			o.TokenLifespan = TimeSpan.FromHours(3));
@@ -50,7 +52,9 @@ internal static class WebApplicationBuilderExtensions
 
 	public static WebApplicationBuilder RegisterBugNetDbContext(this WebApplicationBuilder builder)
     {
-        var bugNetConnectionString =
+	    Guard.Against.Null(builder, nameof(builder));
+
+		var bugNetConnectionString =
             builder
                 .Configuration
                 .GetConnectionString(DataConstants.BugNetConnectionStringName) ??
@@ -70,6 +74,8 @@ internal static class WebApplicationBuilderExtensions
 
     public static WebApplicationBuilder RegisterSerilog(this WebApplicationBuilder builder)
     {
+	    Guard.Against.Null(builder, nameof(builder));
+
 		var connectionString =
             builder
                 .Configuration

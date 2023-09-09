@@ -7,11 +7,11 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class GenerateRecoveryCodesModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly ILogger<GenerateRecoveryCodesModel> logger;
 
     public GenerateRecoveryCodesModel(
-        UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
         ILogger<GenerateRecoveryCodesModel> logger)
     {
         this.userManager = userManager;

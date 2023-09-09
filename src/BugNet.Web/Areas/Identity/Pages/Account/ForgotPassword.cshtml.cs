@@ -8,11 +8,11 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 
 public class ForgotPasswordModel : BugNetPageModeBase<ForgotPasswordModel>
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly IEmailSender emailSender;
 
     public ForgotPasswordModel(
-	    UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
 	    IEmailSender emailSender,
 	    ILogger<ForgotPasswordModel> logger) : base(logger)
     {

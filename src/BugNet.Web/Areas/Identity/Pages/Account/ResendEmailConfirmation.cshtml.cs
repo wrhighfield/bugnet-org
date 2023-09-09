@@ -9,11 +9,11 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 [AllowAnonymous]
 public class ResendEmailConfirmationModel : BugNetPageModeBase<ResendEmailConfirmationModel>
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly IEmailSender emailSender;
 
     public ResendEmailConfirmationModel(
-	    UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
 	    IEmailSender emailSender,
 	    ILogger<ResendEmailConfirmationModel> logger) : base(logger)
     {

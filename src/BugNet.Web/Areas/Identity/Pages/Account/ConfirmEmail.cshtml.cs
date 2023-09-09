@@ -7,10 +7,9 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 
 public class ConfirmEmailModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
 
-	public ConfirmEmailModel(
-		UserManager<ApplicationUser> userManager) => this.userManager = userManager;
+	public ConfirmEmailModel(ApplicationUserManager userManager) => this.userManager = userManager;
 
 	[TempData]
     public string Message { get; set; }

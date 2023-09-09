@@ -7,17 +7,14 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class EmailModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
-    private readonly SignInManager<ApplicationUser> signInManager;
+    private readonly ApplicationUserManager userManager;
     private readonly IEmailSender emailSender;
 
     public EmailModel(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
+	    ApplicationUserManager userManager,
         IEmailSender emailSender)
     {
         this.userManager = userManager;
-        this.signInManager = signInManager;
         this.emailSender = emailSender;
     }
 

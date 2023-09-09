@@ -7,12 +7,14 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class TwoFactorAuthenticationModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
     private readonly ILogger<TwoFactorAuthenticationModel> logger;
 
     public TwoFactorAuthenticationModel(
-        UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<TwoFactorAuthenticationModel> logger)
+	    ApplicationUserManager userManager,
+	    SignInManager<ApplicationUser> signInManager,
+	    ILogger<TwoFactorAuthenticationModel> logger)
     {
         this.userManager = userManager;
         this.signInManager = signInManager;

@@ -9,15 +9,12 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 public class LoginWithRecoveryCodeModel : BugNetPageModeBase<LoginWithRecoveryCodeModel>
 {
     private readonly SignInManager<ApplicationUser> signInManager;
-    private readonly UserManager<ApplicationUser> userManager;
 
     public LoginWithRecoveryCodeModel(
         SignInManager<ApplicationUser> signInManager,
-        UserManager<ApplicationUser> userManager,
         ILogger<LoginWithRecoveryCodeModel> logger) : base(logger)
     {
         this.signInManager = signInManager;
-        this.userManager = userManager;
     }
 
     [BindProperty]

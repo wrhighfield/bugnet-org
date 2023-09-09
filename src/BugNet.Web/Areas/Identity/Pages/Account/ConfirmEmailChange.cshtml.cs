@@ -7,19 +7,15 @@ namespace BugNet.Web.Areas.Identity.Pages.Account;
 
 public class ConfirmEmailChangeModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
 
-    public ConfirmEmailChangeModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+    public ConfirmEmailChangeModel(ApplicationUserManager userManager, SignInManager<ApplicationUser> signInManager)
     {
         this.userManager = userManager;
         this.signInManager = signInManager;
     }
 
-    /// <summary>
-    ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-    ///     directly from your code. This API may change or be removed in future releases.
-    /// </summary>
     [TempData]
     public string StatusMessage { get; set; }
 

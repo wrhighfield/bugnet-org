@@ -8,11 +8,11 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class DownloadPersonalDataModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly ILogger<DownloadPersonalDataModel> logger;
 
     public DownloadPersonalDataModel(
-        UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
         ILogger<DownloadPersonalDataModel> logger)
     {
         this.userManager = userManager;

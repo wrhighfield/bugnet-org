@@ -7,11 +7,11 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class SetPasswordModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
 
     public SetPasswordModel(
-        UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
         SignInManager<ApplicationUser> signInManager)
     {
         this.userManager = userManager;

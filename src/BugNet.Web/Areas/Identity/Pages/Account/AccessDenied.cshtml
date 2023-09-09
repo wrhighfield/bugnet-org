@@ -1,10 +1,18 @@
 ﻿@page
+@inject IStringLocalizer<AccessDeniedModel> PageStrings
 @model AccessDeniedModel
 @{
-    ViewData["Title"] = "Access denied";
+	ViewData["Title"] = PageStrings["Page.Title"];
+	Layout = "_Accounts-Box";
 }
 
-<header>
-    <h1 class="text-danger">@ViewData["Title"]</h1>
-    <p class="text-danger">You do not have access to this resource.</p>
-</header>
+<div>
+	<div class="form-left pt-5 px-5 fs-5">@PageStrings["Form.Title"]</div>
+	<div class="form-left h-100 pt-5 pb-5 px-5">
+		<div class="row g-4">
+			<div class="col-sm-12 text-danger">
+				@PageStrings["Page.Message"]
+			</div>
+		</div>
+	</div>
+</div>

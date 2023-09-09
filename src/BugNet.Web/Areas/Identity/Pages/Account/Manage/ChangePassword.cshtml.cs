@@ -7,12 +7,12 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class ChangePasswordModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
     private readonly ILogger<ChangePasswordModel> logger;
 
     public ChangePasswordModel(
-        UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
         SignInManager<ApplicationUser> signInManager,
         ILogger<ChangePasswordModel> logger)
     {

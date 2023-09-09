@@ -79,6 +79,24 @@ namespace BugNet.Web.Resources.Areas.Identity.Pages.Account {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Log in using your {0} account.
+        /// </summary>
+        public static string ExternalProvider_Button {
+            get {
+                return ResourceManager.GetString("ExternalProvider.Button", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use one of the following external providers to log in..
+        /// </summary>
+        public static string ExternalProvider_Instructions {
+            get {
+                return ResourceManager.GetString("ExternalProvider.Instructions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Forgot password?.
         /// </summary>
         public static string Forgot_Password {

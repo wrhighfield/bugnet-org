@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Globalization;
 using BugNet.Data;
 using QRCoder;
@@ -11,14 +9,14 @@ namespace BugNet.Web.Areas.Identity.Pages.Account.Manage;
 
 public class EnableAuthenticatorModel : PageModel
 {
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly ApplicationUserManager userManager;
     private readonly ILogger<EnableAuthenticatorModel> logger;
     private readonly UrlEncoder urlEncoder;
 
     private const string AUTHENTICATOR_URI_FORMAT = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
 
     public EnableAuthenticatorModel(
-        UserManager<ApplicationUser> userManager,
+	    ApplicationUserManager userManager,
         ILogger<EnableAuthenticatorModel> logger,
         UrlEncoder urlEncoder)
     {
@@ -28,8 +26,6 @@ public class EnableAuthenticatorModel : PageModel
     }
 
     public string SharedKey { get; set; }
-
-    public string AuthenticatorUri { get; set; }
 
     public string QrCodeImage { get; set; }
 
@@ -44,10 +40,6 @@ public class EnableAuthenticatorModel : PageModel
 
     public class InputModel
     {
-        /// <summary>
-        ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
-        ///     directly from your code. This API may change or be removed in future releases.
-        /// </summary>
         [Required]
         [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
         [DataType(DataType.Text)]
@@ -63,6 +55,8 @@ public class EnableAuthenticatorModel : PageModel
             return NotFound($"Unable to load user with ID '{userManager.GetUserId(User)}'.");
         }
 
+        // QRCoder and QRCoder-ImageSharp : this to get around the limitation of System.Drawing not being fully
+        // platform independent.
         var qrCodeGenerator = new QRCodeGenerator();
         var qrCodeData = qrCodeGenerator.CreateQrCode(await LoadSharedKeyAndQrCodeUriAsync(user), QRCodeGenerator.ECCLevel.H);
         var qRCode = new PngByteQRCode(qrCodeData);
@@ -124,6 +118,7 @@ public class EnableAuthenticatorModel : PageModel
     {
         // Load the authenticator key & QR code URI to display on the form
         var unformattedKey = await userManager.GetAuthenticatorKeyAsync(user);
+
         if (string.IsNullOrEmpty(unformattedKey))
         {
             await userManager.ResetAuthenticatorKeyAsync(user);
@@ -136,7 +131,7 @@ public class EnableAuthenticatorModel : PageModel
         return GenerateQrCodeUri(email, unformattedKey);
     }
 
-    private string FormatKey(string unformattedKey)
+    private static string FormatKey(string unformattedKey)
     {
         var result = new StringBuilder();
         var currentPosition = 0;
@@ -158,15 +153,8 @@ public class EnableAuthenticatorModel : PageModel
         return string.Format(
             CultureInfo.InvariantCulture,
             AUTHENTICATOR_URI_FORMAT,
-            urlEncoder.Encode("Microsoft.AspNetCore.Identity.UI"),
+            urlEncoder.Encode("BugNet"),
             urlEncoder.Encode(email),
             unformattedKey);
-    }
-
-    private static byte[] BitmapToArray(Bitmap bitmapImage)
-    {
-	    using var stream = new MemoryStream();
-	    bitmapImage.Save(stream, ImageFormat.Png);
-	    return stream.ToArray();
     }
 }

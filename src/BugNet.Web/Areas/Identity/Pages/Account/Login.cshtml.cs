@@ -10,12 +10,12 @@ namespace BugNet.Web.Areas.Identity.Pages.Account
 	{
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly IStringLocalizer<LoginModel> pageStrings;
-        private readonly UserManager<ApplicationUser> userManager;
+        private readonly ApplicationUserManager userManager;
 
 		public LoginModel(
 			SignInManager<ApplicationUser> signInManager,
 			IStringLocalizer<LoginModel> pageStrings,
-			UserManager<ApplicationUser> userManager,
+			ApplicationUserManager userManager,
 			ILogger<LoginModel> logger) : base(logger)
         {
             this.signInManager = signInManager;
