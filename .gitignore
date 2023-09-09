@@ -204,3 +204,4 @@ BugNetDeploy/
 
 /src/.vs/config/applicationhost.config
 /src/.vs/BugNET_WAP
+/src/BugNet.Web/appsettings.Local.json
